@@ -51,9 +51,15 @@
     @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-red-50 text-aims-stale border border-red-200 dark:bg-red-500/10 dark:border-red-500/25;
   }
 
-  /* Buttons */
+  /* Buttons — AIMS-OS gradient primary (matches agentic/admin .btn-primary) */
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold bg-aims-blue text-white hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed;
+    background: var(--grad);
+    box-shadow: 0 2px 10px rgba(21, 93, 252, 0.3);
+  }
+  .btn-primary:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(21, 93, 252, 0.4);
   }
   .btn-secondary {
     @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 transition-colors dark:bg-white/5 dark:text-slate-200 dark:border-white/15 dark:hover:bg-white/10;
@@ -68,6 +74,44 @@
   }
   .input {
     @apply w-full px-3 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-aims-blue/30 focus:border-aims-blue dark:bg-white/5 dark:border-white/15 dark:text-slate-100 dark:placeholder:text-slate-500;
+  }
+
+  /* Catalog card — AIMS-OS integration-card style (hover lift + border accent) */
+  .catalog-card {
+    @apply relative flex flex-col gap-2.5 rounded-xl border p-4 text-left transition-all;
+    @apply bg-white border-gray-200 dark:bg-[#131a2c] dark:border-white/10;
+  }
+  .catalog-card:hover {
+    @apply border-aims-blue/40 dark:border-aims-blue/40;
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px -10px rgba(0, 0, 0, 0.25);
+  }
+
+  /* Logo square (connector/widget glyph) */
+  .logo-sq {
+    @apply flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-xs font-extrabold text-white;
+  }
+
+  /* Capability chips (matches .cap-chip) */
+  .cap-chip {
+    @apply inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[10px] font-bold leading-none;
+  }
+  .cap-chip-data {
+    @apply border-green-500/25 bg-green-500/10 text-aims-governed;
+  }
+  .cap-chip-tool {
+    @apply border-purple-400/30 bg-purple-500/10 text-purple-600 dark:text-purple-300;
+  }
+  .cap-chip-neutral {
+    @apply border-gray-300 bg-gray-100 text-gray-600 dark:border-white/10 dark:bg-white/5 dark:text-slate-300;
+  }
+
+  /* Status pill with dot (matches .sc / health-badge) */
+  .sc {
+    @apply inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-bold;
+  }
+  .sc-dot {
+    @apply h-1.5 w-1.5 rounded-full bg-current;
   }
 
   /* Canvas zones */

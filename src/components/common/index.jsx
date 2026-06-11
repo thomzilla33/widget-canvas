@@ -70,7 +70,12 @@ const healthLabel = {
 }
 
 export function HealthBadge({ health = 'active' }) {
-  return <span className={healthClass[health] || healthClass.active}>{healthLabel[health]}</span>
+  return (
+    <span className={healthClass[health] || healthClass.active}>
+      <span className="sc-dot" />
+      {healthLabel[health]}
+    </span>
+  )
 }
 
 export function EmptyState({ icon = '📊', title, description, action }) {
@@ -120,8 +125,8 @@ export function PageHeader({ title, description, actions, breadcrumb }) {
       {breadcrumb && <div className="text-xs text-gray-400 dark:text-slate-500 mb-1">{breadcrumb}</div>}
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-lg font-semibold text-gray-900 dark:text-slate-100">{title}</h1>
-          {description && <p className="mt-0.5 text-sm text-gray-500 dark:text-slate-400">{description}</p>}
+          <h1 className="text-[22px] font-bold tracking-tight text-gray-900 dark:text-slate-100">{title}</h1>
+          {description && <p className="mt-1 text-[13px] text-gray-500 dark:text-slate-400">{description}</p>}
         </div>
         {actions && <div className="flex items-center gap-2 shrink-0">{actions}</div>}
       </div>
