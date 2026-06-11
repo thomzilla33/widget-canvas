@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { Plus, X, Lock, Unlock, Trash2 } from 'lucide-react'
 import { PageHeader, GovernedBadge, FreshnessBadge } from '../components/common/index.jsx'
+import { WidgetGlyph } from '../components/widgets/glyph.jsx'
 import { useWidgets } from '../state/WidgetsContext.jsx'
 
 const ZONES = [
@@ -103,12 +104,22 @@ export default function DashboardCanvas() {
                 <button
                   key={w.id}
                   onClick={() => placeWidget(drawerZone, w)}
-                  className="card w-full p-3 text-left hover:shadow-md transition-shadow"
+                  className="catalog-card w-full !p-3"
                 >
-                  <div className="font-semibold text-sm text-gray-900 dark:text-slate-100">{w.name}</div>
-                  <div className="mt-0.5 text-xs text-gray-500 dark:text-slate-400">{w.skeleton}</div>
-                  <div className="mt-2 flex items-center gap-2 flex-wrap">
-                    <GovernedBadge governed={w.governed} />
+                  <div className="flex items-center gap-2.5">
+                    <WidgetGlyph skeleton={w.skeleton} sm />
+                    <div className="min-w-0">
+                      <div className="truncate text-sm font-semibold text-gray-900 dark:text-slate-100">
+                        {w.name}
+                      </div>
+                      <div className="truncate text-[11px] text-gray-400 dark:text-slate-500">{w.source}</div>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <span className="cap-chip cap-chip-neutral">{w.skeleton}</span>
+                    <span className={`cap-chip ${w.governed ? 'cap-chip-data' : 'cap-chip-tool'}`}>
+                      {w.governed ? 'Governed' : 'Ungoverned'}
+                    </span>
                     <FreshnessBadge status={w.freshness} label={w.freshness} />
                   </div>
                 </button>

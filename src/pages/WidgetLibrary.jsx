@@ -2,19 +2,8 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Search } from 'lucide-react'
 import { PageHeader, HealthBadge, FreshnessBadge } from '../components/common/index.jsx'
+import { WidgetGlyph } from '../components/widgets/glyph.jsx'
 import { useWidgets } from '../state/WidgetsContext.jsx'
-
-// Logo color per skeleton type (mirrors the integration-card connector glyphs).
-const SKELETON_COLOR = {
-  KPI: '#2563EB',
-  Chart: '#06B6D4',
-  List: '#A78BFA',
-  Table: '#10B981',
-  Timeline: '#F59E0B',
-  'AI Summary': '#EC4899',
-  Gauge: '#14B8A6',
-  Map: '#6366F1',
-}
 
 // S37, S38, S40–S47 — catalog + health signals
 export default function WidgetLibrary() {
@@ -74,9 +63,7 @@ export default function WidgetLibrary() {
               </div>
 
               <div className="flex items-center gap-3">
-                <span className="logo-sq" style={{ background: SKELETON_COLOR[w.skeleton] || '#2563EB' }}>
-                  {w.skeleton.slice(0, 2).toUpperCase()}
-                </span>
+                <WidgetGlyph skeleton={w.skeleton} />
                 <div className="min-w-0 pr-16">
                   <div className="truncate text-sm font-semibold text-gray-900 dark:text-slate-100">
                     {w.name}
