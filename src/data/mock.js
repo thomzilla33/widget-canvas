@@ -1,0 +1,126 @@
+// All mock data for the prototype: entities, widgets, dashboards, skeletons, chart data.
+
+export const entities = [
+  { id: 'acme-001', name: 'Acme Corporation', type: 'Account', owner: 'Sales', health: 'active' },
+  { id: 'globex-002', name: 'Globex Inc.', type: 'Account', owner: 'Sales', health: 'inactive' },
+  { id: 'initech-003', name: 'Initech LLC', type: 'Account', owner: 'Support', health: 'active' },
+]
+
+export const widgets = [
+  {
+    id: 'w-revenue',
+    name: 'Total Revenue',
+    skeleton: 'KPI',
+    governed: true,
+    freshness: 'live',
+    health: 'active',
+    usedIn: 5,
+    source: 'Finance Data View',
+  },
+  {
+    id: 'w-pipeline',
+    name: 'Pipeline by Stage',
+    skeleton: 'Chart',
+    governed: true,
+    freshness: 'fresh',
+    health: 'active',
+    usedIn: 3,
+    source: 'CRM Data View',
+  },
+  {
+    id: 'w-tickets',
+    name: 'Open Tickets',
+    skeleton: 'List',
+    governed: false,
+    freshness: 'aging',
+    health: 'inactive',
+    usedIn: 1,
+    source: 'Computed in Widget Builder',
+  },
+  {
+    id: 'w-nps',
+    name: 'NPS Trend',
+    skeleton: 'Chart',
+    governed: true,
+    freshness: 'stale',
+    health: 'review',
+    usedIn: 0,
+    source: 'Survey Data View',
+  },
+]
+
+export const dashboards = [
+  {
+    id: 'd-sales-acct',
+    name: 'Sales — Account 360',
+    entity: 'Account',
+    audience: 'Sales Agent',
+    status: 'published',
+    widgets: 8,
+    updated: '2 days ago',
+  },
+  {
+    id: 'd-support-acct',
+    name: 'Support — Account Health',
+    entity: 'Account',
+    audience: 'Support Agent',
+    status: 'draft',
+    widgets: 5,
+    updated: '5 hours ago',
+  },
+  {
+    id: 'd-mgr-overview',
+    name: 'Manager Overview',
+    entity: 'Account',
+    audience: 'Manager',
+    status: 'pending',
+    widgets: 12,
+    updated: '1 week ago',
+  },
+]
+
+// New-dashboard flow (S80–S82)
+export const entityTypes = ['Account', 'Contact', 'Deal', 'Case']
+export const audiences = ['Sales Agent', 'Support Agent', 'Manager', 'All audiences']
+export const dashboardTemplates = [
+  { id: 't-acct360', name: 'Account 360', desc: 'KPIs, pipeline, and recent activity.', entity: 'Account' },
+  { id: 't-support', name: 'Support Health', desc: 'Open tickets, SLA, and CSAT.', entity: 'Account' },
+  { id: 't-exec', name: 'Exec Overview', desc: 'High-level rollups for leadership.', entity: 'Account' },
+]
+
+export const skeletons = [
+  { id: 'kpi', name: 'KPI', icon: '📊', maxFields: 3, desc: 'A single headline number with optional delta.' },
+  { id: 'chart', name: 'Chart', icon: '📈', maxFields: 5, desc: 'Bar, line or area chart over a dimension.' },
+  { id: 'list', name: 'List', icon: '📋', maxFields: 6, desc: 'Ranked or chronological list of records.' },
+  { id: 'table', name: 'Table', icon: '🗂️', maxFields: 8, desc: 'Columns and rows of structured data.' },
+  { id: 'timeline', name: 'Timeline', icon: '🕒', maxFields: 4, desc: 'Events ordered along a time axis.' },
+  { id: 'summary', name: 'AI Summary', icon: '✨', maxFields: 2, desc: 'Pre-computed narrative summary.' },
+  { id: 'gauge', name: 'Gauge', icon: '🎯', maxFields: 2, desc: 'Progress toward a target or threshold.' },
+  { id: 'map', name: 'Map', icon: '🗺️', maxFields: 3, desc: 'Geographic distribution of records.' },
+]
+
+// Step 1 — Intent. Each intent maps to the skeletons that can answer it.
+export const intents = [
+  { id: 'single-metric', label: 'Show a single metric', desc: 'One headline number, e.g. total revenue.', icon: '📊', skeletons: ['kpi', 'gauge'] },
+  { id: 'trend', label: 'Show a trend over time', desc: 'How a value changes across a period.', icon: '📈', skeletons: ['chart', 'timeline'] },
+  { id: 'breakdown', label: 'Break down by category', desc: 'Compare a value across groups.', icon: '🧩', skeletons: ['chart', 'table'] },
+  { id: 'list-records', label: 'List records', desc: 'Show individual rows, ranked or recent.', icon: '📋', skeletons: ['list', 'table'] },
+  { id: 'ai-summary', label: 'Summarize with AI', desc: 'A narrative summary of the data.', icon: '✨', skeletons: ['summary'] },
+  { id: 'geographic', label: 'Show on a map', desc: 'Where records are located.', icon: '🗺️', skeletons: ['map'] },
+]
+
+// Step 2 — Data sources. Governed = approved Data View in Data Studio.
+// Ungoverned = metric computed directly in Widget Builder.
+export const dataSources = [
+  { id: 'src-finance', name: 'Finance Data View', governed: true, owner: 'Finance Team', reviewed: 'Apr 2026', hasPII: false },
+  { id: 'src-crm', name: 'CRM Data View', governed: true, owner: 'RevOps', reviewed: 'May 2026', hasPII: true },
+  { id: 'src-survey', name: 'Survey Data View', governed: true, owner: 'CX Research', reviewed: 'Feb 2026', hasPII: false },
+  { id: 'src-computed', name: 'Compute a metric here', governed: false, owner: 'You (Widget Builder)', reviewed: null, hasPII: false },
+]
+
+export const chartData = [
+  { name: 'Q1', value: 420 },
+  { name: 'Q2', value: 560 },
+  { name: 'Q3', value: 480 },
+  { name: 'Q4', value: 720 },
+]

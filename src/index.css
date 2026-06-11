@@ -1,0 +1,94 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+  body {
+    @apply text-gray-900 antialiased dark:text-slate-200;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+}
+
+@layer components {
+  /* Metric origin badges */
+  .badge-governed {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-green-50 text-aims-governed border border-green-200 dark:bg-green-500/10 dark:border-green-500/25;
+  }
+  .badge-ungoverned {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-aims-ungoverned border border-amber-200 dark:bg-amber-500/10 dark:border-amber-500/25;
+  }
+
+  /* Freshness states (text only — fine on both themes) */
+  .freshness-live,
+  .freshness-fresh {
+    @apply inline-flex items-center gap-1 text-xs font-medium text-aims-fresh;
+  }
+  .freshness-aging {
+    @apply inline-flex items-center gap-1 text-xs font-medium text-aims-aging;
+  }
+  .freshness-stale {
+    @apply inline-flex items-center gap-1 text-xs font-medium text-aims-stale;
+  }
+
+  /* Widget health signals */
+  .health-active {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-green-50 text-aims-governed border border-green-200 dark:bg-green-500/10 dark:border-green-500/25;
+  }
+  .health-inactive {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-aims-aging border border-amber-200 dark:bg-amber-500/10 dark:border-amber-500/25;
+  }
+  .health-unused {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-500 border border-gray-200 dark:bg-white/5 dark:text-slate-400 dark:border-white/10;
+  }
+  .health-review {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-red-50 text-aims-stale border border-red-200 dark:bg-red-500/10 dark:border-red-500/25;
+  }
+
+  /* Buttons */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold bg-aims-blue text-white hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 transition-colors dark:bg-white/5 dark:text-slate-200 dark:border-white/15 dark:hover:bg-white/10;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 transition-colors dark:text-slate-300 dark:hover:bg-white/10;
+  }
+
+  /* Layout */
+  .card {
+    @apply bg-white rounded-xl border border-gray-200 shadow-sm dark:bg-[#131a2c] dark:border-white/10 dark:shadow-none;
+  }
+  .input {
+    @apply w-full px-3 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-aims-blue/30 focus:border-aims-blue dark:bg-white/5 dark:border-white/15 dark:text-slate-100 dark:placeholder:text-slate-500;
+  }
+
+  /* Canvas zones */
+  .zone-header {
+    @apply border-2 border-dashed border-aims-blue/40 rounded-lg bg-aims-blue/5 dark:bg-aims-blue/10;
+  }
+  .zone-sidebar {
+    @apply border-2 border-dashed border-purple-400/50 rounded-lg bg-purple-50 dark:bg-purple-500/10;
+  }
+  .zone-main {
+    @apply border-2 border-dashed border-gray-300 rounded-lg bg-gray-50 dark:border-white/15 dark:bg-white/[0.03];
+  }
+  .zone-bottom {
+    @apply border-2 border-dashed border-amber-400/50 rounded-lg bg-amber-50 dark:bg-amber-500/10;
+  }
+
+  /* Sidebar (legacy stub class — kept for safety) */
+  .sidebar-item {
+    @apply flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-400 hover:bg-aims-nav hover:text-white transition-colors cursor-pointer;
+  }
+  .sidebar-item.active {
+    @apply bg-aims-nav text-white;
+  }
+}
