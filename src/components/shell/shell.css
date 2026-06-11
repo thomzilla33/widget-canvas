@@ -642,6 +642,230 @@ body {
     padding: 0;
   }
 }
+.tb-avatar-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Workspace / account menu (ported from agentic-studio.html) */
+.avatar-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 280px;
+  background: var(--shell-menu-bg);
+  border: 1px solid var(--shell-menu-border);
+  border-radius: 10px;
+  box-shadow: var(--shell-menu-shadow);
+  z-index: 200;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(-6px) scale(0.97);
+  pointer-events: none;
+  transition:
+    opacity 0.15s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  text-align: left;
+}
+.avatar-menu.open {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+.am-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+}
+.am-head-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #00c2c2 0%, #155dfc 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+}
+.am-head-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--shell-text-strong);
+}
+.am-head-email {
+  font-size: 11px;
+  color: var(--shell-text-muted);
+  margin-top: 1px;
+}
+.am-section {
+  padding: 4px 0;
+  border-top: 1px solid var(--shell-divider);
+}
+.am-section-hd {
+  padding: 10px 14px 4px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--shell-text-caption);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.am-ws-card {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 8px 12px;
+  cursor: pointer;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  color: inherit;
+  font-family: inherit;
+  transition: background 0.1s;
+}
+.am-ws-card:hover {
+  background: var(--shell-menu-item-hover-bg);
+}
+.am-ws-ico {
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 900;
+  color: #fff;
+  flex-shrink: 0;
+  letter-spacing: -0.3px;
+  background: linear-gradient(135deg, #00c2c2 0%, #155dfc 100%);
+}
+.am-ws-info {
+  flex: 1;
+  min-width: 0;
+}
+.am-ws-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--shell-text-strong);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.am-ws-role {
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(43, 127, 255, 0.85);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-top: 2px;
+}
+.am-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 14px;
+  cursor: pointer;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  color: var(--shell-text-body);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  transition: background 0.1s;
+}
+.am-item:hover {
+  background: var(--shell-menu-item-hover-bg);
+  color: var(--shell-text-strong);
+}
+.am-item svg {
+  color: var(--shell-icon-default);
+  flex-shrink: 0;
+}
+.am-item:hover svg {
+  color: var(--shell-icon-hover);
+}
+.am-item.is-danger {
+  color: rgba(248, 113, 113, 0.9);
+}
+.am-item.is-danger svg {
+  color: rgba(248, 113, 113, 0.7);
+}
+.am-item.is-danger:hover {
+  background: rgba(248, 113, 113, 0.08);
+  color: rgba(252, 165, 165, 0.95);
+}
+
+/* Theme segmented control inside the workspace menu */
+.am-theme-row {
+  padding: 9px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--shell-text-body);
+  font-size: 13px;
+  font-weight: 500;
+}
+.am-theme-row > svg {
+  color: var(--shell-icon-default);
+  flex-shrink: 0;
+}
+.am-theme-row .am-theme-label {
+  flex: 1;
+}
+.am-theme-seg {
+  display: inline-flex;
+  border: 1px solid var(--shell-menu-border);
+  border-radius: 9999px;
+  padding: 2px;
+  gap: 0;
+  background: var(--shell-topbar-search-bg);
+}
+.am-theme-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  height: 22px;
+  min-width: 32px;
+  padding: 0 10px;
+  border: none;
+  background: transparent;
+  color: var(--shell-text-muted);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 9999px;
+  transition:
+    background 0.12s,
+    color 0.12s;
+}
+.am-theme-btn:hover {
+  color: var(--shell-text-strong);
+}
+.am-theme-btn.is-active {
+  background: var(--shell-menu-item-active-bg);
+  color: var(--shell-accent-blue);
+}
+.am-theme-btn svg {
+  flex-shrink: 0;
+}
+
+/* invisible backdrop to close open menus on outside click */
+.menu-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 150;
+}
+
 .notif-bell-wrap {
   position: relative;
   display: inline-flex;

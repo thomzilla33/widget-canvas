@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
-import { LayoutDashboard, Boxes, UserRound, Sun, Moon } from 'lucide-react'
+import { LayoutDashboard, Boxes, UserRound, Sun, Moon, Palette, Settings, LogOut } from 'lucide-react'
 import { useTheme } from '../../state/ThemeContext.jsx'
 import './shell.css'
 
@@ -37,7 +37,8 @@ function NavItem({ to, label, icon: Icon }) {
 export default function AppShell() {
   const [expanded, setExpanded] = useState(false)
   const [ctxOpen, setCtxOpen] = useState(false)
-  const { theme, toggle } = useTheme()
+  const [avatarOpen, setAvatarOpen] = useState(false)
+  const { theme, setTheme } = useTheme()
 
   return (
     <>
@@ -107,14 +108,6 @@ export default function AppShell() {
         </button>
 
         <div className="tb-right">
-          <button
-            className="icon-btn"
-            aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-            title={theme === 'dark' ? 'Light mode' : 'Dark mode'}
-            onClick={toggle}
-          >
-            {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
-          </button>
           <button className="icon-btn" aria-label="AI Assistant">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path
@@ -154,16 +147,106 @@ export default function AppShell() {
           </button>
           <span className="tb-divider-v" aria-hidden="true" />
           <div className="tb-identity" role="group" aria-label="Workspace and account">
-            <button className="tb-ws-badge" type="button" aria-label="Open account menu">
+            <button
+              className="tb-ws-badge"
+              type="button"
+              aria-label="Open account menu"
+              aria-haspopup="menu"
+              aria-expanded={avatarOpen}
+              onClick={() => {
+                setAvatarOpen((v) => !v)
+                setCtxOpen(false)
+              }}
+            >
               <span className="tb-ws-badge-logo">CL</span>
               <span className="tb-ws-badge-name">Contoso Ltd</span>
             </button>
-            <button className="avatar-sm" type="button" aria-label="Account menu">
-              TH
-            </button>
+            <div className="tb-avatar-wrap">
+              <button
+                className="avatar-sm"
+                type="button"
+                aria-label="Account menu"
+                aria-haspopup="menu"
+                aria-expanded={avatarOpen}
+                onClick={() => {
+                  setAvatarOpen((v) => !v)
+                  setCtxOpen(false)
+                }}
+              >
+                TH
+              </button>
+              <div className={`avatar-menu ${avatarOpen ? 'open' : ''}`} role="menu" aria-label="Account and workspace">
+                <div className="am-head">
+                  <span className="am-head-avatar">TH</span>
+                  <div>
+                    <div className="am-head-name">Thomas Gonzalez</div>
+                    <div className="am-head-email">thomas.gonzalez@aimsos.ai</div>
+                  </div>
+                </div>
+
+                <div className="am-section">
+                  <div className="am-section-hd">Workspace</div>
+                  <button className="am-ws-card" type="button">
+                    <span className="am-ws-ico">CL</span>
+                    <span className="am-ws-info">
+                      <span className="am-ws-name">Contoso Ltd</span>
+                      <span className="am-ws-role">Admin</span>
+                    </span>
+                  </button>
+                </div>
+
+                <div className="am-section">
+                  <div className="am-theme-row" role="group" aria-label="Theme">
+                    <Palette size={15} />
+                    <span className="am-theme-label">Theme</span>
+                    <div className="am-theme-seg" role="radiogroup" aria-label="Theme">
+                      <button
+                        type="button"
+                        className={`am-theme-btn ${theme === 'light' ? 'is-active' : ''}`}
+                        role="radio"
+                        aria-checked={theme === 'light'}
+                        onClick={() => setTheme('light')}
+                        title="Light"
+                      >
+                        <Sun size={13} /> Light
+                      </button>
+                      <button
+                        type="button"
+                        className={`am-theme-btn ${theme === 'dark' ? 'is-active' : ''}`}
+                        role="radio"
+                        aria-checked={theme === 'dark'}
+                        onClick={() => setTheme('dark')}
+                        title="Dark"
+                      >
+                        <Moon size={13} /> Dark
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="am-section">
+                  <button className="am-item" type="button">
+                    <Settings size={15} /> Account settings
+                  </button>
+                  <button className="am-item is-danger" type="button">
+                    <LogOut size={15} /> Sign out
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </header>
+
+      {(ctxOpen || avatarOpen) && (
+        <div
+          className="menu-backdrop"
+          onClick={() => {
+            setCtxOpen(false)
+            setAvatarOpen(false)
+          }}
+        />
+      )}
 
       {/* ═══ APP (sidebar + main) ═══ */}
       <div className="app">
