@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { Plus, X, Lock, Unlock, Trash2 } from 'lucide-react'
-import { PageHeader, GovernedBadge, FreshnessBadge } from '../components/common/index.jsx'
+import { PageHeader, GovernedBadge, FreshnessBadge, Badge } from '../components/common/index.jsx'
 import { WidgetGlyph } from '../components/widgets/glyph.jsx'
 import { useWidgets } from '../state/WidgetsContext.jsx'
+import { useDashboards } from '../state/DashboardsContext.jsx'
+import { TEMPLATE_SEED } from '../data/mock.js'
 
 const ZONES = [
   { key: 'header', label: 'Header', cls: 'zone-header', span: 'col-span-4', text: 'text-aims-blue' },
@@ -18,11 +20,32 @@ const DENSITY_ALERT = 5
 
 let pidSeq = 0
 
+// Seed placements from a dashboard's template (only widgets that still exist).
+function buildInitialPlacements(dashboard, widgets) {
+  const zones = { header: [], sidebar: [], main: [], bottom: [] }
+  const seed = dashboard?.template ? TEMPLATE_SEED[dashboard.template] : null
+  if (!seed) return zones
+  for (const item of seed) {
+    if (!widgets.find((w) => w.id === item.widgetId)) continue
+    pidSeq += 1
+    zones[item.zone].push({
+      pid: `p${pidSeq}`,
+      widgetId: item.widgetId,
+      fixed: false,
+      audience: 'All audiences',
+      quickActions: [],
+    })
+  }
+  return zones
+}
+
 // S84–S94 — dashboard canvas: zones, placement, config, density
 export default function DashboardCanvas() {
   const { id } = useParams()
   const { widgets } = useWidgets()
-  const [placements, setPlacements] = useState({ header: [], sidebar: [], main: [], bottom: [] })
+  const { dashboards } = useDashboards()
+  const dashboard = dashboards.find((d) => d.id === id)
+  const [placements, setPlacements] = useState(() => buildInitialPlacements(dashboard, widgets))
   const [drawerZone, setDrawerZone] = useState(null) // zone we're adding to
   const [selectedPid, setSelectedPid] = useState(null)
 
@@ -66,10 +89,18 @@ export default function DashboardCanvas() {
   return (
     <div className="h-full flex flex-col">
       <PageHeader
-        title="Dashboard canvas"
-        description={`Editing dashboard: ${id}. Drop widgets into zones; permissions are set per widget here.`}
-        breadcrumb="Dashboards / Canvas"
-        actions={<button className="btn-primary">Publish</button>}
+        title={dashboard?.name || 'Dashboard canvas'}
+        description={
+          dashboard
+            ? `${dashboard.entity} · ${dashboard.audience} — drop widgets into zones; permissions are set per widget here.`
+            : 'Drop widgets into zones; permissions are set per widget here.'
+        }
+        actions={
+          <>
+            {dashboard && <Badge variant={dashboard.status} />}
+            <button className="btn-primary">Publish</button>
+          </>
+        }
       />
 
       <div className="flex-1 overflow-hidden relative">

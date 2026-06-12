@@ -91,7 +91,6 @@ export default function WidgetBuilder() {
       <PageHeader
         title="Widget Builder"
         description="Build a reusable widget. Permissions are set later, when it's placed on a dashboard."
-        breadcrumb="Widgets / New"
         actions={
           <button className="btn-secondary" onClick={() => navigate('/widgets')}>
             Cancel

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { AlertTriangle, ChevronLeft, ChevronRight, LayoutGrid, Sparkles, Check } from 'lucide-react'
 import { PageHeader, StepIndicator } from '../components/common/index.jsx'
 import { useDashboards } from '../state/DashboardsContext.jsx'
-import { entityTypes, audiences, dashboardTemplates } from '../data/mock.js'
+import { entityTypes, audiences, dashboardTemplates, TEMPLATE_SEED } from '../data/mock.js'
 
 const STEPS = ['Entity & audience', 'Start point']
 
@@ -30,13 +30,16 @@ export default function NewDashboard() {
 
   function create() {
     const id = `d-${name.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${name.length}`
+    const template = startMode === 'template' ? templateId : null
+    const seedCount = template ? (TEMPLATE_SEED[template]?.length ?? 0) : 0
     addDashboard({
       id,
+      template,
       name: name.trim(),
       entity,
       audience,
       status: 'draft',
-      widgets: 0,
+      widgets: seedCount,
       updated: 'just now',
     })
     navigate(`/dashboard/${id}/canvas`)
@@ -47,7 +50,6 @@ export default function NewDashboard() {
       <PageHeader
         title="New dashboard"
         description="Choose the entity and audience, then start from a blank canvas or an AIMS template."
-        breadcrumb="Dashboards / New"
         actions={
           <button className="btn-secondary" onClick={() => navigate('/dashboards')}>
             Cancel

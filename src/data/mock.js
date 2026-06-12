@@ -52,6 +52,7 @@ export const widgets = [
 export const dashboards = [
   {
     id: 'd-sales-acct',
+    template: 't-acct360',
     name: 'Sales — Account 360',
     entity: 'Account',
     audience: 'Sales Agent',
@@ -61,6 +62,7 @@ export const dashboards = [
   },
   {
     id: 'd-support-acct',
+    template: 't-support',
     name: 'Support — Account Health',
     entity: 'Account',
     audience: 'Support Agent',
@@ -70,6 +72,7 @@ export const dashboards = [
   },
   {
     id: 'd-mgr-overview',
+    template: 't-exec',
     name: 'Manager Overview',
     entity: 'Account',
     audience: 'Manager',
@@ -87,6 +90,25 @@ export const dashboardTemplates = [
   { id: 't-support', name: 'Support Health', desc: 'Open tickets, SLA, and CSAT.', entity: 'Account' },
   { id: 't-exec', name: 'Exec Overview', desc: 'High-level rollups for leadership.', entity: 'Account' },
 ]
+
+// Pre-built widget layout per template (zone -> widget ids). Used to seed a
+// dashboard canvas created "from an AIMS template".
+export const TEMPLATE_SEED = {
+  't-acct360': [
+    { zone: 'header', widgetId: 'w-revenue' },
+    { zone: 'main', widgetId: 'w-pipeline' },
+    { zone: 'sidebar', widgetId: 'w-tickets' },
+  ],
+  't-support': [
+    { zone: 'header', widgetId: 'w-tickets' },
+    { zone: 'main', widgetId: 'w-nps' },
+  ],
+  't-exec': [
+    { zone: 'header', widgetId: 'w-revenue' },
+    { zone: 'main', widgetId: 'w-pipeline' },
+    { zone: 'main', widgetId: 'w-nps' },
+  ],
+}
 
 export const skeletons = [
   { id: 'kpi', name: 'KPI', icon: '📊', maxFields: 3, desc: 'A single headline number with optional delta.' },

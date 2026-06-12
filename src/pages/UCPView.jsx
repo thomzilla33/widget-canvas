@@ -45,7 +45,6 @@ export default function UCPView() {
       <PageHeader
         title={entity ? entity.name : 'Unified Contact Profile'}
         description="Unified Contact Profile — every widget shows its freshness and data origin."
-        breadcrumb={`UCP / ${entityId}`}
       />
 
       <div className="flex-1 overflow-auto relative">
