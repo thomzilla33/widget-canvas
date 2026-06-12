@@ -97,7 +97,7 @@ export default function WidgetBuilder() {
       />
 
       <div className="flex-1 overflow-auto">
-        <div className="mx-auto flex max-w-6xl flex-col gap-6 p-6 lg:flex-row">
+        <div className="mx-auto flex w-full max-w-[1600px] flex-col gap-6 p-6 lg:px-8 2xl:px-10 lg:flex-row">
           {/* Left: build */}
           <div className="w-full shrink-0 space-y-7 lg:w-[440px]">
             <section>

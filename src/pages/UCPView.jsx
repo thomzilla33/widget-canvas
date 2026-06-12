@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
 import {
   Sparkles,
   RefreshCw,
@@ -44,9 +44,18 @@ const QUICK_ACTIONS = [
 // S01–S36 — Unified Contact Profile (end-user consumption)
 export default function UCPView() {
   const { entityId } = useParams()
+  const navigate = useNavigate()
   const { widgets } = useWidgets()
   const entity = entities.find((e) => e.id === entityId)
   const widgetById = (id) => widgets.find((w) => w.id === id)
+
+  // Brief initial load so widgets stream in with a skeleton instead of popping.
+  const [loaded, setLoaded] = useState(false)
+  useEffect(() => {
+    setLoaded(false)
+    const t = setTimeout(() => setLoaded(true), 700)
+    return () => clearTimeout(t)
+  }, [entityId])
 
   const [collapsed, setCollapsed] = useState({})
   const [quickAction, setQuickAction] = useState(null) // { action, widgetName }
@@ -92,7 +101,7 @@ export default function UCPView() {
       />
 
       <div className="flex-1 overflow-auto relative">
-        <div className="px-6 py-5 max-w-5xl">
+        <div className="mx-auto w-full max-w-[1800px] px-6 py-5 lg:px-8 2xl:px-12">
           {/* Toolbar: search (S05) + reset layout (S16) */}
           <div className="mb-4 flex items-center gap-2">
             <div className="relative w-full max-w-xs">
@@ -116,12 +125,13 @@ export default function UCPView() {
               <EmptyState icon="🔍" title="No widgets match" description={`Nothing on this profile matches “${search}”.`} />
             </div>
           ) : (
-            <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-5 grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fill,minmax(min(300px,100%),1fr))' }}>
               {visible.map((inst) => (
                 <UCPWidget
                   key={inst.iid}
                   inst={inst}
                   widget={widgetById(inst.widgetId)}
+                  loading={!loaded}
                   collapsed={!!collapsed[inst.iid]}
                   filter={filters[inst.iid] || null}
                   dragging={dragId === inst.iid}
@@ -143,12 +153,14 @@ export default function UCPView() {
                     })
                   }
                   onDragStartReorder={() => setDragId(inst.iid)}
+                  onDragEndReorder={() => setDragId(null)}
                   onDropReorder={() => {
                     if (dragId) reorder(dragId, inst.iid)
                     setDragId(null)
                   }}
                 />
               ))}
+              {loaded && !search && <AddWidgetCard onClick={() => navigate('/widgets')} />}
             </div>
           )}
         </div>
@@ -205,7 +217,7 @@ function AiSummary({ entityName }) {
           </button>
         </div>
       </div>
-      <p className="mt-3 text-sm text-gray-700 dark:text-slate-200 leading-relaxed">
+      <p className="mt-3 max-w-4xl text-sm text-gray-700 dark:text-slate-200 leading-relaxed">
         {refreshing
           ? 'Recomputing summary from the latest data…'
           : `${entityName} is a high-value account trending up: revenue grew 8.2% this quarter and pipeline is healthy. Two support tickets are open with no SLA breaches. NPS data needs review after a recent schema change.`}
@@ -285,6 +297,7 @@ function WidgetFilter({ onApply, onClear }) {
 function UCPWidget({
   inst,
   widget,
+  loading,
   collapsed,
   filter,
   dragging,
@@ -294,6 +307,7 @@ function UCPWidget({
   onApplyFilter,
   onClearFilter,
   onDragStartReorder,
+  onDragEndReorder,
   onDropReorder,
 }) {
   const name = widget?.name || 'Widget'
@@ -303,6 +317,7 @@ function UCPWidget({
     <div
       draggable={!inst.fixed}
       onDragStart={!inst.fixed ? onDragStartReorder : undefined}
+      onDragEnd={!inst.fixed ? onDragEndReorder : undefined}
       onDragOver={(e) => {
         if (!inst.fixed) e.preventDefault()
       }}
@@ -334,7 +349,13 @@ function UCPWidget({
         </div>
       </div>
 
-      {!collapsed && (
+      {!collapsed && loading && (
+        <div className="mt-3 min-h-[72px]">
+          <WidgetSkeleton />
+        </div>
+      )}
+
+      {!collapsed && !loading && (
         <>
           {/* Applied filter chip (S11/S12) */}
           {filter && (
@@ -386,6 +407,33 @@ function UCPWidget({
         </>
       )}
     </div>
+  )
+}
+
+/* Loading skeleton — shimmer while the widget streams in */
+function WidgetSkeleton() {
+  return (
+    <div className="animate-pulse space-y-2.5">
+      <div className="h-7 w-2/3 rounded bg-gray-200 dark:bg-white/10" />
+      <div className="h-3 w-1/2 rounded bg-gray-200 dark:bg-white/10" />
+      <div className="mt-1 h-16 rounded-lg bg-gray-100 dark:bg-white/5" />
+    </div>
+  )
+}
+
+/* Affordance to add more widgets — fills the trailing grid slot */
+function AddWidgetCard({ onClick }) {
+  return (
+    <button
+      onClick={onClick}
+      className="flex min-h-[160px] flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed border-gray-200 text-gray-400 transition-colors hover:border-aims-blue/50 hover:bg-aims-blue/[0.03] hover:text-aims-blue dark:border-white/10 dark:text-slate-500 dark:hover:border-aims-blue/50 dark:hover:bg-aims-blue/[0.06]"
+    >
+      <span className="grid h-9 w-9 place-items-center rounded-full border border-current">
+        <Plus size={18} />
+      </span>
+      <span className="text-sm font-medium">Add widget</span>
+      <span className="text-[11px] opacity-80">Browse your widget library</span>
+    </button>
   )
 }
 
