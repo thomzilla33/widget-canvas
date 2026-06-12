@@ -17,83 +17,58 @@ export const entities = [
   { id: 'case-4821', name: 'Case #4821 — Outage', type: 'Case', owner: 'Support', health: 'active' },
 ]
 
+// Widget catalog — realistic for an enterprise BI workspace (dozens of widgets
+// across sources, with usage counts and varied health/freshness).
+const W = (o) => ({ governed: true, freshness: 'fresh', health: 'active', usedIn: 0, ...o })
 export const widgets = [
-  {
-    id: 'w-revenue',
-    name: 'Total Revenue',
-    skeleton: 'KPI',
-    governed: true,
-    freshness: 'live',
-    health: 'active',
-    usedIn: 5,
-    source: 'Finance Data View',
-  },
-  {
-    id: 'w-pipeline',
-    name: 'Pipeline by Stage',
-    skeleton: 'Chart',
-    governed: true,
-    freshness: 'fresh',
-    health: 'active',
-    usedIn: 3,
-    source: 'CRM Data View',
-  },
-  {
-    id: 'w-tickets',
-    name: 'Open Tickets',
-    skeleton: 'List',
-    governed: false,
-    freshness: 'aging',
-    health: 'inactive',
-    usedIn: 1,
-    source: 'Computed in Widget Builder',
-  },
-  {
-    id: 'w-nps',
-    name: 'NPS Trend',
-    skeleton: 'Chart',
-    governed: true,
-    freshness: 'stale',
-    health: 'review',
-    usedIn: 0,
-    source: 'Survey Data View',
-  },
+  W({ id: 'w-revenue', name: 'Total Revenue', skeleton: 'KPI', freshness: 'live', usedIn: 9, source: 'Finance Data View' }),
+  W({ id: 'w-mrr', name: 'MRR Trend', skeleton: 'Chart', freshness: 'live', usedIn: 7, source: 'Stripe' }),
+  W({ id: 'w-arr', name: 'ARR Snapshot', skeleton: 'KPI', usedIn: 12, source: 'Finance Data View' }),
+  W({ id: 'w-pipeline', name: 'Pipeline by Stage', skeleton: 'Chart', usedIn: 8, source: 'Salesforce' }),
+  W({ id: 'w-winrate', name: 'Win Rate', skeleton: 'Gauge', usedIn: 5, source: 'Salesforce' }),
+  W({ id: 'w-dealsize', name: 'Avg Deal Size', skeleton: 'KPI', usedIn: 4, source: 'Salesforce' }),
+  W({ id: 'w-leadvel', name: 'Lead Velocity', skeleton: 'Chart', freshness: 'aging', health: 'inactive', usedIn: 2, source: 'HubSpot' }),
+  W({ id: 'w-churn', name: 'Churn Rate', skeleton: 'Gauge', usedIn: 6, source: 'Stripe' }),
+  W({ id: 'w-nrr', name: 'Net Revenue Retention', skeleton: 'KPI', usedIn: 5, source: 'Finance Data View' }),
+  W({ id: 'w-tickets', name: 'Open Tickets', skeleton: 'List', governed: false, freshness: 'aging', health: 'inactive', usedIn: 3, source: 'Zendesk' }),
+  W({ id: 'w-csat', name: 'CSAT', skeleton: 'Gauge', usedIn: 6, source: 'Zendesk' }),
+  W({ id: 'w-sla', name: 'SLA Breach Risk', skeleton: 'Gauge', freshness: 'live', usedIn: 4, source: 'Zendesk' }),
+  W({ id: 'w-ticketvol', name: 'Ticket Volume', skeleton: 'Chart', usedIn: 5, source: 'Zendesk' }),
+  W({ id: 'w-nps', name: 'NPS Trend', skeleton: 'Chart', freshness: 'stale', health: 'review', usedIn: 0, source: 'Survey Data View' }),
+  W({ id: 'w-firstresp', name: 'First Response Time', skeleton: 'KPI', usedIn: 3, source: 'Intercom' }),
+  W({ id: 'w-headcount', name: 'Headcount', skeleton: 'Chart', usedIn: 4, source: 'HR Platform (Workday)' }),
+  W({ id: 'w-attrition', name: 'Attrition', skeleton: 'Gauge', freshness: 'aging', health: 'review', usedIn: 1, source: 'HR Platform (Workday)' }),
+  W({ id: 'w-timetohire', name: 'Time to Hire', skeleton: 'KPI', usedIn: 2, source: 'Greenhouse' }),
+  W({ id: 'w-adspend', name: 'Ad Spend by Channel', skeleton: 'Chart', freshness: 'live', usedIn: 3, source: 'Google Ads' }),
+  W({ id: 'w-roas', name: 'ROAS', skeleton: 'Gauge', freshness: 'live', usedIn: 4, source: 'Google Ads' }),
+  W({ id: 'w-emailctr', name: 'Email Click-through Rate', skeleton: 'KPI', health: 'inactive', usedIn: 2, source: 'HubSpot' }),
+  W({ id: 'w-cashburn', name: 'Cash Burn', skeleton: 'KPI', governed: false, freshness: 'aging', health: 'inactive', usedIn: 1, source: 'QuickBooks' }),
+  W({ id: 'w-apaging', name: 'AP Aging', skeleton: 'Chart', usedIn: 2, source: 'ERP (NetSuite)' }),
+  W({ id: 'w-margin', name: 'Margin by Region', skeleton: 'Heat Map', usedIn: 3, source: 'ERP (NetSuite)' }),
+  W({ id: 'w-accbyregion', name: 'Accounts by Region', skeleton: 'Map', usedIn: 2, source: 'Salesforce' }),
+  W({ id: 'w-topaccounts', name: 'Top Accounts', skeleton: 'Table', usedIn: 5, source: 'Finance Data View' }),
+  W({ id: 'w-contacts', name: 'Contacts', skeleton: 'Table', governed: false, health: 'review', usedIn: 0, source: 'Salesforce' }),
+  W({ id: 'w-execsummary', name: 'Exec AI Summary', skeleton: 'AI Summary', usedIn: 6, source: 'Snowflake' }),
 ]
 
+// Deactivated/offboarded users — dashboards they own need ownership recovery.
+export const DEACTIVATED_OWNERS = ['Robert Chen', 'Aisha Khan']
+
 export const dashboards = [
-  {
-    id: 'd-sales-acct',
-    template: 't-acct360',
-    name: 'Sales — Account 360',
-    entity: 'Account',
-    audience: 'Sales Agent',
-    status: 'published',
-    widgets: 8,
-    updated: '2 days ago',
-    placement: { surface: 'profile', profileType: 'Company', scope: 'all', entityId: null, entityName: null, tab: 'Overview' },
-  },
-  {
-    id: 'd-support-acct',
-    template: 't-support',
-    name: 'Support — Account Health',
-    entity: 'Account',
-    audience: 'Support Agent',
-    status: 'draft',
-    widgets: 5,
-    updated: '5 hours ago',
-    placement: { surface: 'profile', profileType: 'Company', scope: 'entity', entityId: 'acme-001', entityName: 'Acme Corporation', tab: 'Activity' },
-  },
-  {
-    id: 'd-mgr-overview',
-    template: 't-exec',
-    name: 'Manager Overview',
-    entity: 'Report',
-    audience: 'Manager',
-    status: 'pending',
-    widgets: 12,
-    updated: '1 week ago',
-    placement: { surface: 'report', collection: 'Executive' },
-  },
+  { id: 'd-sales-acct', template: 't-acct360', name: 'Sales — Account 360', entity: 'Company', audience: 'Sales Agent', owner: 'Priya Nair', status: 'published', widgets: 8, updated: '2 days ago', placement: { surface: 'profile', profileType: 'Company', scope: 'all', entityId: null, entityName: null, tab: 'Overview' } },
+  { id: 'd-support-acct', template: 't-support', name: 'Support — Account Health', entity: 'Company', audience: 'Support Agent', owner: 'Dana Lee', status: 'draft', widgets: 5, updated: '5 hours ago', placement: { surface: 'profile', profileType: 'Company', scope: 'entity', entityId: 'acme-001', entityName: 'Acme Corporation', tab: 'Activity' } },
+  { id: 'd-mgr-overview', template: 't-exec', name: 'Manager Overview', entity: 'Report', audience: 'Manager', owner: 'Priya Nair', status: 'pending', widgets: 12, updated: '1 week ago', placement: { surface: 'report', collection: 'Executive' } },
+  { id: 'd-rev-exec', template: 't-exec', name: 'Revenue Exec Report', entity: 'Report', audience: 'Manager', owner: 'Robert Chen', status: 'published', widgets: 10, updated: '3 days ago', placement: { surface: 'report', collection: 'Finance Reports' } },
+  { id: 'd-contact-360', template: 't-acct360', name: 'Contact 360', entity: 'Contact', audience: 'Sales Agent', owner: 'Sam Ortiz', status: 'published', widgets: 7, updated: '1 day ago', placement: { surface: 'profile', profileType: 'Contact', scope: 'all', entityId: null, entityName: null, tab: 'Overview' } },
+  { id: 'd-employee-perf', template: null, name: 'Employee Performance', entity: 'Employee', audience: 'Manager', owner: 'Yuki Tanaka', status: 'draft', widgets: 6, updated: '4 hours ago', placement: { surface: 'profile', profileType: 'Employee', scope: 'all', entityId: null, entityName: null, tab: 'Performance' } },
+  { id: 'd-cs-health', template: 't-support', name: 'CS Health', entity: 'Company', audience: 'Support Agent', owner: 'Aisha Khan', status: 'published', widgets: 9, updated: '6 days ago', placement: { surface: 'profile', profileType: 'Company', scope: 'all', entityId: null, entityName: null, tab: 'Activity' } },
+  { id: 'd-team-home', template: null, name: 'Sales Team Home', entity: 'Home', audience: 'Sales Agent', owner: 'Priya Nair', status: 'published', widgets: 5, updated: '2 weeks ago', placement: { surface: 'home', homeScope: 'team' } },
+  { id: 'd-deal-room', template: null, name: 'Deal Room', entity: 'Deal', audience: 'Sales Agent', owner: 'Liam Murphy', status: 'draft', widgets: 4, updated: '3 hours ago', placement: { surface: 'profile', profileType: 'Deal', scope: 'all', entityId: null, entityName: null, tab: 'Overview' } },
+  { id: 'd-marketing', template: null, name: 'Marketing Performance', entity: 'Report', audience: 'Manager', owner: 'Elena Petrova', status: 'published', widgets: 11, updated: '5 days ago', placement: { surface: 'report', collection: 'Sales Reports' } },
+  { id: 'd-support-mgr', template: 't-support', name: 'Support Leadership', entity: 'Report', audience: 'Manager', owner: 'James Okonkwo', status: 'pending', widgets: 8, updated: '1 week ago', placement: { surface: 'report', collection: 'Support Reports' } },
+  { id: 'd-finance', template: null, name: 'Finance Close', entity: 'Report', audience: 'Manager', owner: 'Priya Nair', status: 'draft', widgets: 9, updated: '2 days ago', placement: { surface: 'report', collection: 'Finance Reports' } },
+  { id: 'd-onboarding', template: null, name: 'New Hire Onboarding', entity: 'Employee', audience: 'All audiences', owner: 'Yuki Tanaka', status: 'published', widgets: 5, updated: '1 month ago', placement: { surface: 'profile', profileType: 'Employee', scope: 'all', entityId: null, entityName: null, tab: 'Overview' } },
+  { id: 'd-exec-home', template: 't-exec', name: 'Exec Home', entity: 'Home', audience: 'Manager', owner: 'You (admin)', status: 'published', widgets: 7, updated: '3 days ago', placement: { surface: 'home', homeScope: 'personal' } },
 ]
 
 // New-dashboard flow (S80–S82)
@@ -134,9 +109,9 @@ export function placementLabel(p) {
   return `${ptLabel} · ${where} · ${p.tab || 'Overview'}`
 }
 export const dashboardTemplates = [
-  { id: 't-acct360', name: 'Account 360', desc: 'KPIs, pipeline, and recent activity.', entity: 'Account' },
-  { id: 't-support', name: 'Support Health', desc: 'Open tickets, SLA, and CSAT.', entity: 'Account' },
-  { id: 't-exec', name: 'Exec Overview', desc: 'High-level rollups for leadership.', entity: 'Account' },
+  { id: 't-acct360', name: 'Account 360', desc: 'KPIs, pipeline, and recent activity.', entity: 'Company' },
+  { id: 't-support', name: 'Support Health', desc: 'Open tickets, SLA, and CSAT.', entity: 'Company' },
+  { id: 't-exec', name: 'Exec Overview', desc: 'High-level rollups for leadership.', entity: 'Report' },
 ]
 
 // Pre-built widget layout per template (zone -> widget ids). Used to seed a
@@ -232,17 +207,17 @@ export const feedbackFlags = [
 // Sharing & access (S105–S108). status: 'active' | 'deactivated' (offboarded).
 // Realistic roster for a ~140-person org; deactivated users drive the recovery flow.
 export const SHARE_PEOPLE = [
-  { id: 'u-1', name: 'Dana Lee', sub: 'Support Agent · Support', initials: 'DL', status: 'active' },
-  { id: 'u-2', name: 'Sam Ortiz', sub: 'Sales Agent · Sales', initials: 'SO', status: 'active' },
-  { id: 'u-3', name: 'Priya Nair', sub: 'Manager · Sales', initials: 'PN', status: 'active' },
-  { id: 'u-4', name: 'Marco Diaz', sub: 'Sales Agent · Sales', initials: 'MD', status: 'active' },
-  { id: 'u-5', name: 'Elena Petrova', sub: 'Sales Agent · Sales', initials: 'EP', status: 'active' },
-  { id: 'u-6', name: 'James Okonkwo', sub: 'Support Agent · Support', initials: 'JO', status: 'active' },
-  { id: 'u-7', name: 'Yuki Tanaka', sub: 'CS Manager · Customer Success', initials: 'YT', status: 'active' },
-  { id: 'u-8', name: 'Liam Murphy', sub: 'Account Exec · Sales', initials: 'LM', status: 'active' },
+  { id: 'u-1', name: 'Dana Lee', sub: 'Support Agent · Support', team: 'Support', initials: 'DL', status: 'active' },
+  { id: 'u-2', name: 'Sam Ortiz', sub: 'Sales Agent · Sales', team: 'Sales', initials: 'SO', status: 'active' },
+  { id: 'u-3', name: 'Priya Nair', sub: 'Manager · Sales', team: 'Sales', initials: 'PN', status: 'active' },
+  { id: 'u-4', name: 'Marco Diaz', sub: 'Sales Agent · Sales', team: 'Sales', initials: 'MD', status: 'active' },
+  { id: 'u-5', name: 'Elena Petrova', sub: 'Sales Agent · Sales', team: 'Sales', initials: 'EP', status: 'active' },
+  { id: 'u-6', name: 'James Okonkwo', sub: 'Support Agent · Support', team: 'Support', initials: 'JO', status: 'active' },
+  { id: 'u-7', name: 'Yuki Tanaka', sub: 'CS Manager · Customer Success', team: 'Customer Success', initials: 'YT', status: 'active' },
+  { id: 'u-8', name: 'Liam Murphy', sub: 'Account Exec · Sales', team: 'Sales', initials: 'LM', status: 'active' },
   // Offboarded / deactivated — must be recovered before re-granting access.
-  { id: 'u-9', name: 'Robert Chen', sub: 'Former Sales Lead · deactivated 12 days ago', initials: 'RC', status: 'deactivated' },
-  { id: 'u-10', name: 'Aisha Khan', sub: 'Former Support Agent · deactivated 3 days ago', initials: 'AK', status: 'deactivated' },
+  { id: 'u-9', name: 'Robert Chen', sub: 'Former Sales Lead · deactivated 12 days ago', team: 'Sales', initials: 'RC', status: 'deactivated' },
+  { id: 'u-10', name: 'Aisha Khan', sub: 'Former Support Agent · deactivated 3 days ago', team: 'Support', initials: 'AK', status: 'deactivated' },
 ]
 export const SHARE_DEPARTMENTS = [
   { id: 'dep-sales', name: 'Sales', sub: '42 people' },

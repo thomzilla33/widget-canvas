@@ -1,18 +1,22 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { LayoutDashboard, Search, MapPin } from 'lucide-react'
+import { LayoutDashboard, Search, MapPin, UserX, RotateCcw } from 'lucide-react'
 import { PageHeader, Badge } from '../components/common/index.jsx'
 import { useDashboards } from '../state/DashboardsContext.jsx'
-import { placementLabel } from '../data/mock.js'
+import { placementLabel, DEACTIVATED_OWNERS } from '../data/mock.js'
 
 const STATUS_FILTERS = ['All', 'Published', 'Draft', 'Pending']
 
 // S76–S79 — dashboard list with search + status filter
 export default function DashboardList() {
   const navigate = useNavigate()
-  const { dashboards } = useDashboards()
+  const { dashboards, updateDashboard } = useDashboards()
   const [search, setSearch] = useState('')
   const [status, setStatus] = useState('All')
+
+  // Governance recovery: dashboards owned by an offboarded user need reassigning.
+  const orphaned = dashboards.filter((d) => DEACTIVATED_OWNERS.includes(d.owner))
+  const reassign = (id) => updateDashboard(id, { owner: 'You (admin)' })
 
   const publishedCount = dashboards.filter((d) => d.status === 'published').length
   const shown = dashboards.filter((d) => {
@@ -62,6 +66,31 @@ export default function DashboardList() {
       </div>
 
       <div className="flex-1 overflow-auto px-6 py-4">
+        {orphaned.length > 0 && (
+          <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-3 dark:border-amber-500/25 dark:bg-amber-500/10">
+            <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-slate-100">
+              <UserX size={15} className="text-aims-ungoverned" />
+              Needs attention · {orphaned.length} dashboard{orphaned.length > 1 ? 's' : ''} with an offboarded owner
+            </div>
+            <div className="space-y-1.5">
+              {orphaned.map((d) => (
+                <div key={d.id} className="flex flex-col sm:flex-row sm:items-center gap-2 rounded-lg border border-amber-200/70 bg-white p-2.5 dark:border-white/10 dark:bg-[#131a2c]">
+                  <div className="min-w-0 flex-1">
+                    <button onClick={() => navigate(`/dashboard/${d.id}/canvas`)} className="truncate text-sm font-medium text-gray-900 hover:text-aims-blue dark:text-slate-100">
+                      {d.name}
+                    </button>
+                    <div className="truncate text-[11px] text-gray-500 dark:text-slate-400">
+                      Owner {d.owner} was offboarded · {placementLabel(d.placement)}
+                    </div>
+                  </div>
+                  <button className="btn-secondary !py-1.5 !px-3 text-xs shrink-0" onClick={() => reassign(d.id)}>
+                    <RotateCcw size={13} /> Reassign to me
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
         {shown.length === 0 ? (
           <p className="text-sm text-gray-400 dark:text-slate-500">No dashboards match your filters.</p>
         ) : (
@@ -87,6 +116,12 @@ export default function DashboardList() {
                     <div className="flex items-center gap-1 text-[11px] text-gray-400 dark:text-slate-500">
                       <MapPin size={11} className="shrink-0" />
                       <span className="truncate">{placementLabel(d.placement)}</span>
+                    </div>
+                    <div className="mt-0.5 flex items-center gap-1 truncate text-[11px] text-gray-400 dark:text-slate-500">
+                      Owner · {d.owner}
+                      {DEACTIVATED_OWNERS.includes(d.owner) && (
+                        <span className="cap-chip cap-chip-neutral !border-amber-300 !text-aims-ungoverned dark:!border-amber-500/30 dark:!text-amber-400">offboarded</span>
+                      )}
                     </div>
                   </div>
                 </div>

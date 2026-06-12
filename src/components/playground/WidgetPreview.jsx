@@ -249,6 +249,11 @@ function TableView({ data, pii }) {
           ))}
         </tbody>
       </table>
+      {data.recordTotal > 5 && (
+        <div className="border-t border-gray-100 px-3 py-1.5 text-[11px] text-gray-400 dark:border-white/5 dark:text-slate-500">
+          Showing 5 of {data.recordTotal.toLocaleString()} records
+        </div>
+      )}
     </div>
   )
 }

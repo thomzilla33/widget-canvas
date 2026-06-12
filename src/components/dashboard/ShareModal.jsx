@@ -13,6 +13,8 @@ export default function ShareModal({ dashboard, onClose }) {
   // A deactivated (offboarded) user must be recovered before access can be granted.
   const isActive = (s) => s.status !== 'deactivated' || restored.has(s.id)
   const restore = (id) => setRestored((prev) => new Set(prev).add(id))
+  // Inherited access: a person already has access if their team's department was added.
+  const coveredTeams = new Set(access.filter((a) => a.kind === 'dept').map((a) => a.name))
 
   function add(item) {
     setAccess((prev) => [
@@ -79,17 +81,21 @@ export default function ShareModal({ dashboard, onClose }) {
                         <div className="truncate text-sm font-medium text-gray-900 dark:text-slate-100">{s.name}</div>
                         <div className="truncate text-[11px] text-gray-400 dark:text-slate-500">{s.sub}</div>
                       </div>
-                      {active ? (
-                        <button className="btn-secondary !py-1 !px-2.5 text-xs shrink-0" onClick={() => add(s)}>
-                          <Plus size={13} /> Add
-                        </button>
-                      ) : (
+                      {!active ? (
                         <div className="flex shrink-0 items-center gap-1.5">
                           <span className="cap-chip cap-chip-neutral">Deactivated</span>
                           <button className="btn-secondary !py-1 !px-2.5 text-xs" onClick={() => restore(s.id)}>
                             <RotateCcw size={13} /> Restore
                           </button>
                         </div>
+                      ) : tab === 'people' && coveredTeams.has(s.team) ? (
+                        <span className="cap-chip cap-chip-data shrink-0" title={`Already has access via ${s.team}`}>
+                          Via {s.team}
+                        </span>
+                      ) : (
+                        <button className="btn-secondary !py-1 !px-2.5 text-xs shrink-0" onClick={() => add(s)}>
+                          <Plus size={13} /> Add
+                        </button>
                       )}
                     </div>
                   )

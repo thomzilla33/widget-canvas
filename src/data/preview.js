@@ -42,6 +42,7 @@ const SAMPLE = {
   },
   kpi: { value: '$1.24M', delta: '+8.2%', deltaDir: 'up' },
   gauge: { value: 68, label: 'of target' },
+  recordTotal: 1284, // realistic row count for record-set previews (truncated display)
 }
 
 // Returns the full sample bundle, lightly labeled by the chosen metric.

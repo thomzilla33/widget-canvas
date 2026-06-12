@@ -476,10 +476,13 @@ function WidgetBody({ inst, widget }) {
     )
   }
   return (
-    <ul className="text-xs text-gray-600 dark:text-slate-300 space-y-1.5">
-      <li className="flex justify-between"><span>Ticket #4821</span><span className="text-gray-400 dark:text-slate-500">2h ago</span></li>
-      <li className="flex justify-between"><span>Ticket #4798</span><span className="text-gray-400 dark:text-slate-500">1d ago</span></li>
-    </ul>
+    <div>
+      <ul className="text-xs text-gray-600 dark:text-slate-300 space-y-1.5">
+        <li className="flex justify-between"><span>Ticket #4821</span><span className="text-gray-400 dark:text-slate-500">2h ago</span></li>
+        <li className="flex justify-between"><span>Ticket #4798</span><span className="text-gray-400 dark:text-slate-500">1d ago</span></li>
+      </ul>
+      <div className="mt-1.5 text-[10px] text-gray-400 dark:text-slate-500">Showing 2 of 128 open</div>
+    </div>
   )
 }
 
