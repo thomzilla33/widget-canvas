@@ -79,6 +79,57 @@ export function HealthBadge({ health = 'active' }) {
   )
 }
 
+// Connection status for a data source (mirrors Integrations' health badges).
+const connClass = {
+  connected: 'health-active',
+  syncing: 'health-inactive',
+  error: 'health-review',
+  available: 'health-unused',
+}
+const connLabel = { connected: 'Connected', syncing: 'Syncing', error: 'Error', available: 'Available' }
+
+export function ConnectionBadge({ status = 'available' }) {
+  return (
+    <span className={connClass[status] || connClass.available}>
+      <span className="sc-dot" />
+      {connLabel[status] || status}
+    </span>
+  )
+}
+
+// Source provenance (Official / Partner / Private), matching Integrations.
+const providerChip = { official: 'cap-chip-blue', partner: 'cap-chip-pink', private: 'cap-chip-tool' }
+const providerLabel = { official: 'Official', partner: 'Partner', private: 'Private' }
+
+export function ProviderBadge({ provider = 'official' }) {
+  return (
+    <span className={`cap-chip ${providerChip[provider] || 'cap-chip-neutral'}`}>
+      {providerLabel[provider] || provider}
+    </span>
+  )
+}
+
+// What a source exposes: aggregate Metrics, row-level Records, live Realtime.
+const capMeta = {
+  metrics: { label: 'Metrics', cls: 'cap-chip-data' },
+  records: { label: 'Records', cls: 'cap-chip-cyan' },
+  realtime: { label: 'Realtime', cls: 'cap-chip-blue' },
+}
+
+export function CapabilityChips({ capabilities = [] }) {
+  return (
+    <>
+      {capabilities
+        .filter((c) => capMeta[c])
+        .map((c) => (
+          <span key={c} className={`cap-chip ${capMeta[c].cls}`}>
+            {capMeta[c].label}
+          </span>
+        ))}
+    </>
+  )
+}
+
 export function EmptyState({ icon = '📊', title, description, action }) {
   return (
     <div className="flex flex-col items-center justify-center text-center py-16 px-6">

@@ -144,56 +144,9 @@ export const WIDGET_TYPES = [
 ]
 export const TYPE_LABEL = Object.fromEntries(WIDGET_TYPES.map((t) => [t.id, t.label]))
 
-// External data sources (named connectors) with the metrics they expose.
-// metric.kind drives preview sample data; recommendedType drives the gallery hint.
-export const EXTERNAL_SOURCES = [
-  {
-    id: 'src-salesforce', name: 'Salesforce', category: 'CRM', governed: true, hasPII: true, logoColor: '#00A1E0', initials: 'SF', owner: 'RevOps', reviewed: 'May 2026',
-    metrics: [
-      { id: 'sf-opps', name: 'Opportunities by Stage', kind: 'breakdown', recommendedType: 'bar' },
-      { id: 'sf-winrate', name: 'Win Rate', kind: 'kpi', recommendedType: 'kpi' },
-      { id: 'sf-pipeline', name: 'Pipeline $', kind: 'timeseries', recommendedType: 'line' },
-      { id: 'sf-dealsize', name: 'Deal Size vs Close Time', kind: 'twoVar', recommendedType: 'scatter' },
-      { id: 'sf-byregion', name: 'Accounts by Region', kind: 'geo', recommendedType: 'map' },
-    ],
-  },
-  {
-    id: 'src-dms', name: 'Dealer Management System', category: 'Automotive', governed: true, hasPII: false, logoColor: '#C8102E', initials: 'DM', owner: 'Ops', reviewed: 'Apr 2026',
-    metrics: [
-      { id: 'dms-units', name: 'Units Sold', kind: 'timeseries', recommendedType: 'line' },
-      { id: 'dms-ros', name: 'Service ROs', kind: 'breakdown', recommendedType: 'bar' },
-      { id: 'dms-gpu', name: 'Gross per Unit', kind: 'kpi', recommendedType: 'kpi' },
-    ],
-  },
-  {
-    id: 'src-erp', name: 'ERP (NetSuite)', category: 'Finance', governed: true, hasPII: false, logoColor: '#1F6FEB', initials: 'ER', owner: 'Finance', reviewed: 'Mar 2026',
-    metrics: [
-      { id: 'erp-rev', name: 'Revenue', kind: 'timeseries', recommendedType: 'line' },
-      { id: 'erp-ap', name: 'AP Aging', kind: 'breakdown', recommendedType: 'bar' },
-      { id: 'erp-margin', name: 'Margin by Region', kind: 'matrix', recommendedType: 'heatmap' },
-    ],
-  },
-  {
-    id: 'src-hr', name: 'HR Platform (Workday)', category: 'People', governed: true, hasPII: true, logoColor: '#F38B00', initials: 'HR', owner: 'People Ops', reviewed: 'Feb 2026',
-    metrics: [
-      { id: 'hr-headcount', name: 'Headcount', kind: 'timeseries', recommendedType: 'line' },
-      { id: 'hr-attrition', name: 'Attrition', kind: 'kpi', recommendedType: 'gauge' },
-      { id: 'hr-bydept', name: 'Headcount by Dept', kind: 'breakdown', recommendedType: 'pie' },
-    ],
-  },
-  {
-    id: 'src-finance-dv', name: 'Finance Data View', category: 'Data View', governed: true, hasPII: false, logoColor: '#16A34A', initials: 'FV', owner: 'Finance', reviewed: 'May 2026',
-    metrics: [
-      { id: 'fv-rev', name: 'Total Revenue', kind: 'kpi', recommendedType: 'kpi' },
-      { id: 'fv-trend', name: 'Revenue Trend', kind: 'timeseries', recommendedType: 'line' },
-      { id: 'fv-records', name: 'Top Accounts', kind: 'records', recommendedType: 'table' },
-    ],
-  },
-  {
-    id: 'src-computed', name: 'Compute a metric here', category: 'Custom', governed: false, hasPII: false, logoColor: '#6B7280', initials: 'CM', owner: 'You (Widget Builder)', reviewed: null,
-    metrics: [{ id: 'cm-custom', name: 'Custom Metric', kind: 'kpi', recommendedType: 'kpi' }],
-  },
-]
+// External data sources (named connectors) now live in their own module so the
+// ~40-source catalog stays readable. Re-exported here for existing imports.
+export { EXTERNAL_SOURCES, SOURCE_CATEGORIES, sourceFields } from './sources.js'
 
 // Feedback loop (S22–S27 user · S121–S123 admin)
 export const FLAG_REASONS = [

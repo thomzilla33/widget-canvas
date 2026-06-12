@@ -105,6 +105,15 @@
   .cap-chip-neutral {
     @apply border-gray-300 bg-gray-100 text-gray-600 dark:border-white/10 dark:bg-white/5 dark:text-slate-300;
   }
+  .cap-chip-blue {
+    @apply border-blue-400/30 bg-blue-500/10 text-aims-blue dark:text-blue-300;
+  }
+  .cap-chip-cyan {
+    @apply border-cyan-400/30 bg-cyan-500/10 text-cyan-700 dark:text-cyan-300;
+  }
+  .cap-chip-pink {
+    @apply border-pink-400/30 bg-pink-500/10 text-pink-600 dark:text-pink-300;
+  }
 
   /* Status pill with dot (matches .sc / health-badge) */
   .sc {

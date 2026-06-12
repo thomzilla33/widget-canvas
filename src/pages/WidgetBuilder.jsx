@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Check } from 'lucide-react'
 import { PageHeader } from '../components/common/index.jsx'
 import { useWidgets } from '../state/WidgetsContext.jsx'
-import { EXTERNAL_SOURCES, TYPE_LABEL } from '../data/mock.js'
+import { EXTERNAL_SOURCES, TYPE_LABEL, sourceFields } from '../data/mock.js'
 import {
   SourcePicker,
   MetricPicker,
@@ -12,6 +12,7 @@ import {
   SectionHeading,
 } from '../components/playground/BuilderPanels.jsx'
 import WidgetPreview from '../components/playground/WidgetPreview.jsx'
+import DataSourceMarketplace from '../components/datasources/DataSourceMarketplace.jsx'
 
 const FRESHNESS_STATUS = { realtime: 'live', '15m': 'fresh', '1h': 'fresh', '24h': 'aging' }
 
@@ -30,12 +31,14 @@ export default function WidgetBuilder() {
   const [piiAck, setPiiAck] = useState(false)
   const [ungovernedAck, setUngovernedAck] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [browsing, setBrowsing] = useState(false)
 
   const source = EXTERNAL_SOURCES.find((s) => s.id === sourceId) || null
-  const metric = source?.metrics.find((m) => m.id === metricId) || null
+  // A "field" is either an aggregate metric or a row-level record set.
+  const metric = sourceFields(source).find((f) => f.id === metricId) || null
 
   function selectSource(id) {
-    if (id === sourceId) return // re-clicking the active source shouldn't wipe the metric/type
+    if (id === sourceId) return // re-selecting the active source shouldn't wipe the metric/type
     setSourceId(id)
     setMetricId(null)
     setTypeId(null)
@@ -43,7 +46,7 @@ export default function WidgetBuilder() {
   }
   function selectMetric(id) {
     setMetricId(id)
-    const m = source?.metrics.find((x) => x.id === id)
+    const m = sourceFields(source).find((x) => x.id === id)
     if (m && !typeTouched) setTypeId(m.recommendedType) // auto-pick recommended
   }
   function selectType(id) {
@@ -99,7 +102,7 @@ export default function WidgetBuilder() {
           <div className="w-full shrink-0 space-y-7 lg:w-[440px]">
             <section>
               <SectionHeading n={1} title="Data source" sub="Map from a specific external system or data view." />
-              <SourcePicker sourceId={sourceId} onSelect={selectSource} />
+              <SourcePicker sourceId={sourceId} onSelect={selectSource} onBrowse={() => setBrowsing(true)} />
             </section>
             <section>
               <SectionHeading n={2} title="Metric" sub="Pick the specific metric this widget shows." />
@@ -144,6 +147,14 @@ export default function WidgetBuilder() {
           </div>
         </div>
       </div>
+
+      {browsing && (
+        <DataSourceMarketplace
+          currentSourceId={sourceId}
+          onSelect={selectSource}
+          onClose={() => setBrowsing(false)}
+        />
+      )}
     </div>
   )
 }
