@@ -10,12 +10,16 @@ import {
   Bell,
   AlertTriangle,
   RotateCw,
+  RotateCcw,
   Check,
   X,
   Flag,
   ThumbsUp,
   ThumbsDown,
   MessageCircle,
+  Search,
+  Filter,
+  GripVertical,
 } from 'lucide-react'
 import { PageHeader, GovernedBadge, FreshnessBadge, EmptyState } from '../components/common/index.jsx'
 import FeedbackPanel from '../components/ucp/FeedbackPanel.jsx'
@@ -30,6 +34,7 @@ const PROFILE = [
   { iid: 'i3', widgetId: 'w-tickets', fixed: false, state: 'empty' },
   { iid: 'i4', widgetId: 'w-nps', fixed: false, state: 'error' },
 ]
+const DEFAULT_ORDER = PROFILE.map((p) => p.iid)
 const QUICK_ACTIONS = [
   { id: 'task', label: 'Create Task', icon: Plus },
   { id: 'escalate', label: 'Escalate', icon: ArrowUpRight },
@@ -46,6 +51,38 @@ export default function UCPView() {
   const [collapsed, setCollapsed] = useState({})
   const [quickAction, setQuickAction] = useState(null) // { action, widgetName }
   const [feedback, setFeedback] = useState(null) // { mode, widget }
+  const [order, setOrder] = useState(DEFAULT_ORDER) // S13 reorder
+  const [search, setSearch] = useState('') // S05
+  const [filters, setFilters] = useState({}) // S09–S12 per-iid filter label
+  const [resetOpen, setResetOpen] = useState(false) // S16
+  const [dragId, setDragId] = useState(null)
+
+  const visible = order
+    .map((iid) => PROFILE.find((p) => p.iid === iid))
+    .filter(Boolean)
+    .filter((inst) => {
+      if (!search) return true
+      return (widgetById(inst.widgetId)?.name || '').toLowerCase().includes(search.toLowerCase())
+    })
+
+  function reorder(fromIid, toIid) {
+    setOrder((prev) => {
+      const arr = [...prev]
+      const f = arr.indexOf(fromIid)
+      const t = arr.indexOf(toIid)
+      if (f < 0 || t < 0 || f === t) return prev
+      arr.splice(f, 1)
+      arr.splice(t, 0, fromIid)
+      return arr
+    })
+  }
+
+  function resetLayout() {
+    setOrder(DEFAULT_ORDER)
+    setFilters({})
+    setCollapsed({})
+    setResetOpen(false)
+  }
 
   return (
     <div className="h-full flex flex-col">
@@ -56,29 +93,64 @@ export default function UCPView() {
 
       <div className="flex-1 overflow-auto relative">
         <div className="px-6 py-5 max-w-5xl">
+          {/* Toolbar: search (S05) + reset layout (S16) */}
+          <div className="mb-4 flex items-center gap-2">
+            <div className="relative w-full max-w-xs">
+              <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500" />
+              <input
+                className="input h-9 pl-8"
+                placeholder="Search this profile…"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
+            <button className="btn-secondary ml-auto" onClick={() => setResetOpen(true)}>
+              <RotateCcw size={15} /> Reset layout
+            </button>
+          </div>
+
           <AiSummary />
 
-          <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {PROFILE.map((inst) => (
-              <UCPWidget
-                key={inst.iid}
-                inst={inst}
-                widget={widgetById(inst.widgetId)}
-                collapsed={!!collapsed[inst.iid]}
-                onToggleCollapse={() =>
-                  setCollapsed((c) => ({ ...c, [inst.iid]: !c[inst.iid] }))
-                }
-                onQuickAction={(action, widgetName) => {
-                  setFeedback(null)
-                  setQuickAction({ action, widgetName })
-                }}
-                onFeedback={(mode, widget) => {
-                  setQuickAction(null)
-                  setFeedback({ mode, widget })
-                }}
-              />
-            ))}
-          </div>
+          {visible.length === 0 ? (
+            <div className="mt-5">
+              <EmptyState icon="🔍" title="No widgets match" description={`Nothing on this profile matches “${search}”.`} />
+            </div>
+          ) : (
+            <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {visible.map((inst) => (
+                <UCPWidget
+                  key={inst.iid}
+                  inst={inst}
+                  widget={widgetById(inst.widgetId)}
+                  collapsed={!!collapsed[inst.iid]}
+                  filter={filters[inst.iid] || null}
+                  dragging={dragId === inst.iid}
+                  onToggleCollapse={() => setCollapsed((c) => ({ ...c, [inst.iid]: !c[inst.iid] }))}
+                  onQuickAction={(action, widgetName) => {
+                    setFeedback(null)
+                    setQuickAction({ action, widgetName })
+                  }}
+                  onFeedback={(mode, widget) => {
+                    setQuickAction(null)
+                    setFeedback({ mode, widget })
+                  }}
+                  onApplyFilter={(v) => setFilters((f) => ({ ...f, [inst.iid]: v }))}
+                  onClearFilter={() =>
+                    setFilters((f) => {
+                      const n = { ...f }
+                      delete n[inst.iid]
+                      return n
+                    })
+                  }
+                  onDragStartReorder={() => setDragId(inst.iid)}
+                  onDropReorder={() => {
+                    if (dragId) reorder(dragId, inst.iid)
+                    setDragId(null)
+                  }}
+                />
+              ))}
+            </div>
+          )}
         </div>
 
         {quickAction && (
@@ -97,6 +169,8 @@ export default function UCPView() {
             onClose={() => setFeedback(null)}
           />
         )}
+
+        {resetOpen && <ResetModal onCancel={() => setResetOpen(false)} onConfirm={resetLayout} />}
       </div>
     </div>
   )
@@ -140,7 +214,6 @@ function AiSummary() {
   )
 }
 
-/* ── A single widget with trust layer + states + quick actions ── */
 function HoverIcon({ title, onClick, active, activeClass, children }) {
   return (
     <button
@@ -155,12 +228,87 @@ function HoverIcon({ title, onClick, active, activeClass, children }) {
   )
 }
 
-function UCPWidget({ inst, widget, collapsed, onToggleCollapse, onQuickAction, onFeedback }) {
+/* ── Widget filter (S09 dropdown · S10 date range) ── */
+function WidgetFilter({ onApply, onClear }) {
+  const [open, setOpen] = useState(false)
+  const [range, setRange] = useState('Last 30 days')
+  const [from, setFrom] = useState('')
+  const [to, setTo] = useState('')
+
+  function apply() {
+    const label = range === 'Custom' ? (from && to ? `${from} → ${to}` : 'Custom range') : range
+    onApply(label)
+    setOpen(false)
+  }
+
+  return (
+    <div className="relative">
+      <button
+        title="Filter"
+        onClick={() => setOpen((o) => !o)}
+        className="h-6 w-6 grid place-items-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-aims-blue dark:text-slate-500 dark:hover:bg-white/10"
+      >
+        <Filter size={13} />
+      </button>
+      {open && (
+        <div className="card absolute right-0 top-[calc(100%+6px)] z-20 w-56 p-3">
+          <div className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-gray-400 dark:text-slate-500">
+            Date range
+          </div>
+          <select className="input h-8 !py-1 text-sm" value={range} onChange={(e) => setRange(e.target.value)}>
+            <option>Last 7 days</option>
+            <option>Last 30 days</option>
+            <option>Last 90 days</option>
+            <option>Custom</option>
+          </select>
+          {range === 'Custom' && (
+            <div className="mt-2 flex items-center gap-1.5">
+              <input type="date" className="input h-8 !py-1 text-xs" value={from} onChange={(e) => setFrom(e.target.value)} />
+              <span className="text-gray-400">–</span>
+              <input type="date" className="input h-8 !py-1 text-xs" value={to} onChange={(e) => setTo(e.target.value)} />
+            </div>
+          )}
+          <div className="mt-3 flex justify-end gap-2">
+            <button className="btn-ghost !py-1 !px-2 text-xs" onClick={() => { onClear(); setOpen(false) }}>
+              Clear
+            </button>
+            <button className="btn-primary !py-1 !px-3 text-xs" onClick={apply}>
+              Apply
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function UCPWidget({
+  inst,
+  widget,
+  collapsed,
+  filter,
+  dragging,
+  onToggleCollapse,
+  onQuickAction,
+  onFeedback,
+  onApplyFilter,
+  onClearFilter,
+  onDragStartReorder,
+  onDropReorder,
+}) {
   const name = widget?.name || 'Widget'
   const { reactions, setReaction } = useFeedback()
   const reaction = reactions[inst.iid]
   return (
-    <div className="group card p-4 relative flex flex-col">
+    <div
+      draggable={!inst.fixed}
+      onDragStart={!inst.fixed ? onDragStartReorder : undefined}
+      onDragOver={(e) => {
+        if (!inst.fixed) e.preventDefault()
+      }}
+      onDrop={!inst.fixed ? onDropReorder : undefined}
+      className={`group card p-4 relative flex flex-col ${dragging ? 'opacity-50' : ''}`}
+    >
       {/* Header */}
       <div className="flex items-center justify-between gap-2">
         <span className="font-semibold text-sm text-gray-900 dark:text-slate-100 truncate">{name}</span>
@@ -170,33 +318,53 @@ function UCPWidget({ inst, widget, collapsed, onToggleCollapse, onQuickAction, o
               <Lock size={13} className="text-gray-400 dark:text-slate-500" />
             </span>
           ) : (
-            <button
-              onClick={onToggleCollapse}
-              title={collapsed ? 'Expand' : 'Collapse'}
-              className="text-gray-400 dark:text-slate-500 hover:text-gray-700"
-            >
-              <ChevronDown size={15} className={`transition-transform ${collapsed ? '-rotate-90' : ''}`} />
-            </button>
+            <>
+              <span title="Drag to reorder" className="cursor-move text-gray-300 hover:text-gray-500 dark:text-slate-600 dark:hover:text-slate-400">
+                <GripVertical size={14} />
+              </span>
+              <button
+                onClick={onToggleCollapse}
+                title={collapsed ? 'Expand' : 'Collapse'}
+                className="text-gray-400 dark:text-slate-500 hover:text-gray-700"
+              >
+                <ChevronDown size={15} className={`transition-transform ${collapsed ? '-rotate-90' : ''}`} />
+              </button>
+            </>
           )}
         </div>
       </div>
 
       {!collapsed && (
         <>
+          {/* Applied filter chip (S11/S12) */}
+          {filter && (
+            <div className="mt-2">
+              <span className="inline-flex items-center gap-1 rounded-md border border-aims-blue/30 bg-aims-blue/10 px-2 py-0.5 text-[11px] font-medium text-aims-blue">
+                {filter}
+                <button onClick={onClearFilter} title="Clear filter" className="hover:text-aims-stale">
+                  <X size={11} />
+                </button>
+              </span>
+            </div>
+          )}
+
           <div className="mt-3 min-h-[72px]">
             <WidgetBody inst={inst} widget={widget} />
           </div>
 
-          {/* Trust layer (S06–S08) */}
+          {/* Trust layer (S06–S08) + filter control (S09) */}
           {inst.state === 'ok' && (
             <div className="mt-3 pt-2 border-t border-gray-100 dark:border-white/10 flex items-center gap-2 flex-wrap">
               <TrustBadge widget={widget} />
               <FreshnessBadge status={widget?.freshness} label={widget?.freshness} />
+              <div className="ml-auto">
+                <WidgetFilter onApply={onApplyFilter} onClear={onClearFilter} />
+              </div>
             </div>
           )}
 
           {/* Hover actions: feedback (S22) + quick actions (S17) */}
-          <div className="absolute top-3 right-9 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="absolute top-3 right-16 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
             <HoverIcon title="Flag data issue" onClick={() => onFeedback('flag', widget)}>
               <Flag size={13} />
             </HoverIcon>
@@ -241,7 +409,6 @@ function WidgetBody({ inst, widget }) {
       </div>
     )
   }
-  // ok — render by skeleton
   if (widget?.skeleton === 'KPI') {
     return (
       <div>
@@ -280,6 +447,32 @@ function TrustBadge({ widget }) {
           : 'Computed in Widget Builder · not formally reviewed.'}
       </span>
     </span>
+  )
+}
+
+/* ── Reset to default modal (S16) ── */
+function ResetModal({ onCancel, onConfirm }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onCancel} />
+      <div className="card relative z-10 w-[420px] max-w-full p-6 text-center">
+        <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl border border-amber-200 bg-amber-50 dark:border-amber-500/25 dark:bg-amber-500/10">
+          <RotateCcw size={26} className="text-aims-aging" />
+        </div>
+        <h3 className="mt-4 text-lg font-semibold text-gray-900 dark:text-slate-100">Reset to default?</h3>
+        <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">
+          This restores the admin's default layout and clears your reordering, collapsed widgets, and filters.
+        </p>
+        <div className="mt-5 flex items-center justify-center gap-2">
+          <button className="btn-secondary" onClick={onCancel}>
+            Cancel
+          </button>
+          <button className="btn-primary" onClick={onConfirm}>
+            <RotateCcw size={15} /> Reset to default
+          </button>
+        </div>
+      </div>
+    </div>
   )
 }
 
