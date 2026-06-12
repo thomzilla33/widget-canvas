@@ -244,6 +244,9 @@ export default function DashboardCanvas() {
                       <div className="truncate text-[11px] text-gray-400 dark:text-slate-500">{w.source}</div>
                     </div>
                   </div>
+                  <div className="rounded-md border border-gray-100 bg-gray-50/60 p-2 dark:border-white/5 dark:bg-white/[0.02]">
+                    <WidgetRender widget={w} />
+                  </div>
                   <div className="flex flex-wrap items-center gap-1.5">
                     <span className="cap-chip cap-chip-neutral">{w.skeleton}</span>
                     <span className={`cap-chip ${w.governed ? 'cap-chip-data' : 'cap-chip-tool'}`}>
