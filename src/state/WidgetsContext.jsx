@@ -13,8 +13,15 @@ export function WidgetsProvider({ children }) {
     setWidgets((prev) => [widget, ...prev])
   }
 
+  // Immutable patch by id.
+  function updateWidget(id, patch) {
+    setWidgets((prev) => prev.map((w) => (w.id === id ? { ...w, ...patch } : w)))
+  }
+
   return (
-    <WidgetsContext.Provider value={{ widgets, addWidget }}>{children}</WidgetsContext.Provider>
+    <WidgetsContext.Provider value={{ widgets, addWidget, updateWidget }}>
+      {children}
+    </WidgetsContext.Provider>
   )
 }
 

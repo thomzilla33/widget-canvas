@@ -121,6 +121,32 @@ export const skeletons = [
   { id: 'map', name: 'Map', icon: '🗺️', maxFields: 3, desc: 'Geographic distribution of records.' },
 ]
 
+// Schema drift (S111–S114) — keyed by widget id. Describes what changed in the
+// source schema and which of the widget's bindings need re-mapping.
+export const SCHEMA_DRIFT = {
+  'w-nps': {
+    source: 'Survey Data View',
+    changedOn: '2 days ago',
+    previous: [
+      { name: 'nps_score', status: 'unchanged' },
+      { name: 'survey_date', status: 'removed' },
+      { name: 'segment', status: 'removed' },
+    ],
+    current: [
+      { name: 'nps_score', status: 'unchanged' },
+      { name: 'response_date', status: 'new' },
+      { name: 'region', status: 'new' },
+    ],
+    newFields: ['nps_score', 'response_date', 'region'],
+    // bindings the widget used that are now broken
+    broken: [
+      { binding: 'Time axis', was: 'survey_date', suggest: 'response_date' },
+      { binding: 'Breakdown', was: 'segment', suggest: 'region' },
+    ],
+    ok: [{ binding: 'Value', was: 'nps_score' }],
+  },
+}
+
 // Step 1 — Intent. Each intent maps to the skeletons that can answer it.
 export const intents = [
   { id: 'single-metric', label: 'Show a single metric', desc: 'One headline number, e.g. total revenue.', icon: '📊', skeletons: ['kpi', 'gauge'] },

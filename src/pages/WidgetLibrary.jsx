@@ -3,13 +3,15 @@ import { useNavigate } from 'react-router-dom'
 import { Search } from 'lucide-react'
 import { PageHeader, HealthBadge, FreshnessBadge } from '../components/common/index.jsx'
 import { WidgetGlyph } from '../components/widgets/glyph.jsx'
+import RepinModal from '../components/widgets/RepinModal.jsx'
 import { useWidgets } from '../state/WidgetsContext.jsx'
 
 // S37, S38, S40–S47 — catalog + health signals
 export default function WidgetLibrary() {
   const navigate = useNavigate()
-  const { widgets } = useWidgets()
+  const { widgets, updateWidget } = useWidgets()
   const [cat, setCat] = useState('All')
+  const [repinWidget, setRepinWidget] = useState(null)
 
   const cats = ['All', ...Array.from(new Set(widgets.map((w) => w.skeleton)))]
   const shown = cat === 'All' ? widgets : widgets.filter((w) => w.skeleton === cat)
@@ -55,7 +57,7 @@ export default function WidgetLibrary() {
           {shown.map((w) => (
             <button
               key={w.id}
-              onClick={() => navigate('/widgets/new')}
+              onClick={() => (w.health === 'review' ? setRepinWidget(w) : navigate('/widgets/new'))}
               className="catalog-card min-h-[164px]"
             >
               <div className="absolute top-3 right-3">
@@ -80,8 +82,16 @@ export default function WidgetLibrary() {
               </div>
 
               <div className="mt-auto flex items-center justify-between gap-2 border-t border-gray-100 pt-2.5 dark:border-white/10">
-                <span className="text-[11px] text-gray-500 dark:text-slate-400">
-                  Used in {w.usedIn} dashboard{w.usedIn === 1 ? '' : 's'}
+                <span
+                  className={`text-[11px] ${
+                    w.health === 'review'
+                      ? 'font-semibold text-aims-stale'
+                      : 'text-gray-500 dark:text-slate-400'
+                  }`}
+                >
+                  {w.health === 'review'
+                    ? 'Re-pin needed →'
+                    : `Used in ${w.usedIn} dashboard${w.usedIn === 1 ? '' : 's'}`}
                 </span>
                 <FreshnessBadge status={w.freshness} label={w.freshness} />
               </div>
@@ -90,6 +100,14 @@ export default function WidgetLibrary() {
         </div>
         <p className="mt-4 text-xs text-gray-400 dark:text-slate-500">Screens hosted here: S37, S38, S40–S47</p>
       </div>
+
+      {repinWidget && (
+        <RepinModal
+          widget={repinWidget}
+          onClose={() => setRepinWidget(null)}
+          onComplete={() => updateWidget(repinWidget.id, { health: 'active' })}
+        />
+      )}
     </div>
   )
 }
