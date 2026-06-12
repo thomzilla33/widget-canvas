@@ -98,7 +98,7 @@ export default function DashboardList() {
             {shown.map((d) => (
               <button
                 key={d.id}
-                onClick={() => navigate(`/dashboard/${d.id}/canvas`)}
+                onClick={() => navigate(`/dashboard/${d.id}`)}
                 className="catalog-card min-h-[124px]"
               >
                 <div className="absolute top-3 right-3">

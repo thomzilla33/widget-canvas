@@ -23,9 +23,14 @@ import {
 } from 'lucide-react'
 import { PageHeader, GovernedBadge, FreshnessBadge, EmptyState } from '../components/common/index.jsx'
 import FeedbackPanel from '../components/ucp/FeedbackPanel.jsx'
+import DashboardZones from '../components/dashboard/DashboardZones.jsx'
 import { useWidgets } from '../state/WidgetsContext.jsx'
 import { useFeedback } from '../state/FeedbackContext.jsx'
+import { useDashboards } from '../state/DashboardsContext.jsx'
 import { entities } from '../data/mock.js'
+
+// Map an entity's type to the placement profile type used by dashboards.
+const PROFILE_OF = { Account: 'Company', Contact: 'Contact', Employee: 'Employee', Deal: 'Deal', Case: 'Case' }
 
 // Widget instances shown on this entity's profile (fixed = Admin-locked).
 const PROFILE = [
@@ -46,13 +51,23 @@ export default function UCPView() {
   const { entityId } = useParams()
   const navigate = useNavigate()
   const { widgets } = useWidgets()
+  const { dashboards } = useDashboards()
   const entity = entities.find((e) => e.id === entityId)
   const widgetById = (id) => widgets.find((w) => w.id === id)
+
+  // Dashboards placed on this profile (by type / specific entity) become tabs.
+  const profileType = PROFILE_OF[entity?.type] || 'Company'
+  const profileDashboards = dashboards.filter(
+    (d) => d.placement?.surface === 'profile' && d.placement.profileType === profileType && (d.placement.scope === 'all' || d.placement.entityId === entityId),
+  )
+  const [activeTab, setActiveTab] = useState('overview')
+  const activeDash = profileDashboards.find((d) => d.id === activeTab)
 
   // Brief initial load so widgets stream in with a skeleton instead of popping.
   const [loaded, setLoaded] = useState(false)
   useEffect(() => {
     setLoaded(false)
+    setActiveTab('overview')
     const t = setTimeout(() => setLoaded(true), 700)
     return () => clearTimeout(t)
   }, [entityId])
@@ -100,7 +115,25 @@ export default function UCPView() {
         description="Unified Contact Profile — every widget shows its freshness and data origin."
       />
 
+      {profileDashboards.length > 0 && (
+        <div className="border-b border-gray-200 bg-white px-6 dark:border-white/10 dark:bg-[#0f1629]">
+          <div className="flex gap-1 overflow-x-auto">
+            <TabBtn active={activeTab === 'overview'} onClick={() => setActiveTab('overview')}>Overview</TabBtn>
+            {profileDashboards.map((d) => (
+              <TabBtn key={d.id} active={activeTab === d.id} onClick={() => setActiveTab(d.id)}>
+                {d.name}
+              </TabBtn>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="flex-1 overflow-auto relative">
+        {activeTab !== 'overview' && activeDash ? (
+          <div className="mx-auto w-full max-w-[1800px] px-6 py-5 lg:px-8 2xl:px-12">
+            <DashboardZones dashboard={activeDash} />
+          </div>
+        ) : (
         <div className="mx-auto w-full max-w-[1800px] px-6 py-5 lg:px-8 2xl:px-12">
           {/* Toolbar: search (S05) + reset layout (S16) */}
           <div className="mb-4 flex items-center gap-2">
@@ -164,8 +197,10 @@ export default function UCPView() {
             </div>
           )}
         </div>
+        )}
 
-        {quickAction && (
+        {/* Overview-only panels (they act on the profile widgets, not hosted dashboards) */}
+        {activeTab === 'overview' && quickAction && (
           <QuickActionPanel
             action={quickAction.action}
             widgetName={quickAction.widgetName}
@@ -173,7 +208,7 @@ export default function UCPView() {
           />
         )}
 
-        {feedback && (
+        {activeTab === 'overview' && feedback && (
           <FeedbackPanel
             mode={feedback.mode}
             widget={feedback.widget}
@@ -182,7 +217,7 @@ export default function UCPView() {
           />
         )}
 
-        {resetOpen && <ResetModal onCancel={() => setResetOpen(false)} onConfirm={resetLayout} />}
+        {activeTab === 'overview' && resetOpen && <ResetModal onCancel={() => setResetOpen(false)} onConfirm={resetLayout} />}
       </div>
     </div>
   )
@@ -407,6 +442,22 @@ function UCPWidget({
         </>
       )}
     </div>
+  )
+}
+
+/* Profile tab (Overview + hosted dashboards) */
+function TabBtn({ active, onClick, children }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`shrink-0 whitespace-nowrap border-b-2 px-3 py-2.5 text-sm font-medium transition-colors ${
+        active
+          ? 'border-aims-blue text-aims-blue'
+          : 'border-transparent text-gray-500 hover:text-gray-800 dark:text-slate-400 dark:hover:text-slate-200'
+      }`}
+    >
+      {children}
+    </button>
   )
 }
 

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
-import { LayoutDashboard, Boxes, UserRound, Sun, Moon, Palette, Settings, LogOut } from 'lucide-react'
+import { LayoutDashboard, Boxes, UserRound, Sun, Moon, Palette, Settings, LogOut, Home, FileBarChart } from 'lucide-react'
 import { useTheme } from '../../state/ThemeContext.jsx'
 import { useNotifications } from '../../state/NotificationsContext.jsx'
 import NotificationsMenu from './NotificationsMenu.jsx'
@@ -8,7 +8,9 @@ import './shell.css'
 
 // Sidebar nav — Composable Dashboards surfaces, in the Agentic shell style.
 const adminNav = [
+  { to: '/home', label: 'Home', icon: Home },
   { to: '/dashboards', label: 'Dashboards', icon: LayoutDashboard },
+  { to: '/reports', label: 'Reports', icon: FileBarChart },
   { to: '/widgets', label: 'Widgets', icon: Boxes },
 ]
 const userNav = [{ to: '/ucp/acme-001', label: 'Unified Profile', icon: UserRound }]
