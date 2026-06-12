@@ -14,6 +14,18 @@
     @apply text-gray-900 antialiased dark:text-slate-200;
     font-family: 'Inter', system-ui, sans-serif;
   }
+
+  /* Elevation system — two levels, themed.
+     Light: layered ambient shadow (contact + soft spread).
+     Dark: top inner highlight ("lit from above") instead of muddy drops. */
+  :root {
+    --elev-1: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.06);
+    --elev-2: 0 2px 4px rgba(15, 23, 42, 0.04), 0 12px 28px -8px rgba(15, 23, 42, 0.16);
+  }
+  html.dark {
+    --elev-1: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    --elev-2: 0 12px 32px -10px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  }
 }
 
 @layer components {
@@ -86,7 +98,8 @@
 
   /* Layout */
   .card {
-    @apply bg-white rounded-xl border border-gray-200 shadow-sm dark:bg-[#131a2c] dark:border-white/10 dark:shadow-none;
+    @apply rounded-xl border border-gray-200 bg-white dark:border-white/10 dark:bg-[#131a2c];
+    box-shadow: var(--elev-1);
   }
   .input {
     @apply min-h-[2.25rem] w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-aims-blue focus:outline-none focus:ring-2 focus:ring-aims-blue/30 dark:border-white/15 dark:bg-white/5 dark:text-slate-100 dark:placeholder:text-slate-500;
@@ -99,13 +112,14 @@
 
   /* Catalog card — AIMS-OS integration-card style (hover lift + border accent) */
   .catalog-card {
-    @apply relative flex flex-col gap-2.5 rounded-xl border p-4 text-left transition-all;
+    @apply relative flex flex-col gap-2.5 rounded-xl border p-4 text-left transition-all duration-150;
     @apply bg-white border-gray-200 dark:bg-[#131a2c] dark:border-white/10;
+    box-shadow: var(--elev-1);
   }
   .catalog-card:hover {
     @apply border-aims-blue/40 dark:border-aims-blue/40;
     transform: translateY(-1px);
-    box-shadow: 0 8px 24px -10px rgba(0, 0, 0, 0.25);
+    box-shadow: var(--elev-2);
   }
 
   /* Logo square (connector/widget glyph) */
