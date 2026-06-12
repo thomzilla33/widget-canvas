@@ -1,14 +1,18 @@
 import { useState } from 'react'
-import { X, Building2, Trash2, Plus, Users } from 'lucide-react'
+import { X, Building2, Trash2, Plus, Users, RotateCcw } from 'lucide-react'
 import { SHARE_PEOPLE, SHARE_DEPARTMENTS, SHARE_ROLES } from '../../data/mock.js'
 
 // S105–S107 — share access modal (empty / people added / departments added)
 export default function ShareModal({ dashboard, onClose }) {
   const [tab, setTab] = useState('people')
   const [access, setAccess] = useState([]) // { key, kind, name, sub, initials, role }
+  const [restored, setRestored] = useState(new Set()) // offboarded users reactivated this session
 
   const source = tab === 'people' ? SHARE_PEOPLE : SHARE_DEPARTMENTS
   const available = source.filter((s) => !access.some((a) => a.key === `${tab}-${s.id}`))
+  // A deactivated (offboarded) user must be recovered before access can be granted.
+  const isActive = (s) => s.status !== 'deactivated' || restored.has(s.id)
+  const restore = (id) => setRestored((prev) => new Set(prev).add(id))
 
   function add(item) {
     setAccess((prev) => [
@@ -63,18 +67,33 @@ export default function ShareModal({ dashboard, onClose }) {
               {available.length === 0 ? (
                 <div className="text-xs text-gray-400 dark:text-slate-500">All {tab} added.</div>
               ) : (
-                available.map((s) => (
-                  <div key={s.id} className="flex items-center gap-3 rounded-lg border border-gray-200 p-2 dark:border-white/10">
-                    <Avatar item={s} kind={tab === 'people' ? 'person' : 'dept'} />
-                    <div className="min-w-0 flex-1">
-                      <div className="truncate text-sm font-medium text-gray-900 dark:text-slate-100">{s.name}</div>
-                      <div className="truncate text-[11px] text-gray-400 dark:text-slate-500">{s.sub}</div>
+                available.map((s) => {
+                  const active = isActive(s)
+                  return (
+                    <div
+                      key={s.id}
+                      className={`flex items-center gap-3 rounded-lg border border-gray-200 p-2 dark:border-white/10 ${active ? '' : 'opacity-70'}`}
+                    >
+                      <Avatar item={s} kind={tab === 'people' ? 'person' : 'dept'} />
+                      <div className="min-w-0 flex-1">
+                        <div className="truncate text-sm font-medium text-gray-900 dark:text-slate-100">{s.name}</div>
+                        <div className="truncate text-[11px] text-gray-400 dark:text-slate-500">{s.sub}</div>
+                      </div>
+                      {active ? (
+                        <button className="btn-secondary !py-1 !px-2.5 text-xs shrink-0" onClick={() => add(s)}>
+                          <Plus size={13} /> Add
+                        </button>
+                      ) : (
+                        <div className="flex shrink-0 items-center gap-1.5">
+                          <span className="cap-chip cap-chip-neutral">Deactivated</span>
+                          <button className="btn-secondary !py-1 !px-2.5 text-xs" onClick={() => restore(s.id)}>
+                            <RotateCcw size={13} /> Restore
+                          </button>
+                        </div>
+                      )}
                     </div>
-                    <button className="btn-secondary !py-1 !px-2.5 text-xs" onClick={() => add(s)}>
-                      <Plus size={13} /> Add
-                    </button>
-                  </div>
-                ))
+                  )
+                })
               )}
             </div>
           </div>

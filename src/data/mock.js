@@ -229,17 +229,27 @@ export const feedbackFlags = [
   },
 ]
 
-// Sharing & access (S105–S108)
+// Sharing & access (S105–S108). status: 'active' | 'deactivated' (offboarded).
+// Realistic roster for a ~140-person org; deactivated users drive the recovery flow.
 export const SHARE_PEOPLE = [
-  { id: 'u-1', name: 'Dana Lee', sub: 'Support Agent', initials: 'DL' },
-  { id: 'u-2', name: 'Sam Ortiz', sub: 'Sales Agent', initials: 'SO' },
-  { id: 'u-3', name: 'Priya Nair', sub: 'Manager', initials: 'PN' },
-  { id: 'u-4', name: 'Marco Diaz', sub: 'Sales Agent', initials: 'MD' },
+  { id: 'u-1', name: 'Dana Lee', sub: 'Support Agent · Support', initials: 'DL', status: 'active' },
+  { id: 'u-2', name: 'Sam Ortiz', sub: 'Sales Agent · Sales', initials: 'SO', status: 'active' },
+  { id: 'u-3', name: 'Priya Nair', sub: 'Manager · Sales', initials: 'PN', status: 'active' },
+  { id: 'u-4', name: 'Marco Diaz', sub: 'Sales Agent · Sales', initials: 'MD', status: 'active' },
+  { id: 'u-5', name: 'Elena Petrova', sub: 'Sales Agent · Sales', initials: 'EP', status: 'active' },
+  { id: 'u-6', name: 'James Okonkwo', sub: 'Support Agent · Support', initials: 'JO', status: 'active' },
+  { id: 'u-7', name: 'Yuki Tanaka', sub: 'CS Manager · Customer Success', initials: 'YT', status: 'active' },
+  { id: 'u-8', name: 'Liam Murphy', sub: 'Account Exec · Sales', initials: 'LM', status: 'active' },
+  // Offboarded / deactivated — must be recovered before re-granting access.
+  { id: 'u-9', name: 'Robert Chen', sub: 'Former Sales Lead · deactivated 12 days ago', initials: 'RC', status: 'deactivated' },
+  { id: 'u-10', name: 'Aisha Khan', sub: 'Former Support Agent · deactivated 3 days ago', initials: 'AK', status: 'deactivated' },
 ]
 export const SHARE_DEPARTMENTS = [
   { id: 'dep-sales', name: 'Sales', sub: '42 people' },
   { id: 'dep-support', name: 'Support', sub: '18 people' },
   { id: 'dep-cs', name: 'Customer Success', sub: '27 people' },
+  { id: 'dep-ops', name: 'Revenue Operations', sub: '9 people' },
+  { id: 'dep-exec', name: 'Leadership', sub: '6 people' },
 ]
 export const SHARE_ROLES = ['Viewer', 'Editor']
 

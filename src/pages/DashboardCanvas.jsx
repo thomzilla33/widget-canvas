@@ -60,6 +60,11 @@ export default function DashboardCanvas() {
     .find((p) => p.pid === selectedPid)
   const widgetById = (wid) => widgets.find((w) => w.id === wid)
 
+  // Dashboard-level locking — lock every placed widget so end users can't change them.
+  const allPlacements = Object.values(placements).flat()
+  const lockedCount = allPlacements.filter((p) => p.fixed).length
+  const allLocked = allPlacements.length > 0 && lockedCount === allPlacements.length
+
   function placeWidget(zone, widget) {
     pidSeq += 1
     const placement = {
@@ -79,6 +84,14 @@ export default function DashboardCanvas() {
       for (const z of Object.keys(prev)) {
         next[z] = prev[z].map((p) => (p.pid === pid ? { ...p, ...patch } : p))
       }
+      return next
+    })
+  }
+
+  function setAllFixed(fixed) {
+    setPlacements((prev) => {
+      const next = {}
+      for (const z of Object.keys(prev)) next[z] = prev[z].map((p) => ({ ...p, fixed }))
       return next
     })
   }
@@ -129,12 +142,29 @@ export default function DashboardCanvas() {
         title={dashboard?.name || 'Dashboard canvas'}
         description={
           dashboard
-            ? `${dashboard.entity} · ${dashboard.audience} — drop widgets into zones; permissions are set per widget here.`
+            ? `${dashboard.entity} · ${dashboard.audience}${allPlacements.length ? ` · ${lockedCount}/${allPlacements.length} widgets locked` : ' — drop widgets into zones'}`
             : 'Drop widgets into zones; permissions are set per widget here.'
         }
         actions={
           <>
             {dashboard && <Badge variant={dashboard.status} />}
+            {allPlacements.length > 0 && (
+              <button
+                className="btn-secondary"
+                onClick={() => setAllFixed(!allLocked)}
+                title={allLocked ? 'Unlock all widgets' : 'Lock every widget so end users cannot move or hide them'}
+              >
+                {allLocked ? (
+                  <>
+                    <Unlock size={15} /> Unlock all
+                  </>
+                ) : (
+                  <>
+                    <Lock size={15} /> Lock all
+                  </>
+                )}
+              </button>
+            )}
             <button className="btn-secondary" onClick={() => setShareOpen(true)}>
               Share
             </button>
