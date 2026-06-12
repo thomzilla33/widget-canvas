@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom'
 import { Plus, X, Lock, Unlock, Trash2, Search } from 'lucide-react'
 import { PageHeader, GovernedBadge, FreshnessBadge, Badge } from '../components/common/index.jsx'
 import { WidgetGlyph } from '../components/widgets/glyph.jsx'
+import WidgetRender from '../components/widgets/WidgetRender.jsx'
 import PublishModal from '../components/dashboard/PublishModal.jsx'
 import ShareModal from '../components/dashboard/ShareModal.jsx'
 import { useWidgets } from '../state/WidgetsContext.jsx'
@@ -382,7 +383,13 @@ function Zone({
                     <Unlock size={12} className="text-gray-300 shrink-0" />
                   )}
                 </div>
-                <div className="mt-1 text-[10px] text-gray-400 dark:text-slate-500">{p.audience}</div>
+                <div className="mt-2">
+                  <WidgetRender widget={w} />
+                </div>
+                <div className="mt-2 flex items-center gap-1.5 border-t border-gray-100 pt-1.5 dark:border-white/5">
+                  {w?.freshness && <FreshnessBadge status={w.freshness} label={w.freshness} />}
+                  <span className="ml-auto truncate text-[10px] text-gray-400 dark:text-slate-500">{p.audience}</span>
+                </div>
               </button>
             )
           })}

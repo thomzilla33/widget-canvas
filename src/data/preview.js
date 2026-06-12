@@ -50,6 +50,45 @@ export function previewData(metric) {
   return { ...SAMPLE, label: metric?.name || 'Value' }
 }
 
+// Deterministic per-widget variation so a board of widgets looks realistic
+// (distinct KPI values, gauge levels, and chart shapes) instead of identical.
+const KPI_VARIANTS = [
+  { value: '$1.24M', delta: '+8.2%', deltaDir: 'up' },
+  { value: '94.2%', delta: '+1.1%', deltaDir: 'up' },
+  { value: '1,284', delta: '-3.0%', deltaDir: 'down' },
+  { value: '$486K', delta: '+12.4%', deltaDir: 'up' },
+  { value: '28 days', delta: '-2 days', deltaDir: 'up' },
+  { value: '4.6 / 5', delta: '+0.3', deltaDir: 'up' },
+  { value: '$92.4K', delta: '-5.1%', deltaDir: 'down' },
+]
+const GAUGE_VARIANTS = [68, 82, 45, 91, 73, 57, 88]
+
+function hashId(s = '') {
+  let h = 0
+  for (let i = 0; i < s.length; i += 1) h = (h * 31 + s.charCodeAt(i)) >>> 0
+  return h
+}
+
+export function widgetSample(widget) {
+  const h = hashId(widget?.id || widget?.name || '')
+  const factor = 0.65 + (h % 8) * 0.11
+  const series = SAMPLE.series.map((d, i) => ({ x: d.x, y: Math.max(8, Math.round(d.y * factor + ((h >> i) % 22) - 10)) }))
+  const breakdown = SAMPLE.breakdown.map((b, i) => ({ ...b, value: Math.max(6, Math.round(b.value * factor + ((h >> (i + 1)) % 16))) }))
+  const geo = SAMPLE.geo.map((g, i) => ({ ...g, value: Math.max(5, Math.round(g.value * factor + ((h >> (i + 3)) % 18))) }))
+  const cells = SAMPLE.matrix.cells.map((row, ri) =>
+    row.map((v, ci) => Math.min(100, Math.max(10, Math.round(v * factor + ((h >> (ri + ci)) % 20))))),
+  )
+  return {
+    ...SAMPLE,
+    series,
+    breakdown,
+    geo,
+    matrix: { ...SAMPLE.matrix, cells },
+    kpi: KPI_VARIANTS[h % KPI_VARIANTS.length],
+    gauge: { value: GAUGE_VARIANTS[h % GAUGE_VARIANTS.length], label: 'of target' },
+  }
+}
+
 // Soft fit of a widget type to a metric kind — drives the gallery's recommend/grey.
 const GOOD = {
   timeseries: ['line', 'bar', 'table', 'kpi', 'carousel', 'summary'],

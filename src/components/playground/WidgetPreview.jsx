@@ -24,9 +24,9 @@ import { useTheme } from '../../state/ThemeContext.jsx'
 import { previewData } from '../../data/preview.js'
 import { TYPE_LABEL } from '../../data/mock.js'
 
-const SERIES = ['#2563EB', '#06B6D4', '#A78BFA', '#10B981', '#F59E0B', '#EC4899']
+export const SERIES = ['#2563EB', '#06B6D4', '#A78BFA', '#10B981', '#F59E0B', '#EC4899']
 
-function useChartTheme() {
+export function useChartTheme() {
   const { theme } = useTheme()
   const dark = theme === 'dark'
   return {
