@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { Plus, X, Lock, Unlock, Trash2, Search } from 'lucide-react'
+import { Plus, X, Lock, Unlock, Trash2 } from 'lucide-react'
 import { PageHeader, GovernedBadge, FreshnessBadge, Badge } from '../components/common/index.jsx'
-import { WidgetGlyph } from '../components/widgets/glyph.jsx'
 import WidgetRender from '../components/widgets/WidgetRender.jsx'
+import WidgetLibraryModal from '../components/widgets/WidgetLibraryModal.jsx'
 import PublishModal from '../components/dashboard/PublishModal.jsx'
 import ShareModal from '../components/dashboard/ShareModal.jsx'
 import { useWidgets } from '../state/WidgetsContext.jsx'
@@ -63,7 +63,6 @@ export default function DashboardCanvas() {
   const [publishOpen, setPublishOpen] = useState(false)
   const [shareOpen, setShareOpen] = useState(false)
   const [dragOverZone, setDragOverZone] = useState(null)
-  const [drawerSearch, setDrawerSearch] = useState('')
 
   const selected = Object.values(placements)
     .flat()
@@ -75,13 +74,13 @@ export default function DashboardCanvas() {
   const lockedCount = allPlacements.filter((p) => p.fixed).length
   const allLocked = allPlacements.length > 0 && lockedCount === allPlacements.length
 
-  function placeWidget(zone, widget) {
+  function placeWidget(zone, widget, size = 'md') {
     pidSeq += 1
     const placement = {
       pid: `p${pidSeq}`,
       widgetId: widget.id,
       fixed: false,
-      size: 'md',
+      size,
       audience: 'All audiences',
       quickActions: [],
     }
@@ -220,54 +219,13 @@ export default function DashboardCanvas() {
           <p className="mt-4 text-xs text-gray-400 dark:text-slate-500">Screens hosted here: S84–S94</p>
         </div>
 
-        {/* Library drawer (S85) */}
+        {/* Library browser (S85) — marketplace-style picker over the widget library */}
         {drawerZone && (
-          <SidePanel title={`Add widget to ${labelFor(drawerZone)}`} onClose={() => setDrawerZone(null)}>
-            <div className="relative mb-3">
-              <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500" />
-              <input
-                className="input h-9 pl-8"
-                placeholder="Search widgets…"
-                value={drawerSearch}
-                onChange={(e) => setDrawerSearch(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              {widgets
-                .filter((w) => !drawerSearch || w.name.toLowerCase().includes(drawerSearch.toLowerCase()))
-                .map((w) => (
-                <button
-                  key={w.id}
-                  draggable
-                  onDragStart={(e) =>
-                    e.dataTransfer.setData('text/plain', JSON.stringify({ type: 'new', widgetId: w.id }))
-                  }
-                  onClick={() => placeWidget(drawerZone, w)}
-                  className="catalog-card w-full !p-3 cursor-grab active:cursor-grabbing"
-                >
-                  <div className="flex items-center gap-2.5">
-                    <WidgetGlyph skeleton={w.skeleton} sm />
-                    <div className="min-w-0">
-                      <div className="truncate text-sm font-semibold text-gray-900 dark:text-slate-100">
-                        {w.name}
-                      </div>
-                      <div className="truncate text-[11px] text-gray-400 dark:text-slate-500">{w.source}</div>
-                    </div>
-                  </div>
-                  <div className="rounded-md border border-gray-100 bg-gray-50/60 p-2 dark:border-white/5 dark:bg-white/[0.02]">
-                    <WidgetRender widget={w} />
-                  </div>
-                  <div className="flex flex-wrap items-center gap-1.5">
-                    <span className="cap-chip cap-chip-neutral">{w.skeleton}</span>
-                    <span className={`cap-chip ${w.governed ? 'cap-chip-data' : 'cap-chip-tool'}`}>
-                      {w.governed ? 'Governed' : 'Ungoverned'}
-                    </span>
-                    <FreshnessBadge status={w.freshness} label={w.freshness} />
-                  </div>
-                </button>
-              ))}
-            </div>
-          </SidePanel>
+          <WidgetLibraryModal
+            zoneLabel={labelFor(drawerZone)}
+            onAdd={(w, size) => placeWidget(drawerZone, w, size)}
+            onClose={() => setDrawerZone(null)}
+          />
         )}
 
         {/* Config panel (S87–S92) */}
