@@ -60,14 +60,18 @@ export default function UCPView() {
   const profileDashboards = dashboards.filter(
     (d) => d.placement?.surface === 'profile' && d.placement.profileType === profileType && (d.placement.scope === 'all' || d.placement.entityId === entityId),
   )
-  const [activeTab, setActiveTab] = useState('overview')
-  const activeDash = profileDashboards.find((d) => d.id === activeTab)
+  // Profile tabs are the placement tab names (Overview, Activity…), not dashboard names.
+  const profileTabs = ['Overview', ...new Set(profileDashboards.map((d) => d.placement.tab || 'Overview'))].filter(
+    (t, i, a) => a.indexOf(t) === i,
+  )
+  const [activeTab, setActiveTab] = useState('Overview')
+  const tabDashboards = profileDashboards.filter((d) => (d.placement.tab || 'Overview') === activeTab)
 
   // Brief initial load so widgets stream in with a skeleton instead of popping.
   const [loaded, setLoaded] = useState(false)
   useEffect(() => {
     setLoaded(false)
-    setActiveTab('overview')
+    setActiveTab('Overview')
     const t = setTimeout(() => setLoaded(true), 700)
     return () => clearTimeout(t)
   }, [entityId])
@@ -118,10 +122,9 @@ export default function UCPView() {
       {profileDashboards.length > 0 && (
         <div className="border-b border-gray-200 bg-white px-6 dark:border-white/10 dark:bg-[#0f1629]">
           <div className="flex gap-1 overflow-x-auto">
-            <TabBtn active={activeTab === 'overview'} onClick={() => setActiveTab('overview')}>Overview</TabBtn>
-            {profileDashboards.map((d) => (
-              <TabBtn key={d.id} active={activeTab === d.id} onClick={() => setActiveTab(d.id)}>
-                {d.name}
+            {profileTabs.map((t) => (
+              <TabBtn key={t} active={activeTab === t} onClick={() => setActiveTab(t)}>
+                {t}
               </TabBtn>
             ))}
           </div>
@@ -129,9 +132,16 @@ export default function UCPView() {
       )}
 
       <div className="flex-1 overflow-auto relative">
-        {activeTab !== 'overview' && activeDash ? (
-          <div className="mx-auto w-full max-w-[1800px] px-6 py-5 lg:px-8 2xl:px-12">
-            <DashboardZones dashboard={activeDash} />
+        {activeTab !== 'Overview' ? (
+          <div className="mx-auto w-full max-w-[1800px] space-y-6 px-6 py-5 lg:px-8 2xl:px-12">
+            {tabDashboards.map((d) => (
+              <section key={d.id}>
+                {tabDashboards.length > 1 && (
+                  <div className="mb-2 text-sm font-semibold text-gray-900 dark:text-slate-100">{d.name}</div>
+                )}
+                <DashboardZones dashboard={d} />
+              </section>
+            ))}
           </div>
         ) : (
         <div className="mx-auto w-full max-w-[1800px] px-6 py-5 lg:px-8 2xl:px-12">
@@ -200,7 +210,7 @@ export default function UCPView() {
         )}
 
         {/* Overview-only panels (they act on the profile widgets, not hosted dashboards) */}
-        {activeTab === 'overview' && quickAction && (
+        {activeTab === 'Overview' && quickAction && (
           <QuickActionPanel
             action={quickAction.action}
             widgetName={quickAction.widgetName}
@@ -208,7 +218,7 @@ export default function UCPView() {
           />
         )}
 
-        {activeTab === 'overview' && feedback && (
+        {activeTab === 'Overview' && feedback && (
           <FeedbackPanel
             mode={feedback.mode}
             widget={feedback.widget}
@@ -217,7 +227,7 @@ export default function UCPView() {
           />
         )}
 
-        {activeTab === 'overview' && resetOpen && <ResetModal onCancel={() => setResetOpen(false)} onConfirm={resetLayout} />}
+        {activeTab === 'Overview' && resetOpen && <ResetModal onCancel={() => setResetOpen(false)} onConfirm={resetLayout} />}
       </div>
     </div>
   )
