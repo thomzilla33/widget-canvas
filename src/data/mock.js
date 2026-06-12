@@ -121,6 +121,23 @@ export const skeletons = [
   { id: 'map', name: 'Map', icon: '🗺️', maxFields: 3, desc: 'Geographic distribution of records.' },
 ]
 
+// Widget Marketplace — browseable pre-built widgets. `id` is the templateId
+// used for install dedup; on install a real catalog widget is derived from these.
+export const MARKETPLACE_CATEGORIES = ['Sales', 'Support', 'Finance', 'Product', 'CX']
+export const MARKETPLACE_WIDGETS = [
+  { id: 'mw-arr', name: 'ARR Snapshot', category: 'Finance', maker: 'AIMS', skeleton: 'KPI', governed: true, source: 'Finance Data View', freshness: 'live', description: 'Annual recurring revenue with month-over-month delta, sourced from the governed Finance view.', stats: { installs: 1240, fields: 3 }, featured: true },
+  { id: 'mw-pipeline-velocity', name: 'Pipeline Velocity', category: 'Sales', maker: 'AIMS', skeleton: 'Chart', governed: true, source: 'CRM Data View', freshness: 'fresh', description: 'Deal flow speed across stages so reps see where momentum stalls.', stats: { installs: 980, fields: 5 } },
+  { id: 'mw-win-rate', name: 'Win Rate by Rep', category: 'Sales', maker: 'AIMS', skeleton: 'Table', governed: true, source: 'CRM Data View', freshness: 'fresh', description: 'Closed-won vs closed-lost ratios broken down by sales rep.', stats: { installs: 760, fields: 6 } },
+  { id: 'mw-sla-breach', name: 'SLA Breach Risk', category: 'Support', maker: 'AIMS', skeleton: 'Gauge', governed: true, source: 'Support Data View', freshness: 'live', description: 'Live gauge of tickets approaching their SLA threshold.', stats: { installs: 540, fields: 2 } },
+  { id: 'mw-ticket-queue', name: 'Open Ticket Queue', category: 'Support', maker: 'Community', skeleton: 'List', governed: false, source: 'Computed in Widget Builder', freshness: 'aging', description: 'Chronological list of unresolved tickets with priority flags.', stats: { installs: 310, fields: 6 } },
+  { id: 'mw-csat-trend', name: 'CSAT Trend', category: 'CX', maker: 'AIMS', skeleton: 'Chart', governed: true, source: 'Survey Data View', freshness: 'fresh', description: 'Customer satisfaction trend with a rolling 30-day average.', stats: { installs: 690, fields: 4 } },
+  { id: 'mw-nps-map', name: 'NPS by Region', category: 'CX', maker: 'Community', skeleton: 'Map', governed: false, source: 'Survey Data View', freshness: 'stale', description: 'Geographic distribution of net promoter score across regions.', stats: { installs: 180, fields: 3 } },
+  { id: 'mw-feature-adoption', name: 'Feature Adoption', category: 'Product', maker: 'AIMS', skeleton: 'Chart', governed: true, source: 'Product Data View', freshness: 'fresh', description: 'Adoption curve per feature so PMs spot what is landing.', stats: { installs: 820, fields: 5 } },
+  { id: 'mw-activation', name: 'Activation Funnel', category: 'Product', maker: 'AIMS', skeleton: 'Timeline', governed: true, source: 'Product Data View', freshness: 'live', description: 'Step-by-step activation funnel from signup to first value.', stats: { installs: 450, fields: 4 } },
+  { id: 'mw-burn', name: 'Cash Burn', category: 'Finance', maker: 'Community', skeleton: 'KPI', governed: false, source: 'Computed in Widget Builder', freshness: 'aging', description: 'Monthly net burn with a runway estimate.', stats: { installs: 220, fields: 3 }, featured: true },
+  { id: 'mw-ai-exec', name: 'AI Exec Brief', category: 'Finance', maker: 'AIMS', skeleton: 'AI Summary', governed: true, source: 'Finance Data View', freshness: 'live', description: 'Pre-computed narrative summary of the quarter for leadership.', stats: { installs: 410, fields: 2 } },
+]
+
 // Feedback loop (S22–S27 user · S121–S123 admin)
 export const FLAG_REASONS = [
   'Wrong number',

@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Search, Flag } from 'lucide-react'
+import { Search, Flag, Store } from 'lucide-react'
 import { PageHeader, HealthBadge, FreshnessBadge } from '../components/common/index.jsx'
 import { WidgetGlyph } from '../components/widgets/glyph.jsx'
 import RepinModal from '../components/widgets/RepinModal.jsx'
 import FlagDetailModal from '../components/widgets/FlagDetailModal.jsx'
+import WidgetMarketplace from '../components/widgets/WidgetMarketplace.jsx'
 import { useWidgets } from '../state/WidgetsContext.jsx'
 import { useFeedback } from '../state/FeedbackContext.jsx'
 import { entities } from '../data/mock.js'
@@ -18,6 +19,7 @@ export default function WidgetLibrary() {
   const [search, setSearch] = useState('')
   const [repinWidget, setRepinWidget] = useState(null)
   const [detailFlag, setDetailFlag] = useState(null)
+  const [marketplace, setMarketplace] = useState(false)
 
   const cats = ['All', ...Array.from(new Set(widgets.map((w) => w.skeleton)))]
   const shown = widgets.filter(
@@ -36,9 +38,14 @@ export default function WidgetLibrary() {
         title="Widget Library"
         description={`${widgets.length} widgets · ${governedCount} governed`}
         actions={
-          <button className="btn-primary" onClick={() => navigate('/widgets/new')}>
-            + New widget
-          </button>
+          <>
+            <button className="btn-secondary" onClick={() => setMarketplace(true)}>
+              <Store size={15} /> Browse marketplace
+            </button>
+            <button className="btn-primary" onClick={() => navigate('/widgets/new')}>
+              + New widget
+            </button>
+          </>
         }
       />
 
@@ -172,6 +179,8 @@ export default function WidgetLibrary() {
           onResolve={() => resolveFlag(detailFlag.id)}
         />
       )}
+
+      {marketplace && <WidgetMarketplace onClose={() => setMarketplace(false)} />}
     </div>
   )
 }

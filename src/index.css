@@ -97,7 +97,7 @@
     @apply inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[10px] font-bold leading-none;
   }
   .cap-chip-data {
-    @apply border-green-500/25 bg-green-500/10 text-aims-governed;
+    @apply border-green-500/25 bg-green-500/10 text-aims-governed dark:text-green-400;
   }
   .cap-chip-tool {
     @apply border-purple-400/30 bg-purple-500/10 text-purple-600 dark:text-purple-300;
