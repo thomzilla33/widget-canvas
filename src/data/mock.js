@@ -1,9 +1,20 @@
 // All mock data for the prototype: entities, widgets, dashboards, skeletons, chart data.
 
 export const entities = [
+  // Companies / Accounts
   { id: 'acme-001', name: 'Acme Corporation', type: 'Account', owner: 'Sales', health: 'active' },
   { id: 'globex-002', name: 'Globex Inc.', type: 'Account', owner: 'Sales', health: 'inactive' },
   { id: 'initech-003', name: 'Initech LLC', type: 'Account', owner: 'Support', health: 'active' },
+  // Contacts (UCP)
+  { id: 'c-dana', name: 'Dana Lee', type: 'Contact', owner: 'Sales', health: 'active' },
+  { id: 'c-sam', name: 'Sam Ortiz', type: 'Contact', owner: 'Support', health: 'active' },
+  // Employees (UEP)
+  { id: 'e-maria', name: 'María González', type: 'Employee', owner: 'People Ops', health: 'active' },
+  { id: 'e-tom', name: 'Tom Becker', type: 'Employee', owner: 'People Ops', health: 'active' },
+  // Deals
+  { id: 'deal-acme-q3', name: 'Acme Renewal — Q3', type: 'Deal', owner: 'Sales', health: 'active' },
+  // Cases
+  { id: 'case-4821', name: 'Case #4821 — Outage', type: 'Case', owner: 'Support', health: 'active' },
 ]
 
 export const widgets = [
@@ -59,6 +70,7 @@ export const dashboards = [
     status: 'published',
     widgets: 8,
     updated: '2 days ago',
+    placement: { surface: 'profile', profileType: 'Company', scope: 'all', entityId: null, entityName: null, tab: 'Overview' },
   },
   {
     id: 'd-support-acct',
@@ -69,22 +81,58 @@ export const dashboards = [
     status: 'draft',
     widgets: 5,
     updated: '5 hours ago',
+    placement: { surface: 'profile', profileType: 'Company', scope: 'entity', entityId: 'acme-001', entityName: 'Acme Corporation', tab: 'Activity' },
   },
   {
     id: 'd-mgr-overview',
     template: 't-exec',
     name: 'Manager Overview',
-    entity: 'Account',
+    entity: 'Report',
     audience: 'Manager',
     status: 'pending',
     widgets: 12,
     updated: '1 week ago',
+    placement: { surface: 'report', collection: 'Executive' },
   },
 ]
 
 // New-dashboard flow (S80–S82)
 export const entityTypes = ['Account', 'Contact', 'Deal', 'Case']
 export const audiences = ['Sales Agent', 'Support Agent', 'Manager', 'All audiences']
+
+// ── Dashboard placement (where a new dashboard lives) ──
+// surface: 'profile' (nested in an entity profile) | 'report' | 'home'
+export const PLACEMENT_SURFACES = [
+  { id: 'profile', label: 'Unified profile', desc: 'Nest inside a Company, Contact, or Employee profile.', iconName: 'UserSquare' },
+  { id: 'report', label: 'Standalone report', desc: 'Lives in Reports — not tied to a profile.', iconName: 'FileBarChart' },
+  { id: 'home', label: 'Workspace home', desc: 'A personal or team landing dashboard.', iconName: 'Home' },
+]
+
+// Profile types you can nest a dashboard into, each with its own default tabs.
+export const PROFILE_TYPES = [
+  { id: 'Company', label: 'Company / Account', entityType: 'Account', tabs: ['Overview', 'Financials', 'Activity', 'Relationships'] },
+  { id: 'Contact', label: 'Contact (UCP)', entityType: 'Contact', tabs: ['Overview', 'Activity', 'Opportunities', 'Notes'] },
+  { id: 'Employee', label: 'Employee (UEP)', entityType: 'Employee', tabs: ['Overview', 'Performance', 'Org chart', 'Compensation'] },
+  { id: 'Deal', label: 'Deal', entityType: 'Deal', tabs: ['Overview', 'Timeline', 'Stakeholders'] },
+  { id: 'Case', label: 'Case', entityType: 'Case', tabs: ['Overview', 'Activity', 'Resolution'] },
+]
+
+export const REPORT_COLLECTIONS = ['Sales Reports', 'Finance Reports', 'Support Reports', 'Executive']
+export const HOME_SCOPES = [
+  { id: 'personal', label: 'Just me' },
+  { id: 'team', label: 'My team' },
+]
+
+// Human-readable destination for a dashboard's placement (used in the list).
+export function placementLabel(p) {
+  if (!p) return 'Unscoped'
+  if (p.surface === 'report') return `Report · ${p.collection || 'Reports'}`
+  if (p.surface === 'home') return `Home · ${p.homeScope === 'team' ? 'My team' : p.homeScope === 'personal' ? 'Just me' : 'Workspace'}`
+  const pt = PROFILE_TYPES.find((t) => t.id === p.profileType)
+  const ptLabel = pt?.label || p.profileType || 'Profile'
+  const where = p.scope === 'entity' ? p.entityName || 'a specific profile' : `All ${ptLabel} profiles`
+  return `${ptLabel} · ${where} · ${p.tab || 'Overview'}`
+}
 export const dashboardTemplates = [
   { id: 't-acct360', name: 'Account 360', desc: 'KPIs, pipeline, and recent activity.', entity: 'Account' },
   { id: 't-support', name: 'Support Health', desc: 'Open tickets, SLA, and CSAT.', entity: 'Account' },

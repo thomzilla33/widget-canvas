@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { LayoutDashboard, Search } from 'lucide-react'
+import { LayoutDashboard, Search, MapPin } from 'lucide-react'
 import { PageHeader, Badge } from '../components/common/index.jsx'
 import { useDashboards } from '../state/DashboardsContext.jsx'
+import { placementLabel } from '../data/mock.js'
 
 const STATUS_FILTERS = ['All', 'Published', 'Draft', 'Pending']
 
@@ -83,14 +84,15 @@ export default function DashboardList() {
                     <div className="truncate text-sm font-semibold text-gray-900 dark:text-slate-100">
                       {d.name}
                     </div>
-                    <div className="truncate text-[11px] text-gray-400 dark:text-slate-500">
-                      {d.entity} · {d.audience}
+                    <div className="flex items-center gap-1 text-[11px] text-gray-400 dark:text-slate-500">
+                      <MapPin size={11} className="shrink-0" />
+                      <span className="truncate">{placementLabel(d.placement)}</span>
                     </div>
                   </div>
                 </div>
 
                 <div className="mt-auto flex items-center justify-between gap-2 border-t border-gray-100 pt-2.5 dark:border-white/10">
-                  <span className="text-[11px] text-gray-500 dark:text-slate-400">{d.widgets} widgets</span>
+                  <span className="text-[11px] text-gray-500 dark:text-slate-400">{d.widgets} widgets · {d.audience}</span>
                   <span className="text-[11px] text-gray-400 dark:text-slate-500">{d.updated}</span>
                 </div>
               </button>
