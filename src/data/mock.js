@@ -121,6 +121,39 @@ export const skeletons = [
   { id: 'map', name: 'Map', icon: '🗺️', maxFields: 3, desc: 'Geographic distribution of records.' },
 ]
 
+// Feedback loop (S22–S27 user · S121–S123 admin)
+export const FLAG_REASONS = [
+  'Wrong number',
+  'Stale / outdated',
+  'Wrong records shown',
+  'Missing data',
+  'Other',
+]
+export const CANNED_ANSWER =
+  'This widget reads from its governed data source and shows the latest synced value. If a figure looks off it may be awaiting the next sync — you can flag it so the data owner reviews it.'
+export const feedbackFlags = [
+  {
+    id: 'fl-1',
+    widgetId: 'w-nps',
+    entityId: 'initech-003',
+    reason: 'Stale / outdated',
+    details: "NPS hasn't moved in weeks — looks frozen.",
+    reporter: 'Dana Lee (Support Agent)',
+    createdAt: '3 hours ago',
+    status: 'open',
+  },
+  {
+    id: 'fl-2',
+    widgetId: 'w-tickets',
+    entityId: 'acme-001',
+    reason: 'Wrong records shown',
+    details: 'Showing tickets that belong to a different account.',
+    reporter: 'Sam Ortiz (Sales Agent)',
+    createdAt: '1 day ago',
+    status: 'open',
+  },
+]
+
 // Schema drift (S111–S114) — keyed by widget id. Describes what changed in the
 // source schema and which of the widget's bindings need re-mapping.
 export const SCHEMA_DRIFT = {

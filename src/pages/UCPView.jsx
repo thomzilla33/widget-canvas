@@ -12,9 +12,15 @@ import {
   RotateCw,
   Check,
   X,
+  Flag,
+  ThumbsUp,
+  ThumbsDown,
+  MessageCircle,
 } from 'lucide-react'
 import { PageHeader, GovernedBadge, FreshnessBadge, EmptyState } from '../components/common/index.jsx'
+import FeedbackPanel from '../components/ucp/FeedbackPanel.jsx'
 import { useWidgets } from '../state/WidgetsContext.jsx'
+import { useFeedback } from '../state/FeedbackContext.jsx'
 import { entities } from '../data/mock.js'
 
 // Widget instances shown on this entity's profile (fixed = Admin-locked).
@@ -39,6 +45,7 @@ export default function UCPView() {
 
   const [collapsed, setCollapsed] = useState({})
   const [quickAction, setQuickAction] = useState(null) // { action, widgetName }
+  const [feedback, setFeedback] = useState(null) // { mode, widget }
 
   return (
     <div className="h-full flex flex-col">
@@ -61,7 +68,14 @@ export default function UCPView() {
                 onToggleCollapse={() =>
                   setCollapsed((c) => ({ ...c, [inst.iid]: !c[inst.iid] }))
                 }
-                onQuickAction={(action, widgetName) => setQuickAction({ action, widgetName })}
+                onQuickAction={(action, widgetName) => {
+                  setFeedback(null)
+                  setQuickAction({ action, widgetName })
+                }}
+                onFeedback={(mode, widget) => {
+                  setQuickAction(null)
+                  setFeedback({ mode, widget })
+                }}
               />
             ))}
           </div>
@@ -72,6 +86,15 @@ export default function UCPView() {
             action={quickAction.action}
             widgetName={quickAction.widgetName}
             onClose={() => setQuickAction(null)}
+          />
+        )}
+
+        {feedback && (
+          <FeedbackPanel
+            mode={feedback.mode}
+            widget={feedback.widget}
+            entityId={entityId}
+            onClose={() => setFeedback(null)}
           />
         )}
       </div>
@@ -118,8 +141,24 @@ function AiSummary() {
 }
 
 /* ── A single widget with trust layer + states + quick actions ── */
-function UCPWidget({ inst, widget, collapsed, onToggleCollapse, onQuickAction }) {
+function HoverIcon({ title, onClick, active, activeClass, children }) {
+  return (
+    <button
+      title={title}
+      onClick={onClick}
+      className={`h-6 w-6 grid place-items-center rounded-md border border-gray-200 bg-white shadow-sm hover:border-aims-blue dark:border-white/15 dark:bg-[#1b2540] ${
+        active ? activeClass : 'text-gray-500 dark:text-slate-400 hover:text-aims-blue'
+      }`}
+    >
+      {children}
+    </button>
+  )
+}
+
+function UCPWidget({ inst, widget, collapsed, onToggleCollapse, onQuickAction, onFeedback }) {
   const name = widget?.name || 'Widget'
+  const { reactions, setReaction } = useFeedback()
+  const reaction = reactions[inst.iid]
   return (
     <div className="group card p-4 relative flex flex-col">
       {/* Header */}
@@ -156,17 +195,24 @@ function UCPWidget({ inst, widget, collapsed, onToggleCollapse, onQuickAction })
             </div>
           )}
 
-          {/* Quick actions on hover (S17) */}
+          {/* Hover actions: feedback (S22) + quick actions (S17) */}
           <div className="absolute top-3 right-9 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <HoverIcon title="Flag data issue" onClick={() => onFeedback('flag', widget)}>
+              <Flag size={13} />
+            </HoverIcon>
+            <HoverIcon title="Helpful" active={reaction === 'up'} activeClass="text-aims-governed" onClick={() => setReaction(inst.iid, 'up')}>
+              <ThumbsUp size={13} />
+            </HoverIcon>
+            <HoverIcon title="Not helpful" active={reaction === 'down'} activeClass="text-aims-stale" onClick={() => setReaction(inst.iid, 'down')}>
+              <ThumbsDown size={13} />
+            </HoverIcon>
+            <HoverIcon title="Ask about data" onClick={() => onFeedback('ask', widget)}>
+              <MessageCircle size={13} />
+            </HoverIcon>
             {QUICK_ACTIONS.map((qa) => (
-              <button
-                key={qa.id}
-                title={qa.label}
-                onClick={() => onQuickAction(qa.label, name)}
-                className="h-6 w-6 grid place-items-center rounded-md bg-white border border-gray-200 text-gray-500 dark:text-slate-400 hover:text-aims-blue hover:border-aims-blue shadow-sm dark:bg-[#1b2540] dark:border-white/15"
-              >
+              <HoverIcon key={qa.id} title={qa.label} onClick={() => onQuickAction(qa.label, name)}>
                 <qa.icon size={13} />
-              </button>
+              </HoverIcon>
             ))}
           </div>
         </>
