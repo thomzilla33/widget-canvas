@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
 import { LayoutDashboard, Boxes, UserRound, Sun, Moon, Palette, Settings, LogOut } from 'lucide-react'
 import { useTheme } from '../../state/ThemeContext.jsx'
+import { useNotifications } from '../../state/NotificationsContext.jsx'
+import NotificationsMenu from './NotificationsMenu.jsx'
 import './shell.css'
 
 // Sidebar nav — Composable Dashboards surfaces, in the Agentic shell style.
@@ -38,7 +40,9 @@ export default function AppShell() {
   const [expanded, setExpanded] = useState(false)
   const [ctxOpen, setCtxOpen] = useState(false)
   const [avatarOpen, setAvatarOpen] = useState(false)
+  const [notifOpen, setNotifOpen] = useState(false)
   const { theme, setTheme } = useTheme()
+  const { unreadCount } = useNotifications()
 
   return (
     <>
@@ -117,7 +121,17 @@ export default function AppShell() {
             </svg>
           </button>
           <span className="notif-bell-wrap">
-            <button className="icon-btn" aria-label="Notifications">
+            <button
+              className="icon-btn"
+              aria-label="Notifications"
+              aria-haspopup="dialog"
+              aria-expanded={notifOpen}
+              onClick={() => {
+                setNotifOpen((v) => !v)
+                setCtxOpen(false)
+                setAvatarOpen(false)
+              }}
+            >
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                 <path
                   d="M8 2a4 4 0 014 4c0 3 1 4 1 4H3s1-1 1-4a4 4 0 014-4zM6.5 12.5a1.5 1.5 0 003 0"
@@ -127,7 +141,8 @@ export default function AppShell() {
                 />
               </svg>
             </button>
-            <span className="notif-bell-dot">3</span>
+            {unreadCount > 0 && <span className="notif-bell-dot">{unreadCount}</span>}
+            {notifOpen && <NotificationsMenu onClose={() => setNotifOpen(false)} />}
           </span>
           <button className="icon-btn" aria-label="Settings">
             <svg
@@ -238,12 +253,13 @@ export default function AppShell() {
         </div>
       </header>
 
-      {(ctxOpen || avatarOpen) && (
+      {(ctxOpen || avatarOpen || notifOpen) && (
         <div
           className="menu-backdrop"
           onClick={() => {
             setCtxOpen(false)
             setAvatarOpen(false)
+            setNotifOpen(false)
           }}
         />
       )}

@@ -154,6 +154,42 @@ export const feedbackFlags = [
   },
 ]
 
+// Notifications (S115–S120)
+export const NOTIFICATION_CATEGORIES = [
+  { id: 'threshold', label: 'Freshness threshold alerts', mandatory: true },
+  { id: 'dashboard', label: 'Dashboard updates', mandatory: false },
+  { id: 'feedback', label: 'Feedback responses', mandatory: false },
+]
+export const notifications = [
+  {
+    id: 'n1',
+    category: 'threshold',
+    icon: '⏱️',
+    title: 'Freshness threshold exceeded',
+    body: '“NPS Trend” is stale — last synced 3 days ago.',
+    when: '10 min ago',
+    read: false,
+  },
+  {
+    id: 'n2',
+    category: 'dashboard',
+    icon: '🗂️',
+    title: '3 dashboards you follow were updated',
+    body: 'Sales — Account 360, Manager Overview, +1 more.',
+    when: '2 hours ago',
+    read: false,
+  },
+  {
+    id: 'n3',
+    category: 'feedback',
+    icon: '🚩',
+    title: 'Your flag was resolved',
+    body: 'Open Tickets — “Wrong records shown” was marked resolved.',
+    when: '1 day ago',
+    read: true,
+  },
+]
+
 // Schema drift (S111–S114) — keyed by widget id. Describes what changed in the
 // source schema and which of the widget's bindings need re-mapping.
 export const SCHEMA_DRIFT = {

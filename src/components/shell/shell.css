@@ -859,11 +859,13 @@ body {
   flex-shrink: 0;
 }
 
-/* invisible backdrop to close open menus on outside click */
+/* invisible backdrop to close open menus on outside click. Must sit BELOW the
+   topbar (z-index:20) so the dropdowns — trapped in the topbar's fixed stacking
+   context — remain clickable, while still covering page content. */
 .menu-backdrop {
   position: fixed;
   inset: 0;
-  z-index: 150;
+  z-index: 15;
 }
 
 .notif-bell-wrap {
