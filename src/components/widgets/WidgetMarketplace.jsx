@@ -81,10 +81,7 @@ export default function WidgetMarketplace({ onClose }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
-      <div
-        className="card relative z-10 flex flex-col overflow-hidden p-0 max-w-[1400px]"
-        style={{ width: 'calc(100vw - 120px)', height: 'calc(100vh - 40px)' }}
-      >
+      <div className="card relative z-10 flex h-full w-full max-w-[1400px] flex-col overflow-hidden p-0 sm:h-[calc(100vh-40px)] sm:w-[calc(100vw-120px)]">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4 dark:border-white/10">
           <div className="flex items-center gap-3">
@@ -109,7 +106,7 @@ export default function WidgetMarketplace({ onClose }) {
         </div>
 
         {/* Body */}
-        <div className="flex flex-1 min-h-0">
+        <div className="flex flex-1 min-h-0 flex-col md:flex-row">
           <Rail
             show={show}
             onShow={setShow}
@@ -149,7 +146,7 @@ export default function WidgetMarketplace({ onClose }) {
                       }
                     />
                   ) : (
-                    <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill,minmax(280px,1fr))' }}>
+                    <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill,minmax(min(280px,100%),1fr))' }}>
                       {list.map((mw) => (
                         <Card
                           key={mw.id}
@@ -183,7 +180,7 @@ export default function WidgetMarketplace({ onClose }) {
 
 function Rail({ show, onShow, sort, onSort, counts, activeCats, onToggleCat }) {
   return (
-    <div className="w-[220px] shrink-0 overflow-auto border-r border-gray-200 p-4 dark:border-white/10">
+    <div className="max-h-[38vh] w-full shrink-0 overflow-auto border-b border-gray-200 p-4 dark:border-white/10 md:max-h-none md:w-[220px] md:border-b-0 md:border-r">
       <RailLabel>Show</RailLabel>
       <div className="mb-4 flex rounded-lg border border-gray-300 p-0.5 dark:border-white/15">
         {SHOW.map((s) => (

@@ -51,10 +51,10 @@ export default function WidgetLibrary() {
 
       {/* Filters (matches .filters / .chip) */}
       <div className="flex items-center gap-2 flex-wrap px-6 py-3 border-b border-gray-200 dark:border-white/10">
-        <div className="relative">
+        <div className="relative w-full sm:w-auto">
           <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500" />
           <input
-            className="input h-9 w-52 pl-8"
+            className="input h-9 w-full sm:w-52 pl-8"
             placeholder="Search widgets…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -92,7 +92,7 @@ export default function WidgetLibrary() {
                 return (
                   <div
                     key={f.id}
-                    className="flex items-center gap-3 rounded-lg border border-gray-200 bg-white p-2.5 dark:border-white/10 dark:bg-[#131a2c]"
+                    className="flex flex-col sm:flex-row sm:items-center gap-3 rounded-lg border border-gray-200 bg-white p-2.5 dark:border-white/10 dark:bg-[#131a2c]"
                   >
                     <WidgetGlyph skeleton={w?.skeleton || 'KPI'} sm />
                     <div className="min-w-0 flex-1">
@@ -114,7 +114,7 @@ export default function WidgetLibrary() {
           </div>
         )}
 
-        <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill,minmax(264px,1fr))' }}>
+        <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill,minmax(min(264px,100%),1fr))' }}>
           {shown.map((w) => (
             <button
               key={w.id}

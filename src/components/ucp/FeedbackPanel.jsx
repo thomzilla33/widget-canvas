@@ -7,7 +7,7 @@ import { FLAG_REASONS, CANNED_ANSWER } from '../../data/mock.js'
 // S23/S24 (flag) and S26/S27 (ask) — right-side slide-over, two modes.
 export default function FeedbackPanel({ mode, widget, entityId, onClose }) {
   return (
-    <div className="absolute top-0 right-0 bottom-0 w-80 bg-white border-l border-gray-200 shadow-xl flex flex-col z-10 dark:bg-[#0f1629] dark:border-white/10">
+    <div className="absolute top-0 right-0 bottom-0 w-80 max-w-[calc(100vw-2rem)] bg-white border-l border-gray-200 shadow-xl flex flex-col z-10 dark:bg-[#0f1629] dark:border-white/10">
       <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-white/10">
         <span className="font-semibold text-gray-900 dark:text-slate-100">
           {mode === 'flag' ? 'Flag data issue' : 'Ask about data'}

@@ -10,10 +10,10 @@ import { useDashboards } from '../state/DashboardsContext.jsx'
 import { TEMPLATE_SEED } from '../data/mock.js'
 
 const ZONES = [
-  { key: 'header', label: 'Header', cls: 'zone-header', span: 'col-span-4', text: 'text-aims-blue' },
+  { key: 'header', label: 'Header', cls: 'zone-header', span: 'col-span-1 md:col-span-4', text: 'text-aims-blue' },
   { key: 'sidebar', label: 'Sidebar', cls: 'zone-sidebar', span: 'col-span-1', text: 'text-purple-500' },
-  { key: 'main', label: 'Main', cls: 'zone-main', span: 'col-span-3', text: 'text-gray-400' },
-  { key: 'bottom', label: 'Bottom', cls: 'zone-bottom', span: 'col-span-4', text: 'text-aims-aging' },
+  { key: 'main', label: 'Main', cls: 'zone-main', span: 'col-span-1 md:col-span-3', text: 'text-gray-400' },
+  { key: 'bottom', label: 'Bottom', cls: 'zone-bottom', span: 'col-span-1 md:col-span-4', text: 'text-aims-aging' },
 ]
 const AUDIENCES = ['All audiences', 'Sales Agent', 'Support Agent', 'Manager']
 const QUICK_ACTIONS = ['Create Task', 'Escalate / Handoff', 'Notify']
@@ -147,7 +147,7 @@ export default function DashboardCanvas() {
 
       <div className="flex-1 overflow-hidden relative">
         <div className="h-full overflow-auto px-6 py-4">
-          <div className="grid grid-cols-4 gap-3 auto-rows-min">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-3 auto-rows-min">
             {ZONES.map((z) => (
               <Zone
                 key={z.key}
@@ -450,7 +450,7 @@ function ConfigPanel({ placement, widget, onChange }) {
 /* ── Reusable right-side slide-over ── */
 function SidePanel({ title, children, footer, onClose }) {
   return (
-    <div className="absolute top-0 right-0 bottom-0 w-80 bg-white border-l border-gray-200 dark:bg-[#0f1629] dark:border-white/10 shadow-xl flex flex-col z-10">
+    <div className="absolute top-0 right-0 bottom-0 w-80 max-w-[calc(100vw-2rem)] bg-white border-l border-gray-200 dark:bg-[#0f1629] dark:border-white/10 shadow-xl flex flex-col z-10">
       <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-white/10">
         <span className="font-semibold text-gray-900 dark:text-slate-100">{title}</span>
         <button onClick={onClose} className="text-gray-400 dark:text-slate-500 hover:text-gray-700">

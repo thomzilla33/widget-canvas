@@ -34,10 +34,10 @@ export default function DashboardList() {
 
       {/* Filters (S78) */}
       <div className="flex items-center gap-2 flex-wrap px-6 py-3 border-b border-gray-200 dark:border-white/10">
-        <div className="relative">
+        <div className="relative w-full sm:w-auto">
           <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500" />
           <input
-            className="input h-9 w-52 pl-8"
+            className="input h-9 w-full sm:w-52 pl-8"
             placeholder="Search dashboards…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -64,7 +64,7 @@ export default function DashboardList() {
         {shown.length === 0 ? (
           <p className="text-sm text-gray-400 dark:text-slate-500">No dashboards match your filters.</p>
         ) : (
-          <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill,minmax(280px,1fr))' }}>
+          <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill,minmax(min(280px,100%),1fr))' }}>
             {shown.map((d) => (
               <button
                 key={d.id}
