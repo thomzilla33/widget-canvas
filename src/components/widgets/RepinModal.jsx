@@ -16,7 +16,22 @@ export default function RepinModal({ widget, onClose, onComplete }) {
   )
   const [submitted, setSubmitted] = useState(false)
 
-  if (!drift) return null
+  if (!drift) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
+        <div className="card relative z-10 w-[420px] max-w-full p-6 text-center">
+          <h3 className="text-base font-semibold text-gray-900 dark:text-slate-100">No schema drift recorded</h3>
+          <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">
+            “{widget.name}” has no pending data-structure changes to re-pin.
+          </p>
+          <button className="btn-primary mt-4" onClick={onClose}>
+            Done
+          </button>
+        </div>
+      </div>
+    )
+  }
   const allMapped = drift.broken.every((b) => !!remap[b.was])
 
   function submit() {

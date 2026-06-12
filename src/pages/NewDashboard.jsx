@@ -29,7 +29,7 @@ export default function NewDashboard() {
       : startMode === 'blank' || (startMode === 'template' && !!templateId)
 
   function create() {
-    const id = `d-${name.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${name.length}`
+    const id = `d-${name.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now().toString(36)}`
     const template = startMode === 'template' ? templateId : null
     const seedCount = template ? (TEMPLATE_SEED[template]?.length ?? 0) : 0
     addDashboard({
@@ -57,7 +57,7 @@ export default function NewDashboard() {
         }
       />
 
-      <div className="px-6 py-4 border-b border-gray-200 dark:border-white/10 bg-white">
+      <div className="px-6 py-4 border-b border-gray-200 dark:border-white/10 bg-white dark:bg-[#0f1629]">
         <StepIndicator steps={STEPS} current={step} />
       </div>
 
@@ -183,7 +183,7 @@ export default function NewDashboard() {
       </div>
 
       {/* Footer nav */}
-      <div className="border-t border-gray-200 dark:border-white/10 bg-white px-6 py-3 flex items-center justify-between">
+      <div className="border-t border-gray-200 dark:border-white/10 bg-white dark:bg-[#0f1629] px-6 py-3 flex items-center justify-between">
         <button
           className="btn-secondary"
           onClick={() => (step === 0 ? navigate('/dashboards') : setStep(0))}

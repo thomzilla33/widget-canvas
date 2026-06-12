@@ -72,7 +72,7 @@ export default function WidgetBuilder() {
 
   function handleSave() {
     addWidget({
-      id: `w-${name.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${name.length}`,
+      id: `w-${name.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now().toString(36)}`,
       name: name.trim(),
       skeleton: skeleton?.name || 'KPI',
       governed: !!source?.governed,
@@ -98,7 +98,7 @@ export default function WidgetBuilder() {
         }
       />
 
-      <div className="px-6 py-4 border-b border-gray-200 dark:border-white/10 bg-white">
+      <div className="px-6 py-4 border-b border-gray-200 dark:border-white/10 bg-white dark:bg-[#0f1629]">
         <StepIndicator steps={STEPS} current={step} />
       </div>
 
@@ -137,7 +137,7 @@ export default function WidgetBuilder() {
       </div>
 
       {/* Footer nav */}
-      <div className="border-t border-gray-200 dark:border-white/10 bg-white px-6 py-3 flex items-center justify-between">
+      <div className="border-t border-gray-200 dark:border-white/10 bg-white dark:bg-[#0f1629] px-6 py-3 flex items-center justify-between">
         <button
           className="btn-secondary"
           onClick={() => (step === 0 ? navigate('/widgets') : setStep(step - 1))}

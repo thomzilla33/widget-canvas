@@ -109,7 +109,7 @@ export default function UCPView() {
             </button>
           </div>
 
-          <AiSummary />
+          <AiSummary entityName={entity?.name || 'This account'} />
 
           {visible.length === 0 ? (
             <div className="mt-5">
@@ -177,7 +177,7 @@ export default function UCPView() {
 }
 
 /* ── AI Summary (S33–S35) ── */
-function AiSummary() {
+function AiSummary({ entityName }) {
   const [refreshing, setRefreshing] = useState(false)
   const [updated, setUpdated] = useState('Updated 4 min ago')
 
@@ -208,7 +208,7 @@ function AiSummary() {
       <p className="mt-3 text-sm text-gray-700 dark:text-slate-200 leading-relaxed">
         {refreshing
           ? 'Recomputing summary from the latest data…'
-          : 'Acme Corporation is a high-value account trending up: revenue grew 8.2% this quarter and pipeline is healthy. Two support tickets are open with no SLA breaches. NPS data needs review after a recent schema change.'}
+          : `${entityName} is a high-value account trending up: revenue grew 8.2% this quarter and pipeline is healthy. Two support tickets are open with no SLA breaches. NPS data needs review after a recent schema change.`}
       </p>
     </div>
   )

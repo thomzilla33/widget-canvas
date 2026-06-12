@@ -15,11 +15,16 @@ export default function WidgetLibrary() {
   const { widgets, updateWidget } = useWidgets()
   const { flags, resolveFlag } = useFeedback()
   const [cat, setCat] = useState('All')
+  const [search, setSearch] = useState('')
   const [repinWidget, setRepinWidget] = useState(null)
   const [detailFlag, setDetailFlag] = useState(null)
 
   const cats = ['All', ...Array.from(new Set(widgets.map((w) => w.skeleton)))]
-  const shown = cat === 'All' ? widgets : widgets.filter((w) => w.skeleton === cat)
+  const shown = widgets.filter(
+    (w) =>
+      (cat === 'All' || w.skeleton === cat) &&
+      (!search || w.name.toLowerCase().includes(search.toLowerCase())),
+  )
   const governedCount = widgets.filter((w) => w.governed).length
   const openFlags = flags.filter((f) => f.status === 'open')
   const widgetById = (id) => widgets.find((w) => w.id === id)
@@ -41,7 +46,12 @@ export default function WidgetLibrary() {
       <div className="flex items-center gap-2 flex-wrap px-6 py-3 border-b border-gray-200 dark:border-white/10">
         <div className="relative">
           <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500" />
-          <input className="input h-9 w-52 pl-8" placeholder="Search widgets…" />
+          <input
+            className="input h-9 w-52 pl-8"
+            placeholder="Search widgets…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
         </div>
         <div className="flex items-center gap-1.5 flex-wrap">
           {cats.map((c) => (

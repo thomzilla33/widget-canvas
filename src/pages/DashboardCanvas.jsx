@@ -1,11 +1,10 @@
 import { useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { Plus, X, Lock, Unlock, Trash2, Download } from 'lucide-react'
+import { Plus, X, Lock, Unlock, Trash2, Search } from 'lucide-react'
 import { PageHeader, GovernedBadge, FreshnessBadge, Badge } from '../components/common/index.jsx'
 import { WidgetGlyph } from '../components/widgets/glyph.jsx'
 import PublishModal from '../components/dashboard/PublishModal.jsx'
 import ShareModal from '../components/dashboard/ShareModal.jsx'
-import ExportModal from '../components/dashboard/ExportModal.jsx'
 import { useWidgets } from '../state/WidgetsContext.jsx'
 import { useDashboards } from '../state/DashboardsContext.jsx'
 import { TEMPLATE_SEED } from '../data/mock.js'
@@ -53,8 +52,8 @@ export default function DashboardCanvas() {
   const [selectedPid, setSelectedPid] = useState(null)
   const [publishOpen, setPublishOpen] = useState(false)
   const [shareOpen, setShareOpen] = useState(false)
-  const [exportOpen, setExportOpen] = useState(false)
   const [dragOverZone, setDragOverZone] = useState(null)
+  const [drawerSearch, setDrawerSearch] = useState('')
 
   const selected = Object.values(placements)
     .flat()
@@ -136,9 +135,6 @@ export default function DashboardCanvas() {
         actions={
           <>
             {dashboard && <Badge variant={dashboard.status} />}
-            <button className="btn-secondary !px-2.5" title="Export template" onClick={() => setExportOpen(true)}>
-              <Download size={15} />
-            </button>
             <button className="btn-secondary" onClick={() => setShareOpen(true)}>
               Share
             </button>
@@ -186,8 +182,19 @@ export default function DashboardCanvas() {
         {/* Library drawer (S85) */}
         {drawerZone && (
           <SidePanel title={`Add widget to ${labelFor(drawerZone)}`} onClose={() => setDrawerZone(null)}>
+            <div className="relative mb-3">
+              <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500" />
+              <input
+                className="input h-9 pl-8"
+                placeholder="Search widgets…"
+                value={drawerSearch}
+                onChange={(e) => setDrawerSearch(e.target.value)}
+              />
+            </div>
             <div className="space-y-2">
-              {widgets.map((w) => (
+              {widgets
+                .filter((w) => !drawerSearch || w.name.toLowerCase().includes(drawerSearch.toLowerCase()))
+                .map((w) => (
                 <button
                   key={w.id}
                   draggable
@@ -257,8 +264,6 @@ export default function DashboardCanvas() {
       )}
 
       {shareOpen && dashboard && <ShareModal dashboard={dashboard} onClose={() => setShareOpen(false)} />}
-
-      {exportOpen && dashboard && <ExportModal dashboard={dashboard} onClose={() => setExportOpen(false)} />}
     </div>
   )
 }
@@ -385,7 +390,7 @@ function ConfigPanel({ placement, widget, onChange }) {
           <button
             onClick={() => onChange({ fixed: false })}
             className={`flex-1 px-3 py-2 flex items-center justify-center gap-1.5 ${
-              !placement.fixed ? 'bg-aims-blue text-white' : 'bg-white text-gray-600 dark:text-slate-300'
+              !placement.fixed ? 'bg-aims-blue text-white' : 'bg-white text-gray-600 dark:bg-white/5 dark:text-slate-300'
             }`}
           >
             <Unlock size={14} /> Flexible
@@ -393,7 +398,7 @@ function ConfigPanel({ placement, widget, onChange }) {
           <button
             onClick={() => onChange({ fixed: true })}
             className={`flex-1 px-3 py-2 flex items-center justify-center gap-1.5 ${
-              placement.fixed ? 'bg-aims-blue text-white' : 'bg-white text-gray-600 dark:text-slate-300'
+              placement.fixed ? 'bg-aims-blue text-white' : 'bg-white text-gray-600 dark:bg-white/5 dark:text-slate-300'
             }`}
           >
             <Lock size={14} /> Fixed

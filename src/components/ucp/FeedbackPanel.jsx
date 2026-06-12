@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { X, Check, Send } from 'lucide-react'
 import { EmptyState } from '../common/index.jsx'
 import { useFeedback } from '../../state/FeedbackContext.jsx'
@@ -94,14 +94,15 @@ function FlagForm({ widget, entityId, onClose }) {
 function AskChat({ widget }) {
   const [messages, setMessages] = useState([])
   const [draft, setDraft] = useState('')
+  const idRef = useRef(0)
 
   function send() {
     const text = draft.trim()
     if (!text) return
-    setMessages((m) => [...m, { role: 'user', text }])
+    setMessages((m) => [...m, { id: ++idRef.current, role: 'user', text }])
     setDraft('')
     setTimeout(() => {
-      setMessages((m) => [...m, { role: 'assistant', text: CANNED_ANSWER }])
+      setMessages((m) => [...m, { id: ++idRef.current, role: 'assistant', text: CANNED_ANSWER }])
     }, 500)
   }
 
@@ -114,9 +115,9 @@ function AskChat({ widget }) {
             Ask anything about how this widget is calculated or sourced.
           </div>
         )}
-        {messages.map((m, i) => (
+        {messages.map((m) => (
           <div
-            key={i}
+            key={m.id}
             className={`max-w-[85%] rounded-lg px-3 py-2 text-sm ${
               m.role === 'user'
                 ? 'ml-auto bg-aims-blue text-white'

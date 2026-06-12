@@ -248,10 +248,3 @@ export const dataSources = [
   { id: 'src-survey', name: 'Survey Data View', governed: true, owner: 'CX Research', reviewed: 'Feb 2026', hasPII: false },
   { id: 'src-computed', name: 'Compute a metric here', governed: false, owner: 'You (Widget Builder)', reviewed: null, hasPII: false },
 ]
-
-export const chartData = [
-  { name: 'Q1', value: 420 },
-  { name: 'Q2', value: 560 },
-  { name: 'Q3', value: 480 },
-  { name: 'Q4', value: 720 },
-]

@@ -24,6 +24,7 @@ export default function NotificationsMenu({ onClose }) {
               <button
                 className="h-7 w-7 grid place-items-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:text-slate-500 dark:hover:bg-white/10 dark:hover:text-slate-200"
                 title="Notification settings"
+                aria-label="Notification settings"
                 onClick={() => setView('settings')}
               >
                 <Settings size={15} />
@@ -64,6 +65,7 @@ export default function NotificationsMenu({ onClose }) {
           <div className="flex items-center gap-2 border-b border-gray-200 px-3 py-3 dark:border-white/10">
             <button
               className="h-7 w-7 grid place-items-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:text-slate-500 dark:hover:bg-white/10 dark:hover:text-slate-200"
+              aria-label="Back to notifications"
               onClick={() => setView('list')}
             >
               <ChevronLeft size={16} />
