@@ -203,7 +203,7 @@ function GaugeView({ data }) {
         </RadialBarChart>
       </ResponsiveContainer>
       <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-3xl font-bold text-gray-900 dark:text-slate-100">{v}%</span>
+        <span className="num text-3xl font-bold tracking-tight text-gray-900 dark:text-slate-100">{v}%</span>
         <span className="text-xs text-gray-500 dark:text-slate-400">{data.gauge.label}</span>
       </div>
     </div>
@@ -214,8 +214,8 @@ function GaugeView({ data }) {
 function KpiView({ data }) {
   return (
     <div className="flex h-full min-h-[180px] flex-col justify-center">
-      <div className="text-4xl font-bold text-gray-900 dark:text-slate-100">{data.kpi.value}</div>
-      <div className="mt-1 text-sm font-semibold text-aims-governed">{data.kpi.delta} vs last quarter</div>
+      <div className="num text-4xl font-bold tracking-tight text-gray-900 dark:text-slate-100">{data.kpi.value}</div>
+      <div className="num mt-1 text-sm font-semibold text-aims-governed">{data.kpi.delta} vs last quarter</div>
     </div>
   )
 }
