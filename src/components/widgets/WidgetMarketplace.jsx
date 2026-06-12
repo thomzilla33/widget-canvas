@@ -1,9 +1,10 @@
 import { useState } from 'react'
-import { Store, X, Search, Eye, Check, Plus, ChevronLeft, BadgeCheck } from 'lucide-react'
+import { Store, X, Search, Eye, Check, Plus, ChevronLeft, BadgeCheck, Info, LayoutGrid } from 'lucide-react'
 import { WidgetGlyph } from './glyph.jsx'
+import WidgetRender from './WidgetRender.jsx'
 import { EmptyState, FreshnessBadge } from '../common/index.jsx'
 import { useWidgets } from '../../state/WidgetsContext.jsx'
-import { MARKETPLACE_CATEGORIES, MARKETPLACE_WIDGETS } from '../../data/mock.js'
+import { MARKETPLACE_CATEGORIES, MARKETPLACE_WIDGETS, WIDGET_SIZES } from '../../data/mock.js'
 
 const SHOW = [
   { id: 'all', label: 'All' },
@@ -374,60 +375,88 @@ function Card({ mw, installed, onInstall, onOpen }) {
   )
 }
 
+const PREVIEW_WIDTH = { sm: 'max-w-[240px]', md: 'max-w-md', lg: 'max-w-2xl' }
+
 function Detail({ mw, installed, onInstall, onBack }) {
+  const [size, setSize] = useState('lg')
+  const sizeMeta = WIDGET_SIZES.find((s) => s.id === size)
+
   return (
     <div className="flex-1 overflow-auto">
-      <div className="flex items-center gap-1 border-b border-gray-200 px-6 py-2.5 dark:border-white/10">
+      <div className="flex items-center gap-2 border-b border-gray-200 px-6 py-2.5 dark:border-white/10">
         <button onClick={onBack} className="grid h-7 w-7 place-items-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:text-slate-500 dark:hover:bg-white/10" aria-label="Back">
           <ChevronLeft size={16} />
         </button>
-        <span className="text-xs text-gray-400 dark:text-slate-500">Marketplace</span>
-        <span className="text-xs text-gray-400 dark:text-slate-500">/</span>
-        <span className="text-xs font-semibold text-gray-700 dark:text-slate-200">{mw.name}</span>
+        <WidgetGlyph skeleton={mw.skeleton} sm />
+        <span className="truncate text-sm font-semibold text-gray-900 dark:text-slate-100">{mw.name}</span>
+        <MakerLine maker={mw.maker} />
       </div>
 
-      <div className="max-w-3xl p-6">
-        <div className="flex items-start gap-4">
-          <WidgetGlyph skeleton={mw.skeleton} />
-          <div className="min-w-0 flex-1">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-slate-100">{mw.name}</h2>
-            <div className="mt-1 flex items-center gap-2">
-              <MakerLine maker={mw.maker} />
-              <span className="text-gray-300 dark:text-slate-600">·</span>
-              <span className="text-[11px] text-gray-400 dark:text-slate-500">
-                {mw.stats.installs.toLocaleString()} installs
-              </span>
-            </div>
+      <div className="mx-auto max-w-3xl space-y-5 p-6">
+        {/* About this Widget */}
+        <div className="flex items-start justify-between gap-4 rounded-xl border border-gray-200 bg-gray-50/70 p-4 dark:border-white/10 dark:bg-white/[0.02]">
+          <div className="min-w-0">
+            <div className="text-sm font-semibold text-gray-900 dark:text-slate-100">About this Widget</div>
+            <p className="mt-0.5 text-sm text-gray-500 dark:text-slate-400">{mw.description}</p>
           </div>
-          <InstallButton installed={installed} onInstall={onInstall} />
+          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-aims-blue/10">
+            <LayoutGrid size={18} className="text-aims-blue" />
+          </span>
         </div>
 
-        <div className="mt-4 flex flex-wrap items-center gap-1.5">
+        {/* Best for */}
+        {mw.bestFor && (
+          <div className="flex items-start gap-2.5 rounded-xl border border-aims-blue/30 bg-aims-blue/5 p-4 dark:bg-aims-blue/10">
+            <Info size={16} className="mt-0.5 shrink-0 text-aims-blue" />
+            <div className="min-w-0">
+              <div className="text-sm font-semibold text-gray-900 dark:text-slate-100">Best for</div>
+              <p className="mt-0.5 text-sm text-gray-600 dark:text-slate-300">{mw.bestFor}</p>
+            </div>
+          </div>
+        )}
+
+        {/* Preview with size selector */}
+        <div>
+          <div className="mb-2 flex items-center justify-between">
+            <span className="text-sm font-semibold text-gray-900 dark:text-slate-100">Preview</span>
+            <div className="flex overflow-hidden rounded-lg border border-gray-300 text-sm dark:border-white/15">
+              {WIDGET_SIZES.map((s) => (
+                <button
+                  key={s.id}
+                  onClick={() => setSize(s.id)}
+                  className={`px-3 py-1 font-medium transition-colors ${
+                    size === s.id ? 'bg-aims-blue text-white' : 'text-gray-600 dark:text-slate-300'
+                  }`}
+                >
+                  {s.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="rounded-xl border border-gray-200 bg-gray-50/60 p-6 dark:border-white/10 dark:bg-white/[0.02]">
+            <div className={`mx-auto rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition-all dark:border-white/10 dark:bg-[#131a2c] ${PREVIEW_WIDTH[size]}`}>
+              <div className="mb-2 text-[10px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-500">{mw.name}</div>
+              <WidgetRender widget={mw} size={size} />
+            </div>
+          </div>
+          <p className="mt-2 text-center text-xs text-gray-400 dark:text-slate-500">
+            {sizeMeta?.width} · {sizeMeta?.detail}
+          </p>
+        </div>
+
+        {/* Meta + Add */}
+        <div className="flex flex-wrap items-center gap-1.5">
           <span className="cap-chip cap-chip-neutral">{mw.category}</span>
           <span className={`cap-chip ${mw.governed ? 'cap-chip-data' : 'cap-chip-tool'}`}>
             {mw.governed ? 'Governed' : 'Ungoverned'}
           </span>
-          <span className="cap-chip cap-chip-neutral">{mw.skeleton}</span>
           <FreshnessBadge status={mw.freshness} label={mw.freshness} />
+          <span className="ml-auto text-[11px] text-gray-400 dark:text-slate-500">{mw.stats.installs.toLocaleString()} installs · {mw.source}</span>
         </div>
-
-        <p className="mt-4 text-sm leading-relaxed text-gray-700 dark:text-slate-200">{mw.description}</p>
-
-        <div className="mt-5 grid gap-3 sm:grid-cols-3">
-          <DetailStat label="Skeleton" value={mw.skeleton} />
-          <DetailStat label="Fields" value={mw.stats.fields} />
-          <DetailStat label="Source" value={mw.source} />
+        <div className="flex justify-end border-t border-gray-100 pt-4 dark:border-white/10">
+          <InstallButton installed={installed} onInstall={onInstall} />
         </div>
       </div>
-    </div>
-  )
-}
-
-function DetailStat({ label, value }) {
-  return (
-    <div className="rounded-lg border border-gray-200 p-3 dark:border-white/10">
-      <div className="text-[10px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-500">{label}</div>
-      <div className="mt-0.5 truncate text-sm font-medium text-gray-800 dark:text-slate-200">{value}</div>
     </div>
   )
 }
