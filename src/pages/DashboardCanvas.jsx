@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom'
 import { Plus, X, Lock, Unlock, Trash2 } from 'lucide-react'
 import { PageHeader, GovernedBadge, FreshnessBadge, Badge } from '../components/common/index.jsx'
 import { WidgetGlyph } from '../components/widgets/glyph.jsx'
+import PublishModal from '../components/dashboard/PublishModal.jsx'
 import { useWidgets } from '../state/WidgetsContext.jsx'
 import { useDashboards } from '../state/DashboardsContext.jsx'
 import { TEMPLATE_SEED } from '../data/mock.js'
@@ -43,11 +44,12 @@ function buildInitialPlacements(dashboard, widgets) {
 export default function DashboardCanvas() {
   const { id } = useParams()
   const { widgets } = useWidgets()
-  const { dashboards } = useDashboards()
+  const { dashboards, updateDashboard } = useDashboards()
   const dashboard = dashboards.find((d) => d.id === id)
   const [placements, setPlacements] = useState(() => buildInitialPlacements(dashboard, widgets))
   const [drawerZone, setDrawerZone] = useState(null) // zone we're adding to
   const [selectedPid, setSelectedPid] = useState(null)
+  const [publishOpen, setPublishOpen] = useState(false)
 
   const selected = Object.values(placements)
     .flat()
@@ -98,7 +100,9 @@ export default function DashboardCanvas() {
         actions={
           <>
             {dashboard && <Badge variant={dashboard.status} />}
-            <button className="btn-primary">Publish</button>
+            <button className="btn-primary" onClick={() => setPublishOpen(true)}>
+              Publish
+            </button>
           </>
         }
       />
@@ -181,6 +185,16 @@ export default function DashboardCanvas() {
           </SidePanel>
         )}
       </div>
+
+      {publishOpen && dashboard && (
+        <PublishModal
+          dashboard={dashboard}
+          placements={placements}
+          widgetById={widgetById}
+          onClose={() => setPublishOpen(false)}
+          onPublish={() => updateDashboard(dashboard.id, { status: 'published' })}
+        />
+      )}
     </div>
   )
 }

@@ -13,8 +13,13 @@ export function DashboardsProvider({ children }) {
     setDashboards((prev) => [dashboard, ...prev])
   }
 
+  // Immutable patch by id.
+  function updateDashboard(id, patch) {
+    setDashboards((prev) => prev.map((d) => (d.id === id ? { ...d, ...patch } : d)))
+  }
+
   return (
-    <DashboardsContext.Provider value={{ dashboards, addDashboard }}>
+    <DashboardsContext.Provider value={{ dashboards, addDashboard, updateDashboard }}>
       {children}
     </DashboardsContext.Provider>
   )
