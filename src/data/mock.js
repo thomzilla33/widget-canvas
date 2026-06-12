@@ -110,17 +110,6 @@ export const TEMPLATE_SEED = {
   ],
 }
 
-export const skeletons = [
-  { id: 'kpi', name: 'KPI', icon: '📊', maxFields: 3, desc: 'A single headline number with optional delta.' },
-  { id: 'chart', name: 'Chart', icon: '📈', maxFields: 5, desc: 'Bar, line or area chart over a dimension.' },
-  { id: 'list', name: 'List', icon: '📋', maxFields: 6, desc: 'Ranked or chronological list of records.' },
-  { id: 'table', name: 'Table', icon: '🗂️', maxFields: 8, desc: 'Columns and rows of structured data.' },
-  { id: 'timeline', name: 'Timeline', icon: '🕒', maxFields: 4, desc: 'Events ordered along a time axis.' },
-  { id: 'summary', name: 'AI Summary', icon: '✨', maxFields: 2, desc: 'Pre-computed narrative summary.' },
-  { id: 'gauge', name: 'Gauge', icon: '🎯', maxFields: 2, desc: 'Progress toward a target or threshold.' },
-  { id: 'map', name: 'Map', icon: '🗺️', maxFields: 3, desc: 'Geographic distribution of records.' },
-]
-
 // Widget Marketplace — browseable pre-built widgets. `id` is the templateId
 // used for install dedup; on install a real catalog widget is derived from these.
 export const MARKETPLACE_CATEGORIES = ['Sales', 'Support', 'Finance', 'Product', 'CX']
@@ -136,6 +125,74 @@ export const MARKETPLACE_WIDGETS = [
   { id: 'mw-activation', name: 'Activation Funnel', category: 'Product', maker: 'AIMS', skeleton: 'Timeline', governed: true, source: 'Product Data View', freshness: 'live', description: 'Step-by-step activation funnel from signup to first value.', stats: { installs: 450, fields: 4 } },
   { id: 'mw-burn', name: 'Cash Burn', category: 'Finance', maker: 'Community', skeleton: 'KPI', governed: false, source: 'Computed in Widget Builder', freshness: 'aging', description: 'Monthly net burn with a runway estimate.', stats: { installs: 220, fields: 3 }, featured: true },
   { id: 'mw-ai-exec', name: 'AI Exec Brief', category: 'Finance', maker: 'AIMS', skeleton: 'AI Summary', governed: true, source: 'Finance Data View', freshness: 'live', description: 'Pre-computed narrative summary of the quarter for leadership.', stats: { installs: 410, fields: 2 } },
+]
+
+// Widget Playground — expanded widget types (visual gallery)
+export const WIDGET_TYPES = [
+  { id: 'kpi', label: 'KPI', category: 'Metric', iconName: 'Hash' },
+  { id: 'line', label: 'Line Chart', category: 'Trend', iconName: 'LineChart' },
+  { id: 'bar', label: 'Bar Chart', category: 'Breakdown', iconName: 'BarChart3' },
+  { id: 'pie', label: 'Pie / Donut', category: 'Breakdown', iconName: 'PieChart' },
+  { id: 'table', label: 'Table', category: 'Records', iconName: 'Table2' },
+  { id: 'heatmap', label: 'Heat Map', category: 'Relationship', iconName: 'Grid3x3' },
+  { id: 'scatter', label: 'Correlation', category: 'Relationship', iconName: 'ScatterChart' },
+  { id: 'carousel', label: 'Carousel', category: 'Records', iconName: 'GalleryHorizontalEnd' },
+  { id: 'gauge', label: 'Gauge', category: 'Metric', iconName: 'Gauge' },
+  { id: 'list', label: 'List', category: 'Records', iconName: 'List' },
+  { id: 'summary', label: 'AI Summary', category: 'Narrative', iconName: 'Sparkles' },
+  { id: 'map', label: 'Map', category: 'Geo', iconName: 'Map' },
+]
+export const TYPE_LABEL = Object.fromEntries(WIDGET_TYPES.map((t) => [t.id, t.label]))
+
+// External data sources (named connectors) with the metrics they expose.
+// metric.kind drives preview sample data; recommendedType drives the gallery hint.
+export const EXTERNAL_SOURCES = [
+  {
+    id: 'src-salesforce', name: 'Salesforce', category: 'CRM', governed: true, hasPII: true, logoColor: '#00A1E0', initials: 'SF', owner: 'RevOps', reviewed: 'May 2026',
+    metrics: [
+      { id: 'sf-opps', name: 'Opportunities by Stage', kind: 'breakdown', recommendedType: 'bar' },
+      { id: 'sf-winrate', name: 'Win Rate', kind: 'kpi', recommendedType: 'kpi' },
+      { id: 'sf-pipeline', name: 'Pipeline $', kind: 'timeseries', recommendedType: 'line' },
+      { id: 'sf-dealsize', name: 'Deal Size vs Close Time', kind: 'twoVar', recommendedType: 'scatter' },
+      { id: 'sf-byregion', name: 'Accounts by Region', kind: 'geo', recommendedType: 'map' },
+    ],
+  },
+  {
+    id: 'src-dms', name: 'Dealer Management System', category: 'Automotive', governed: true, hasPII: false, logoColor: '#C8102E', initials: 'DM', owner: 'Ops', reviewed: 'Apr 2026',
+    metrics: [
+      { id: 'dms-units', name: 'Units Sold', kind: 'timeseries', recommendedType: 'line' },
+      { id: 'dms-ros', name: 'Service ROs', kind: 'breakdown', recommendedType: 'bar' },
+      { id: 'dms-gpu', name: 'Gross per Unit', kind: 'kpi', recommendedType: 'kpi' },
+    ],
+  },
+  {
+    id: 'src-erp', name: 'ERP (NetSuite)', category: 'Finance', governed: true, hasPII: false, logoColor: '#1F6FEB', initials: 'ER', owner: 'Finance', reviewed: 'Mar 2026',
+    metrics: [
+      { id: 'erp-rev', name: 'Revenue', kind: 'timeseries', recommendedType: 'line' },
+      { id: 'erp-ap', name: 'AP Aging', kind: 'breakdown', recommendedType: 'bar' },
+      { id: 'erp-margin', name: 'Margin by Region', kind: 'matrix', recommendedType: 'heatmap' },
+    ],
+  },
+  {
+    id: 'src-hr', name: 'HR Platform (Workday)', category: 'People', governed: true, hasPII: true, logoColor: '#F38B00', initials: 'HR', owner: 'People Ops', reviewed: 'Feb 2026',
+    metrics: [
+      { id: 'hr-headcount', name: 'Headcount', kind: 'timeseries', recommendedType: 'line' },
+      { id: 'hr-attrition', name: 'Attrition', kind: 'kpi', recommendedType: 'gauge' },
+      { id: 'hr-bydept', name: 'Headcount by Dept', kind: 'breakdown', recommendedType: 'pie' },
+    ],
+  },
+  {
+    id: 'src-finance-dv', name: 'Finance Data View', category: 'Data View', governed: true, hasPII: false, logoColor: '#16A34A', initials: 'FV', owner: 'Finance', reviewed: 'May 2026',
+    metrics: [
+      { id: 'fv-rev', name: 'Total Revenue', kind: 'kpi', recommendedType: 'kpi' },
+      { id: 'fv-trend', name: 'Revenue Trend', kind: 'timeseries', recommendedType: 'line' },
+      { id: 'fv-records', name: 'Top Accounts', kind: 'records', recommendedType: 'table' },
+    ],
+  },
+  {
+    id: 'src-computed', name: 'Compute a metric here', category: 'Custom', governed: false, hasPII: false, logoColor: '#6B7280', initials: 'CM', owner: 'You (Widget Builder)', reviewed: null,
+    metrics: [{ id: 'cm-custom', name: 'Custom Metric', kind: 'kpi', recommendedType: 'kpi' }],
+  },
 ]
 
 // Feedback loop (S22–S27 user · S121–S123 admin)
@@ -247,21 +304,3 @@ export const SCHEMA_DRIFT = {
   },
 }
 
-// Step 1 — Intent. Each intent maps to the skeletons that can answer it.
-export const intents = [
-  { id: 'single-metric', label: 'Show a single metric', desc: 'One headline number, e.g. total revenue.', icon: '📊', skeletons: ['kpi', 'gauge'] },
-  { id: 'trend', label: 'Show a trend over time', desc: 'How a value changes across a period.', icon: '📈', skeletons: ['chart', 'timeline'] },
-  { id: 'breakdown', label: 'Break down by category', desc: 'Compare a value across groups.', icon: '🧩', skeletons: ['chart', 'table'] },
-  { id: 'list-records', label: 'List records', desc: 'Show individual rows, ranked or recent.', icon: '📋', skeletons: ['list', 'table'] },
-  { id: 'ai-summary', label: 'Summarize with AI', desc: 'A narrative summary of the data.', icon: '✨', skeletons: ['summary'] },
-  { id: 'geographic', label: 'Show on a map', desc: 'Where records are located.', icon: '🗺️', skeletons: ['map'] },
-]
-
-// Step 2 — Data sources. Governed = approved Data View in Data Studio.
-// Ungoverned = metric computed directly in Widget Builder.
-export const dataSources = [
-  { id: 'src-finance', name: 'Finance Data View', governed: true, owner: 'Finance Team', reviewed: 'Apr 2026', hasPII: false },
-  { id: 'src-crm', name: 'CRM Data View', governed: true, owner: 'RevOps', reviewed: 'May 2026', hasPII: true },
-  { id: 'src-survey', name: 'Survey Data View', governed: true, owner: 'CX Research', reviewed: 'Feb 2026', hasPII: false },
-  { id: 'src-computed', name: 'Compute a metric here', governed: false, owner: 'You (Widget Builder)', reviewed: null, hasPII: false },
-]

@@ -8,6 +8,12 @@ export const SKELETON_COLOR = {
   'AI Summary': '#EC4899',
   Gauge: '#14B8A6',
   Map: '#6366F1',
+  'Line Chart': '#06B6D4',
+  'Bar Chart': '#2563EB',
+  'Pie / Donut': '#A78BFA',
+  'Heat Map': '#EF4444',
+  Correlation: '#14B8A6',
+  Carousel: '#F59E0B',
 }
 
 export function WidgetGlyph({ skeleton = 'KPI', sm = false }) {
