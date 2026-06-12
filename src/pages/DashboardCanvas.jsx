@@ -54,6 +54,7 @@ export default function DashboardCanvas() {
   const [publishOpen, setPublishOpen] = useState(false)
   const [shareOpen, setShareOpen] = useState(false)
   const [exportOpen, setExportOpen] = useState(false)
+  const [dragOverZone, setDragOverZone] = useState(null)
 
   const selected = Object.values(placements)
     .flat()
@@ -90,6 +91,37 @@ export default function DashboardCanvas() {
       return next
     })
     if (selectedPid === pid) setSelectedPid(null)
+  }
+
+  // Move a placed widget to another zone (drag between zones).
+  function movePlacement(pid, toZone) {
+    setPlacements((prev) => {
+      let moved = null
+      const next = {}
+      for (const z of Object.keys(prev)) {
+        next[z] = prev[z].filter((p) => (p.pid === pid ? ((moved = p), false) : true))
+      }
+      if (moved) next[toZone] = [...next[toZone], moved]
+      return next
+    })
+  }
+
+  // Drop onto a zone: a new widget from the drawer, or a moved placement.
+  function handleZoneDrop(e, zoneKey) {
+    e.preventDefault()
+    setDragOverZone(null)
+    let data
+    try {
+      data = JSON.parse(e.dataTransfer.getData('text/plain'))
+    } catch {
+      return
+    }
+    if (data.type === 'new') {
+      const w = widgets.find((x) => x.id === data.widgetId)
+      if (w) placeWidget(zoneKey, w)
+    } else if (data.type === 'move') {
+      movePlacement(data.pid, zoneKey)
+    }
   }
 
   return (
@@ -135,6 +167,16 @@ export default function DashboardCanvas() {
                   setDrawerZone(null)
                   setSelectedPid(pid)
                 }}
+                dragOver={dragOverZone === z.key}
+                onDragOverZone={(e) => {
+                  e.preventDefault()
+                  setDragOverZone(z.key)
+                }}
+                onDragLeaveZone={() => setDragOverZone((cur) => (cur === z.key ? null : cur))}
+                onDropZone={(e) => handleZoneDrop(e, z.key)}
+                onPlacementDragStart={(e, pid) =>
+                  e.dataTransfer.setData('text/plain', JSON.stringify({ type: 'move', pid }))
+                }
               />
             ))}
           </div>
@@ -148,8 +190,12 @@ export default function DashboardCanvas() {
               {widgets.map((w) => (
                 <button
                   key={w.id}
+                  draggable
+                  onDragStart={(e) =>
+                    e.dataTransfer.setData('text/plain', JSON.stringify({ type: 'new', widgetId: w.id }))
+                  }
                   onClick={() => placeWidget(drawerZone, w)}
-                  className="catalog-card w-full !p-3"
+                  className="catalog-card w-full !p-3 cursor-grab active:cursor-grabbing"
                 >
                   <div className="flex items-center gap-2.5">
                     <WidgetGlyph skeleton={w.skeleton} sm />
@@ -228,10 +274,29 @@ function densityState(count) {
 }
 
 /* ── A single zone ── */
-function Zone({ zone, placements, widgetById, selectedPid, onAdd, onSelect }) {
+function Zone({
+  zone,
+  placements,
+  widgetById,
+  selectedPid,
+  onAdd,
+  onSelect,
+  dragOver,
+  onDragOverZone,
+  onDragLeaveZone,
+  onDropZone,
+  onPlacementDragStart,
+}) {
   const density = densityState(placements.length)
   return (
-    <div className={`${zone.span} ${zone.cls} rounded-lg p-3 min-h-[120px]`}>
+    <div
+      className={`${zone.span} ${zone.cls} rounded-lg p-3 min-h-[120px] transition-shadow ${
+        dragOver ? 'ring-2 ring-aims-blue' : ''
+      }`}
+      onDragOver={onDragOverZone}
+      onDragLeave={onDragLeaveZone}
+      onDrop={onDropZone}
+    >
       <div className="flex items-center justify-between mb-2">
         <span className={`text-xs font-semibold uppercase tracking-wide ${zone.text}`}>
           {zone.label}
@@ -265,8 +330,10 @@ function Zone({ zone, placements, widgetById, selectedPid, onAdd, onSelect }) {
             return (
               <button
                 key={p.pid}
+                draggable
+                onDragStart={(e) => onPlacementDragStart(e, p.pid)}
                 onClick={() => onSelect(p.pid)}
-                className={`bg-white dark:bg-[#131a2c] rounded-lg border p-2.5 text-left transition-shadow hover:shadow-md ${
+                className={`bg-white dark:bg-[#131a2c] rounded-lg border p-2.5 text-left transition-shadow hover:shadow-md cursor-grab active:cursor-grabbing ${
                   selectedPid === p.pid ? 'border-aims-blue ring-2 ring-aims-blue/30' : 'border-gray-200 dark:border-white/10'
                 }`}
               >
