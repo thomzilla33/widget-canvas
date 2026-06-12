@@ -1,12 +1,15 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { LayoutDashboard } from 'lucide-react'
+import { LayoutDashboard, FileUp } from 'lucide-react'
 import { PageHeader, Badge } from '../components/common/index.jsx'
+import ImportModal from '../components/dashboard/ImportModal.jsx'
 import { useDashboards } from '../state/DashboardsContext.jsx'
 
 // S76, S77, S79 — dashboard list with tabs Created/Templates
 export default function DashboardList() {
   const navigate = useNavigate()
   const { dashboards } = useDashboards()
+  const [importOpen, setImportOpen] = useState(false)
   const publishedCount = dashboards.filter((d) => d.status === 'published').length
 
   return (
@@ -15,9 +18,14 @@ export default function DashboardList() {
         title="Dashboards"
         description={`${dashboards.length} dashboards · ${publishedCount} published`}
         actions={
-          <button className="btn-primary" onClick={() => navigate('/dashboard/new')}>
-            + New dashboard
-          </button>
+          <>
+            <button className="btn-secondary" onClick={() => setImportOpen(true)}>
+              <FileUp size={15} /> Import
+            </button>
+            <button className="btn-primary" onClick={() => navigate('/dashboard/new')}>
+              + New dashboard
+            </button>
+          </>
         }
       />
       <div className="flex-1 overflow-auto px-6 py-4">
@@ -55,6 +63,8 @@ export default function DashboardList() {
         </div>
         <p className="mt-4 text-xs text-gray-400 dark:text-slate-500">Screens hosted here: S76, S77, S79</p>
       </div>
+
+      {importOpen && <ImportModal onClose={() => setImportOpen(false)} />}
     </div>
   )
 }

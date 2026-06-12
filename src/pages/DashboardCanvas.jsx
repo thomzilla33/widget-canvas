@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { Plus, X, Lock, Unlock, Trash2 } from 'lucide-react'
+import { Plus, X, Lock, Unlock, Trash2, Download } from 'lucide-react'
 import { PageHeader, GovernedBadge, FreshnessBadge, Badge } from '../components/common/index.jsx'
 import { WidgetGlyph } from '../components/widgets/glyph.jsx'
 import PublishModal from '../components/dashboard/PublishModal.jsx'
 import ShareModal from '../components/dashboard/ShareModal.jsx'
+import ExportModal from '../components/dashboard/ExportModal.jsx'
 import { useWidgets } from '../state/WidgetsContext.jsx'
 import { useDashboards } from '../state/DashboardsContext.jsx'
 import { TEMPLATE_SEED } from '../data/mock.js'
@@ -52,6 +53,7 @@ export default function DashboardCanvas() {
   const [selectedPid, setSelectedPid] = useState(null)
   const [publishOpen, setPublishOpen] = useState(false)
   const [shareOpen, setShareOpen] = useState(false)
+  const [exportOpen, setExportOpen] = useState(false)
 
   const selected = Object.values(placements)
     .flat()
@@ -102,6 +104,9 @@ export default function DashboardCanvas() {
         actions={
           <>
             {dashboard && <Badge variant={dashboard.status} />}
+            <button className="btn-secondary !px-2.5" title="Export template" onClick={() => setExportOpen(true)}>
+              <Download size={15} />
+            </button>
             <button className="btn-secondary" onClick={() => setShareOpen(true)}>
               Share
             </button>
@@ -206,6 +211,8 @@ export default function DashboardCanvas() {
       )}
 
       {shareOpen && dashboard && <ShareModal dashboard={dashboard} onClose={() => setShareOpen(false)} />}
+
+      {exportOpen && dashboard && <ExportModal dashboard={dashboard} onClose={() => setExportOpen(false)} />}
     </div>
   )
 }
