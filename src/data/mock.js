@@ -154,6 +154,20 @@ export const feedbackFlags = [
   },
 ]
 
+// Sharing & access (S105–S108)
+export const SHARE_PEOPLE = [
+  { id: 'u-1', name: 'Dana Lee', sub: 'Support Agent', initials: 'DL' },
+  { id: 'u-2', name: 'Sam Ortiz', sub: 'Sales Agent', initials: 'SO' },
+  { id: 'u-3', name: 'Priya Nair', sub: 'Manager', initials: 'PN' },
+  { id: 'u-4', name: 'Marco Diaz', sub: 'Sales Agent', initials: 'MD' },
+]
+export const SHARE_DEPARTMENTS = [
+  { id: 'dep-sales', name: 'Sales', sub: '42 people' },
+  { id: 'dep-support', name: 'Support', sub: '18 people' },
+  { id: 'dep-cs', name: 'Customer Success', sub: '27 people' },
+]
+export const SHARE_ROLES = ['Viewer', 'Editor']
+
 // Notifications (S115–S120)
 export const NOTIFICATION_CATEGORIES = [
   { id: 'threshold', label: 'Freshness threshold alerts', mandatory: true },

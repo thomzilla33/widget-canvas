@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { X, Check, Rocket, History, RotateCcw, EyeOff } from 'lucide-react'
+import { X, Check, Rocket, History, RotateCcw, EyeOff, Users } from 'lucide-react'
 
 const ROLES = ['Sales Agent', 'Support Agent', 'Manager']
 const ZONES = [
@@ -12,7 +12,7 @@ const ZONES = [
 const visibleTo = (audience, role) => audience === 'All audiences' || audience === role
 
 // S99–S104 — preview by role, publish confirm, version history, rollback
-export default function PublishModal({ dashboard, placements, widgetById, onClose, onPublish }) {
+export default function PublishModal({ dashboard, placements, widgetById, onClose, onPublish, onShare }) {
   const [tab, setTab] = useState('preview')
   const [role, setRole] = useState(dashboard?.audience && ROLES.includes(dashboard.audience) ? dashboard.audience : ROLES[0])
   const [published, setPublished] = useState(false)
@@ -59,7 +59,7 @@ export default function PublishModal({ dashboard, placements, widgetById, onClos
         </div>
 
         {published ? (
-          <PublishedState dashboard={dashboard} role={role} onClose={onClose} onHistory={() => { setPublished(false); setTab('history') }} />
+          <PublishedState dashboard={dashboard} role={role} onClose={onClose} onShare={onShare} onHistory={() => { setPublished(false); setTab('history') }} />
         ) : restoring ? (
           <RestoreConfirm version={restoring} onCancel={() => setRestoring(null)} onConfirm={confirmRestore} />
         ) : (
@@ -181,7 +181,7 @@ function Tab({ active, onClick, icon, children }) {
   )
 }
 
-function PublishedState({ dashboard, role, onClose, onHistory }) {
+function PublishedState({ dashboard, role, onClose, onHistory, onShare }) {
   return (
     <div className="flex flex-col items-center px-6 py-10 text-center">
       <div className="grid h-14 w-14 place-items-center rounded-2xl border border-green-200 bg-green-50 dark:border-green-500/25 dark:bg-green-500/10">
@@ -195,10 +195,13 @@ function PublishedState({ dashboard, role, onClose, onHistory }) {
         <button className="btn-secondary" onClick={onHistory}>
           <History size={15} /> Version history
         </button>
-        <button className="btn-primary" onClick={onClose}>
-          Done
+        <button className="btn-primary" onClick={onShare}>
+          <Users size={15} /> Share access
         </button>
       </div>
+      <button className="btn-ghost mt-2 text-xs" onClick={onClose}>
+        Done
+      </button>
     </div>
   )
 }

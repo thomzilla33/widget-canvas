@@ -4,6 +4,7 @@ import { Plus, X, Lock, Unlock, Trash2 } from 'lucide-react'
 import { PageHeader, GovernedBadge, FreshnessBadge, Badge } from '../components/common/index.jsx'
 import { WidgetGlyph } from '../components/widgets/glyph.jsx'
 import PublishModal from '../components/dashboard/PublishModal.jsx'
+import ShareModal from '../components/dashboard/ShareModal.jsx'
 import { useWidgets } from '../state/WidgetsContext.jsx'
 import { useDashboards } from '../state/DashboardsContext.jsx'
 import { TEMPLATE_SEED } from '../data/mock.js'
@@ -50,6 +51,7 @@ export default function DashboardCanvas() {
   const [drawerZone, setDrawerZone] = useState(null) // zone we're adding to
   const [selectedPid, setSelectedPid] = useState(null)
   const [publishOpen, setPublishOpen] = useState(false)
+  const [shareOpen, setShareOpen] = useState(false)
 
   const selected = Object.values(placements)
     .flat()
@@ -100,6 +102,9 @@ export default function DashboardCanvas() {
         actions={
           <>
             {dashboard && <Badge variant={dashboard.status} />}
+            <button className="btn-secondary" onClick={() => setShareOpen(true)}>
+              Share
+            </button>
             <button className="btn-primary" onClick={() => setPublishOpen(true)}>
               Publish
             </button>
@@ -193,8 +198,14 @@ export default function DashboardCanvas() {
           widgetById={widgetById}
           onClose={() => setPublishOpen(false)}
           onPublish={() => updateDashboard(dashboard.id, { status: 'published' })}
+          onShare={() => {
+            setPublishOpen(false)
+            setShareOpen(true)
+          }}
         />
       )}
+
+      {shareOpen && dashboard && <ShareModal dashboard={dashboard} onClose={() => setShareOpen(false)} />}
     </div>
   )
 }
