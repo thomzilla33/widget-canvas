@@ -93,6 +93,13 @@ export const PROFILE_TYPES = [
 ]
 
 export const REPORT_COLLECTIONS = ['Sales Reports', 'Finance Reports', 'Support Reports', 'Executive']
+
+// Widget sizing — drives column span on the canvas AND how much detail renders.
+export const WIDGET_SIZES = [
+  { id: 'sm', label: 'Small', span: 1, width: '1/3 width', detail: 'Compact summary' },
+  { id: 'md', label: 'Medium', span: 2, width: '2/3 width', detail: 'Standard view' },
+  { id: 'lg', label: 'Large', span: 3, width: 'Full width', detail: 'Detailed view' },
+]
 export const HOME_SCOPES = [
   { id: 'personal', label: 'Just me' },
   { id: 'team', label: 'My team' },

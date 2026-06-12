@@ -8,7 +8,15 @@ import PublishModal from '../components/dashboard/PublishModal.jsx'
 import ShareModal from '../components/dashboard/ShareModal.jsx'
 import { useWidgets } from '../state/WidgetsContext.jsx'
 import { useDashboards } from '../state/DashboardsContext.jsx'
-import { TEMPLATE_SEED } from '../data/mock.js'
+import { TEMPLATE_SEED, WIDGET_SIZES } from '../data/mock.js'
+
+// Responsive column span per size — capped to the tracks available at each
+// breakpoint (1 col mobile, 2 at sm, 3 at lg) so a Large widget never overflows.
+const SIZE_SPAN_CLASS = {
+  sm: '',
+  md: 'sm:col-span-2',
+  lg: 'sm:col-span-2 lg:col-span-3',
+}
 
 const ZONES = [
   { key: 'header', label: 'Header', cls: 'zone-header', span: 'col-span-1 md:col-span-4', text: 'text-aims-blue' },
@@ -35,6 +43,7 @@ function buildInitialPlacements(dashboard, widgets) {
       pid: `p${pidSeq}`,
       widgetId: item.widgetId,
       fixed: false,
+      size: 'md',
       audience: 'All audiences',
       quickActions: [],
     })
@@ -72,6 +81,7 @@ export default function DashboardCanvas() {
       pid: `p${pidSeq}`,
       widgetId: widget.id,
       fixed: false,
+      size: 'md',
       audience: 'All audiences',
       quickActions: [],
     }
@@ -363,16 +373,17 @@ function Zone({
       {placements.length === 0 ? (
         <div className="text-xs text-gray-400 dark:text-slate-500 py-4 text-center">Drop widgets here</div>
       ) : (
-        <div className="grid gap-2" style={{ gridTemplateColumns: zone.key === 'sidebar' ? '1fr' : 'repeat(auto-fill,minmax(180px,1fr))' }}>
+        <div className={`grid gap-2 ${zone.key === 'sidebar' ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'}`}>
           {placements.map((p) => {
             const w = widgetById(p.widgetId)
+            const spanClass = zone.key === 'sidebar' ? '' : SIZE_SPAN_CLASS[p.size] || SIZE_SPAN_CLASS.md
             return (
               <button
                 key={p.pid}
                 draggable
                 onDragStart={(e) => onPlacementDragStart(e, p.pid)}
                 onClick={() => onSelect(p.pid)}
-                className={`bg-white dark:bg-[#131a2c] rounded-lg border p-2.5 text-left transition-shadow hover:shadow-md cursor-grab active:cursor-grabbing ${
+                className={`bg-white dark:bg-[#131a2c] rounded-lg border p-2.5 text-left transition-shadow hover:shadow-md cursor-grab active:cursor-grabbing ${spanClass} ${
                   selectedPid === p.pid ? 'border-aims-blue ring-2 ring-aims-blue/30' : 'border-gray-200 dark:border-white/10'
                 }`}
               >
@@ -387,7 +398,7 @@ function Zone({
                   )}
                 </div>
                 <div className="mt-2">
-                  <WidgetRender widget={w} />
+                  <WidgetRender widget={w} size={p.size} />
                 </div>
                 <div className="mt-2 flex items-center gap-1.5 border-t border-gray-100 pt-1.5 dark:border-white/5">
                   {w?.freshness && <FreshnessBadge status={w.freshness} label={w.freshness} />}
@@ -421,6 +432,30 @@ function ConfigPanel({ placement, widget, onChange }) {
           <GovernedBadge governed={!!widget?.governed} />
           {widget?.freshness && <FreshnessBadge status={widget.freshness} label={widget.freshness} />}
         </div>
+      </div>
+
+      {/* Size (resizing) — live preview reflects the chosen size */}
+      <div>
+        <div className="mb-1.5 text-sm font-medium text-gray-700 dark:text-slate-200">Size</div>
+        <div className="rounded-lg border border-gray-200 bg-gray-50/60 p-3 dark:border-white/10 dark:bg-white/[0.02]">
+          <WidgetRender widget={widget} size={placement.size} />
+        </div>
+        <div className="mt-2 flex overflow-hidden rounded-lg border border-gray-300 text-sm dark:border-white/15">
+          {WIDGET_SIZES.map((s) => (
+            <button
+              key={s.id}
+              onClick={() => onChange({ size: s.id })}
+              className={`flex-1 px-2 py-1.5 font-medium ${
+                placement.size === s.id ? 'bg-aims-blue text-white' : 'bg-white text-gray-600 dark:bg-white/5 dark:text-slate-300'
+              }`}
+            >
+              {s.label}
+            </button>
+          ))}
+        </div>
+        <p className="mt-1 text-xs text-gray-400 dark:text-slate-500">
+          {WIDGET_SIZES.find((s) => s.id === placement.size)?.width} · {WIDGET_SIZES.find((s) => s.id === placement.size)?.detail}
+        </p>
       </div>
 
       {/* Fixed vs flexible (S90) */}
