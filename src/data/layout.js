@@ -24,6 +24,8 @@ export function dashboardLayout(dashboard) {
       widgetId: item.widgetId,
       size: ZONE_SIZE[item.zone] || 'md',
       fixed: item.zone === 'header',
+      audience: 'All audiences',
+      quickActions: [],
     })
   })
   return zones

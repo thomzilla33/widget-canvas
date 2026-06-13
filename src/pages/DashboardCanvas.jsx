@@ -8,7 +8,8 @@ import PublishModal from '../components/dashboard/PublishModal.jsx'
 import ShareModal from '../components/dashboard/ShareModal.jsx'
 import { useWidgets } from '../state/WidgetsContext.jsx'
 import { useDashboards } from '../state/DashboardsContext.jsx'
-import { TEMPLATE_SEED, WIDGET_SIZES } from '../data/mock.js'
+import { WIDGET_SIZES } from '../data/mock.js'
+import { dashboardLayout } from '../data/layout.js'
 
 // Responsive column span per size — capped to the tracks available at each
 // breakpoint (1 col mobile, 2 at sm, 3 at lg) so a Large widget never overflows.
@@ -31,38 +32,28 @@ const DENSITY_ALERT = 5
 
 let pidSeq = 0
 
-// Seed placements from a dashboard's template (only widgets that still exist).
-function buildInitialPlacements(dashboard, widgets) {
-  const zones = { header: [], sidebar: [], main: [], bottom: [] }
-  const seed = dashboard?.template ? TEMPLATE_SEED[dashboard.template] : null
-  if (!seed) return zones
-  for (const item of seed) {
-    if (!widgets.find((w) => w.id === item.widgetId)) continue
-    pidSeq += 1
-    zones[item.zone].push({
-      pid: `p${pidSeq}`,
-      widgetId: item.widgetId,
-      fixed: false,
-      size: 'md',
-      audience: 'All audiences',
-      quickActions: [],
-    })
-  }
-  return zones
-}
-
 // S84–S94 — dashboard canvas: zones, placement, config, density
 export default function DashboardCanvas() {
   const { id } = useParams()
   const { widgets } = useWidgets()
   const { dashboards, updateDashboard } = useDashboards()
   const dashboard = dashboards.find((d) => d.id === id)
-  const [placements, setPlacements] = useState(() => buildInitialPlacements(dashboard, widgets))
   const [drawerZone, setDrawerZone] = useState(null) // zone we're adding to
   const [selectedPid, setSelectedPid] = useState(null)
   const [publishOpen, setPublishOpen] = useState(false)
   const [shareOpen, setShareOpen] = useState(false)
   const [dragOverZone, setDragOverZone] = useState(null)
+
+  // Layout is persisted on the dashboard (so edits show on the view/profile).
+  // Falls back to the template seed until the first edit.
+  const placements = dashboardLayout(dashboard)
+
+  // Write the new layout (and the real widget count) back to the dashboard.
+  function commit(updater) {
+    const next = updater(dashboardLayout(dashboard))
+    const count = Object.values(next).reduce((n, arr) => n + arr.length, 0)
+    updateDashboard(id, { layout: next, widgets: count })
+  }
 
   const selected = Object.values(placements)
     .flat()
@@ -84,12 +75,12 @@ export default function DashboardCanvas() {
       audience: 'All audiences',
       quickActions: [],
     }
-    setPlacements((prev) => ({ ...prev, [zone]: [...prev[zone], placement] }))
+    commit((prev) => ({ ...prev, [zone]: [...prev[zone], placement] }))
     setDrawerZone(null)
   }
 
   function updatePlacement(pid, patch) {
-    setPlacements((prev) => {
+    commit((prev) => {
       const next = {}
       for (const z of Object.keys(prev)) {
         next[z] = prev[z].map((p) => (p.pid === pid ? { ...p, ...patch } : p))
@@ -99,7 +90,7 @@ export default function DashboardCanvas() {
   }
 
   function setAllFixed(fixed) {
-    setPlacements((prev) => {
+    commit((prev) => {
       const next = {}
       for (const z of Object.keys(prev)) next[z] = prev[z].map((p) => ({ ...p, fixed }))
       return next
@@ -107,7 +98,7 @@ export default function DashboardCanvas() {
   }
 
   function removePlacement(pid) {
-    setPlacements((prev) => {
+    commit((prev) => {
       const next = {}
       for (const z of Object.keys(prev)) next[z] = prev[z].filter((p) => p.pid !== pid)
       return next
@@ -117,13 +108,13 @@ export default function DashboardCanvas() {
 
   // Move a placed widget to another zone (drag between zones).
   function movePlacement(pid, toZone) {
-    setPlacements((prev) => {
+    commit((prev) => {
       let moved = null
       const next = {}
       for (const z of Object.keys(prev)) {
         next[z] = prev[z].filter((p) => (p.pid === pid ? ((moved = p), false) : true))
       }
-      if (moved) next[toZone] = [...next[toZone], moved]
+      if (moved) next[toZone] = [...next[toZone], { ...moved }]
       return next
     })
   }
