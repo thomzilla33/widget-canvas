@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Check } from 'lucide-react'
 import { PageHeader } from '../components/common/index.jsx'
 import { useWidgets } from '../state/WidgetsContext.jsx'
-import { EXTERNAL_SOURCES, TYPE_LABEL, sourceFields } from '../data/mock.js'
+import { EXTERNAL_SOURCES, TYPE_LABEL, sourceFields, WIDGET_SIZES } from '../data/mock.js'
 import {
   SourcePicker,
   MetricPicker,
@@ -15,6 +15,23 @@ import WidgetPreview from '../components/playground/WidgetPreview.jsx'
 import DataSourceMarketplace from '../components/datasources/DataSourceMarketplace.jsx'
 
 const FRESHNESS_STATUS = { realtime: 'live', '15m': 'fresh', '1h': 'fresh', '24h': 'aging' }
+const PREVIEW_WIDTH = { sm: 'max-w-[240px]', md: 'max-w-md', lg: 'max-w-full' }
+
+// About / Best-for per widget type — shown in the preview, mirroring the marketplace detail.
+const TYPE_INFO = {
+  kpi: { about: 'A single headline metric with its trend.', bestFor: 'At-a-glance status and headline numbers.' },
+  line: { about: 'A value over time.', bestFor: 'Spotting trends and momentum.' },
+  bar: { about: 'A value compared across categories.', bestFor: 'Comparing groups or stages.' },
+  pie: { about: 'A part-to-whole breakdown.', bestFor: 'Showing composition at a glance.' },
+  table: { about: 'Row-level records in a table.', bestFor: 'Detailed, row-by-row review.' },
+  heatmap: { about: 'A matrix of values across two dimensions.', bestFor: 'Finding hotspots across two dimensions.' },
+  scatter: { about: 'The relationship between two variables.', bestFor: 'Correlation and outlier analysis.' },
+  carousel: { about: 'Records you can page through one at a time.', bestFor: 'Reviewing records in a compact space.' },
+  gauge: { about: 'Progress toward a target or threshold.', bestFor: 'Monitoring against a target in real time.' },
+  list: { about: 'A ranked or chronological list.', bestFor: 'Tracking recent items and activity.' },
+  summary: { about: 'An AI-written narrative of the data.', bestFor: 'Executive summaries and quick context.' },
+  map: { about: 'A geographic distribution of values.', bestFor: 'Comparing performance across regions.' },
+}
 
 // S50–S65 — Widget Playground: split-screen build (left) + live preview (right)
 export default function WidgetBuilder() {
@@ -32,6 +49,7 @@ export default function WidgetBuilder() {
   const [ungovernedAck, setUngovernedAck] = useState(false)
   const [saved, setSaved] = useState(false)
   const [browsing, setBrowsing] = useState(false)
+  const [previewSize, setPreviewSize] = useState('lg')
 
   const source = EXTERNAL_SOURCES.find((s) => s.id === sourceId) || null
   // A "field" is either an aggregate metric or a row-level record set.
@@ -61,6 +79,21 @@ export default function WidgetBuilder() {
     name.trim().length > 0 &&
     (!source.hasPII || piiAck) &&
     (source.governed || ungovernedAck)
+
+  // Why Save is disabled (first unmet requirement), shown under the preview.
+  const saveHint = !source
+    ? 'Pick a data source to begin.'
+    : !metric
+      ? 'Choose a metric or record set.'
+      : !typeId
+        ? 'Pick a widget type.'
+        : name.trim().length === 0
+          ? 'Name your widget to save it.'
+          : source.hasPII && !piiAck
+            ? 'Acknowledge the PII notice to save.'
+            : !source.governed && !ungovernedAck
+              ? 'Acknowledge the ungoverned source to save.'
+              : ''
 
   function handleSave() {
     addWidget({
@@ -133,16 +166,55 @@ export default function WidgetBuilder() {
           {/* Right: live preview */}
           <div className="min-w-0 flex-1">
             <div className="lg:sticky lg:top-0">
-              <div className="mb-2 text-[10px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-500">
-                Live preview
+              <div className="mb-2 flex items-center justify-between gap-2">
+                <span className="text-[10px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-500">Live preview</span>
+                {typeId && (
+                  <div className="flex overflow-hidden rounded-lg border border-gray-300 text-xs dark:border-white/15">
+                    {WIDGET_SIZES.map((s) => (
+                      <button
+                        key={s.id}
+                        onClick={() => setPreviewSize(s.id)}
+                        className={`px-2.5 py-1 font-medium transition-colors ${
+                          previewSize === s.id ? 'bg-aims-blue text-white' : 'text-gray-600 dark:text-slate-300'
+                        }`}
+                      >
+                        {s.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
-              <WidgetPreview
-                typeId={typeId}
-                metric={metric}
-                source={source}
-                name={name}
-                freshness={FRESHNESS_STATUS[freshness] || 'fresh'}
-              />
+              <div className={`mx-auto transition-all ${PREVIEW_WIDTH[previewSize]}`}>
+                <WidgetPreview
+                  typeId={typeId}
+                  metric={metric}
+                  source={source}
+                  name={name}
+                  freshness={FRESHNESS_STATUS[freshness] || 'fresh'}
+                />
+              </div>
+              {typeId && (
+                <p className="mt-2 text-center text-xs text-gray-400 dark:text-slate-500">
+                  {WIDGET_SIZES.find((s) => s.id === previewSize)?.width} · {WIDGET_SIZES.find((s) => s.id === previewSize)?.detail}
+                </p>
+              )}
+
+              {typeId && TYPE_INFO[typeId] && (
+                <div className="mt-4 space-y-2">
+                  <div className="rounded-lg border border-gray-200 bg-gray-50/70 p-3 dark:border-white/10 dark:bg-white/[0.02]">
+                    <div className="text-xs font-semibold text-gray-900 dark:text-slate-100">About this widget</div>
+                    <p className="mt-0.5 text-xs text-gray-500 dark:text-slate-400">{TYPE_INFO[typeId].about}</p>
+                  </div>
+                  <div className="rounded-lg border border-aims-blue/30 bg-aims-blue/5 p-3 dark:bg-aims-blue/10">
+                    <div className="text-xs font-semibold text-gray-900 dark:text-slate-100">Best for</div>
+                    <p className="mt-0.5 text-xs text-gray-600 dark:text-slate-300">{TYPE_INFO[typeId].bestFor}</p>
+                  </div>
+                </div>
+              )}
+
+              {!canSave && (
+                <p className="mt-3 text-center text-[11px] text-gray-400 dark:text-slate-500">{saveHint}</p>
+              )}
             </div>
           </div>
         </div>

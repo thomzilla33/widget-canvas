@@ -112,10 +112,23 @@ export default function UCPView() {
     setResetOpen(false)
   }
 
+  if (!entity) {
+    return (
+      <div className="grid h-full place-items-center px-6">
+        <EmptyState
+          icon="🔍"
+          title="Profile not found"
+          description={`No entity matches “${entityId}”.`}
+          action={<button className="btn-secondary" onClick={() => navigate('/dashboards')}>Back to dashboards</button>}
+        />
+      </div>
+    )
+  }
+
   return (
     <div className="h-full flex flex-col">
       <PageHeader
-        title={entity ? entity.name : 'Unified Contact Profile'}
+        title={entity.name}
         description="Unified Contact Profile — every widget shows its freshness and data origin."
       />
 

@@ -110,7 +110,9 @@ export default function WidgetLibraryModal({ zoneLabel, onAdd, onClose }) {
                   </div>
                 </div>
                 <div className="flex-1 overflow-auto p-6">
-                  {list.length === 0 ? (
+                  {widgets.length === 0 ? (
+                    <EmptyState icon="📭" title="Your widget library is empty" description="Create your first widget in the Widget Playground, then add it here." />
+                  ) : list.length === 0 ? (
                     <EmptyState icon="🔍" title="No widgets match" description="Try a different search or clear filters." action={<button className="btn-secondary" onClick={clearAll}>Clear filters</button>} />
                   ) : (
                     <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill,minmax(min(280px,100%),1fr))' }}>

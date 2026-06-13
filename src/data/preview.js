@@ -78,11 +78,20 @@ export function widgetSample(widget) {
   const cells = SAMPLE.matrix.cells.map((row, ri) =>
     row.map((v, ci) => Math.min(100, Math.max(10, Math.round(v * factor + ((h >> (ri + ci)) % 20))))),
   )
+  // Rotate the record set per widget so two tables/lists don't show identical rows.
+  const start = h % SAMPLE.records.length
+  const records = [...SAMPLE.records.slice(start), ...SAMPLE.records.slice(0, start)]
+  const twoVar = SAMPLE.twoVar.map((p, i) => ({
+    x: Math.max(2, Math.round(p.x * factor + ((h >> i) % 10))),
+    y: Math.max(2, Math.round(p.y * factor + ((h >> (i + 2)) % 12))),
+  }))
   return {
     ...SAMPLE,
     series,
     breakdown,
     geo,
+    records,
+    twoVar,
     matrix: { ...SAMPLE.matrix, cells },
     kpi: KPI_VARIANTS[h % KPI_VARIANTS.length],
     gauge: { value: GAUGE_VARIANTS[h % GAUGE_VARIANTS.length], label: 'of target' },

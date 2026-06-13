@@ -28,11 +28,19 @@ export default function DashboardZones({ dashboard }) {
       {zones.map((z) => (
         <div key={z.key} className={`col-span-1 ${z.span}`}>
           <div className={`grid gap-3 ${z.key === 'sidebar' ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'}`}>
-            {layout[z.key].map((p) => {
+            {layout[z.key].map((p, i) => {
+              const key = p.pid ?? `${z.key}-${i}`
               const w = byId(p.widgetId)
               const span = z.key === 'sidebar' ? '' : SIZE_SPAN_CLASS[p.size] || 'sm:col-span-2'
+              if (!w) {
+                return (
+                  <div key={key} className={`card grid min-h-[96px] place-items-center p-3 text-center text-[11px] text-gray-400 dark:text-slate-500 ${span}`}>
+                    This widget was removed from the catalog.
+                  </div>
+                )
+              }
               return (
-                <div key={p.pid} className={`card p-3 ${span}`}>
+                <div key={key} className={`card p-3 ${span}`}>
                   <div className="flex items-center justify-between gap-1">
                     <span className="truncate text-xs font-semibold text-gray-900 dark:text-slate-100">{w?.name || 'Widget'}</span>
                     {p.fixed && <Lock size={12} className="shrink-0 text-gray-400 dark:text-slate-500" />}

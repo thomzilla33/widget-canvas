@@ -12,6 +12,11 @@ export const VIEW_ZONES = [
 
 const ZONE_SIZE = { header: 'sm', sidebar: 'md', main: 'lg', bottom: 'md' }
 
+// Real widget count for a dashboard (from its persisted/seeded layout).
+export function widgetCount(dashboard) {
+  return Object.values(dashboardLayout(dashboard)).reduce((n, arr) => n + arr.length, 0)
+}
+
 export function dashboardLayout(dashboard) {
   // Forward-compatible: use a persisted layout if one ever exists.
   if (dashboard?.layout) return dashboard.layout

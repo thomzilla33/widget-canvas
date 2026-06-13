@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { LayoutDashboard, Search, MapPin, UserX, RotateCcw } from 'lucide-react'
-import { PageHeader, Badge } from '../components/common/index.jsx'
+import { PageHeader, Badge, EmptyState } from '../components/common/index.jsx'
 import { useDashboards } from '../state/DashboardsContext.jsx'
 import { placementLabel, DEACTIVATED_OWNERS } from '../data/mock.js'
+import { widgetCount } from '../data/layout.js'
 
 const STATUS_FILTERS = ['All', 'Published', 'Draft', 'Pending']
 
@@ -92,7 +93,16 @@ export default function DashboardList() {
           </div>
         )}
         {shown.length === 0 ? (
-          <p className="text-sm text-gray-400 dark:text-slate-500">No dashboards match your filters.</p>
+          dashboards.length === 0 ? (
+            <EmptyState
+              icon="🗂️"
+              title="No dashboards yet"
+              description="Create your first dashboard and choose where it lives."
+              action={<button className="btn-primary" onClick={() => navigate('/dashboard/new')}>+ New dashboard</button>}
+            />
+          ) : (
+            <p className="text-sm text-gray-400 dark:text-slate-500">No dashboards match your search or filters.</p>
+          )
         ) : (
           <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill,minmax(min(280px,100%),1fr))' }}>
             {shown.map((d) => (
@@ -127,7 +137,7 @@ export default function DashboardList() {
                 </div>
 
                 <div className="mt-auto flex items-center justify-between gap-2 border-t border-gray-100 pt-2.5 dark:border-white/10">
-                  <span className="text-[11px] text-gray-500 dark:text-slate-400">{d.widgets} widgets · {d.audience}</span>
+                  <span className="text-[11px] text-gray-500 dark:text-slate-400">{widgetCount(d)} widgets · {d.audience}</span>
                   <span className="text-[11px] text-gray-400 dark:text-slate-500">{d.updated}</span>
                 </div>
               </button>

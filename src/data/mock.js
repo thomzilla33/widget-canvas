@@ -127,17 +127,26 @@ export const dashboardTemplates = [
 export const TEMPLATE_SEED = {
   't-acct360': [
     { zone: 'header', widgetId: 'w-revenue' },
+    { zone: 'header', widgetId: 'w-arr' },
     { zone: 'main', widgetId: 'w-pipeline' },
+    { zone: 'main', widgetId: 'w-winrate' },
     { zone: 'sidebar', widgetId: 'w-tickets' },
+    { zone: 'bottom', widgetId: 'w-topaccounts' },
   ],
   't-support': [
-    { zone: 'header', widgetId: 'w-tickets' },
-    { zone: 'main', widgetId: 'w-nps' },
+    { zone: 'header', widgetId: 'w-sla' },
+    { zone: 'header', widgetId: 'w-csat' },
+    { zone: 'main', widgetId: 'w-ticketvol' },
+    { zone: 'sidebar', widgetId: 'w-tickets' },
+    { zone: 'bottom', widgetId: 'w-firstresp' },
   ],
   't-exec': [
     { zone: 'header', widgetId: 'w-revenue' },
+    { zone: 'header', widgetId: 'w-mrr' },
     { zone: 'main', widgetId: 'w-pipeline' },
-    { zone: 'main', widgetId: 'w-nps' },
+    { zone: 'main', widgetId: 'w-margin' },
+    { zone: 'sidebar', widgetId: 'w-churn' },
+    { zone: 'bottom', widgetId: 'w-execsummary' },
   ],
 }
 
