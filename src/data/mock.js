@@ -106,6 +106,34 @@ export const HOME_SCOPES = [
   { id: 'team', label: 'My team' },
 ]
 
+// ── Home pinned widgets: Inbox, Tasks, and the Human Touch Layer (HITL) ──
+export const HOME_INBOX = [
+  { id: 'm1', from: 'Dana Lee', subject: 'Flagged “NPS Trend” — looks frozen', when: '12m ago', unread: true },
+  { id: 'm2', from: 'María González', subject: 'Shared “Employee Performance” with you', when: '1h ago', unread: true },
+  { id: 'm3', from: 'RevOps', subject: '3 dashboards you follow were updated', when: '3h ago', unread: true },
+  { id: 'm4', from: 'Stripe', subject: 'Sync completed — 64,000 customers refreshed', when: '5h ago', unread: false },
+  { id: 'm5', from: 'Priya Nair', subject: 'Re: Q3 pipeline forecast', when: '1d ago', unread: false },
+]
+
+export const HOME_TASKS = [
+  { id: 't1', title: 'Approve “Marketing Performance” for publish', due: 'Today', priority: 'high' },
+  { id: 't2', title: 'Reassign “CS Health” — owner offboarded', due: 'Overdue', priority: 'high' },
+  { id: 't3', title: 'Respond to Dana Lee’s data flag on NPS', due: 'Today', priority: 'med' },
+  { id: 't4', title: 'Review Q3 pipeline forecast', due: 'Tomorrow', priority: 'med' },
+  { id: 't5', title: 'Add widgets to “New Hire Onboarding”', due: 'This week', priority: 'low' },
+]
+
+// HITL queue — agents, workflows, or escalations waiting on a human decision.
+// source: 'Agent' | 'Workflow' | 'System' | 'Escalation'; action label is the primary CTA.
+export const HTL_ITEMS = [
+  { id: 'h1', source: 'Agent', title: 'Sales Copilot — send renewal email to Acme Corp?', detail: 'Drafted a follow-up. Awaiting your approval before it sends.', action: 'Approve', priority: 'high', when: '8m ago' },
+  { id: 'h2', source: 'Workflow', title: 'Invoice approval — $84,200 over threshold', detail: 'NetSuite workflow paused for sign-off above $50k.', action: 'Review', priority: 'high', when: '22m ago' },
+  { id: 'h3', source: 'Escalation', title: 'Support ticket #4821 needs a human', detail: 'AI couldn’t resolve; customer escalated to a person.', action: 'Take', priority: 'high', when: '40m ago' },
+  { id: 'h4', source: 'System', title: 'Schema drift — “NPS Trend” needs re-pin', detail: 'Survey Data View changed; 2 fields were removed.', action: 'Review', priority: 'med', when: '1h ago' },
+  { id: 'h5', source: 'Agent', title: 'Churn-risk agent flagged Globex Inc.', detail: 'Confidence 0.82 — recommends an outreach play.', action: 'Assign', priority: 'med', when: '2h ago' },
+  { id: 'h6', source: 'Workflow', title: 'New-hire access — María González', detail: 'Approve dashboard access for onboarding.', action: 'Approve', priority: 'low', when: '1d ago' },
+]
+
 // Human-readable destination for a dashboard's placement (used in the list).
 export function placementLabel(p) {
   if (!p) return 'Unscoped'
