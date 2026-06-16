@@ -26,6 +26,7 @@ import {
 import { EmptyState, ConnectionBadge } from '../common/index.jsx'
 import { EXTERNAL_SOURCES, WIDGET_TYPES, TYPE_LABEL } from '../../data/mock.js'
 import { TABLE_DEFINITIONS, tableValueColumns } from '../../data/tables.js'
+import { dimensionsFor, bindSlots, TRANSFORMS, AGGREGATIONS } from '../../data/fields.js'
 import { fitScore } from '../../data/preview.js'
 
 const TYPE_ICONS = {
@@ -294,6 +295,85 @@ export function TypeGallery({ typeId, metric, onSelect }) {
           </button>
         )
       })}
+    </div>
+  )
+}
+
+/* ── 3b. Slice by — pick a dimension to break the measure down (Phase 1). ── */
+export function DimensionPicker({ source, measure, dimensionId, onSelect }) {
+  if (!measure) {
+    return <p className="text-xs text-gray-500 dark:text-slate-400">Pick a measure first to choose how to slice it.</p>
+  }
+  const dims = dimensionsFor(source, measure)
+  return (
+    <div className="flex flex-wrap gap-1.5">
+      {dims.map((d) => (
+        <button
+          key={d.id}
+          onClick={() => onSelect(d.id)}
+          aria-pressed={dimensionId === d.id}
+          className={`rounded-full border px-2.5 py-1 text-xs font-medium transition-colors ${
+            dimensionId === d.id
+              ? 'border-aims-blue bg-aims-blue/10 text-aims-blue'
+              : 'border-gray-200 text-gray-600 hover:border-aims-blue/40 dark:border-white/10 dark:text-slate-300'
+          }`}
+        >
+          {d.id === 'none' ? 'No breakdown' : `by ${d.name}`}
+        </button>
+      ))}
+    </div>
+  )
+}
+
+/* ── Slots — how the chosen fields bind to the tile's slots (Phase 1.2). ── */
+export function SlotPanel({ typeId, measure, dimension, transform }) {
+  if (!typeId || !measure) return null
+  const rows = bindSlots(typeId, measure, dimension, transform)
+  return (
+    <div className="space-y-1.5 rounded-lg border border-gray-200 bg-gray-50/60 p-3 dark:border-white/10 dark:bg-white/[0.02]">
+      {rows.map((s) => (
+        <div key={s.key} className="flex items-center justify-between gap-3 text-xs">
+          <span className="flex items-center gap-1.5 text-gray-500 dark:text-slate-400">
+            <span className={`grid h-4 w-4 place-items-center rounded text-[9px] font-bold ${ROLE_CHIP[s.role] || ROLE_CHIP.m}`}>{ROLE_GLYPH[s.role] || 'M'}</span>
+            {s.label}
+            {s.optional && <span className="text-[10px] text-gray-400 dark:text-slate-500">optional</span>}
+          </span>
+          <span className={`truncate font-medium ${s.bound === '—' ? 'text-gray-400 dark:text-slate-500' : 'text-gray-900 dark:text-slate-100'}`}>{s.bound}</span>
+        </div>
+      ))}
+    </div>
+  )
+}
+const ROLE_CHIP = {
+  m: 'bg-aims-blue/15 text-aims-blue',
+  d: 'bg-purple-500/15 text-purple-600 dark:text-purple-300',
+  md: 'bg-cyan-500/15 text-cyan-600 dark:text-cyan-300',
+  t: 'bg-amber-500/15 text-amber-600 dark:text-amber-300',
+  records: 'bg-gray-500/15 text-gray-500 dark:text-slate-400',
+}
+const ROLE_GLYPH = { m: 'M', d: 'D', md: 'F', t: 'T', records: 'R' }
+
+/* ── Transform — reshape the measure / breakdown (Phase 1.4). ── */
+export function TransformPanel({ transform, setTransform, aggregation, setAggregation }) {
+  return (
+    <div className="space-y-4">
+      <Field label="Transform">
+        <select className="input" value={transform} onChange={(e) => setTransform(e.target.value)}>
+          {TRANSFORMS.map((t) => (
+            <option key={t.id} value={t.id}>{t.label}</option>
+          ))}
+        </select>
+      </Field>
+      <Field label="Aggregation">
+        <select className="input" value={aggregation} onChange={(e) => setAggregation(e.target.value)}>
+          {AGGREGATIONS.map((a) => (
+            <option key={a.id} value={a.id}>{a.label}</option>
+          ))}
+        </select>
+      </Field>
+      <p className="text-xs text-gray-500 dark:text-slate-400">
+        Transforms reshape the breakdown (% of total, top-N, running total); aggregation sets how the value rolls up.
+      </p>
     </div>
   )
 }

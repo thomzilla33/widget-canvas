@@ -54,7 +54,7 @@ export function useChartTheme() {
 const H = 220
 
 // ── Trust header + type switcher ─────────────────────────────
-export default function WidgetPreview({ typeId, metric, source, name, freshness, display }) {
+export default function WidgetPreview({ typeId, metric, source, name, freshness, display, shape }) {
   const ready = source && metric && typeId
   return (
     <div className="card flex flex-col p-4">
@@ -79,8 +79,8 @@ export default function WidgetPreview({ typeId, metric, source, name, freshness,
       <div className="mt-3 flex-1">
         {ready ? (
           // Key on type AND data identity so a prior render error clears when the table/column changes.
-          <ChartBoundary key={`${typeId}|${metric._table ? `${metric._table.def?.id}:${metric._table.valueKey}` : metric.id}`}>
-            <Renderer typeId={typeId} metric={metric} pii={!!source.hasPII} display={display} />
+          <ChartBoundary key={`${typeId}|${metric._table ? `${metric._table.def?.id}:${metric._table.valueKey}` : metric.id}|${shape?.dimension?.id || ''}|${shape?.transform || ''}`}>
+            <Renderer typeId={typeId} metric={metric} pii={!!source.hasPII} display={display} shape={shape} />
           </ChartBoundary>
         ) : (
           <div className="grid h-full min-h-[220px] place-items-center rounded-lg border-2 border-dashed border-gray-200 text-center text-sm text-gray-400 dark:border-white/10 dark:text-slate-500">
@@ -104,9 +104,10 @@ export default function WidgetPreview({ typeId, metric, source, name, freshness,
 }
 
 // Renders only the selected view, so an unused view can't throw or do work.
-function Renderer({ typeId, metric, pii, display }) {
-  // Table-backed widgets render REAL computed table data; everything else uses the canned sample.
-  const data = metric?._table ? tableData(metric._table.def, metric._table.valueKey) : previewData(metric)
+function Renderer({ typeId, metric, pii, display, shape }) {
+  // Table-backed widgets render REAL computed table data; everything else uses the canned sample
+  // (sliced by the chosen dimension + transform when set — Phase 1).
+  const data = metric?._table ? tableData(metric._table.def, metric._table.valueKey) : previewData(metric, shape)
   switch (typeId) {
     case 'line': return <LineView data={data} />
     case 'bar': return <BarView data={data} />

@@ -5,11 +5,15 @@ import { PageHeader } from '../components/common/index.jsx'
 import { useWidgets } from '../state/WidgetsContext.jsx'
 import { EXTERNAL_SOURCES, TYPE_LABEL, sourceFields, WIDGET_SIZES } from '../data/mock.js'
 import { getTable } from '../data/tables.js'
+import { dimensionById, recommendTile } from '../data/fields.js'
 import {
   SourcePicker,
   TablePicker,
   TableColumnPicker,
   MetricPicker,
+  DimensionPicker,
+  SlotPanel,
+  TransformPanel,
   TypeGallery,
   ConfigPanel,
   FormatPanel,
@@ -47,6 +51,9 @@ export default function WidgetBuilder() {
   const [metricId, setMetricId] = useState(null)
   const [tableId, setTableId] = useState(null)
   const [tableColumn, setTableColumn] = useState(null)
+  const [dimensionId, setDimensionId] = useState('none') // Phase 1: slice-by dimension
+  const [transform, setTransform] = useState('none')
+  const [aggregation, setAggregation] = useState('sum')
   const [typeId, setTypeId] = useState(null)
   const [typeTouched, setTypeTouched] = useState(false)
   const [name, setName] = useState('')
@@ -83,6 +90,11 @@ export default function WidgetBuilder() {
         ? sourceFields(extSource).find((f) => f.id === metricId) || null
         : null
 
+  function resetShape() {
+    setDimensionId('none')
+    setTransform('none')
+    setAggregation('sum')
+  }
   function selectMode(mode) {
     if (mode === sourceMode) return
     setSourceMode(mode)
@@ -92,6 +104,7 @@ export default function WidgetBuilder() {
     setTableColumn(null)
     setTypeId(null)
     setTypeTouched(false)
+    resetShape()
   }
   function selectSource(id) {
     if (id === sourceId) return // re-selecting the active source shouldn't wipe the metric/type
@@ -99,11 +112,19 @@ export default function WidgetBuilder() {
     setMetricId(null)
     setTypeId(null)
     setTypeTouched(false)
+    resetShape()
   }
   function selectMetric(id) {
     setMetricId(id)
+    resetShape()
+    if (!extSource) return // table mode has no external source to search
     const m = sourceFields(extSource).find((x) => x.id === id)
-    if (m && !typeTouched) setTypeId(m.recommendedType) // auto-pick recommended
+    // Recommend a tile from the measure's natural shape (no dimension yet).
+    if (m && !typeTouched) setTypeId(recommendTile(m, dimensionById('none')))
+  }
+  function selectDimension(id) {
+    setDimensionId(id)
+    if (!typeTouched && metric) setTypeId(recommendTile(metric, dimensionById(id))) // re-recommend from measure × dimension
   }
   function selectTable(id) {
     if (id === tableId) return
@@ -157,6 +178,9 @@ export default function WidgetBuilder() {
       source: source.name,
       tableId: sourceMode === 'table' ? tableId : undefined,
       tableColumn: sourceMode === 'table' ? tableColumn : undefined,
+      dimension: sourceMode !== 'table' && dimensionId !== 'none' ? dimensionId : undefined,
+      transform: transform !== 'none' ? transform : undefined,
+      aggregation: aggregation !== 'sum' ? aggregation : undefined,
       format: format.style === 'auto' ? undefined : format,
       goal: goal.value != null ? goal : undefined,
     })
@@ -164,6 +188,12 @@ export default function WidgetBuilder() {
   }
 
   if (saved) return <SavedConfirmation name={name} navigate={navigate} />
+
+  const isTable = sourceMode === 'table'
+  const dimension = dimensionById(dimensionId)
+  // The gallery's recommendation reflects measure × dimension (connected mode only).
+  const galleryMetric = isTable || !metric ? metric : { ...metric, recommendedType: recommendTile(metric, dimension) }
+  const shape = !isTable ? { dimension, transform } : undefined
 
   return (
     <div className="h-full flex flex-col">
@@ -212,24 +242,42 @@ export default function WidgetBuilder() {
               )}
             </section>
             <section>
-              {sourceMode === 'table' ? (
+              {isTable ? (
                 <>
                   <SectionHeading n={2} title="Column" sub="Pick a measure or formula (ƒ) column to visualize." />
                   <TableColumnPicker table={tableDef} valueKey={tableColumn} onSelect={selectColumn} />
                 </>
               ) : (
                 <>
-                  <SectionHeading n={2} title="Metric" sub="Pick the specific metric this widget shows." />
+                  <SectionHeading n={2} title="Measure" sub="The numeric value this widget shows (a record set for row-level tiles)." />
                   <MetricPicker source={source} metricId={metricId} onSelect={selectMetric} />
                 </>
               )}
             </section>
+            {!isTable && (
+              <section>
+                <SectionHeading n={3} title="Slice by" sub="Break the measure down by a dimension — drives the chart's axis/segments." />
+                <DimensionPicker source={source} measure={metric} dimensionId={dimensionId} onSelect={selectDimension} />
+              </section>
+            )}
             <section>
-              <SectionHeading n={3} title="Widget type" sub="Choose how to visualize it — recommended type is marked." />
-              <TypeGallery typeId={typeId} metric={metric} onSelect={selectType} />
+              <SectionHeading n={isTable ? 3 : 4} title="Widget type" sub="Choose how to visualize it — recommended type is marked." />
+              <TypeGallery typeId={typeId} metric={galleryMetric} onSelect={selectType} />
+              {!isTable && typeId && metric && (
+                <div className="mt-3">
+                  <div className="mb-1.5 text-[11px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-500">Slots</div>
+                  <SlotPanel typeId={typeId} measure={metric} dimension={dimension} transform={transform} />
+                </div>
+              )}
             </section>
+            {!isTable && (
+              <section>
+                <SectionHeading n={5} title="Transform" sub="Reshape the measure — Δ, % of total, top-N, running total, aggregation." />
+                <TransformPanel transform={transform} setTransform={setTransform} aggregation={aggregation} setAggregation={setAggregation} />
+              </section>
+            )}
             <section>
-              <SectionHeading n={4} title="Configure" sub="Name, freshness, filters. Permissions are set later, on a dashboard." />
+              <SectionHeading n={isTable ? 4 : 6} title="Configure" sub="Name, freshness, filters. Permissions are set later, on a dashboard." />
               <ConfigPanel
                 source={source}
                 name={name}
@@ -245,7 +293,7 @@ export default function WidgetBuilder() {
               />
             </section>
             <section>
-              <SectionHeading n={5} title="Format & display" sub="Number format, units, and a goal with conditional color." />
+              <SectionHeading n={isTable ? 5 : 7} title="Format & display" sub="Number format, units, and a goal with conditional color." />
               <FormatPanel format={format} setFormat={setFormat} goal={goal} setGoal={setGoal} />
             </section>
           </div>
@@ -279,6 +327,7 @@ export default function WidgetBuilder() {
                   name={name}
                   freshness={FRESHNESS_STATUS[freshness] || 'fresh'}
                   display={{ format, goal }}
+                  shape={shape}
                 />
               </div>
               {typeId && (

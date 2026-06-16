@@ -1,5 +1,6 @@
 import { computeTable, formatCell, columnAvg, tableDimColumn } from './tables.js'
 import { scopeMult } from './governance.js'
+import { dimensionCats, applyTransform } from './fields.js'
 
 // Canned preview datasets for the Widget Playground. A single bundle is returned
 // so any (metric, widget-type) pair can render something sensible.
@@ -167,14 +168,26 @@ function hashId(s = '') {
   return h
 }
 
+// Re-label a breakdown by the chosen dimension's categories, then apply a transform.
+// `opts` = { dimensionId, transform } — absent ⇒ identity (the pre-Phase-1 behavior).
+function shapeBreakdown(breakdown, opts) {
+  if (!opts || !breakdown?.length) return breakdown
+  let bd = breakdown
+  const cats = opts.dimensionId && opts.dimensionId !== 'none' && opts.dimensionId !== 'time' ? dimensionCats(opts.dimensionId) : null
+  if (cats) bd = cats.map((label, i) => ({ label, value: breakdown[i % breakdown.length]?.value ?? 10 }))
+  return applyTransform(bd, opts.transform)
+}
+
 // Returns the sample bundle with KPI value + breakdown labels that fit the metric.
-export function previewData(metric) {
+// `opts` (builder) = { dimension, transform } — slices the breakdown by a dimension.
+export function previewData(metric, opts) {
   const name = metric?.name || 'Value'
   const h = hashId(name)
   const k = semanticKpi(name, h)
   const cats = breakdownCats(name)
   const breakdown = cats.map((label, i) => ({ label, value: SAMPLE.breakdown[i % SAMPLE.breakdown.length].value }))
-  return { ...SAMPLE, label: name, kpi: { ...SAMPLE.kpi, value: k.value }, kpiRaw: k.raw, breakdown }
+  const shaped = opts ? shapeBreakdown(breakdown, { dimensionId: opts.dimension?.id, transform: opts.transform }) : breakdown
+  return { ...SAMPLE, label: name, kpi: { ...SAMPLE.kpi, value: k.value }, kpiRaw: k.raw, breakdown: shaped }
 }
 
 // Consumption controls: a date range scales magnitude (longer = bigger cumulative
@@ -196,10 +209,15 @@ export function widgetSample(widget, scope) {
   const factor = (0.65 + (hStable % 8) * 0.11) * m
   const series = SAMPLE.series.map((d, i) => ({ x: d.x, y: Math.max(8, Math.round(d.y * factor + ((h >> i) % 22) - 10)) }))
   const cats = breakdownCats(name)
-  const breakdown = cats.map((label, i) => ({
+  const rawBreakdown = cats.map((label, i) => ({
     label,
     value: Math.max(6, Math.round(SAMPLE.breakdown[i % SAMPLE.breakdown.length].value * factor + ((h >> (i + 1)) % 16))),
   }))
+  // A saved widget can carry a dimension/transform (Phase 1) — slice + reshape accordingly.
+  const breakdown =
+    widget?.dimension || widget?.transform
+      ? shapeBreakdown(rawBreakdown, { dimensionId: widget.dimension, transform: widget.transform })
+      : rawBreakdown
   const geo = SAMPLE.geo.map((g, i) => ({ ...g, value: Math.max(5, Math.round(g.value * factor + ((h >> (i + 3)) % 18))) }))
   const cells = SAMPLE.matrix.cells.map((row, ri) =>
     row.map((v, ci) => Math.min(100, Math.max(10, Math.round(v * factor + ((h >> (ri + ci)) % 20))))),
