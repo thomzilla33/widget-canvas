@@ -24,6 +24,7 @@ import {
 import { PageHeader, GovernedBadge, FreshnessBadge, EmptyState } from '../components/common/index.jsx'
 import FeedbackPanel from '../components/ucp/FeedbackPanel.jsx'
 import DashboardZones from '../components/dashboard/DashboardZones.jsx'
+import EntityContextHeader, { profileSupportsHeader } from '../components/dashboard/EntityContextHeader.jsx'
 import { useWidgets } from '../state/WidgetsContext.jsx'
 import { useFeedback } from '../state/FeedbackContext.jsx'
 import { useDashboards } from '../state/DashboardsContext.jsx'
@@ -145,6 +146,11 @@ export default function UCPView() {
       )}
 
       <div className="flex-1 overflow-auto relative">
+        {profileSupportsHeader(profileType) && (
+          <div className="mx-auto w-full max-w-[1800px] px-6 pt-5 lg:px-8 2xl:px-12">
+            <EntityContextHeader entity={entity} />
+          </div>
+        )}
         {activeTab !== 'Overview' ? (
           <div className="mx-auto w-full max-w-[1800px] space-y-6 px-6 py-5 lg:px-8 2xl:px-12">
             {tabDashboards.map((d) => (

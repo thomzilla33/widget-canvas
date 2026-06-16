@@ -5,6 +5,7 @@ import { PageHeader, Badge } from '../components/common/index.jsx'
 import DashboardZones from '../components/dashboard/DashboardZones.jsx'
 import DashboardControls, { DEFAULT_SCOPE } from '../components/dashboard/DashboardControls.jsx'
 import WidgetDrilldownModal from '../components/dashboard/WidgetDrilldownModal.jsx'
+import EntityContextHeader, { entityHeaderApplies } from '../components/dashboard/EntityContextHeader.jsx'
 import { useDashboards } from '../state/DashboardsContext.jsx'
 import { useWidgets } from '../state/WidgetsContext.jsx'
 import { useLive } from '../state/LiveContext.jsx'
@@ -101,6 +102,7 @@ export default function DashboardViewPage() {
               </span>
             </div>
           )}
+          {entityHeaderApplies(dashboard.placement) && <EntityContextHeader placement={dashboard.placement} />}
           <DashboardControls scope={scope} onChange={setScope} />
           <DashboardZones dashboard={dashboard} scope={liveScope} onDrill={setDrill} viewerRole={viewAs} />
         </div>
