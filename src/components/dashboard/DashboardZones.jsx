@@ -1,4 +1,4 @@
-import { Lock } from 'lucide-react'
+import { Lock, Maximize2 } from 'lucide-react'
 import { EmptyState, FreshnessBadge } from '../common/index.jsx'
 import WidgetRender from '../widgets/WidgetRender.jsx'
 import { useWidgets } from '../../state/WidgetsContext.jsx'
@@ -9,9 +9,10 @@ const SIZE_SPAN_CLASS = { sm: '', md: 'sm:col-span-2', lg: 'sm:col-span-2 lg:col
 
 // Read-only render of a dashboard's zones + real widgets. Used by the dashboard
 // view page and inside the profile (UCP) tabs — the consumption side of placement.
-// Cards stretch to fill their cell (h-full + auto-rows-fr) and the header tiles
-// evenly (auto-fit) so the board fills its width/height with no empty gaps.
-export default function DashboardZones({ dashboard }) {
+// `scope` (date range + filters) is threaded into each widget's sample so the
+// board responds to the consumption controls. `onDrill(widget)` makes each card
+// clickable to open the drill-down (omitted on surfaces without it, e.g. UCP).
+export default function DashboardZones({ dashboard, scope, onDrill }) {
   const { widgets } = useWidgets()
   const byId = (id) => widgets.find((w) => w.id === id)
   const layout = dashboardLayout(dashboard)
@@ -36,7 +37,7 @@ export default function DashboardZones({ dashboard }) {
           {z.key === 'header' ? (
             // KPIs tile evenly across the full header width — no trailing gap.
             <div className="grid h-full gap-3" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(min(180px,100%), 1fr))' }}>
-              {layout.header.map((p, i) => renderCard(p, i, z.key, '', byId))}
+              {layout.header.map((p, i) => renderCard(p, i, z.key, '', byId, scope, onDrill))}
             </div>
           ) : (
             <div
@@ -45,7 +46,7 @@ export default function DashboardZones({ dashboard }) {
               }`}
             >
               {layout[z.key].map((p, i) =>
-                renderCard(p, i, z.key, z.key === 'sidebar' ? '' : SIZE_SPAN_CLASS[p.size] || 'sm:col-span-2', byId),
+                renderCard(p, i, z.key, z.key === 'sidebar' ? '' : SIZE_SPAN_CLASS[p.size] || 'sm:col-span-2', byId, scope, onDrill),
               )}
             </div>
           )}
@@ -55,7 +56,7 @@ export default function DashboardZones({ dashboard }) {
   )
 }
 
-function renderCard(p, i, zoneKey, span, byId) {
+function renderCard(p, i, zoneKey, span, byId, scope, onDrill) {
   const key = p.pid ?? `${zoneKey}-${i}`
   const w = byId(p.widgetId)
   if (!w) {
@@ -68,20 +69,43 @@ function renderCard(p, i, zoneKey, span, byId) {
       </div>
     )
   }
-  return (
-    <div key={key} className={`card flex h-full flex-col p-3 ${span}`}>
+  const inner = (
+    <>
       <div className="flex items-center justify-between gap-1">
-        <span className="truncate text-xs font-semibold text-gray-900 dark:text-slate-100" title={w?.name || 'Widget'}>{w?.name || 'Widget'}</span>
-        {p.fixed && <Lock size={12} aria-hidden="true" className="shrink-0 text-gray-400 dark:text-slate-500" />}
+        <span className="truncate text-xs font-semibold text-gray-900 dark:text-slate-100" title={w?.name || 'Widget'}>
+          {w?.name || 'Widget'}
+        </span>
+        <div className="flex shrink-0 items-center gap-1">
+          {onDrill && <Maximize2 size={12} aria-hidden="true" className="text-gray-300 transition-colors group-hover:text-aims-blue dark:text-slate-600" />}
+          {p.fixed && <Lock size={12} aria-hidden="true" className="text-gray-400 dark:text-slate-500" />}
+        </div>
       </div>
       <div className="mt-2 flex flex-1 flex-col justify-center">
-        <WidgetRender widget={w} size={p.size} />
+        <WidgetRender widget={w} size={p.size} scope={scope} />
       </div>
       {w?.freshness && (
         <div className="mt-2 border-t border-gray-100 pt-1.5 dark:border-white/5">
           <FreshnessBadge status={w.freshness} label={w.freshness} />
         </div>
       )}
+    </>
+  )
+  if (onDrill) {
+    return (
+      <button
+        key={key}
+        type="button"
+        onClick={() => onDrill(w)}
+        aria-label={`Open ${w?.name || 'widget'} details`}
+        className={`card group flex h-full flex-col p-3 text-left transition-colors hover:border-aims-blue/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aims-blue/50 ${span}`}
+      >
+        {inner}
+      </button>
+    )
+  }
+  return (
+    <div key={key} className={`card flex h-full flex-col p-3 ${span}`}>
+      {inner}
     </div>
   )
 }

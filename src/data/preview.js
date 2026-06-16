@@ -69,9 +69,21 @@ function hashId(s = '') {
   return h
 }
 
-export function widgetSample(widget) {
-  const h = hashId(widget?.id || widget?.name || '')
-  const factor = 0.65 + (h % 8) * 0.11
+// Consumption controls: a date range scales magnitude (longer = bigger cumulative
+// numbers) and active filters narrow the data. `scope` is optional — when absent
+// the output is identical to the un-scoped baseline (canvas/library/builder).
+const RANGE_MULT = { '7d': 0.45, '30d': 0.78, '90d': 1, qtd: 0.9, '12m': 1.7 }
+
+export function widgetSample(widget, scope) {
+  const base = widget?.id || widget?.name || ''
+  const filterVals = scope?.filters ? Object.values(scope.filters).filter((v) => v && v !== 'All') : []
+  const salt = scope ? `${scope.range || ''}|${filterVals.join(',')}` : ''
+  const hStable = hashId(base) // widget identity → stable KPI/gauge semantics
+  const h = salt ? hashId(`${base}#${salt}`) : hStable // scoped jitter → shapes shift with controls
+  const rangeMult = (scope && RANGE_MULT[scope.range]) || 1
+  const filterScale = 1 - Math.min(0.4, filterVals.length * 0.15) // each active filter narrows the data
+  const m = rangeMult * filterScale
+  const factor = (0.65 + (hStable % 8) * 0.11) * m
   const series = SAMPLE.series.map((d, i) => ({ x: d.x, y: Math.max(8, Math.round(d.y * factor + ((h >> i) % 22) - 10)) }))
   const breakdown = SAMPLE.breakdown.map((b, i) => ({ ...b, value: Math.max(6, Math.round(b.value * factor + ((h >> (i + 1)) % 16))) }))
   const geo = SAMPLE.geo.map((g, i) => ({ ...g, value: Math.max(5, Math.round(g.value * factor + ((h >> (i + 3)) % 18))) }))
@@ -93,8 +105,8 @@ export function widgetSample(widget) {
     records,
     twoVar,
     matrix: { ...SAMPLE.matrix, cells },
-    kpi: KPI_VARIANTS[h % KPI_VARIANTS.length],
-    gauge: { value: GAUGE_VARIANTS[h % GAUGE_VARIANTS.length], label: 'of target' },
+    kpi: KPI_VARIANTS[hStable % KPI_VARIANTS.length],
+    gauge: { value: Math.min(99, Math.max(5, Math.round(GAUGE_VARIANTS[hStable % GAUGE_VARIANTS.length] * (0.85 + 0.15 * m)))), label: 'of target' },
   }
 }
 

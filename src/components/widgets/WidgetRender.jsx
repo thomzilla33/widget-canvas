@@ -21,8 +21,11 @@ const H = { sm: 52, md: 84, lg: 150 }
 
 // Compact, real mini-visualization of a catalog widget, rendered by its
 // `skeleton` AND `size` (sm/md/lg) so the detail level scales with the widget.
-export default function WidgetRender({ widget, size = 'md' }) {
-  const data = useMemo(() => (widget ? widgetSample(widget) : null), [widget])
+export default function WidgetRender({ widget, size = 'md', scope }) {
+  const scopeKey = scope
+    ? `${scope.range || ''}|${Object.values(scope.filters || {}).filter((v) => v && v !== 'All').join(',')}`
+    : ''
+  const data = useMemo(() => (widget ? widgetSample(widget, scope) : null), [widget, scopeKey])
   if (!widget) {
     return <div className="grid h-[88px] place-items-center text-[10px] text-gray-400 dark:text-slate-500">No data</div>
   }

@@ -1,7 +1,10 @@
+import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Pencil, ChevronLeft, MapPin } from 'lucide-react'
 import { PageHeader, Badge } from '../components/common/index.jsx'
 import DashboardZones from '../components/dashboard/DashboardZones.jsx'
+import DashboardControls, { DEFAULT_SCOPE } from '../components/dashboard/DashboardControls.jsx'
+import WidgetDrilldownModal from '../components/dashboard/WidgetDrilldownModal.jsx'
 import { useDashboards } from '../state/DashboardsContext.jsx'
 import { placementLabel } from '../data/mock.js'
 
@@ -11,6 +14,8 @@ export default function DashboardViewPage() {
   const navigate = useNavigate()
   const { dashboards } = useDashboards()
   const dashboard = dashboards.find((d) => d.id === id)
+  const [scope, setScope] = useState(DEFAULT_SCOPE)
+  const [drill, setDrill] = useState(null) // widget opened in the drill-down
 
   if (!dashboard) {
     return (
@@ -46,9 +51,12 @@ export default function DashboardViewPage() {
             <MapPin size={12} aria-hidden="true" className="shrink-0" />
             <span>{placementLabel(dashboard.placement)}</span>
           </div>
-          <DashboardZones dashboard={dashboard} />
+          <DashboardControls scope={scope} onChange={setScope} />
+          <DashboardZones dashboard={dashboard} scope={scope} onDrill={setDrill} />
         </div>
       </div>
+
+      {drill && <WidgetDrilldownModal widget={drill} scope={scope} onClose={() => setDrill(null)} />}
     </div>
   )
 }
