@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { Plus, X, Lock, Unlock, Trash2 } from 'lucide-react'
+import { Plus, X, Lock, Unlock, Trash2, Sparkles, RotateCcw } from 'lucide-react'
 import { PageHeader, GovernedBadge, FreshnessBadge, Badge, EmptyState } from '../components/common/index.jsx'
 import WidgetRender from '../components/widgets/WidgetRender.jsx'
 import WidgetLibraryModal from '../components/widgets/WidgetLibraryModal.jsx'
@@ -10,6 +10,7 @@ import { useWidgets } from '../state/WidgetsContext.jsx'
 import { useDashboards } from '../state/DashboardsContext.jsx'
 import { WIDGET_SIZES } from '../data/mock.js'
 import { dashboardLayout } from '../data/layout.js'
+import { vizRecommendation, vizInterchangeable, VIZ_OPTIONS } from '../data/preview.js'
 
 // Responsive column span per size — capped to the tracks available at each
 // breakpoint (1 col mobile, 2 at sm, 3 at lg) so a Large widget never overflows.
@@ -224,6 +225,7 @@ export default function DashboardCanvas() {
                   onPlacementDragStart={(e, pid) =>
                     e.dataTransfer.setData('text/plain', JSON.stringify({ type: 'move', pid }))
                   }
+                  onUpdate={updatePlacement}
                 />
               ))}
             </div>
@@ -305,6 +307,7 @@ function Zone({
   onDragLeaveZone,
   onDropZone,
   onPlacementDragStart,
+  onUpdate,
 }) {
   const density = densityState(placements.length)
   return (
@@ -348,18 +351,60 @@ function Zone({
           {placements.map((p) => {
             const w = widgetById(p.widgetId)
             const spanClass = zone.key === 'sidebar' ? '' : SIZE_SPAN_CLASS[p.size] || SIZE_SPAN_CLASS.md
+            const current = p.viewAs || w?.skeleton
+            const rec = w ? vizRecommendation(w) : null
+            const suggest = rec && rec.best && rec.best !== current && !vizInterchangeable(rec.best, current) ? rec.best : null
+            const stop = (e) => e.stopPropagation()
             return (
-              <button
+              <div
                 key={p.pid}
+                role="button"
+                tabIndex={0}
                 draggable
                 onDragStart={(e) => onPlacementDragStart(e, p.pid)}
                 onClick={() => onSelect(p.pid)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    onSelect(p.pid)
+                  }
+                }}
                 aria-label={`Configure ${w?.name || 'widget'}`}
-                className={`bg-white dark:bg-[#131a2c] rounded-lg border p-2.5 text-left transition-shadow hover:shadow-md cursor-grab active:cursor-grabbing focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aims-blue/50 ${spanClass} ${
+                className={`group relative bg-white dark:bg-[#131a2c] rounded-lg border p-2.5 text-left transition-shadow hover:shadow-md cursor-grab active:cursor-grabbing focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aims-blue/50 ${spanClass} ${
                   selectedPid === p.pid ? 'border-aims-blue ring-2 ring-aims-blue/30' : 'border-gray-200 dark:border-white/10'
                 }`}
               >
-                <div className="flex items-center justify-between gap-1">
+                {/* Resize through the widget — hover/focus S·M·L control */}
+                <div
+                  className="pointer-events-none absolute right-2 top-2 z-10 flex overflow-hidden rounded-md border border-gray-200 bg-white text-[10px] opacity-0 shadow-sm transition-opacity group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100 dark:border-white/15 dark:bg-[#1a2236]"
+                  onMouseDown={stop}
+                  onDragStart={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                  }}
+                >
+                  {WIDGET_SIZES.map((s) => (
+                    <button
+                      key={s.id}
+                      type="button"
+                      draggable={false}
+                      title={`Resize to ${s.label}`}
+                      aria-label={`Resize ${w?.name || 'widget'} to ${s.label}`}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        e.preventDefault()
+                        onUpdate(p.pid, { size: s.id })
+                      }}
+                      className={`px-1.5 py-0.5 font-bold ${
+                        p.size === s.id ? 'bg-aims-blue text-white' : 'text-gray-500 hover:bg-gray-100 dark:text-slate-400 dark:hover:bg-white/10'
+                      }`}
+                    >
+                      {s.label[0]}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="flex items-center justify-between gap-1 pr-16">
                   <span className="text-xs font-semibold text-gray-900 dark:text-slate-100 truncate">
                     {w?.name || 'Widget'}
                   </span>
@@ -370,13 +415,34 @@ function Zone({
                   )}
                 </div>
                 <div className="mt-2">
-                  <WidgetRender widget={w} size={p.size} />
+                  <WidgetRender widget={w} size={p.size} viewAs={p.viewAs} />
                 </div>
+                {suggest && (
+                  <button
+                    type="button"
+                    draggable={false}
+                    onMouseDown={stop}
+                    onDragStart={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      e.preventDefault()
+                      onUpdate(p.pid, { viewAs: suggest })
+                    }}
+                    title={`Show this widget as ${suggest}`}
+                    className="mt-2 inline-flex items-center gap-1 rounded-md border border-aims-blue/30 bg-aims-blue/10 px-1.5 py-0.5 text-[10px] font-semibold text-aims-blue hover:bg-aims-blue/20"
+                  >
+                    <Sparkles size={10} aria-hidden="true" /> Suggested: {suggest}
+                  </button>
+                )}
                 <div className="mt-2 flex items-center gap-1.5 border-t border-gray-100 pt-1.5 dark:border-white/5">
                   {w?.freshness && <FreshnessBadge status={w.freshness} label={w.freshness} />}
+                  {p.viewAs && <span className="truncate text-[10px] text-gray-400 dark:text-slate-500">as {p.viewAs}</span>}
                   <span className="ml-auto truncate text-[10px] text-gray-400 dark:text-slate-500">{p.audience}</span>
                 </div>
-              </button>
+              </div>
             )
           })}
         </div>
@@ -396,6 +462,8 @@ function ConfigPanel({ placement, widget, onChange }) {
     })
   }
 
+  const rec = widget ? vizRecommendation(widget) : null
+  const currentViz = placement.viewAs || widget?.skeleton
   return (
     <div className="space-y-5">
       <div>
@@ -406,11 +474,11 @@ function ConfigPanel({ placement, widget, onChange }) {
         </div>
       </div>
 
-      {/* Size (resizing) — live preview reflects the chosen size */}
+      {/* Size (resizing) — live preview reflects the chosen size + visualization */}
       <div>
         <div className="mb-1.5 text-sm font-medium text-gray-700 dark:text-slate-200">Size</div>
         <div className="rounded-lg border border-gray-200 bg-gray-50/60 p-3 dark:border-white/10 dark:bg-white/[0.02]">
-          <WidgetRender widget={widget} size={placement.size} />
+          <WidgetRender widget={widget} size={placement.size} viewAs={placement.viewAs} />
         </div>
         <div className="mt-2 flex overflow-hidden rounded-lg border border-gray-300 text-sm dark:border-white/15">
           {WIDGET_SIZES.map((s) => (
@@ -428,6 +496,44 @@ function ConfigPanel({ placement, widget, onChange }) {
         <p className="mt-1 text-xs text-gray-400 dark:text-slate-500">
           {WIDGET_SIZES.find((s) => s.id === placement.size)?.width} · {WIDGET_SIZES.find((s) => s.id === placement.size)?.detail}
         </p>
+      </div>
+
+      {/* Visualization — "best way to show the data" (recommended types marked) */}
+      <div>
+        <div className="mb-1.5 flex items-center justify-between gap-2">
+          <span className="text-sm font-medium text-gray-700 dark:text-slate-200">Visualization</span>
+          <span className="inline-flex items-center gap-1 text-[11px] text-gray-400 dark:text-slate-500">
+            <Sparkles size={11} className="text-amber-500" aria-hidden="true" /> recommended
+          </span>
+        </div>
+        <div className="grid grid-cols-2 gap-1.5">
+          {VIZ_OPTIONS.map((v) => {
+            const isCurrent = currentViz === v
+            const isRec = rec?.recommended.includes(v)
+            return (
+              <button
+                key={v}
+                onClick={() => onChange({ viewAs: v === widget?.skeleton ? undefined : v })}
+                className={`flex items-center justify-between gap-1 rounded-lg border px-2 py-1.5 text-xs font-medium transition-colors ${
+                  isCurrent
+                    ? 'border-aims-blue bg-aims-blue/10 text-aims-blue'
+                    : 'border-gray-200 text-gray-600 hover:border-gray-300 dark:border-white/10 dark:text-slate-300 dark:hover:border-white/20'
+                }`}
+              >
+                <span className="truncate">{v}</span>
+                {isRec && <Sparkles size={11} aria-label="Recommended" className={isCurrent ? 'text-aims-blue' : 'text-amber-500'} />}
+              </button>
+            )
+          })}
+        </div>
+        {placement.viewAs && (
+          <button
+            onClick={() => onChange({ viewAs: undefined })}
+            className="mt-1.5 inline-flex items-center gap-1 text-[11px] text-gray-400 hover:text-gray-600 dark:text-slate-500 dark:hover:text-slate-300"
+          >
+            <RotateCcw size={11} aria-hidden="true" /> Revert to default ({widget?.skeleton})
+          </button>
+        )}
       </div>
 
       {/* Fixed vs flexible (S90) */}

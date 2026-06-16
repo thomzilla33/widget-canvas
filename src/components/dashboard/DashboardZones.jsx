@@ -81,7 +81,7 @@ function renderCard(p, i, zoneKey, span, byId, scope, onDrill) {
         </div>
       </div>
       <div className="mt-2 flex flex-1 flex-col justify-center">
-        <WidgetRender widget={w} size={p.size} scope={scope} />
+        <WidgetRender widget={w} size={p.size} scope={scope} viewAs={p.viewAs} />
       </div>
       {w?.freshness && (
         <div className="mt-2 border-t border-gray-100 pt-1.5 dark:border-white/5">

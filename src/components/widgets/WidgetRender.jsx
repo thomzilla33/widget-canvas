@@ -21,7 +21,7 @@ const H = { sm: 52, md: 84, lg: 150 }
 
 // Compact, real mini-visualization of a catalog widget, rendered by its
 // `skeleton` AND `size` (sm/md/lg) so the detail level scales with the widget.
-export default function WidgetRender({ widget, size = 'md', scope }) {
+export default function WidgetRender({ widget, size = 'md', scope, viewAs }) {
   const scopeKey = scope
     ? `${scope.range || ''}|${Object.values(scope.filters || {}).filter((v) => v && v !== 'All').join(',')}`
     : ''
@@ -30,7 +30,8 @@ export default function WidgetRender({ widget, size = 'md', scope }) {
     return <div className="grid h-[88px] place-items-center text-[10px] text-gray-400 dark:text-slate-500">No data</div>
   }
   const props = { data, size }
-  switch (widget.skeleton) {
+  // A placement can override how the widget is rendered ("best way to show the data").
+  switch (viewAs || widget.skeleton) {
     case 'KPI':
       return <KpiMini {...props} />
     case 'Gauge':

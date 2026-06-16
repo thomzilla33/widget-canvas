@@ -124,3 +124,48 @@ const GOOD = {
 export function fitScore(kind, typeId) {
   return (GOOD[kind] || []).includes(typeId) ? 'good' : 'poor'
 }
+
+// ── "Best way to show the data" — recommend a visualization for a widget ──
+// Bridges a widget's render `skeleton` to a data `kind`, then to the chart types
+// that suit that kind. Used on the canvas to suggest / pick a visualization.
+const SKELETON_KIND = {
+  KPI: 'kpi',
+  Gauge: 'kpi',
+  Chart: 'timeseries',
+  Table: 'records',
+  List: 'breakdown',
+  'Heat Map': 'matrix',
+  Map: 'geo',
+  'AI Summary': 'narrative',
+  Timeline: 'timeseries',
+}
+// Chart type id → the renderable skeleton label WidgetRender understands.
+const TYPEID_SKELETON = {
+  kpi: 'KPI',
+  gauge: 'Gauge',
+  line: 'Chart',
+  bar: 'Chart',
+  pie: 'Chart',
+  table: 'Table',
+  list: 'List',
+  heatmap: 'Heat Map',
+  scatter: 'Chart',
+  carousel: 'List',
+  summary: 'AI Summary',
+  map: 'Map',
+}
+// All renderable visualization options (what a placement can be shown as).
+export const VIZ_OPTIONS = ['KPI', 'Chart', 'Gauge', 'Table', 'List', 'Heat Map', 'Map', 'AI Summary']
+
+// KPI and Gauge are interchangeable single-value views — don't nag to swap between them.
+export function vizInterchangeable(a, b) {
+  const single = (s) => s === 'KPI' || s === 'Gauge'
+  return single(a) && single(b)
+}
+
+// Returns the data kind, the single best skeleton, and the set of recommended skeletons.
+export function vizRecommendation(widget) {
+  const kind = SKELETON_KIND[widget?.skeleton] || 'timeseries'
+  const recommended = [...new Set((GOOD[kind] || []).map((t) => TYPEID_SKELETON[t]).filter(Boolean))]
+  return { kind, best: recommended[0] || widget?.skeleton, recommended }
+}
