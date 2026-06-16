@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
 import { LayoutDashboard, Boxes, UserRound, Sun, Moon, Palette, Settings, LogOut, Home, FileBarChart } from 'lucide-react'
 import { useTheme } from '../../state/ThemeContext.jsx'
 import { useNotifications } from '../../state/NotificationsContext.jsx'
 import NotificationsMenu from './NotificationsMenu.jsx'
+import CommandPalette from './CommandPalette.jsx'
 import './shell.css'
 
 // Sidebar nav — Composable Dashboards surfaces, in the Agentic shell style.
@@ -43,8 +44,21 @@ export default function AppShell() {
   const [ctxOpen, setCtxOpen] = useState(false)
   const [avatarOpen, setAvatarOpen] = useState(false)
   const [notifOpen, setNotifOpen] = useState(false)
+  const [cmdOpen, setCmdOpen] = useState(false)
   const { theme, setTheme } = useTheme()
   const { unreadCount } = useNotifications()
+
+  // Global ⌘K / Ctrl+K opens the command palette.
+  useEffect(() => {
+    const onKey = (e) => {
+      if ((e.metaKey || e.ctrlKey) && (e.key === 'k' || e.key === 'K')) {
+        e.preventDefault()
+        setCmdOpen((v) => !v)
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
 
   return (
     <>
@@ -102,7 +116,7 @@ export default function AppShell() {
           </div>
         </div>
 
-        <button type="button" className="tb-search" aria-label="Open global search">
+        <button type="button" className="tb-search" aria-label="Open global search" onClick={() => setCmdOpen(true)}>
           <svg className="tb-search-ic" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
             <circle cx="6" cy="6" r="4" stroke="currentColor" strokeWidth="1.3" />
             <path d="M9.5 9.5L12 12" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
@@ -265,6 +279,8 @@ export default function AppShell() {
           }}
         />
       )}
+
+      {cmdOpen && <CommandPalette onClose={() => setCmdOpen(false)} />}
 
       {/* ═══ APP (sidebar + main) ═══ */}
       <div className="app">
