@@ -17,7 +17,7 @@ export default function UndoToast({ message, onUndo, onClose }) {
       aria-live="polite"
       className="fixed bottom-5 left-1/2 z-[60] flex max-w-[calc(100vw-2rem)] -translate-x-1/2 items-center gap-3 rounded-xl border border-white/10 bg-gray-900 px-4 py-2.5 text-sm text-white shadow-lg dark:bg-slate-800"
     >
-      <span className="truncate">{message}</span>
+      <span className="line-clamp-2">{message}</span>
       {onUndo && (
         <button
           ref={undoRef}

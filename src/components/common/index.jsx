@@ -141,6 +141,11 @@ export function EmptyState({ icon = '📊', title, description, action }) {
   )
 }
 
+// Shimmer placeholder for in-flight content (prevents blank flashes / layout shift).
+export function Skeleton({ className = '' }) {
+  return <div className={`animate-pulse rounded bg-gray-100 dark:bg-white/5 ${className}`} />
+}
+
 export function StepIndicator({ steps = [], current = 0 }) {
   return (
     <div className="flex items-center gap-2 flex-wrap">

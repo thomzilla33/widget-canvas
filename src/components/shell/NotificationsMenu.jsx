@@ -12,11 +12,11 @@ export default function NotificationsMenu({ onClose }) {
   const visible = items.filter((n) => settings[n.category])
 
   return (
-    <div className="absolute right-0 top-[calc(100%+10px)] z-[200] w-[360px] max-w-[90vw] overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl dark:border-white/10 dark:bg-[#131a2c]">
+    <div className="absolute right-0 top-[calc(100%+10px)] z-[200] w-full sm:w-[360px] max-w-[90vw] overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl dark:border-white/10 dark:bg-[#131a2c]">
       {view === 'list' ? (
         <>
           <div className="flex items-center justify-between border-b border-gray-200 px-4 py-3 dark:border-white/10">
-            <span className="font-semibold text-gray-900 dark:text-slate-100">Notifications</span>
+            <span className="font-semibold text-gray-900 dark:text-white">Notifications</span>
             <div className="flex items-center gap-1">
               <button className="btn-ghost !px-2 !py-1 text-xs" onClick={markAllRead}>
                 Mark all read
@@ -35,7 +35,7 @@ export default function NotificationsMenu({ onClose }) {
           <div className="max-h-[60vh] overflow-auto">
             {visible.length === 0 ? (
               <div className="flex flex-col items-center px-6 py-10 text-center">
-                <BellOff size={26} className="text-gray-300 dark:text-slate-600" />
+                <BellOff size={26} className="text-gray-300 dark:text-slate-400" />
                 <div className="mt-2 text-sm font-medium text-gray-700 dark:text-slate-200">You're all caught up</div>
                 <div className="mt-0.5 text-xs text-gray-400 dark:text-slate-500">No notifications right now.</div>
               </div>
@@ -70,7 +70,7 @@ export default function NotificationsMenu({ onClose }) {
             >
               <ChevronLeft size={16} />
             </button>
-            <span className="font-semibold text-gray-900 dark:text-slate-100">Notification settings</span>
+            <span className="font-semibold text-gray-900 dark:text-white">Notification settings</span>
           </div>
           <div className="p-2">
             {NOTIFICATION_CATEGORIES.map((c) => (
@@ -109,7 +109,7 @@ function Toggle({ checked, disabled, onChange }) {
       onClick={onChange}
       className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${
         checked ? 'bg-aims-blue' : 'bg-gray-300 dark:bg-white/15'
-      } ${disabled ? 'opacity-60' : ''}`}
+      } ${disabled ? 'cursor-not-allowed opacity-60' : ''}`}
     >
       <span
         className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-all ${

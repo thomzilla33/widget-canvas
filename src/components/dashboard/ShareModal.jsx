@@ -35,13 +35,13 @@ export default function ShareModal({ dashboard, onClose }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
-      <div className="card relative z-10 flex w-[560px] max-w-full max-h-[85vh] flex-col overflow-hidden p-0">
+      <div className="card relative z-10 flex w-[90vw] sm:max-w-[560px] max-w-full max-h-[85vh] flex-col overflow-hidden p-0">
         <div className="flex items-center justify-between border-b border-gray-200 px-5 py-3.5 dark:border-white/10">
           <div className="flex items-center gap-2">
             <Users size={16} className="text-aims-blue" />
             <span className="font-semibold text-gray-900 dark:text-slate-100">Share — {dashboard?.name}</span>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-700 dark:text-slate-500 dark:hover:text-slate-200">
+          <button onClick={onClose} aria-label="Close" className="text-gray-400 hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aims-blue/50 dark:text-slate-500 dark:hover:text-slate-200">
             <X size={18} />
           </button>
         </div>
@@ -67,7 +67,7 @@ export default function ShareModal({ dashboard, onClose }) {
             </div>
             <div className="space-y-1.5">
               {available.length === 0 ? (
-                <div className="text-xs text-gray-400 dark:text-slate-500">All {tab} added.</div>
+                <div className="text-xs text-gray-400 dark:text-slate-500">Everyone in {tab} already has access.</div>
               ) : (
                 available.map((s) => {
                   const active = isActive(s)
@@ -111,7 +111,7 @@ export default function ShareModal({ dashboard, onClose }) {
             </div>
             {access.length === 0 ? (
               <div className="rounded-lg border border-dashed border-gray-300 p-5 text-center text-xs text-gray-400 dark:border-white/15 dark:text-slate-500">
-                No one has access yet. Add people or departments above.
+                This dashboard is private. Add people or teams to grant access.
               </div>
             ) : (
               <div className="space-y-1.5">

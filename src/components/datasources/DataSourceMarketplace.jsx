@@ -193,7 +193,7 @@ export default function DataSourceMarketplace({ currentSourceId, onSelect, onClo
 
 function Rail({ show, onShow, sort, onSort, counts, activeCats, onToggleCat, activeProviders, onToggleProvider }) {
   return (
-    <div className="max-h-[38vh] w-full shrink-0 overflow-auto border-b border-gray-200 p-4 dark:border-white/10 md:max-h-none md:w-[220px] md:border-b-0 md:border-r">
+    <div className="max-h-[45vh] w-full shrink-0 overflow-y-auto border-b border-gray-200 p-4 dark:border-white/10 md:max-h-none md:w-[220px] md:border-b-0 md:border-r">
       <RailLabel>Show</RailLabel>
       <div className="mb-4 flex rounded-lg border border-gray-300 p-0.5 dark:border-white/15">
         {SHOW.map((s) => (

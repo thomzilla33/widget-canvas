@@ -161,7 +161,7 @@ export default function NewDashboard() {
         }
       />
 
-      <div className="px-6 py-4 border-b border-gray-200 dark:border-white/10 bg-white dark:bg-[#0f1629]">
+      <div className="shrink-0 px-6 py-4 border-b border-gray-200 dark:border-white/10 bg-white dark:bg-[#0f1629]">
         <StepIndicator steps={STEPS} current={step} />
       </div>
 
@@ -309,9 +309,9 @@ export default function NewDashboard() {
               </Field>
 
               {/* Live destination preview */}
-              <div className="flex items-center gap-2 rounded-lg border border-aims-blue/30 bg-aims-blue/5 px-3 py-2 dark:bg-aims-blue/10">
+              <div className="alert-info flex items-center gap-2">
                 <MapPin size={14} className="shrink-0 text-aims-blue" />
-                <span className="text-xs text-gray-700 dark:text-slate-200">
+                <span>
                   <span className="font-semibold text-aims-blue">Destination:</span> {placementLabel(placement)} · {audience}
                 </span>
               </div>
@@ -324,7 +324,7 @@ export default function NewDashboard() {
                       <div className="text-sm font-semibold text-gray-900 dark:text-slate-100">
                         A dashboard already lives here
                       </div>
-                      <div className="mt-0.5 text-xs text-gray-600 dark:text-slate-300">
+                      <div className="mt-1 text-sm leading-relaxed text-gray-600 dark:text-slate-300">
                         “{conflict.name}” ({conflict.status}) already targets {placementLabel(conflict.placement)} · {conflict.audience}. Creating another may cause overlap.
                       </div>
                       <div className="mt-3 flex items-center gap-2">

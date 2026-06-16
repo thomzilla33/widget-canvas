@@ -43,7 +43,7 @@ export default function DashboardViewPage() {
       <div className="flex-1 overflow-auto">
         <div className="mx-auto w-full max-w-[1800px] px-6 py-5 lg:px-8 2xl:px-12">
           <div className="mb-4 flex items-center gap-1.5 text-xs text-gray-400 dark:text-slate-500">
-            <MapPin size={12} className="shrink-0" />
+            <MapPin size={12} aria-hidden="true" className="shrink-0" />
             <span>{placementLabel(dashboard.placement)}</span>
           </div>
           <DashboardZones dashboard={dashboard} />

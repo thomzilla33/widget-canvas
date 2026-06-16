@@ -19,6 +19,8 @@ export const SKELETON_COLOR = {
 export function WidgetGlyph({ skeleton = 'KPI', sm = false }) {
   return (
     <span
+      role="img"
+      aria-label={`${skeleton} widget`}
       className={`logo-sq ${sm ? '!h-7 !w-7 text-[10px]' : ''}`}
       style={{ background: SKELETON_COLOR[skeleton] || '#2563EB' }}
     >

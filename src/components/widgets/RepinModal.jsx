@@ -42,13 +42,13 @@ export default function RepinModal({ widget, onClose, onComplete }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
-      <div className="card relative z-10 flex w-[660px] max-w-full max-h-[85vh] flex-col overflow-hidden p-0">
+      <div className="card relative z-10 flex w-[90vw] sm:max-w-[660px] max-w-full max-h-[88vh] flex-col overflow-hidden p-0">
         <div className="flex items-center justify-between border-b border-gray-200 px-5 py-3.5 dark:border-white/10">
           <div className="flex items-center gap-2">
             <Pin size={16} className="text-aims-blue" />
             <span className="font-semibold text-gray-900 dark:text-slate-100">Re-pin — {widget.name}</span>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-700 dark:text-slate-500 dark:hover:text-slate-200">
+          <button onClick={onClose} aria-label="Close" className="text-gray-400 hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aims-blue/50 dark:text-slate-500 dark:hover:text-slate-200">
             <X size={18} />
           </button>
         </div>
@@ -128,8 +128,15 @@ export default function RepinModal({ widget, onClose, onComplete }) {
 
             {/* S114 — complete -> approval */}
             <div className="flex items-center justify-between border-t border-gray-200 px-5 py-3 dark:border-white/10">
-              <span className="text-xs text-gray-500 dark:text-slate-400">Approval is notification-only.</span>
-              <button className="btn-primary" disabled={!allMapped} onClick={submit}>
+              <span className="text-xs text-gray-500 dark:text-slate-400">
+                {allMapped ? 'Approval is notification-only.' : 'Map all changed fields to re-pin.'}
+              </span>
+              <button
+                className="btn-primary"
+                disabled={!allMapped}
+                onClick={submit}
+                title={allMapped ? undefined : 'Map all changed fields to re-pin.'}
+              >
                 <Pin size={15} /> Re-pin & submit
               </button>
             </div>

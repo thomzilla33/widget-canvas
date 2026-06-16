@@ -84,8 +84,8 @@ export default function DashboardList() {
                       Owner {d.owner} was offboarded · {placementLabel(d.placement)}
                     </div>
                   </div>
-                  <button className="btn-secondary !py-1.5 !px-3 text-xs shrink-0" onClick={() => reassign(d.id)}>
-                    <RotateCcw size={13} /> Reassign to me
+                  <button className="btn-secondary !py-1.5 !px-3 text-xs shrink-0" aria-label="Take ownership of this dashboard" onClick={() => reassign(d.id)}>
+                    <RotateCcw size={13} /> Take ownership
                   </button>
                 </div>
               ))}
@@ -101,7 +101,11 @@ export default function DashboardList() {
               action={<button className="btn-primary" onClick={() => navigate('/dashboard/new')}>+ New dashboard</button>}
             />
           ) : (
-            <p className="text-sm text-gray-400 dark:text-slate-500">No dashboards match your search or filters.</p>
+            <EmptyState
+              icon="🔍"
+              title="No dashboards found"
+              description="Try a different search or filter."
+            />
           )
         ) : (
           <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill,minmax(min(280px,100%),1fr))' }}>

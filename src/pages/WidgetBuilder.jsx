@@ -132,7 +132,7 @@ export default function WidgetBuilder() {
       <div className="flex-1 overflow-auto">
         <div className="mx-auto flex w-full max-w-[1600px] flex-col gap-6 p-6 lg:px-8 2xl:px-10 lg:flex-row">
           {/* Left: build */}
-          <div className="w-full shrink-0 space-y-7 lg:w-[440px]">
+          <div className="order-2 w-full shrink-0 space-y-7 lg:order-1 lg:w-[440px]">
             <section>
               <SectionHeading n={1} title="Data source" sub="Map from a specific external system or data view." />
               <SourcePicker sourceId={sourceId} onSelect={selectSource} onBrowse={() => setBrowsing(true)} />
@@ -164,7 +164,7 @@ export default function WidgetBuilder() {
           </div>
 
           {/* Right: live preview */}
-          <div className="min-w-0 flex-1">
+          <div className="order-1 min-w-0 flex-1 lg:order-2">
             <div className="lg:sticky lg:top-0">
               <div className="mb-2 flex items-center justify-between gap-2">
                 <span className="text-[10px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-500">Live preview</span>

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { Plus, X, Lock, Unlock, Trash2 } from 'lucide-react'
-import { PageHeader, GovernedBadge, FreshnessBadge, Badge } from '../components/common/index.jsx'
+import { PageHeader, GovernedBadge, FreshnessBadge, Badge, EmptyState } from '../components/common/index.jsx'
 import WidgetRender from '../components/widgets/WidgetRender.jsx'
 import WidgetLibraryModal from '../components/widgets/WidgetLibraryModal.jsx'
 import PublishModal from '../components/dashboard/PublishModal.jsx'
@@ -178,35 +178,56 @@ export default function DashboardCanvas() {
 
       <div className="flex-1 overflow-hidden relative">
         <div className="h-full overflow-auto px-6 py-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-3 auto-rows-min">
-            {ZONES.map((z) => (
-              <Zone
-                key={z.key}
-                zone={z}
-                placements={placements[z.key]}
-                widgetById={widgetById}
-                selectedPid={selectedPid}
-                onAdd={() => {
-                  setSelectedPid(null)
-                  setDrawerZone(z.key)
-                }}
-                onSelect={(pid) => {
-                  setDrawerZone(null)
-                  setSelectedPid(pid)
-                }}
-                dragOver={dragOverZone === z.key}
-                onDragOverZone={(e) => {
-                  e.preventDefault()
-                  setDragOverZone(z.key)
-                }}
-                onDragLeaveZone={() => setDragOverZone((cur) => (cur === z.key ? null : cur))}
-                onDropZone={(e) => handleZoneDrop(e, z.key)}
-                onPlacementDragStart={(e, pid) =>
-                  e.dataTransfer.setData('text/plain', JSON.stringify({ type: 'move', pid }))
+          {allPlacements.length === 0 ? (
+            <div className="rounded-lg border-2 border-dashed border-gray-300 bg-gray-50/40 dark:border-white/10 dark:bg-white/[0.02]">
+              <EmptyState
+                icon="🧩"
+                title="No widgets placed yet"
+                description="Select a zone and add widgets to get started."
+                action={
+                  <button
+                    className="btn-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aims-blue/50"
+                    onClick={() => {
+                      setSelectedPid(null)
+                      setDrawerZone(ZONES[0].key)
+                    }}
+                  >
+                    <Plus size={15} aria-hidden="true" /> Add widget
+                  </button>
                 }
               />
-            ))}
-          </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-3 auto-rows-min">
+              {ZONES.map((z) => (
+                <Zone
+                  key={z.key}
+                  zone={z}
+                  placements={placements[z.key]}
+                  widgetById={widgetById}
+                  selectedPid={selectedPid}
+                  onAdd={() => {
+                    setSelectedPid(null)
+                    setDrawerZone(z.key)
+                  }}
+                  onSelect={(pid) => {
+                    setDrawerZone(null)
+                    setSelectedPid(pid)
+                  }}
+                  dragOver={dragOverZone === z.key}
+                  onDragOverZone={(e) => {
+                    e.preventDefault()
+                    setDragOverZone(z.key)
+                  }}
+                  onDragLeaveZone={() => setDragOverZone((cur) => (cur === z.key ? null : cur))}
+                  onDropZone={(e) => handleZoneDrop(e, z.key)}
+                  onPlacementDragStart={(e, pid) =>
+                    e.dataTransfer.setData('text/plain', JSON.stringify({ type: 'move', pid }))
+                  }
+                />
+              ))}
+            </div>
+          )}
           <p className="mt-4 text-xs text-gray-400 dark:text-slate-500">Screens hosted here: S84–S94</p>
         </div>
 
@@ -226,10 +247,10 @@ export default function DashboardCanvas() {
             onClose={() => setSelectedPid(null)}
             footer={
               <button
-                className="btn-secondary w-full text-aims-stale"
+                className="btn-secondary w-full text-red-600 dark:text-red-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aims-blue/50"
                 onClick={() => removePlacement(selected.pid)}
               >
-                <Trash2 size={15} /> Remove from dashboard
+                <Trash2 size={15} aria-hidden="true" /> Remove from dashboard
               </button>
             }
           >
@@ -295,7 +316,7 @@ function Zone({
       onDragLeave={onDragLeaveZone}
       onDrop={onDropZone}
     >
-      <div className="flex items-center justify-between mb-2">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
         <span className={`text-xs font-semibold uppercase tracking-wide ${zone.text}`}>
           {zone.label}
         </span>
@@ -312,9 +333,10 @@ function Zone({
           )}
           <button
             onClick={onAdd}
-            className="inline-flex items-center gap-1 text-xs font-medium text-gray-500 dark:text-slate-400 hover:text-aims-blue"
+            aria-label={`Add widget to ${zone.label} zone`}
+            className="inline-flex items-center gap-1 text-xs font-medium text-gray-500 dark:text-slate-400 hover:text-aims-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aims-blue/50"
           >
-            <Plus size={13} /> Add
+            <Plus size={13} aria-hidden="true" /> Add
           </button>
         </div>
       </div>
@@ -332,7 +354,8 @@ function Zone({
                 draggable
                 onDragStart={(e) => onPlacementDragStart(e, p.pid)}
                 onClick={() => onSelect(p.pid)}
-                className={`bg-white dark:bg-[#131a2c] rounded-lg border p-2.5 text-left transition-shadow hover:shadow-md cursor-grab active:cursor-grabbing ${spanClass} ${
+                aria-label={`Configure ${w?.name || 'widget'}`}
+                className={`bg-white dark:bg-[#131a2c] rounded-lg border p-2.5 text-left transition-shadow hover:shadow-md cursor-grab active:cursor-grabbing focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aims-blue/50 ${spanClass} ${
                   selectedPid === p.pid ? 'border-aims-blue ring-2 ring-aims-blue/30' : 'border-gray-200 dark:border-white/10'
                 }`}
               >
@@ -341,9 +364,9 @@ function Zone({
                     {w?.name || 'Widget'}
                   </span>
                   {p.fixed ? (
-                    <Lock size={12} className="text-gray-400 dark:text-slate-500 shrink-0" />
+                    <Lock size={12} aria-hidden="true" className="text-gray-400 dark:text-slate-500 shrink-0" />
                   ) : (
-                    <Unlock size={12} className="text-gray-300 shrink-0" />
+                    <Unlock size={12} aria-hidden="true" className="text-gray-300 shrink-0" />
                   )}
                 </div>
                 <div className="mt-2">
@@ -417,7 +440,7 @@ function ConfigPanel({ placement, widget, onChange }) {
               !placement.fixed ? 'bg-aims-blue text-white' : 'bg-white text-gray-600 dark:bg-white/5 dark:text-slate-300'
             }`}
           >
-            <Unlock size={14} /> Flexible
+            <Unlock size={14} aria-hidden="true" /> Flexible
           </button>
           <button
             onClick={() => onChange({ fixed: true })}
@@ -425,7 +448,7 @@ function ConfigPanel({ placement, widget, onChange }) {
               placement.fixed ? 'bg-aims-blue text-white' : 'bg-white text-gray-600 dark:bg-white/5 dark:text-slate-300'
             }`}
           >
-            <Lock size={14} /> Fixed
+            <Lock size={14} aria-hidden="true" /> Fixed
           </button>
         </div>
         <p className="mt-1 text-xs text-gray-400 dark:text-slate-500">
@@ -456,9 +479,10 @@ function ConfigPanel({ placement, widget, onChange }) {
         <div className="mb-1.5 text-sm font-medium text-gray-700 dark:text-slate-200">Quick Actions</div>
         <div className="space-y-1.5">
           {QUICK_ACTIONS.map((qa) => (
-            <label key={qa} className="flex items-center gap-2 text-sm text-gray-700 dark:text-slate-200">
+            <label key={qa} className="flex cursor-pointer items-center gap-2 text-sm text-gray-700 dark:text-slate-200">
               <input
                 type="checkbox"
+                className="checkbox"
                 checked={placement.quickActions.includes(qa)}
                 onChange={() => toggleQuickAction(qa)}
               />
@@ -477,8 +501,12 @@ function SidePanel({ title, children, footer, onClose }) {
     <div className="absolute top-0 right-0 bottom-0 w-80 max-w-[calc(100vw-2rem)] bg-white border-l border-gray-200 dark:bg-[#0f1629] dark:border-white/10 shadow-xl flex flex-col z-10">
       <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-white/10">
         <span className="font-semibold text-gray-900 dark:text-slate-100">{title}</span>
-        <button onClick={onClose} className="text-gray-400 dark:text-slate-500 hover:text-gray-700">
-          <X size={18} />
+        <button
+          onClick={onClose}
+          aria-label="Close panel"
+          className="text-gray-400 dark:text-slate-500 hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aims-blue/50"
+        >
+          <X size={18} aria-hidden="true" />
         </button>
       </div>
       <div className="flex-1 overflow-auto p-4">{children}</div>

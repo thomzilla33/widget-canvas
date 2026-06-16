@@ -112,7 +112,7 @@
 
   /* Catalog card — AIMS-OS integration-card style (hover lift + border accent) */
   .catalog-card {
-    @apply relative flex flex-col gap-2.5 rounded-xl border p-4 text-left transition-all duration-150;
+    @apply relative flex cursor-pointer flex-col gap-2.5 rounded-xl border p-4 text-left transition-all duration-150;
     @apply bg-white border-gray-200 dark:bg-[#131a2c] dark:border-white/10;
     box-shadow: var(--elev-1);
   }
@@ -120,6 +120,31 @@
     @apply border-aims-blue/40 dark:border-aims-blue/40;
     transform: translateY(-1px);
     box-shadow: var(--elev-2);
+  }
+  .catalog-card:active {
+    transform: translateY(0) scale(0.992);
+  }
+  .catalog-card:focus-visible {
+    @apply outline-none ring-2 ring-aims-blue/50 ring-offset-2 ring-offset-white dark:ring-offset-[#131a2c];
+  }
+
+  /* Shared checkbox — consistent box, focus ring, dark-mode contrast */
+  .checkbox {
+    @apply h-4 w-4 shrink-0 cursor-pointer appearance-none rounded border border-gray-300 bg-white transition-colors
+      checked:border-aims-blue checked:bg-aims-blue
+      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aims-blue/40
+      dark:border-white/20 dark:bg-white/5 dark:checked:border-aims-blue dark:checked:bg-aims-blue;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 0.7rem;
+  }
+  .checkbox:checked {
+    background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 0 1 0 1.414l-5 5a1 1 0 0 1-1.414 0l-2-2a1 1 0 1 1 1.414-1.414L6.5 9.086l4.293-4.293a1 1 0 0 1 1.414 0z'/%3e%3c/svg%3e");
+  }
+
+  /* Info banner — used for recaps, hints, destination summaries */
+  .alert-info {
+    @apply rounded-lg border border-blue-200 bg-blue-50 p-3 text-sm text-gray-700 dark:border-blue-500/25 dark:bg-blue-500/10 dark:text-slate-200;
   }
 
   /* Logo square (connector/widget glyph) */

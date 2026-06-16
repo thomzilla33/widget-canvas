@@ -297,7 +297,7 @@ body {
 }
 .sb-toggle:hover {
   background: var(--shell-menu-item-hover-bg);
-  color: #80afff;
+  color: rgba(43, 127, 255, 0.85);
 }
 .sb-toggle-icon {
   width: 18px;
@@ -488,6 +488,11 @@ body {
 .tb-search:hover {
   background: var(--shell-menu-item-hover-bg);
   border-color: var(--shell-menu-border);
+}
+.tb-search:focus-visible {
+  outline: none;
+  border-color: rgba(43, 127, 255, 0.7);
+  box-shadow: 0 0 0 2px rgba(43, 127, 255, 0.35);
 }
 .tb-search-ic {
   color: var(--shell-icon-default);

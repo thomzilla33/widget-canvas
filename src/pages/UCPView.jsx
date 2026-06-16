@@ -260,7 +260,7 @@ function AiSummary({ entityName }) {
   }
 
   return (
-    <div className="card p-5 border-aims-blue/30 bg-gradient-to-br from-blue-50/60 to-white dark:from-aims-blue/10 dark:to-[#131a2c]">
+    <div className="card p-5 border-aims-blue/30 dark:border-aims-blue/20 bg-gradient-to-br from-blue-50/60 to-white dark:from-aims-blue/10 dark:to-[#131a2c]">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-2">
           <span className="h-7 w-7 rounded-lg bg-aims-blue/10 grid place-items-center">
@@ -288,8 +288,10 @@ function HoverIcon({ title, onClick, active, activeClass, children }) {
   return (
     <button
       title={title}
+      aria-label={title}
+      aria-pressed={active != null ? !!active : undefined}
       onClick={onClick}
-      className={`h-6 w-6 grid place-items-center rounded-md border border-gray-200 bg-white shadow-sm hover:border-aims-blue dark:border-white/15 dark:bg-[#1b2540] ${
+      className={`h-6 w-6 grid place-items-center rounded-md border border-gray-200 bg-white shadow-sm hover:border-aims-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aims-blue/50 dark:border-white/15 dark:bg-[#1b2540] ${
         active ? activeClass : 'text-gray-500 dark:text-slate-400 hover:text-aims-blue'
       }`}
     >
@@ -334,7 +336,7 @@ function WidgetFilter({ onApply, onClear }) {
           {range === 'Custom' && (
             <div className="mt-2 flex items-center gap-1.5">
               <input type="date" className="input h-8 !py-1 text-xs" value={from} onChange={(e) => setFrom(e.target.value)} />
-              <span className="text-gray-400">–</span>
+              <span className="text-gray-400 dark:text-slate-500">–</span>
               <input type="date" className="input h-8 !py-1 text-xs" value={to} onChange={(e) => setTo(e.target.value)} />
             </div>
           )}
@@ -383,9 +385,9 @@ function UCPWidget({
       className={`group card p-4 relative flex flex-col ${dragging ? 'opacity-50' : ''}`}
     >
       {/* Header */}
-      <div className="flex items-center justify-between gap-2">
-        <span className="font-semibold text-sm text-gray-900 dark:text-slate-100 truncate">{name}</span>
-        <div className="flex items-center gap-1.5">
+      <div className="flex items-center justify-between gap-2 min-w-0">
+        <span title={name} className="flex-1 min-w-0 font-semibold text-sm text-gray-900 dark:text-slate-100 truncate">{name}</span>
+        <div className="flex shrink-0 items-center gap-1.5">
           {inst.fixed ? (
             <span title="Locked by admin — cannot be moved or hidden">
               <Lock size={13} className="text-gray-400 dark:text-slate-500" />
@@ -398,7 +400,7 @@ function UCPWidget({
               <button
                 onClick={onToggleCollapse}
                 title={collapsed ? 'Expand' : 'Collapse'}
-                className="text-gray-400 dark:text-slate-500 hover:text-gray-700"
+                className="text-gray-400 dark:text-slate-500 hover:text-gray-700 dark:hover:text-slate-300"
               >
                 <ChevronDown size={15} className={`transition-transform ${collapsed ? '-rotate-90' : ''}`} />
               </button>
@@ -445,20 +447,20 @@ function UCPWidget({
           {/* Hover actions: feedback (S22) + quick actions (S17) */}
           <div className="absolute top-3 right-16 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
             <HoverIcon title="Flag data issue" onClick={() => onFeedback('flag', widget)}>
-              <Flag size={13} />
+              <Flag size={13} aria-hidden="true" />
             </HoverIcon>
             <HoverIcon title="Helpful" active={reaction === 'up'} activeClass="text-aims-governed" onClick={() => setReaction(inst.iid, 'up')}>
-              <ThumbsUp size={13} />
+              <ThumbsUp size={13} aria-hidden="true" />
             </HoverIcon>
             <HoverIcon title="Not helpful" active={reaction === 'down'} activeClass="text-aims-stale" onClick={() => setReaction(inst.iid, 'down')}>
-              <ThumbsDown size={13} />
+              <ThumbsDown size={13} aria-hidden="true" />
             </HoverIcon>
             <HoverIcon title="Ask about data" onClick={() => onFeedback('ask', widget)}>
-              <MessageCircle size={13} />
+              <MessageCircle size={13} aria-hidden="true" />
             </HoverIcon>
             {QUICK_ACTIONS.map((qa) => (
               <HoverIcon key={qa.id} title={qa.label} onClick={() => onQuickAction(qa.label, name)}>
-                <qa.icon size={13} />
+                <qa.icon size={13} aria-hidden="true" />
               </HoverIcon>
             ))}
           </div>
@@ -608,7 +610,7 @@ function QuickActionPanel({ action, widgetName, onClose }) {
     <div className="absolute top-0 right-0 bottom-0 w-80 max-w-[calc(100vw-2rem)] bg-white border-l border-gray-200 shadow-xl flex flex-col z-10 dark:bg-[#0f1629] dark:border-white/10">
       <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-white/10">
         <span className="font-semibold text-gray-900 dark:text-slate-100">{action}</span>
-        <button onClick={onClose} className="text-gray-400 dark:text-slate-500 hover:text-gray-700">
+        <button onClick={onClose} className="text-gray-400 dark:text-slate-500 hover:text-gray-700 dark:hover:text-slate-300">
           <X size={18} />
         </button>
       </div>

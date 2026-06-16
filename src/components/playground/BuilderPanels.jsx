@@ -122,7 +122,7 @@ function SourceRow({ source, selected, onSelect }) {
   return (
     <button
       onClick={() => onSelect(source.id)}
-      className={`flex w-full items-center gap-2.5 rounded-lg border p-2.5 text-left transition-shadow hover:shadow-sm ${
+      className={`flex w-full cursor-pointer items-center gap-2.5 rounded-lg border p-2.5 text-left transition-shadow hover:bg-gray-50 hover:shadow-sm dark:hover:bg-white/5 ${
         selected ? 'border-aims-blue ring-2 ring-aims-blue/30' : 'border-gray-200 dark:border-white/10'
       }`}
     >
@@ -182,7 +182,7 @@ function FieldButton({ field, selected, onSelect }) {
   return (
     <button
       onClick={() => onSelect(field.id)}
-      className={`card flex w-full items-center justify-between gap-2 p-3 text-left transition-shadow hover:shadow-md ${
+      className={`card flex w-full cursor-pointer items-center justify-between gap-2 p-3 text-left transition-shadow hover:bg-gray-50 hover:shadow-md dark:hover:bg-white/5 ${
         selected ? 'border-aims-blue ring-2 ring-aims-blue/30' : ''
       }`}
     >
@@ -202,7 +202,7 @@ function FieldButton({ field, selected, onSelect }) {
 /* ── 3. Widget type gallery ── */
 export function TypeGallery({ typeId, metric, onSelect }) {
   return (
-    <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
       {WIDGET_TYPES.map((t) => {
         const Icon = TYPE_ICONS[t.iconName] || Hash
         const recommended = metric && metric.recommendedType === t.id
@@ -260,8 +260,8 @@ export function ConfigPanel({
         </select>
       </Field>
 
-      <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-slate-200">
-        <input type="checkbox" checked={interactiveFilters} onChange={(e) => setInteractiveFilters(e.target.checked)} />
+      <label className="flex cursor-pointer items-center gap-2 text-sm text-gray-700 dark:text-slate-200">
+        <input type="checkbox" className="checkbox" checked={interactiveFilters} onChange={(e) => setInteractiveFilters(e.target.checked)} />
         Let end users filter this widget
       </label>
 
@@ -287,7 +287,7 @@ function Field({ label, children }) {
 function AckBox({ checked, onChange, title, body }) {
   return (
     <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-500/25 dark:bg-amber-500/10">
-      <input type="checkbox" className="mt-0.5" checked={checked} onChange={(e) => onChange(e.target.checked)} />
+      <input type="checkbox" className="checkbox mt-0.5" checked={checked} onChange={(e) => onChange(e.target.checked)} />
       <span>
         <span className="block text-sm font-semibold text-gray-900 dark:text-slate-100">{title}</span>
         <span className="mt-0.5 block text-xs text-gray-600 dark:text-slate-300">{body}</span>

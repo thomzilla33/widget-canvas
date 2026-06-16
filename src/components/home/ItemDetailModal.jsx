@@ -156,7 +156,7 @@ export default function ItemDetailModal({ item, kind, onClose, onArchive, onComp
 
             {/* Metadata grid */}
             {meta.length > 0 && (
-              <dl className="mt-4 grid grid-cols-[auto,1fr] gap-x-4 gap-y-1.5 rounded-lg border border-gray-200 p-3 text-xs dark:border-white/10">
+              <dl className="mt-4 grid grid-cols-[minmax(72px,auto),1fr] gap-x-4 gap-y-1.5 rounded-lg border border-gray-200 p-3 text-xs dark:border-white/10">
                 {meta.map(([label, value]) => (
                   <div key={label} className="contents">
                     <dt className="text-gray-400 dark:text-slate-500">{label}</dt>

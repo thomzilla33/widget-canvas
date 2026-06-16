@@ -174,10 +174,10 @@ function ListMini({ data, size }) {
           const Icon = ACT_ICONS[i % ACT_ICONS.length]
           const Status = ACT_STATUS[i % ACT_STATUS.length]
           return (
-            <div key={r.name} className="rounded-md border border-gray-100 px-2.5 py-1.5 dark:border-white/10">
-              <div className="flex items-center gap-2">
+            <div key={r.name} className="rounded-md border border-gray-100 px-2.5 py-1.5 hover:bg-gray-50 dark:border-white/10 dark:hover:bg-white/5">
+              <div className="flex min-w-0 items-center gap-2">
                 <Icon size={12} className="shrink-0 text-aims-blue" />
-                <span className="flex-1 truncate text-xs font-medium text-gray-900 dark:text-slate-100">{r.name}</span>
+                <span className="min-w-0 flex-1 truncate text-xs font-medium text-gray-900 dark:text-slate-100">{r.name}</span>
                 {Status && <Status size={12} className={`shrink-0 ${ACT_STATUS_COLOR[i % ACT_STATUS_COLOR.length]}`} />}
                 <span className="shrink-0 text-[10px] text-gray-400 dark:text-slate-500">4h ago</span>
                 <ChevronRight size={12} className="shrink-0 text-gray-300 dark:text-slate-600" />
@@ -196,7 +196,7 @@ function ListMini({ data, size }) {
     return (
       <ul className="space-y-1 text-[10px]">
         {data.breakdown.slice(0, 2).map((b) => (
-          <li key={b.label} className="flex justify-between">
+          <li key={b.label} className="flex min-w-0 justify-between">
             <span className="truncate text-gray-600 dark:text-slate-300">{b.label}</span>
             <span className="num font-medium text-gray-900 dark:text-slate-100">{b.value}</span>
           </li>
@@ -225,7 +225,7 @@ function MapMini({ data, size }) {
   return (
     <ul className="space-y-1">
       {rows.map((g, i) => (
-        <li key={g.region} className="flex items-center gap-1.5 text-[10px]">
+        <li key={g.region} className="flex min-w-0 items-center gap-1.5 text-[10px]">
           <span className="w-16 shrink-0 truncate text-gray-600 dark:text-slate-300">{g.region}</span>
           <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-gray-100 dark:bg-white/10">
             <span className="block h-full rounded-full" style={{ width: `${(g.value / max) * 100}%`, background: SERIES[i % SERIES.length] }} />

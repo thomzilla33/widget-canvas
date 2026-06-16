@@ -1,5 +1,5 @@
 import { Lock } from 'lucide-react'
-import { FreshnessBadge } from '../common/index.jsx'
+import { EmptyState, FreshnessBadge } from '../common/index.jsx'
 import WidgetRender from '../widgets/WidgetRender.jsx'
 import { useWidgets } from '../../state/WidgetsContext.jsx'
 import { dashboardLayout, VIEW_ZONES } from '../../data/layout.js'
@@ -19,8 +19,12 @@ export default function DashboardZones({ dashboard }) {
 
   if (!zones.length) {
     return (
-      <div className="rounded-xl border-2 border-dashed border-gray-200 p-10 text-center text-sm text-gray-400 dark:border-white/10 dark:text-slate-500">
-        This dashboard has no widgets yet.
+      <div className="rounded-xl border-2 border-dashed border-gray-200 dark:border-white/10">
+        <EmptyState
+          icon="📊"
+          title="This dashboard is empty"
+          description="Add widgets to start building this dashboard."
+        />
       </div>
     )
   }
@@ -31,7 +35,7 @@ export default function DashboardZones({ dashboard }) {
         <div key={z.key} className={`col-span-1 ${z.span}`}>
           {z.key === 'header' ? (
             // KPIs tile evenly across the full header width — no trailing gap.
-            <div className="grid h-full gap-3" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))' }}>
+            <div className="grid h-full gap-3" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(min(180px,100%), 1fr))' }}>
               {layout.header.map((p, i) => renderCard(p, i, z.key, '', byId))}
             </div>
           ) : (
@@ -67,8 +71,8 @@ function renderCard(p, i, zoneKey, span, byId) {
   return (
     <div key={key} className={`card flex h-full flex-col p-3 ${span}`}>
       <div className="flex items-center justify-between gap-1">
-        <span className="truncate text-xs font-semibold text-gray-900 dark:text-slate-100">{w?.name || 'Widget'}</span>
-        {p.fixed && <Lock size={12} className="shrink-0 text-gray-400 dark:text-slate-500" />}
+        <span className="truncate text-xs font-semibold text-gray-900 dark:text-slate-100" title={w?.name || 'Widget'}>{w?.name || 'Widget'}</span>
+        {p.fixed && <Lock size={12} aria-hidden="true" className="shrink-0 text-gray-400 dark:text-slate-500" />}
       </div>
       <div className="mt-2 flex flex-1 flex-col justify-center">
         <WidgetRender widget={w} size={p.size} />

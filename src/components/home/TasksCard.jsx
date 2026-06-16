@@ -128,7 +128,7 @@ function TaskRow({ t, due, snoozed, onComplete, onSnooze, onOpen }) {
         {t.title}
         {snoozed && <span className="ml-1 text-[10px] text-gray-400 dark:text-slate-500">· snoozed</span>}
       </button>
-      <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${PRIORITY_DOT[t.priority]}`} title={`${t.priority} priority`} />
+      <span role="img" aria-label={`${t.priority} priority`} className={`h-1.5 w-1.5 shrink-0 rounded-full ${PRIORITY_DOT[t.priority]}`} title={`${t.priority} priority`} />
       <span className={`shrink-0 text-[10px] font-medium ${DUE_TONE[due] || 'text-gray-400 dark:text-slate-500'}`}>{due}</span>
       <button
         onClick={onSnooze}

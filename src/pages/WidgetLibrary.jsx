@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Search, Flag, Store } from 'lucide-react'
-import { PageHeader, HealthBadge, FreshnessBadge } from '../components/common/index.jsx'
+import { PageHeader, HealthBadge, FreshnessBadge, EmptyState } from '../components/common/index.jsx'
 import { WidgetGlyph } from '../components/widgets/glyph.jsx'
 import WidgetRender from '../components/widgets/WidgetRender.jsx'
 import RepinModal from '../components/widgets/RepinModal.jsx'
@@ -140,6 +140,13 @@ export default function WidgetLibrary() {
           </div>
         )}
 
+        {shown.length === 0 ? (
+          <EmptyState
+            icon="🔍"
+            title="No widgets found"
+            description="Try adjusting your search or category filter."
+          />
+        ) : (
         <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill,minmax(min(264px,100%),1fr))' }}>
           {shown.map((w) => (
             <button
@@ -190,6 +197,7 @@ export default function WidgetLibrary() {
             </button>
           ))}
         </div>
+        )}
         <p className="mt-4 text-xs text-gray-400 dark:text-slate-500">Screens hosted here: S37, S38, S40–S47</p>
       </div>
 
