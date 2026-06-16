@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Home, LayoutDashboard, FileBarChart, Boxes, UserRound, Plus, Search, CornerDownLeft } from 'lucide-react'
 import { useDashboards } from '../../state/DashboardsContext.jsx'
 import { useWidgets } from '../../state/WidgetsContext.jsx'
 import { entities } from '../../data/mock.js'
+import { useFocusTrap } from '../../hooks/useFocusTrap.js'
 
 const PER_GROUP = 6 // cap results per group so the list stays scannable
 
@@ -14,13 +15,7 @@ export default function CommandPalette({ onClose }) {
   const { widgets } = useWidgets()
   const [q, setQ] = useState('')
   const [active, setActive] = useState(0)
-  const inputRef = useRef(null)
-
-  useEffect(() => {
-    const prev = document.activeElement
-    inputRef.current?.focus()
-    return () => prev?.focus?.()
-  }, [])
+  const trapRef = useFocusTrap()
 
   const go = (path) => {
     onClose()
@@ -108,11 +103,10 @@ export default function CommandPalette({ onClose }) {
       onKeyDown={onKeyDown}
     >
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
-      <div className="card relative z-10 flex max-h-[70vh] w-[90vw] max-w-[600px] flex-col overflow-hidden p-0">
+      <div ref={trapRef} tabIndex={-1} className="card relative z-10 flex max-h-[70vh] w-[90vw] max-w-[600px] flex-col overflow-hidden p-0 outline-none">
         <div className="flex items-center gap-2 border-b border-gray-200 px-4 dark:border-white/10">
-          <Search size={16} className="shrink-0 text-gray-400 dark:text-slate-500" aria-hidden="true" />
+          <Search size={16} className="shrink-0 text-gray-500 dark:text-slate-400" aria-hidden="true" />
           <input
-            ref={inputRef}
             value={q}
             onChange={(e) => {
               setQ(e.target.value)
@@ -128,11 +122,11 @@ export default function CommandPalette({ onClose }) {
         </div>
         <div className="min-h-0 flex-1 overflow-auto py-2">
           {results.length === 0 ? (
-            <div className="px-4 py-10 text-center text-sm text-gray-400 dark:text-slate-500">No results for “{q}”.</div>
+            <div className="px-4 py-10 text-center text-sm text-gray-500 dark:text-slate-400">No results for “{q}”.</div>
           ) : (
             groups.map((g) => (
               <div key={g.name} className="px-2 pb-1">
-                <div className="px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-500">{g.name}</div>
+                <div className="px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-gray-500 dark:text-slate-400">{g.name}</div>
                 {g.items.map((c) => {
                   const Icon = c.icon
                   const isActive = c.flatIndex === safeActive
@@ -146,9 +140,9 @@ export default function CommandPalette({ onClose }) {
                         isActive ? 'bg-aims-blue/10 text-aims-blue' : 'text-gray-700 hover:bg-gray-50 dark:text-slate-200 dark:hover:bg-white/5'
                       }`}
                     >
-                      <Icon size={15} className={`shrink-0 ${isActive ? 'text-aims-blue' : 'text-gray-400 dark:text-slate-500'}`} aria-hidden="true" />
+                      <Icon size={15} className={`shrink-0 ${isActive ? 'text-aims-blue' : 'text-gray-500 dark:text-slate-400'}`} aria-hidden="true" />
                       <span className="min-w-0 flex-1 truncate text-sm">{c.label}</span>
-                      {c.sub && <span className="max-w-[45%] shrink-0 truncate text-[11px] text-gray-400 dark:text-slate-500">{c.sub}</span>}
+                      {c.sub && <span className="max-w-[45%] shrink-0 truncate text-[11px] text-gray-500 dark:text-slate-400">{c.sub}</span>}
                       {isActive && <CornerDownLeft size={13} className="shrink-0 text-aims-blue" aria-hidden="true" />}
                     </button>
                   )

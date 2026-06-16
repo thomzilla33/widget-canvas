@@ -54,7 +54,7 @@ export default function WidgetPreview({ typeId, metric, source, name, freshness 
         <div className="min-w-0">
           <div className="truncate font-semibold text-gray-900 dark:text-slate-100">{name?.trim() || 'Untitled widget'}</div>
           {ready && (
-            <div className="truncate text-[11px] text-gray-400 dark:text-slate-500">
+            <div className="truncate text-[11px] text-gray-500 dark:text-slate-400">
               {TYPE_LABEL[typeId]} · {source.name} · {metric.name}
             </div>
           )}
@@ -319,7 +319,7 @@ function CarouselView({ data, pii }) {
       </button>
       <div className="flex-1 rounded-lg border border-gray-200 p-4 dark:border-white/10">
         <div className="text-sm font-semibold text-gray-900 dark:text-slate-100">{r.name}</div>
-        <div className="mt-0.5 text-[11px] text-gray-400 dark:text-slate-500">{pii ? maskName(r.owner) : r.owner}</div>
+        <div className="mt-0.5 text-[11px] text-gray-500 dark:text-slate-400">{pii ? maskName(r.owner) : r.owner}</div>
         <div className="mt-3 text-2xl font-bold text-gray-900 dark:text-slate-100">{r.value}</div>
         <div className="mt-1 text-xs text-gray-500 dark:text-slate-400">{r.status}</div>
         <div className="mt-3 flex justify-center gap-1">
@@ -357,7 +357,7 @@ function MapView({ data }) {
   const max = Math.max(...data.geo.map((g) => g.value))
   return (
     <div>
-      <div className="mb-3 grid h-24 place-items-center rounded-lg bg-gradient-to-br from-aims-blue/10 to-purple-500/10 text-xs text-gray-400 dark:text-slate-500">
+      <div className="mb-3 grid h-24 place-items-center rounded-lg bg-gradient-to-br from-aims-blue/10 to-purple-500/10 text-xs text-gray-500 dark:text-slate-400">
         🗺️ Geographic distribution
       </div>
       <ul className="space-y-1.5">

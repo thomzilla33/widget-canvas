@@ -27,7 +27,7 @@ export default function WidgetRender({ widget, size = 'md', scope, viewAs }) {
     : ''
   const data = useMemo(() => (widget ? widgetSample(widget, scope) : null), [widget, scopeKey])
   if (!widget) {
-    return <div className="grid h-[88px] place-items-center text-[10px] text-gray-400 dark:text-slate-500">No data</div>
+    return <div className="grid h-[88px] place-items-center text-[10px] text-gray-500 dark:text-slate-400">No data</div>
   }
   const props = { data, size }
   // A placement can override how the widget is rendered ("best way to show the data").
@@ -71,7 +71,7 @@ function KpiMini({ data, size }) {
         </div>
       )}
       {size === 'lg' && (
-        <div className="mt-2">
+        <div className="mt-2" aria-hidden="true">
           <ResponsiveContainer width="100%" height={64}>
             <LineChart data={data.series} margin={{ top: 4, right: 4, left: 4, bottom: 0 }}>
               <Line type="monotone" dataKey="y" stroke={SERIES[0]} strokeWidth={2} dot={false} />
@@ -85,31 +85,38 @@ function KpiMini({ data, size }) {
 
 function LineMini({ data, size }) {
   const t = useChartTheme()
+  const ys = data.series.map((d) => d.y)
+  const label = `Trend line — ${ys.length} points, latest ${ys[ys.length - 1]}, range ${Math.min(...ys)} to ${Math.max(...ys)}.`
   return (
-    <ResponsiveContainer width="100%" height={H[size]}>
-      <LineChart data={data.series} margin={{ top: 6, right: 6, left: 6, bottom: 0 }}>
-        {size === 'lg' && <CartesianGrid stroke={t.grid} vertical={false} />}
-        {size === 'lg' && <XAxis dataKey="x" stroke={t.axis} tick={{ ...t.tick, fontSize: 10 }} tickLine={false} />}
-        <Line type="monotone" dataKey="y" stroke={SERIES[0]} strokeWidth={2} dot={false} />
-      </LineChart>
-    </ResponsiveContainer>
+    <div role="img" aria-label={label}>
+      <ResponsiveContainer width="100%" height={H[size]}>
+        <LineChart data={data.series} margin={{ top: 6, right: 6, left: 6, bottom: 0 }}>
+          {size === 'lg' && <CartesianGrid stroke={t.grid} vertical={false} />}
+          {size === 'lg' && <XAxis dataKey="x" stroke={t.axis} tick={{ ...t.tick, fontSize: 10 }} tickLine={false} />}
+          <Line type="monotone" dataKey="y" stroke={SERIES[0]} strokeWidth={2} dot={false} />
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
   )
 }
 
 function BarMini({ data, size }) {
   const t = useChartTheme()
+  const label = `Bar chart — ${data.breakdown.map((b) => `${b.label} ${b.value}`).join(', ')}.`
   return (
-    <ResponsiveContainer width="100%" height={H[size]}>
-      <BarChart data={data.breakdown} margin={{ top: 6, right: 6, left: 6, bottom: 0 }}>
-        {size === 'lg' && <CartesianGrid stroke={t.grid} vertical={false} />}
-        {size === 'lg' && <XAxis dataKey="label" stroke={t.axis} tick={{ ...t.tick, fontSize: 9 }} tickLine={false} interval={0} />}
-        <Bar dataKey="value" radius={[3, 3, 0, 0]}>
-          {data.breakdown.map((entry, i) => (
-            <Cell key={entry.label} fill={SERIES[i % SERIES.length]} />
-          ))}
-        </Bar>
-      </BarChart>
-    </ResponsiveContainer>
+    <div role="img" aria-label={label}>
+      <ResponsiveContainer width="100%" height={H[size]}>
+        <BarChart data={data.breakdown} margin={{ top: 6, right: 6, left: 6, bottom: 0 }}>
+          {size === 'lg' && <CartesianGrid stroke={t.grid} vertical={false} />}
+          {size === 'lg' && <XAxis dataKey="label" stroke={t.axis} tick={{ ...t.tick, fontSize: 9 }} tickLine={false} interval={0} />}
+          <Bar dataKey="value" radius={[3, 3, 0, 0]}>
+            {data.breakdown.map((entry, i) => (
+              <Cell key={entry.label} fill={SERIES[i % SERIES.length]} />
+            ))}
+          </Bar>
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
   )
 }
 
@@ -118,7 +125,7 @@ function GaugeMini({ data, size }) {
   const v = data.gauge.value
   const h = size === 'sm' ? 64 : size === 'lg' ? 132 : 88
   return (
-    <div className="relative" style={{ height: h }}>
+    <div className="relative" style={{ height: h }} role="img" aria-label={`${v}% ${data.gauge.label}`}>
       <ResponsiveContainer width="100%" height="100%">
         <RadialBarChart innerRadius="70%" outerRadius="100%" data={[{ value: v }]} startAngle={210} endAngle={-30}>
           <PolarAngleAxis type="number" domain={[0, 100]} tick={false} />
@@ -183,7 +190,7 @@ function ListMini({ data, size }) {
                 <Icon size={12} className="shrink-0 text-aims-blue" />
                 <span className="min-w-0 flex-1 truncate text-xs font-medium text-gray-900 dark:text-slate-100">{r.name}</span>
                 {Status && <Status size={12} className={`shrink-0 ${ACT_STATUS_COLOR[i % ACT_STATUS_COLOR.length]}`} />}
-                <span className="shrink-0 text-[10px] text-gray-400 dark:text-slate-500">4h ago</span>
+                <span className="shrink-0 text-[10px] text-gray-500 dark:text-slate-400">4h ago</span>
                 <ChevronRight size={12} className="shrink-0 text-gray-300 dark:text-slate-600" />
               </div>
               <div className="mt-0.5 truncate text-[11px] text-gray-500 dark:text-slate-400">

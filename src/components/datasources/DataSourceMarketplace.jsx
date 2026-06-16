@@ -254,7 +254,7 @@ function Rail({ show, onShow, sort, onSort, counts, activeCats, onToggleCat, act
 
 function RailLabel({ children }) {
   return (
-    <div className="mb-1.5 text-[10px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-500">{children}</div>
+    <div className="mb-1.5 text-[10px] font-bold uppercase tracking-wide text-gray-500 dark:text-slate-400">{children}</div>
   )
 }
 
@@ -262,7 +262,7 @@ function Toolbar({ search, onSearch, activeCats, onToggleCat, activeProviders, o
   return (
     <div className="border-b border-gray-200 px-6 py-3 dark:border-white/10">
       <div className="relative max-w-md">
-        <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500" />
+        <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-500 dark:text-slate-400" />
         <input
           className="input h-9 pl-8"
           placeholder={`Search ${EXTERNAL_SOURCES.length} data sources…`}
@@ -364,7 +364,7 @@ function Card({ source, isCurrent, onUse, onOpen }) {
         <Logo source={source} />
         <div className="min-w-0 flex-1">
           <div className="truncate text-sm font-semibold text-gray-900 dark:text-slate-100">{source.name}</div>
-          <div className="truncate text-[11px] uppercase tracking-wide text-gray-400 dark:text-slate-500">{source.category}</div>
+          <div className="truncate text-[11px] uppercase tracking-wide text-gray-500 dark:text-slate-400">{source.category}</div>
         </div>
         <ConnectionBadge status={source.status} />
       </div>
@@ -395,7 +395,7 @@ function FieldRow({ field }) {
       <div className="min-w-0">
         <div className="truncate text-sm font-medium text-gray-900 dark:text-slate-100">{field.name}</div>
         {field.entityType && (
-          <div className="text-[11px] text-gray-400 dark:text-slate-500">
+          <div className="text-[11px] text-gray-500 dark:text-slate-400">
             {field.entityType} · {field.count.toLocaleString()} rows{field.hasPII ? ' · PII' : ''}
           </div>
         )}
@@ -412,8 +412,8 @@ function Detail({ source, isCurrent, onUse, onBack }) {
         <button onClick={onBack} className="grid h-7 w-7 place-items-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:text-slate-500 dark:hover:bg-white/10" aria-label="Back">
           <ChevronLeft size={16} />
         </button>
-        <span className="text-xs text-gray-400 dark:text-slate-500">Data Sources</span>
-        <span className="text-xs text-gray-400 dark:text-slate-500">/</span>
+        <span className="text-xs text-gray-500 dark:text-slate-400">Data Sources</span>
+        <span className="text-xs text-gray-500 dark:text-slate-400">/</span>
         <span className="text-xs font-semibold text-gray-700 dark:text-slate-200">{source.name}</span>
       </div>
 
@@ -423,7 +423,7 @@ function Detail({ source, isCurrent, onUse, onBack }) {
           <div className="min-w-0 flex-1">
             <h2 className="text-xl font-bold text-gray-900 dark:text-slate-100">{source.name}</h2>
             <div className="mt-1 flex flex-wrap items-center gap-2">
-              <span className="text-[11px] uppercase tracking-wide text-gray-400 dark:text-slate-500">{source.category}</span>
+              <span className="text-[11px] uppercase tracking-wide text-gray-500 dark:text-slate-400">{source.category}</span>
               <ConnectionBadge status={source.status} />
             </div>
           </div>
@@ -476,14 +476,14 @@ function Detail({ source, isCurrent, onUse, onBack }) {
 
 function SectionLabel({ children }) {
   return (
-    <div className="mb-2 text-[11px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-500">{children}</div>
+    <div className="mb-2 text-[11px] font-bold uppercase tracking-wide text-gray-500 dark:text-slate-400">{children}</div>
   )
 }
 
 function DetailStat({ label, value }) {
   return (
     <div className="rounded-lg border border-gray-200 p-3 dark:border-white/10">
-      <div className="text-[10px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-500">{label}</div>
+      <div className="text-[10px] font-bold uppercase tracking-wide text-gray-500 dark:text-slate-400">{label}</div>
       <div className="mt-0.5 truncate text-sm font-medium text-gray-800 dark:text-slate-200">{value}</div>
     </div>
   )

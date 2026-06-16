@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { X, Check, AlertTriangle, ArrowRight, Pin } from 'lucide-react'
 import { SCHEMA_DRIFT } from '../../data/mock.js'
+import { useFocusTrap } from '../../hooks/useFocusTrap.js'
 
 const STATUS_CHIP = {
   unchanged: 'cap-chip-neutral',
@@ -10,6 +11,7 @@ const STATUS_CHIP = {
 
 // S111–S114 — re-pin a widget whose source schema changed
 export default function RepinModal({ widget, onClose, onComplete }) {
+  const trapRef = useFocusTrap()
   const drift = SCHEMA_DRIFT[widget.id]
   const [remap, setRemap] = useState(() =>
     Object.fromEntries((drift?.broken ?? []).map((b) => [b.was, b.suggest])),
@@ -40,9 +42,9 @@ export default function RepinModal({ widget, onClose, onComplete }) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onKeyDown={(e) => e.key === 'Escape' && onClose()}>
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
-      <div className="card relative z-10 flex w-[90vw] sm:max-w-[660px] max-w-full max-h-[88vh] flex-col overflow-hidden p-0">
+      <div ref={trapRef} tabIndex={-1} className="card relative z-10 flex w-[90vw] sm:max-w-[660px] max-w-full max-h-[88vh] flex-col overflow-hidden p-0">
         <div className="flex items-center justify-between border-b border-gray-200 px-5 py-3.5 dark:border-white/10">
           <div className="flex items-center gap-2">
             <Pin size={16} className="text-aims-blue" />
@@ -99,7 +101,7 @@ export default function RepinModal({ widget, onClose, onComplete }) {
                       <div className="text-xs font-semibold text-gray-900 dark:text-slate-100">{b.binding}</div>
                       <div className="text-[11px] text-aims-stale line-through">{b.was}</div>
                     </div>
-                    <ArrowRight size={15} className="shrink-0 text-gray-400 dark:text-slate-500" />
+                    <ArrowRight size={15} className="shrink-0 text-gray-500 dark:text-slate-400" />
                     <select
                       className="input h-9 flex-1"
                       value={remap[b.was] || ''}
@@ -150,7 +152,7 @@ export default function RepinModal({ widget, onClose, onComplete }) {
 function SchemaColumn({ title, fields }) {
   return (
     <div className="rounded-lg border border-gray-200 p-3 dark:border-white/10">
-      <div className="mb-2 text-[10px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-500">
+      <div className="mb-2 text-[10px] font-bold uppercase tracking-wide text-gray-500 dark:text-slate-400">
         {title}
       </div>
       <div className="space-y-1.5">

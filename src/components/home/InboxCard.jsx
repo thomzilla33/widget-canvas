@@ -107,7 +107,7 @@ export default function InboxCard({ notify }) {
             )}
           </ul>
           <div className="mt-1.5 flex items-center justify-between px-2">
-            <span className="text-[11px] text-gray-400 dark:text-slate-500">
+            <span className="text-[11px] text-gray-500 dark:text-slate-400">
               Showing {shown.length} of {visible.length}
             </span>
             {visible.length > PREVIEW_COUNT && (
@@ -147,7 +147,7 @@ function MessageRow({ m, unread, recovered, onOpen, onToggleRead, onArchive }) {
         >
           {recovered ? 'Salesforce reconnected — sync recovered' : m.subject}
         </span>
-        <span className="block truncate text-[11px] text-gray-400 dark:text-slate-500">
+        <span className="block truncate text-[11px] text-gray-500 dark:text-slate-400">
           {m.actor?.name} · {recovered ? 'just now' : m.when}
         </span>
       </button>
@@ -165,7 +165,7 @@ function ErrorRow({ m, retrying, onRetry, onOpen }) {
       <AlertTriangle size={14} className="mt-0.5 shrink-0 text-aims-stale" />
       <button onClick={onOpen} className="min-w-0 flex-1 text-left">
         <span className="block truncate text-xs font-semibold text-gray-900 dark:text-slate-100">{m.subject}</span>
-        <span className="block truncate text-[11px] text-gray-400 dark:text-slate-500">
+        <span className="block truncate text-[11px] text-gray-500 dark:text-slate-400">
           {m.actor?.name} · {m.when}
         </span>
       </button>
@@ -195,7 +195,7 @@ function EmptyInbox() {
     <div className="mt-3 grid place-items-center rounded-lg border border-dashed border-gray-200 py-8 text-center dark:border-white/10">
       <MailOpen size={22} className="text-aims-governed" />
       <div className="mt-1 text-sm font-medium text-gray-700 dark:text-slate-200">Inbox zero</div>
-      <div className="text-[11px] text-gray-400 dark:text-slate-500">You’ve archived everything. Nice.</div>
+      <div className="text-[11px] text-gray-500 dark:text-slate-400">You’ve archived everything. Nice.</div>
     </div>
   )
 }

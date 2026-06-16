@@ -77,7 +77,7 @@ function renderCard(p, i, zoneKey, span, byId, scope, onDrill) {
     return (
       <div
         key={key}
-        className={`card grid h-full min-h-[96px] place-items-center p-3 text-center text-[11px] text-gray-400 dark:text-slate-500 ${span}`}
+        className={`card grid h-full min-h-[96px] place-items-center p-3 text-center text-[11px] text-gray-500 dark:text-slate-400 ${span}`}
       >
         This widget was removed from the catalog.
       </div>
@@ -91,7 +91,7 @@ function renderCard(p, i, zoneKey, span, byId, scope, onDrill) {
         </span>
         <div className="flex shrink-0 items-center gap-1">
           {onDrill && <Maximize2 size={12} aria-hidden="true" className="text-gray-300 transition-colors group-hover:text-aims-blue dark:text-slate-600" />}
-          {p.fixed && <Lock size={12} aria-hidden="true" className="text-gray-400 dark:text-slate-500" />}
+          {p.fixed && <Lock size={12} aria-hidden="true" className="text-gray-500 dark:text-slate-400" />}
         </div>
       </div>
       <div className="mt-2 flex flex-1 flex-col justify-center">

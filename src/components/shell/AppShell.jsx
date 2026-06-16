@@ -322,11 +322,11 @@ export default function AppShell() {
           </div>
         </nav>
 
-        <div className="main">
+        <main className="main">
           <div className="views">
             <Outlet />
           </div>
-        </div>
+        </main>
       </div>
     </>
   )

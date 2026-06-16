@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { X, Check, Rocket, History, RotateCcw, EyeOff, Users } from 'lucide-react'
 import { AUDIENCE_ROLES, audienceVisibleTo } from '../../data/audiences.js'
+import { useFocusTrap } from '../../hooks/useFocusTrap.js'
 
 const ROLES = AUDIENCE_ROLES
 const ZONES = [
@@ -12,6 +13,7 @@ const ZONES = [
 
 // S99–S104 — preview by role, publish confirm, version history, rollback
 export default function PublishModal({ dashboard, placements, widgetById, onClose, onPublish, onShare }) {
+  const trapRef = useFocusTrap()
   const [tab, setTab] = useState('preview')
   const [role, setRole] = useState(dashboard?.audience && ROLES.includes(dashboard.audience) ? dashboard.audience : ROLES[0])
   const [published, setPublished] = useState(false)
@@ -43,9 +45,9 @@ export default function PublishModal({ dashboard, placements, widgetById, onClos
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onKeyDown={(e) => e.key === 'Escape' && onClose()}>
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
-      <div className="card relative z-10 flex w-[90vw] sm:max-w-[640px] max-w-full max-h-[88vh] flex-col overflow-hidden p-0">
+      <div ref={trapRef} tabIndex={-1} className="card relative z-10 flex w-[90vw] sm:max-w-[640px] max-w-full max-h-[88vh] flex-col overflow-hidden p-0">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-gray-200 px-5 py-3.5 dark:border-white/10">
           <div className="flex items-center gap-2">
@@ -104,11 +106,11 @@ export default function PublishModal({ dashboard, placements, widgetById, onClos
                       const items = placements[z.key].filter((p) => audienceVisibleTo(p, role))
                       return (
                         <div key={z.key} className="rounded-lg border border-gray-200 p-3 dark:border-white/10">
-                          <div className="mb-1.5 text-[10px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-500">
+                          <div className="mb-1.5 text-[10px] font-bold uppercase tracking-wide text-gray-500 dark:text-slate-400">
                             {z.label}
                           </div>
                           {items.length === 0 ? (
-                            <div className="text-xs text-gray-400 dark:text-slate-500">— empty for this role</div>
+                            <div className="text-xs text-gray-500 dark:text-slate-400">— empty for this role</div>
                           ) : (
                             <div className="flex flex-wrap gap-1.5">
                               {items.map((p) => (
@@ -133,7 +135,7 @@ export default function PublishModal({ dashboard, placements, widgetById, onClos
                           <span className="text-xs text-gray-500 dark:text-slate-400">{v.label}</span>
                           {v.current && <span className="cap-chip cap-chip-data">Current</span>}
                         </div>
-                        <div className="mt-0.5 text-[11px] text-gray-400 dark:text-slate-500">{v.status} · {v.when}</div>
+                        <div className="mt-0.5 text-[11px] text-gray-500 dark:text-slate-400">{v.status} · {v.when}</div>
                       </div>
                       {!v.current && (
                         <button className="btn-secondary !py-1.5 !px-3 text-xs" onClick={() => setRestoring(v)}>

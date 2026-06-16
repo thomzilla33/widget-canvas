@@ -9,7 +9,7 @@ import { widgetCount } from '../../data/layout.js'
 export default function DashboardCards({ items }) {
   const navigate = useNavigate()
   if (!items.length) {
-    return <p className="text-sm text-gray-400 dark:text-slate-500">No dashboards here yet.</p>
+    return <p className="text-sm text-gray-500 dark:text-slate-400">No dashboards here yet.</p>
   }
   return (
     <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill,minmax(min(280px,100%),1fr))' }}>
@@ -24,7 +24,7 @@ export default function DashboardCards({ items }) {
             </span>
             <div className="min-w-0 pr-24">
               <div className="truncate text-sm font-semibold text-gray-900 dark:text-slate-100">{d.name}</div>
-              <div className="flex items-center gap-1 text-[11px] text-gray-400 dark:text-slate-500">
+              <div className="flex items-center gap-1 text-[11px] text-gray-500 dark:text-slate-400">
                 <MapPin size={11} aria-hidden="true" className="shrink-0" />
                 <span className="truncate">{placementLabel(d.placement)}</span>
               </div>
@@ -32,7 +32,7 @@ export default function DashboardCards({ items }) {
           </div>
           <div className="mt-auto flex items-center justify-between gap-2 border-t border-gray-100 pt-2.5 dark:border-white/10">
             <span className="text-[11px] text-gray-500 dark:text-slate-400">{widgetCount(d)} widgets · {d.audience}</span>
-            <span className="text-[11px] text-gray-400 dark:text-slate-500">{d.updated}</span>
+            <span className="text-[11px] text-gray-500 dark:text-slate-400">{d.updated}</span>
           </div>
         </button>
       ))}

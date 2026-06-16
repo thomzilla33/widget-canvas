@@ -41,7 +41,7 @@ export default function DashboardList() {
       {/* Filters (S78) */}
       <div className="flex items-center gap-2 flex-wrap px-6 py-3 border-b border-gray-200 dark:border-white/10">
         <div className="relative w-full sm:w-auto">
-          <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500" />
+          <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-500 dark:text-slate-400" />
           <input
             className="input h-9 w-full sm:w-52 pl-8"
             placeholder="Search dashboards…"
@@ -127,11 +127,11 @@ export default function DashboardList() {
                     <div className="truncate text-sm font-semibold text-gray-900 dark:text-slate-100">
                       {d.name}
                     </div>
-                    <div className="flex items-center gap-1 text-[11px] text-gray-400 dark:text-slate-500">
+                    <div className="flex items-center gap-1 text-[11px] text-gray-500 dark:text-slate-400">
                       <MapPin size={11} className="shrink-0" />
                       <span className="truncate">{placementLabel(d.placement)}</span>
                     </div>
-                    <div className="mt-0.5 flex items-center gap-1 truncate text-[11px] text-gray-400 dark:text-slate-500">
+                    <div className="mt-0.5 flex items-center gap-1 truncate text-[11px] text-gray-500 dark:text-slate-400">
                       Owner · {d.owner}
                       {DEACTIVATED_OWNERS.includes(d.owner) && (
                         <span className="cap-chip cap-chip-neutral !border-amber-300 !text-aims-ungoverned dark:!border-amber-500/30 dark:!text-amber-400">offboarded</span>
@@ -142,13 +142,13 @@ export default function DashboardList() {
 
                 <div className="mt-auto flex items-center justify-between gap-2 border-t border-gray-100 pt-2.5 dark:border-white/10">
                   <span className="text-[11px] text-gray-500 dark:text-slate-400">{widgetCount(d)} widgets · {d.audience}</span>
-                  <span className="text-[11px] text-gray-400 dark:text-slate-500">{d.updated}</span>
+                  <span className="text-[11px] text-gray-500 dark:text-slate-400">{d.updated}</span>
                 </div>
               </button>
             ))}
           </div>
         )}
-        <p className="mt-4 text-xs text-gray-400 dark:text-slate-500">Screens hosted here: S76–S79</p>
+        <p className="mt-4 text-xs text-gray-500 dark:text-slate-400">Screens hosted here: S76–S79</p>
       </div>
     </div>
   )

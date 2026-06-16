@@ -76,7 +76,7 @@ export default function TasksCard({ notify }) {
               if (rows.length === 0) return null
               return (
                 <div key={b.key}>
-                  <div className="px-2 text-[10px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-500">
+                  <div className="px-2 text-[10px] font-bold uppercase tracking-wide text-gray-500 dark:text-slate-400">
                     {b.label} · {rows.length}
                   </div>
                   <ul className="-mx-1">
@@ -100,7 +100,7 @@ export default function TasksCard({ notify }) {
               )
             })}
           </div>
-          <div className="mt-1.5 px-2 text-[11px] text-gray-400 dark:text-slate-500">
+          <div className="mt-1.5 px-2 text-[11px] text-gray-500 dark:text-slate-400">
             {openTasks.length} open · {done.size} completed · {snoozed.size} snoozed
           </div>
         </>
@@ -121,15 +121,15 @@ export default function TasksCard({ notify }) {
 function TaskRow({ t, due, snoozed, onComplete, onSnooze, onOpen }) {
   return (
     <li className="group flex items-center gap-2 rounded-md px-2 py-1.5 hover:bg-gray-50 dark:hover:bg-white/5">
-      <button onClick={onComplete} aria-label="Mark complete" className="shrink-0 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-aims-governed/50">
+      <button onClick={onComplete} aria-label="Mark complete" className="grid h-6 w-6 shrink-0 place-items-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-aims-governed/50">
         <Circle size={15} className="text-gray-300 transition-colors hover:text-aims-governed dark:text-slate-600" />
       </button>
       <button onClick={onOpen} className="min-w-0 flex-1 truncate text-left text-xs text-gray-700 dark:text-slate-200">
         {t.title}
-        {snoozed && <span className="ml-1 text-[10px] text-gray-400 dark:text-slate-500">· snoozed</span>}
+        {snoozed && <span className="ml-1 text-[10px] text-gray-500 dark:text-slate-400">· snoozed</span>}
       </button>
       <span role="img" aria-label={`${t.priority} priority`} className={`h-1.5 w-1.5 shrink-0 rounded-full ${PRIORITY_DOT[t.priority]}`} title={`${t.priority} priority`} />
-      <span className={`shrink-0 text-[10px] font-medium ${DUE_TONE[due] || 'text-gray-400 dark:text-slate-500'}`}>{due}</span>
+      <span className={`shrink-0 text-[10px] font-medium ${DUE_TONE[due] || 'text-gray-500 dark:text-slate-400'}`}>{due}</span>
       <button
         onClick={onSnooze}
         aria-label="Snooze to next week"
@@ -148,7 +148,7 @@ function ErrorTaskRow({ t, retrying, onRetry, onOpen }) {
       <AlertTriangle size={14} className="mt-0.5 shrink-0 text-aims-stale" />
       <button onClick={onOpen} className="min-w-0 flex-1 text-left">
         <span className="block truncate text-xs font-semibold text-gray-900 dark:text-slate-100">{t.title}</span>
-        <span className="block truncate text-[11px] text-gray-400 dark:text-slate-500">{t.errorMsg}</span>
+        <span className="block truncate text-[11px] text-gray-500 dark:text-slate-400">{t.errorMsg}</span>
       </button>
       <button onClick={onRetry} disabled={retrying} className="btn-secondary !h-auto !px-2 !py-1 text-xs">
         {retrying ? <Loader2 size={12} className="animate-spin" /> : <RefreshCw size={12} />}
@@ -163,7 +163,7 @@ function EmptyTasks() {
     <div className="mt-3 grid place-items-center rounded-lg border border-dashed border-gray-200 py-8 text-center dark:border-white/10">
       <CheckCircle2 size={22} className="text-aims-governed" />
       <div className="mt-1 text-sm font-medium text-gray-700 dark:text-slate-200">All clear</div>
-      <div className="text-[11px] text-gray-400 dark:text-slate-500">No open tasks. Completed ones can be undone from the toast.</div>
+      <div className="text-[11px] text-gray-500 dark:text-slate-400">No open tasks. Completed ones can be undone from the toast.</div>
     </div>
   )
 }

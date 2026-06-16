@@ -37,7 +37,7 @@ export default function NotificationsMenu({ onClose }) {
               <div className="flex flex-col items-center px-6 py-10 text-center">
                 <BellOff size={26} className="text-gray-300 dark:text-slate-400" />
                 <div className="mt-2 text-sm font-medium text-gray-700 dark:text-slate-200">You're all caught up</div>
-                <div className="mt-0.5 text-xs text-gray-400 dark:text-slate-500">No notifications right now.</div>
+                <div className="mt-0.5 text-xs text-gray-500 dark:text-slate-400">No notifications right now.</div>
               </div>
             ) : (
               visible.map((n) => (
@@ -53,7 +53,7 @@ export default function NotificationsMenu({ onClose }) {
                       {!n.read && <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-aims-blue" />}
                     </div>
                     <div className="mt-0.5 text-xs text-gray-500 dark:text-slate-400">{n.body}</div>
-                    <div className="mt-1 text-[11px] text-gray-400 dark:text-slate-500">{n.when}</div>
+                    <div className="mt-1 text-[11px] text-gray-500 dark:text-slate-400">{n.when}</div>
                   </div>
                 </button>
               ))
@@ -83,10 +83,10 @@ export default function NotificationsMenu({ onClose }) {
                 <div>
                   <div className="flex items-center gap-1.5 text-sm font-medium text-gray-800 dark:text-slate-200">
                     {c.label}
-                    {c.mandatory && <Lock size={12} className="text-gray-400 dark:text-slate-500" />}
+                    {c.mandatory && <Lock size={12} className="text-gray-500 dark:text-slate-400" />}
                   </div>
                   {c.mandatory && (
-                    <div className="text-[11px] text-gray-400 dark:text-slate-500">Required — can't be turned off</div>
+                    <div className="text-[11px] text-gray-500 dark:text-slate-400">Required — can't be turned off</div>
                   )}
                 </div>
                 <Toggle checked={c.mandatory ? true : settings[c.id]} disabled={c.mandatory} onChange={() => toggleSetting(c.id)} />

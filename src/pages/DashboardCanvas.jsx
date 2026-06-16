@@ -230,7 +230,7 @@ export default function DashboardCanvas() {
               ))}
             </div>
           )}
-          <p className="mt-4 text-xs text-gray-400 dark:text-slate-500">Screens hosted here: S84–S94</p>
+          <p className="mt-4 text-xs text-gray-500 dark:text-slate-400">Screens hosted here: S84–S94</p>
         </div>
 
         {/* Library browser (S85) — marketplace-style picker over the widget library */}
@@ -345,7 +345,7 @@ function Zone({
       </div>
 
       {placements.length === 0 ? (
-        <div className="text-xs text-gray-400 dark:text-slate-500 py-4 text-center">Drop widgets here</div>
+        <div className="text-xs text-gray-500 dark:text-slate-400 py-4 text-center">Drop widgets here</div>
       ) : (
         <div className={`grid gap-2 ${zone.key === 'sidebar' ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'}`}>
           {placements.map((p) => {
@@ -409,7 +409,7 @@ function Zone({
                     {w?.name || 'Widget'}
                   </span>
                   {p.fixed ? (
-                    <Lock size={12} aria-hidden="true" className="text-gray-400 dark:text-slate-500 shrink-0" />
+                    <Lock size={12} aria-hidden="true" className="text-gray-500 dark:text-slate-400 shrink-0" />
                   ) : (
                     <Unlock size={12} aria-hidden="true" className="text-gray-300 shrink-0" />
                   )}
@@ -439,8 +439,8 @@ function Zone({
                 )}
                 <div className="mt-2 flex items-center gap-1.5 border-t border-gray-100 pt-1.5 dark:border-white/5">
                   {w?.freshness && <FreshnessBadge status={w.freshness} label={w.freshness} />}
-                  {p.viewAs && <span className="truncate text-[10px] text-gray-400 dark:text-slate-500">as {p.viewAs}</span>}
-                  <span className="ml-auto truncate text-[10px] text-gray-400 dark:text-slate-500">{audienceSummary(p)}</span>
+                  {p.viewAs && <span className="truncate text-[10px] text-gray-500 dark:text-slate-400">as {p.viewAs}</span>}
+                  <span className="ml-auto truncate text-[10px] text-gray-500 dark:text-slate-400">{audienceSummary(p)}</span>
                 </div>
               </div>
             )
@@ -494,7 +494,7 @@ function ConfigPanel({ placement, widget, onChange }) {
             </button>
           ))}
         </div>
-        <p className="mt-1 text-xs text-gray-400 dark:text-slate-500">
+        <p className="mt-1 text-xs text-gray-500 dark:text-slate-400">
           {WIDGET_SIZES.find((s) => s.id === placement.size)?.width} · {WIDGET_SIZES.find((s) => s.id === placement.size)?.detail}
         </p>
       </div>
@@ -503,7 +503,7 @@ function ConfigPanel({ placement, widget, onChange }) {
       <div>
         <div className="mb-1.5 flex items-center justify-between gap-2">
           <span className="text-sm font-medium text-gray-700 dark:text-slate-200">Visualization</span>
-          <span className="inline-flex items-center gap-1 text-[11px] text-gray-400 dark:text-slate-500">
+          <span className="inline-flex items-center gap-1 text-[11px] text-gray-500 dark:text-slate-400">
             <Sparkles size={11} className="text-amber-500" aria-hidden="true" /> recommended
           </span>
         </div>
@@ -558,7 +558,7 @@ function ConfigPanel({ placement, widget, onChange }) {
             <Lock size={14} aria-hidden="true" /> Fixed
           </button>
         </div>
-        <p className="mt-1 text-xs text-gray-400 dark:text-slate-500">
+        <p className="mt-1 text-xs text-gray-500 dark:text-slate-400">
           {placement.fixed
             ? 'Locked — users cannot move or hide this widget.'
             : 'Users can reorder, collapse, and save filter preferences.'}
@@ -587,7 +587,7 @@ function ConfigPanel({ placement, widget, onChange }) {
             )
           })}
         </div>
-        <p className="mt-1.5 text-xs text-gray-400 dark:text-slate-500">
+        <p className="mt-1.5 text-xs text-gray-500 dark:text-slate-400">
           {allowedAudiences.length === 0
             ? 'Visible to everyone who can see this dashboard.'
             : `Only visible to: ${allowedAudiences.join(', ')}.`}
@@ -624,7 +624,7 @@ function SidePanel({ title, children, footer, onClose }) {
         <button
           onClick={onClose}
           aria-label="Close panel"
-          className="text-gray-400 dark:text-slate-500 hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aims-blue/50"
+          className="text-gray-500 dark:text-slate-400 hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aims-blue/50"
         >
           <X size={18} aria-hidden="true" />
         </button>

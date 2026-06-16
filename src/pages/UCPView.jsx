@@ -161,7 +161,7 @@ export default function UCPView() {
           {/* Toolbar: search (S05) + reset layout (S16) */}
           <div className="mb-4 flex items-center gap-2">
             <div className="relative w-full max-w-xs">
-              <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500" />
+              <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-500 dark:text-slate-400" />
               <input
                 className="input h-9 pl-8"
                 placeholder="Search this profile…"
@@ -324,7 +324,7 @@ function WidgetFilter({ onApply, onClear }) {
       </button>
       {open && (
         <div className="card absolute right-0 top-[calc(100%+6px)] z-20 w-56 p-3">
-          <div className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-gray-400 dark:text-slate-500">
+          <div className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-gray-500 dark:text-slate-400">
             Date range
           </div>
           <select className="input h-8 !py-1 text-sm" value={range} onChange={(e) => setRange(e.target.value)}>
@@ -336,7 +336,7 @@ function WidgetFilter({ onApply, onClear }) {
           {range === 'Custom' && (
             <div className="mt-2 flex items-center gap-1.5">
               <input type="date" className="input h-8 !py-1 text-xs" value={from} onChange={(e) => setFrom(e.target.value)} />
-              <span className="text-gray-400 dark:text-slate-500">–</span>
+              <span className="text-gray-500 dark:text-slate-400">–</span>
               <input type="date" className="input h-8 !py-1 text-xs" value={to} onChange={(e) => setTo(e.target.value)} />
             </div>
           )}
@@ -390,7 +390,7 @@ function UCPWidget({
         <div className="flex shrink-0 items-center gap-1.5">
           {inst.fixed ? (
             <span title="Locked by admin — cannot be moved or hidden">
-              <Lock size={13} className="text-gray-400 dark:text-slate-500" />
+              <Lock size={13} className="text-gray-500 dark:text-slate-400" />
             </span>
           ) : (
             <>
@@ -400,7 +400,7 @@ function UCPWidget({
               <button
                 onClick={onToggleCollapse}
                 title={collapsed ? 'Expand' : 'Collapse'}
-                className="text-gray-400 dark:text-slate-500 hover:text-gray-700 dark:hover:text-slate-300"
+                className="text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-300"
               >
                 <ChevronDown size={15} className={`transition-transform ${collapsed ? '-rotate-90' : ''}`} />
               </button>
@@ -554,10 +554,10 @@ function WidgetBody({ inst, widget }) {
   return (
     <div>
       <ul className="text-xs text-gray-600 dark:text-slate-300 space-y-1.5">
-        <li className="flex justify-between"><span>Ticket #4821</span><span className="text-gray-400 dark:text-slate-500">2h ago</span></li>
-        <li className="flex justify-between"><span>Ticket #4798</span><span className="text-gray-400 dark:text-slate-500">1d ago</span></li>
+        <li className="flex justify-between"><span>Ticket #4821</span><span className="text-gray-500 dark:text-slate-400">2h ago</span></li>
+        <li className="flex justify-between"><span>Ticket #4798</span><span className="text-gray-500 dark:text-slate-400">1d ago</span></li>
       </ul>
-      <div className="mt-1.5 text-[10px] text-gray-400 dark:text-slate-500">Showing 2 of 128 open</div>
+      <div className="mt-1.5 text-[10px] text-gray-500 dark:text-slate-400">Showing 2 of 128 open</div>
     </div>
   )
 }
@@ -610,7 +610,7 @@ function QuickActionPanel({ action, widgetName, onClose }) {
     <div className="absolute top-0 right-0 bottom-0 w-80 max-w-[calc(100vw-2rem)] bg-white border-l border-gray-200 shadow-xl flex flex-col z-10 dark:bg-[#0f1629] dark:border-white/10">
       <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-white/10">
         <span className="font-semibold text-gray-900 dark:text-slate-100">{action}</span>
-        <button onClick={onClose} className="text-gray-400 dark:text-slate-500 hover:text-gray-700 dark:hover:text-slate-300">
+        <button onClick={onClose} className="text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-300">
           <X size={18} />
         </button>
       </div>

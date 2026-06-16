@@ -230,7 +230,7 @@ function Rail({ show, onShow, sort, onSort, counts, activeCats, onToggleCat }) {
 
 function RailLabel({ children }) {
   return (
-    <div className="mb-1.5 text-[10px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-500">
+    <div className="mb-1.5 text-[10px] font-bold uppercase tracking-wide text-gray-500 dark:text-slate-400">
       {children}
     </div>
   )
@@ -240,7 +240,7 @@ function Toolbar({ search, onSearch, activeCats, onToggleCat, show, onResetShow,
   return (
     <div className="border-b border-gray-200 px-6 py-3 dark:border-white/10">
       <div className="relative max-w-md">
-        <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500" />
+        <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-500 dark:text-slate-400" />
         <input
           className="input h-9 pl-8"
           placeholder="Search the marketplace…"
@@ -304,7 +304,7 @@ function Hero({ onOpen }) {
 
 function MakerLine({ maker }) {
   return (
-    <span className="inline-flex items-center gap-1 text-[11px] text-gray-400 dark:text-slate-500">
+    <span className="inline-flex items-center gap-1 text-[11px] text-gray-500 dark:text-slate-400">
       by {maker}
       {maker === 'AIMS' && <BadgeCheck size={12} className="text-aims-blue" />}
     </span>
@@ -435,11 +435,11 @@ function Detail({ mw, installed, onInstall, onBack }) {
           </div>
           <div className="rounded-xl border border-gray-200 bg-gray-50/60 p-6 dark:border-white/10 dark:bg-white/[0.02]">
             <div className={`mx-auto rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition-all dark:border-white/10 dark:bg-[#131a2c] ${PREVIEW_WIDTH[size]}`}>
-              <div className="mb-2 text-[10px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-500">{mw.name}</div>
+              <div className="mb-2 text-[10px] font-bold uppercase tracking-wide text-gray-500 dark:text-slate-400">{mw.name}</div>
               <WidgetRender widget={mw} size={size} />
             </div>
           </div>
-          <p className="mt-2 text-center text-xs text-gray-400 dark:text-slate-500">
+          <p className="mt-2 text-center text-xs text-gray-500 dark:text-slate-400">
             {sizeMeta?.width} · {sizeMeta?.detail}
           </p>
         </div>
@@ -451,7 +451,7 @@ function Detail({ mw, installed, onInstall, onBack }) {
             {mw.governed ? 'Governed' : 'Ungoverned'}
           </span>
           <FreshnessBadge status={mw.freshness} label={mw.freshness} />
-          <span className="ml-auto text-[11px] text-gray-400 dark:text-slate-500">{mw.stats.installs.toLocaleString()} installs · {mw.source}</span>
+          <span className="ml-auto text-[11px] text-gray-500 dark:text-slate-400">{mw.stats.installs.toLocaleString()} installs · {mw.source}</span>
         </div>
         <div className="flex justify-end border-t border-gray-100 pt-4 dark:border-white/10">
           <InstallButton installed={installed} onInstall={onInstall} />

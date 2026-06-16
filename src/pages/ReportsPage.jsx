@@ -32,7 +32,7 @@ export default function ReportsPage() {
               if (!items.length && collection === 'Other') return null
               return (
                 <section key={collection}>
-                  <div className="mb-2 text-[11px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-500">{collection}</div>
+                  <div className="mb-2 text-[11px] font-bold uppercase tracking-wide text-gray-500 dark:text-slate-400">{collection}</div>
                   {items.length ? (
                     <DashboardCards items={items} />
                   ) : (

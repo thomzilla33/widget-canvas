@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { X, Check, Flag } from 'lucide-react'
 import { WidgetGlyph } from './glyph.jsx'
+import { useFocusTrap } from '../../hooks/useFocusTrap.js'
 
 // S122/S123 — flag detail with full context + resolve (notification-only).
 export default function FlagDetailModal({ flag, widget, entity, onClose, onResolve }) {
+  const trapRef = useFocusTrap()
   const [resolved, setResolved] = useState(false)
 
   function resolve() {
@@ -12,9 +14,9 @@ export default function FlagDetailModal({ flag, widget, entity, onClose, onResol
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onKeyDown={(e) => e.key === 'Escape' && onClose()}>
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
-      <div className="card relative z-10 flex w-[90vw] sm:max-w-[520px] max-w-full flex-col overflow-hidden p-0">
+      <div ref={trapRef} tabIndex={-1} className="card relative z-10 flex w-[90vw] sm:max-w-[520px] max-w-full flex-col overflow-hidden p-0">
         <div className="flex items-center justify-between border-b border-gray-200 px-5 py-3.5 dark:border-white/10">
           <div className="flex items-center gap-2">
             <Flag size={16} className="text-aims-stale" />
@@ -47,7 +49,7 @@ export default function FlagDetailModal({ flag, widget, entity, onClose, onResol
                   <div className="text-sm font-semibold text-gray-900 dark:text-slate-100">
                     {widget?.name || flag.widgetId}
                   </div>
-                  <div className="text-[11px] text-gray-400 dark:text-slate-500">{widget?.source}</div>
+                  <div className="text-[11px] text-gray-500 dark:text-slate-400">{widget?.source}</div>
                 </div>
                 <span className="cap-chip cap-chip-tool ml-auto">{flag.reason}</span>
               </div>
@@ -60,7 +62,7 @@ export default function FlagDetailModal({ flag, widget, entity, onClose, onResol
               </dl>
 
               <div>
-                <div className="mb-1 text-[10px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-500">
+                <div className="mb-1 text-[10px] font-bold uppercase tracking-wide text-gray-500 dark:text-slate-400">
                   Message
                 </div>
                 <div className="rounded-lg border border-gray-200 p-3 text-sm text-gray-700 dark:border-white/10 dark:text-slate-200">
@@ -85,7 +87,7 @@ export default function FlagDetailModal({ flag, widget, entity, onClose, onResol
 function Field({ label, value }) {
   return (
     <div>
-      <dt className="text-[10px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-500">{label}</dt>
+      <dt className="text-[10px] font-bold uppercase tracking-wide text-gray-500 dark:text-slate-400">{label}</dt>
       <dd className="mt-0.5 text-gray-800 dark:text-slate-200">{value}</dd>
     </div>
   )

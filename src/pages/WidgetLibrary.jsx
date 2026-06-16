@@ -63,7 +63,7 @@ export default function WidgetLibrary() {
       {/* Filters (matches .filters / .chip) */}
       <div className="flex items-center gap-2 flex-wrap px-6 py-3 border-b border-gray-200 dark:border-white/10">
         <div className="relative w-full sm:w-auto">
-          <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500" />
+          <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-500 dark:text-slate-400" />
           <input
             className="input h-9 w-full sm:w-52 pl-8"
             placeholder="Search widgets…"
@@ -120,7 +120,7 @@ export default function WidgetLibrary() {
                         <span className="cap-chip cap-chip-tool shrink-0">{f.reason}</span>
                       </div>
                       <div className="mt-0.5 text-xs text-gray-600 dark:text-slate-300">{problem}</div>
-                      <div className="mt-0.5 truncate text-[11px] text-gray-400 dark:text-slate-500">
+                      <div className="mt-0.5 truncate text-[11px] text-gray-500 dark:text-slate-400">
                         Flagged by {f.reporter} on {entityById(f.entityId)?.name || f.entityId} · {f.createdAt}
                       </div>
                     </div>
@@ -164,7 +164,7 @@ export default function WidgetLibrary() {
                   <div className="truncate text-sm font-semibold text-gray-900 dark:text-slate-100">
                     {w.name}
                   </div>
-                  <div className="truncate text-[11px] text-gray-400 dark:text-slate-500">{w.source}</div>
+                  <div className="truncate text-[11px] text-gray-500 dark:text-slate-400">{w.source}</div>
                 </div>
               </div>
 
@@ -198,7 +198,7 @@ export default function WidgetLibrary() {
           ))}
         </div>
         )}
-        <p className="mt-4 text-xs text-gray-400 dark:text-slate-500">Screens hosted here: S37, S38, S40–S47</p>
+        <p className="mt-4 text-xs text-gray-500 dark:text-slate-400">Screens hosted here: S37, S38, S40–S47</p>
       </div>
 
       {repinWidget && (

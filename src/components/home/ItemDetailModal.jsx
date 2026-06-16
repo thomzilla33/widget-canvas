@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useFocusTrap } from '../../hooks/useFocusTrap.js'
 import {
   X, Calendar, User, Sparkles, Workflow, RefreshCw, ArrowUpRight,
   Mail, ExternalLink, AlertTriangle, Archive, CheckCircle2, LayoutGrid,
@@ -30,18 +31,12 @@ export default function ItemDetailModal({ item, kind, onClose, onArchive, onComp
   const navigate = useNavigate()
   const { widgets, updateWidget } = useWidgets()
   const { dashboards, updateDashboard } = useDashboards()
-  const dialogRef = useRef(null)
+  const dialogRef = useFocusTrap()
   const actionBtnRef = useRef(null)
   const prevFlow = useRef(null)
   const [flow, setFlow] = useState(null) // open sub-flow: 'publish' | 'share' | 'repin'
   const [reply, setReply] = useState('')
   const [sent, setSent] = useState(false)
-
-  useEffect(() => {
-    const prev = document.activeElement
-    dialogRef.current?.focus()
-    return () => prev?.focus?.()
-  }, [])
 
   // When a stacked sub-flow closes, return focus to the action that opened it.
   useEffect(() => {
@@ -117,7 +112,7 @@ export default function ItemDetailModal({ item, kind, onClose, onArchive, onComp
                 <span className="rounded-md bg-gray-100 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-gray-500 dark:bg-white/10 dark:text-slate-300">
                   {o.label}
                 </span>
-                <span className="truncate text-[11px] text-gray-400 dark:text-slate-500">{item.actor?.name}</span>
+                <span className="truncate text-[11px] text-gray-500 dark:text-slate-400">{item.actor?.name}</span>
               </div>
               <h2 id="item-detail-title" className="mt-1 text-sm font-semibold leading-snug text-gray-900 dark:text-slate-100">{title}</h2>
             </div>
@@ -140,7 +135,7 @@ export default function ItemDetailModal({ item, kind, onClose, onArchive, onComp
               {item.actor?.email && (
                 <span className="inline-flex items-center gap-1.5">
                   <Mail size={12} /> {item.actor.email}
-                  {item.actor.role && <span className="text-gray-400 dark:text-slate-500">· {item.actor.role}</span>}
+                  {item.actor.role && <span className="text-gray-500 dark:text-slate-400">· {item.actor.role}</span>}
                 </span>
               )}
             </div>
@@ -159,7 +154,7 @@ export default function ItemDetailModal({ item, kind, onClose, onArchive, onComp
               <dl className="mt-4 grid grid-cols-[minmax(72px,auto),1fr] gap-x-4 gap-y-1.5 rounded-lg border border-gray-200 p-3 text-xs dark:border-white/10">
                 {meta.map(([label, value]) => (
                   <div key={label} className="contents">
-                    <dt className="text-gray-400 dark:text-slate-500">{label}</dt>
+                    <dt className="text-gray-500 dark:text-slate-400">{label}</dt>
                     <dd className="min-w-0 break-words font-medium text-gray-700 dark:text-slate-200">{value}</dd>
                   </div>
                 ))}
@@ -169,7 +164,7 @@ export default function ItemDetailModal({ item, kind, onClose, onArchive, onComp
             {/* Related preview */}
             {(relWidget || rel?.dashboardId) && (
               <div className="mt-4">
-                <div className="mb-1.5 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-500">
+                <div className="mb-1.5 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-gray-500 dark:text-slate-400">
                   <LayoutGrid size={12} /> Preview
                 </div>
                 <div className="rounded-lg border border-gray-200 p-3 dark:border-white/10">
@@ -177,14 +172,14 @@ export default function ItemDetailModal({ item, kind, onClose, onArchive, onComp
                     <>
                       <div className="mb-1.5 flex items-center justify-between">
                         <span className="truncate text-xs font-medium text-gray-700 dark:text-slate-200">{relWidget.name}</span>
-                        <span className="shrink-0 text-[10px] text-gray-400 dark:text-slate-500">{relWidget.source}</span>
+                        <span className="shrink-0 text-[10px] text-gray-500 dark:text-slate-400">{relWidget.source}</span>
                       </div>
                       <WidgetRender widget={relWidget} size="lg" />
                     </>
                   ) : (
                     <div className="flex items-center justify-between gap-2">
                       <span className="truncate text-xs text-gray-600 dark:text-slate-300">{rel.label}</span>
-                      <span className="shrink-0 text-[10px] text-gray-400 dark:text-slate-500">Dashboard</span>
+                      <span className="shrink-0 text-[10px] text-gray-500 dark:text-slate-400">Dashboard</span>
                     </div>
                   )}
                 </div>
@@ -204,7 +199,7 @@ export default function ItemDetailModal({ item, kind, onClose, onArchive, onComp
                   </div>
                 ) : (
                   <>
-                    <div className="mb-1.5 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-500">
+                    <div className="mb-1.5 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-gray-500 dark:text-slate-400">
                       <MessageSquare size={12} /> Reply to {item.actor?.name}
                     </div>
                     <textarea

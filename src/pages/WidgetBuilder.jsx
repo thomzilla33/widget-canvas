@@ -167,7 +167,7 @@ export default function WidgetBuilder() {
           <div className="order-1 min-w-0 flex-1 lg:order-2">
             <div className="lg:sticky lg:top-0">
               <div className="mb-2 flex items-center justify-between gap-2">
-                <span className="text-[10px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-500">Live preview</span>
+                <span className="text-[10px] font-bold uppercase tracking-wide text-gray-500 dark:text-slate-400">Live preview</span>
                 {typeId && (
                   <div className="flex overflow-hidden rounded-lg border border-gray-300 text-xs dark:border-white/15">
                     {WIDGET_SIZES.map((s) => (
@@ -194,7 +194,7 @@ export default function WidgetBuilder() {
                 />
               </div>
               {typeId && (
-                <p className="mt-2 text-center text-xs text-gray-400 dark:text-slate-500">
+                <p className="mt-2 text-center text-xs text-gray-500 dark:text-slate-400">
                   {WIDGET_SIZES.find((s) => s.id === previewSize)?.width} · {WIDGET_SIZES.find((s) => s.id === previewSize)?.detail}
                 </p>
               )}
@@ -213,7 +213,7 @@ export default function WidgetBuilder() {
               )}
 
               {!canSave && (
-                <p className="mt-3 text-center text-[11px] text-gray-400 dark:text-slate-500">{saveHint}</p>
+                <p className="mt-3 text-center text-[11px] text-gray-500 dark:text-slate-400">{saveHint}</p>
               )}
             </div>
           </div>

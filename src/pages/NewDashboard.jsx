@@ -390,7 +390,7 @@ export default function NewDashboard() {
 
               {/* Destination recap on the final step */}
               <div className="flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 dark:border-white/10">
-                <MapPin size={14} className="shrink-0 text-gray-400 dark:text-slate-500" />
+                <MapPin size={14} className="shrink-0 text-gray-500 dark:text-slate-400" />
                 <span className="text-xs text-gray-500 dark:text-slate-400">
                   Will be created in <span className="font-medium text-gray-700 dark:text-slate-200">{placementLabel(placement)}</span>
                 </span>

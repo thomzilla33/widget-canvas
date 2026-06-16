@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { X, Building2, Trash2, Plus, Users, RotateCcw } from 'lucide-react'
 import { SHARE_PEOPLE, SHARE_DEPARTMENTS, SHARE_ROLES } from '../../data/mock.js'
+import { useFocusTrap } from '../../hooks/useFocusTrap.js'
 
 // S105–S107 — share access modal (empty / people added / departments added)
 export default function ShareModal({ dashboard, onClose }) {
+  const trapRef = useFocusTrap()
   const [tab, setTab] = useState('people')
   const [access, setAccess] = useState([]) // { key, kind, name, sub, initials, role }
   const [restored, setRestored] = useState(new Set()) // offboarded users reactivated this session
@@ -33,9 +35,9 @@ export default function ShareModal({ dashboard, onClose }) {
   const remove = (key) => setAccess((p) => p.filter((a) => a.key !== key))
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onKeyDown={(e) => e.key === 'Escape' && onClose()}>
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
-      <div className="card relative z-10 flex w-[90vw] sm:max-w-[560px] max-w-full max-h-[85vh] flex-col overflow-hidden p-0">
+      <div ref={trapRef} tabIndex={-1} className="card relative z-10 flex w-[90vw] sm:max-w-[560px] max-w-full max-h-[85vh] flex-col overflow-hidden p-0">
         <div className="flex items-center justify-between border-b border-gray-200 px-5 py-3.5 dark:border-white/10">
           <div className="flex items-center gap-2">
             <Users size={16} className="text-aims-blue" />
@@ -67,7 +69,7 @@ export default function ShareModal({ dashboard, onClose }) {
             </div>
             <div className="space-y-1.5">
               {available.length === 0 ? (
-                <div className="text-xs text-gray-400 dark:text-slate-500">Everyone in {tab} already has access.</div>
+                <div className="text-xs text-gray-500 dark:text-slate-400">Everyone in {tab} already has access.</div>
               ) : (
                 available.map((s) => {
                   const active = isActive(s)
@@ -79,7 +81,7 @@ export default function ShareModal({ dashboard, onClose }) {
                       <Avatar item={s} kind={tab === 'people' ? 'person' : 'dept'} />
                       <div className="min-w-0 flex-1">
                         <div className="truncate text-sm font-medium text-gray-900 dark:text-slate-100">{s.name}</div>
-                        <div className="truncate text-[11px] text-gray-400 dark:text-slate-500">{s.sub}</div>
+                        <div className="truncate text-[11px] text-gray-500 dark:text-slate-400">{s.sub}</div>
                       </div>
                       {!active ? (
                         <div className="flex shrink-0 items-center gap-1.5">
@@ -120,7 +122,7 @@ export default function ShareModal({ dashboard, onClose }) {
                     <Avatar item={a} kind={a.kind} />
                     <div className="min-w-0 flex-1">
                       <div className="truncate text-sm font-medium text-gray-900 dark:text-slate-100">{a.name}</div>
-                      <div className="truncate text-[11px] text-gray-400 dark:text-slate-500">{a.sub}</div>
+                      <div className="truncate text-[11px] text-gray-500 dark:text-slate-400">{a.sub}</div>
                     </div>
                     <select
                       className="input h-8 w-24 !py-1 text-xs"

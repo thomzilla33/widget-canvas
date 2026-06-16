@@ -153,7 +153,7 @@ export function StepIndicator({ steps = [], current = 0 }) {
         <div key={s} className="flex items-center gap-2">
           <div
             className={`flex items-center gap-2 ${
-              i === current ? 'text-aims-blue' : i < current ? 'text-aims-governed' : 'text-gray-400 dark:text-slate-500'
+              i === current ? 'text-aims-blue' : i < current ? 'text-aims-governed' : 'text-gray-500 dark:text-slate-400'
             }`}
           >
             <span

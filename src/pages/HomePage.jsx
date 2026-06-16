@@ -19,13 +19,13 @@ export default function HomePage() {
 
           {personal.length > 0 && (
             <section>
-              <div className="mb-2 text-[11px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-500">Just me</div>
+              <div className="mb-2 text-[11px] font-bold uppercase tracking-wide text-gray-500 dark:text-slate-400">Just me</div>
               <DashboardCards items={personal} />
             </section>
           )}
           {team.length > 0 && (
             <section>
-              <div className="mb-2 text-[11px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-500">My team</div>
+              <div className="mb-2 text-[11px] font-bold uppercase tracking-wide text-gray-500 dark:text-slate-400">My team</div>
               <DashboardCards items={team} />
             </section>
           )}

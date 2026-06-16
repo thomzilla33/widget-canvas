@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 import { Hand, Sparkles, Workflow, RefreshCw, ArrowUpRight, CheckCircle2, X } from 'lucide-react'
 import { HTL_ITEMS } from '../../data/mock.js'
 import { useWidgets } from '../../state/WidgetsContext.jsx'
+import { useFocusTrap } from '../../hooks/useFocusTrap.js'
 import RepinModal from '../widgets/RepinModal.jsx'
 import CardHeader from './CardHeader.jsx'
 
@@ -38,7 +39,7 @@ export default function HtlCard() {
         <div className="mt-3 grid place-items-center rounded-lg border border-dashed border-gray-200 py-8 text-center dark:border-white/10">
           <CheckCircle2 size={22} className="text-aims-governed" />
           <div className="mt-1 text-sm font-medium text-gray-700 dark:text-slate-200">All caught up</div>
-          <div className="text-[11px] text-gray-400 dark:text-slate-500">Nothing needs your attention right now.</div>
+          <div className="text-[11px] text-gray-500 dark:text-slate-400">Nothing needs your attention right now.</div>
         </div>
       ) : (
         <div className="mt-3 space-y-2">
@@ -56,7 +57,7 @@ export default function HtlCard() {
                     <span className={`rounded-md border px-1.5 text-[10px] font-bold uppercase leading-[15px] ${PRIORITY[item.priority]}`}>{item.priority}</span>
                   </div>
                   <div className="mt-0.5 text-xs text-gray-500 dark:text-slate-400">{item.detail}</div>
-                  <div className="mt-1 text-[11px] text-gray-400 dark:text-slate-500">{item.source} · {item.when}</div>
+                  <div className="mt-1 text-[11px] text-gray-500 dark:text-slate-400">{item.source} · {item.when}</div>
                 </div>
                 <div className="flex shrink-0 items-center gap-1.5">
                   <button className="btn-primary !px-3 !py-1.5 text-xs" onClick={() => setActive(item)}>{item.action}</button>
@@ -99,10 +100,7 @@ export default function HtlCard() {
 function HtlActionModal({ item, onAct, onClose }) {
   const s = SOURCE[item.source] || SOURCE.System
   const Icon = s.icon
-  const dialogRef = useRef(null)
-  useEffect(() => {
-    dialogRef.current?.focus()
-  }, [])
+  const dialogRef = useFocusTrap()
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
@@ -122,7 +120,7 @@ function HtlActionModal({ item, onAct, onClose }) {
               <span className="text-sm font-semibold text-gray-900 dark:text-slate-100">{item.title}</span>
               <span className={`rounded-md border px-1.5 text-[10px] font-bold uppercase leading-[15px] ${PRIORITY[item.priority]}`}>{item.priority}</span>
             </div>
-            <div className="mt-0.5 text-[11px] text-gray-400 dark:text-slate-500">{item.source} · {item.when}</div>
+            <div className="mt-0.5 text-[11px] text-gray-500 dark:text-slate-400">{item.source} · {item.when}</div>
           </div>
         </div>
         <div className="p-5">

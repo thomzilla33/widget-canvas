@@ -83,7 +83,7 @@ export function SourcePicker({ sourceId, onSelect, onBrowse }) {
   return (
     <div className="space-y-3">
       <div className="relative">
-        <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500" />
+        <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-500 dark:text-slate-400" />
         <input
           className="input h-9 pl-8"
           placeholder="Search your connected sources…"
@@ -100,7 +100,7 @@ export function SourcePicker({ sourceId, onSelect, onBrowse }) {
         <div className="max-h-[340px] space-y-3 overflow-auto pr-1">
           {groups.map(([cat, items]) => (
             <div key={cat}>
-              <div className="mb-1 text-[10px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-500">{cat}</div>
+              <div className="mb-1 text-[10px] font-bold uppercase tracking-wide text-gray-500 dark:text-slate-400">{cat}</div>
               <div className="space-y-1.5">
                 {items.map((s) => (
                   <SourceRow key={s.id} source={s} selected={sourceId === s.id} onSelect={onSelect} />
@@ -129,9 +129,9 @@ function SourceRow({ source, selected, onSelect }) {
       <span className="logo-sq !h-8 !w-8 !text-[10px]" style={{ background: source.logoColor }}>{source.initials}</span>
       <div className="min-w-0 flex-1">
         <div className="truncate text-sm font-semibold text-gray-900 dark:text-slate-100">{source.name}</div>
-        <div className="truncate text-[11px] text-gray-400 dark:text-slate-500">{source.category}</div>
+        <div className="truncate text-[11px] text-gray-500 dark:text-slate-400">{source.category}</div>
       </div>
-      {source.hasPII && <Lock size={12} className="shrink-0 text-gray-400 dark:text-slate-500" />}
+      {source.hasPII && <Lock size={12} className="shrink-0 text-gray-500 dark:text-slate-400" />}
       <ConnectionBadge status={source.status} />
     </button>
   )
@@ -171,7 +171,7 @@ function FieldSection({ title, hint, children }) {
     <div>
       <div className="mb-1.5 flex items-baseline justify-between">
         <span className="text-xs font-semibold text-gray-700 dark:text-slate-200">{title}</span>
-        <span className="text-[10px] text-gray-400 dark:text-slate-500">{hint}</span>
+        <span className="text-[10px] text-gray-500 dark:text-slate-400">{hint}</span>
       </div>
       <div className="space-y-2">{children}</div>
     </div>
@@ -189,7 +189,7 @@ function FieldButton({ field, selected, onSelect }) {
       <span className="min-w-0">
         <span className="block truncate text-sm font-medium text-gray-900 dark:text-slate-100">{field.name}</span>
         {field.entityType && (
-          <span className="block text-[11px] text-gray-400 dark:text-slate-500">
+          <span className="block text-[11px] text-gray-500 dark:text-slate-400">
             {field.entityType} · {field.count.toLocaleString()} rows{field.hasPII ? ' · PII' : ''}
           </span>
         )}

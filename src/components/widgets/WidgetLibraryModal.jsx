@@ -86,7 +86,7 @@ export default function WidgetLibraryModal({ zoneLabel, onAdd, onClose }) {
             <>
               {/* Rail */}
               <div className="max-h-[34vh] w-full shrink-0 overflow-auto border-b border-gray-200 p-4 dark:border-white/10 md:max-h-none md:w-[220px] md:border-b-0 md:border-r">
-                <div className="mb-1.5 text-[10px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-500">Categories</div>
+                <div className="mb-1.5 text-[10px] font-bold uppercase tracking-wide text-gray-500 dark:text-slate-400">Categories</div>
                 <div className="space-y-0.5">
                   {CATALOG_CATEGORIES.map((c) => {
                     const on = activeCats.has(c)
@@ -105,7 +105,7 @@ export default function WidgetLibraryModal({ zoneLabel, onAdd, onClose }) {
               <div className="flex min-w-0 flex-1 flex-col">
                 <div className="border-b border-gray-200 px-6 py-3 dark:border-white/10">
                   <div className="relative max-w-md">
-                    <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500" />
+                    <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-500 dark:text-slate-400" />
                     <input className="input h-9 pl-8" placeholder="Search your widgets…" value={search} onChange={(e) => setSearch(e.target.value)} />
                   </div>
                 </div>
@@ -149,7 +149,7 @@ function Card({ widget, onOpen, onAdd }) {
         <WidgetGlyph skeleton={widget.skeleton} />
         <div className="min-w-0 flex-1">
           <div className="truncate text-sm font-semibold text-gray-900 dark:text-slate-100">{widget.name}</div>
-          <div className="truncate text-[11px] text-gray-400 dark:text-slate-500">{widget.source}</div>
+          <div className="truncate text-[11px] text-gray-500 dark:text-slate-400">{widget.source}</div>
         </div>
       </div>
       <div className="rounded-md border border-gray-100 bg-gray-50/60 p-2 dark:border-white/5 dark:bg-white/[0.02]">
@@ -180,7 +180,7 @@ function Detail({ widget, onBack, onAdd }) {
         </button>
         <WidgetGlyph skeleton={widget.skeleton} sm />
         <span className="truncate text-sm font-semibold text-gray-900 dark:text-slate-100">{widget.name}</span>
-        <span className="truncate text-[11px] text-gray-400 dark:text-slate-500">{widget.source}</span>
+        <span className="truncate text-[11px] text-gray-500 dark:text-slate-400">{widget.source}</span>
       </div>
 
       <div className="mx-auto max-w-3xl space-y-5 p-6">
@@ -215,11 +215,11 @@ function Detail({ widget, onBack, onAdd }) {
           </div>
           <div className="rounded-xl border border-gray-200 bg-gray-50/60 p-6 dark:border-white/10 dark:bg-white/[0.02]">
             <div className={`mx-auto rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition-all dark:border-white/10 dark:bg-[#131a2c] ${PREVIEW_WIDTH[size]}`}>
-              <div className="mb-2 text-[10px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-500">{widget.name}</div>
+              <div className="mb-2 text-[10px] font-bold uppercase tracking-wide text-gray-500 dark:text-slate-400">{widget.name}</div>
               <WidgetRender widget={widget} size={size} />
             </div>
           </div>
-          <p className="mt-2 text-center text-xs text-gray-400 dark:text-slate-500">{sizeMeta?.width} · {sizeMeta?.detail}</p>
+          <p className="mt-2 text-center text-xs text-gray-500 dark:text-slate-400">{sizeMeta?.width} · {sizeMeta?.detail}</p>
         </div>
 
         <div className="flex flex-wrap items-center gap-1.5">

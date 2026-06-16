@@ -111,7 +111,7 @@ function AskChat({ widget }) {
       <div className="flex-1 overflow-auto p-4 space-y-2.5">
         <div className="text-xs text-gray-500 dark:text-slate-400">Asking about: {widget?.name}</div>
         {messages.length === 0 && (
-          <div className="text-xs text-gray-400 dark:text-slate-500">
+          <div className="text-xs text-gray-500 dark:text-slate-400">
             Ask anything about how this widget is calculated or sourced.
           </div>
         )}

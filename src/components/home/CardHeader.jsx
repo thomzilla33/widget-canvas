@@ -15,7 +15,7 @@ export default function CardHeader({ icon: Icon, title, count, sub, tone = 'blue
               <span className={`rounded-full px-1.5 text-[10px] font-bold leading-[16px] ${tone === 'amber' ? 'bg-aims-ungoverned/20 text-aims-ungoverned dark:text-amber-300' : 'bg-aims-blue text-white'}`}>{count}</span>
             )}
           </div>
-          {sub && <div className="text-[11px] text-gray-400 dark:text-slate-500">{sub}</div>}
+          {sub && <div className="text-[11px] text-gray-500 dark:text-slate-400">{sub}</div>}
         </div>
       </div>
       {right && <div className="shrink-0">{right}</div>}

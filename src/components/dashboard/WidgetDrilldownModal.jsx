@@ -1,20 +1,15 @@
-import { useEffect, useRef } from 'react'
 import { X, Table2 } from 'lucide-react'
 import WidgetRender from '../widgets/WidgetRender.jsx'
 import { FreshnessBadge } from '../common/index.jsx'
 import { widgetSample } from '../../data/preview.js'
 import { scopeLabel } from './DashboardControls.jsx'
+import { useFocusTrap } from '../../hooks/useFocusTrap.js'
 
 // Drill-down / click-through from a widget on the consumption view: shows the
 // full-size visualization plus the underlying records, both scoped to the
 // dashboard's current date range + filters.
 export default function WidgetDrilldownModal({ widget, scope, onClose }) {
-  const dialogRef = useRef(null)
-  useEffect(() => {
-    const prev = document.activeElement
-    dialogRef.current?.focus()
-    return () => prev?.focus?.()
-  }, [])
+  const dialogRef = useFocusTrap()
 
   const sample = widgetSample(widget, scope)
   const records = sample.records || []
@@ -28,22 +23,6 @@ export default function WidgetDrilldownModal({ widget, scope, onClose }) {
       onKeyDown={(e) => {
         if (e.key === 'Escape') {
           onClose()
-          return
-        }
-        if (e.key === 'Tab' && dialogRef.current) {
-          const f = dialogRef.current.querySelectorAll(
-            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
-          )
-          if (!f.length) return
-          const first = f[0]
-          const last = f[f.length - 1]
-          if (e.shiftKey && document.activeElement === first) {
-            e.preventDefault()
-            last.focus()
-          } else if (!e.shiftKey && document.activeElement === last) {
-            e.preventDefault()
-            first.focus()
-          }
         }
       }}
     >
@@ -59,7 +38,7 @@ export default function WidgetDrilldownModal({ widget, scope, onClose }) {
             <h2 id="drilldown-title" className="truncate text-sm font-semibold text-gray-900 dark:text-slate-100">
               {widget?.name || 'Widget'}
             </h2>
-            <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-gray-400 dark:text-slate-500">
+            <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-gray-500 dark:text-slate-400">
               <span className="truncate">{widget?.source}</span>
               <span aria-hidden="true">·</span>
               <span className="truncate">{scopeLabel(scope)}</span>
@@ -81,7 +60,7 @@ export default function WidgetDrilldownModal({ widget, scope, onClose }) {
             <WidgetRender widget={widget} size="lg" scope={scope} />
           </div>
 
-          <div className="mt-4 mb-1.5 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-500">
+          <div className="mt-4 mb-1.5 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-gray-500 dark:text-slate-400">
             <Table2 size={12} aria-hidden="true" /> Underlying records
           </div>
           <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-white/10">
@@ -108,7 +87,7 @@ export default function WidgetDrilldownModal({ widget, scope, onClose }) {
               </tbody>
             </table>
           </div>
-          <div className="mt-2 text-[11px] text-gray-400 dark:text-slate-500">
+          <div className="mt-2 text-[11px] text-gray-500 dark:text-slate-400">
             Showing {records.length} of {sample.recordTotal?.toLocaleString() || records.length} records · sample data
           </div>
         </div>
