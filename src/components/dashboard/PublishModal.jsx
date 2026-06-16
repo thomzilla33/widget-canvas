@@ -1,15 +1,14 @@
 import { useState } from 'react'
 import { X, Check, Rocket, History, RotateCcw, EyeOff, Users } from 'lucide-react'
+import { AUDIENCE_ROLES, audienceVisibleTo } from '../../data/audiences.js'
 
-const ROLES = ['Sales Agent', 'Support Agent', 'Manager']
+const ROLES = AUDIENCE_ROLES
 const ZONES = [
   { key: 'header', label: 'Header' },
   { key: 'sidebar', label: 'Sidebar' },
   { key: 'main', label: 'Main' },
   { key: 'bottom', label: 'Bottom' },
 ]
-
-const visibleTo = (audience, role) => audience === 'All audiences' || audience === role
 
 // S99–S104 — preview by role, publish confirm, version history, rollback
 export default function PublishModal({ dashboard, placements, widgetById, onClose, onPublish, onShare }) {
@@ -23,7 +22,7 @@ export default function PublishModal({ dashboard, placements, widgetById, onClos
   ])
 
   const all = Object.values(placements).flat()
-  const hiddenCount = all.filter((p) => !visibleTo(p.audience, role)).length
+  const hiddenCount = all.filter((p) => !audienceVisibleTo(p, role)).length
 
   function publish() {
     onPublish?.()
@@ -102,7 +101,7 @@ export default function PublishModal({ dashboard, placements, widgetById, onClos
 
                   <div className="space-y-2">
                     {ZONES.map((z) => {
-                      const items = placements[z.key].filter((p) => visibleTo(p.audience, role))
+                      const items = placements[z.key].filter((p) => audienceVisibleTo(p, role))
                       return (
                         <div key={z.key} className="rounded-lg border border-gray-200 p-3 dark:border-white/10">
                           <div className="mb-1.5 text-[10px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-500">

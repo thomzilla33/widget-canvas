@@ -3,6 +3,7 @@ import { EmptyState, FreshnessBadge } from '../common/index.jsx'
 import WidgetRender from '../widgets/WidgetRender.jsx'
 import { useWidgets } from '../../state/WidgetsContext.jsx'
 import { dashboardLayout, VIEW_ZONES } from '../../data/layout.js'
+import { audienceVisibleTo, ALL_AUDIENCES } from '../../data/audiences.js'
 
 // Per-size column span — same responsive caps as the canvas (no overflow).
 const SIZE_SPAN_CLASS = { sm: '', md: 'sm:col-span-2', lg: 'sm:col-span-2 lg:col-span-3' }
@@ -12,20 +13,33 @@ const SIZE_SPAN_CLASS = { sm: '', md: 'sm:col-span-2', lg: 'sm:col-span-2 lg:col
 // `scope` (date range + filters) is threaded into each widget's sample so the
 // board responds to the consumption controls. `onDrill(widget)` makes each card
 // clickable to open the drill-down (omitted on surfaces without it, e.g. UCP).
-export default function DashboardZones({ dashboard, scope, onDrill }) {
+export default function DashboardZones({ dashboard, scope, onDrill, viewerRole }) {
   const { widgets } = useWidgets()
   const byId = (id) => widgets.find((w) => w.id === id)
   const layout = dashboardLayout(dashboard)
-  const zones = VIEW_ZONES.filter((z) => layout[z.key]?.length)
+  // Filter by the "view as" role — empty restriction or admin/all sees everything.
+  const filtered = {}
+  for (const k of Object.keys(layout)) filtered[k] = (layout[k] || []).filter((p) => audienceVisibleTo(p, viewerRole))
+  const zones = VIEW_ZONES.filter((z) => filtered[z.key]?.length)
+  const roleScoped = viewerRole && viewerRole !== ALL_AUDIENCES
+  const anyWidgets = Object.values(layout).some((a) => a.length)
 
   if (!zones.length) {
     return (
       <div className="rounded-xl border-2 border-dashed border-gray-200 dark:border-white/10">
-        <EmptyState
-          icon="📊"
-          title="This dashboard is empty"
-          description="Add widgets to start building this dashboard."
-        />
+        {roleScoped && anyWidgets ? (
+          <EmptyState
+            icon="🔒"
+            title={`Nothing visible for ${viewerRole}`}
+            description="Every widget on this dashboard is restricted to other audiences."
+          />
+        ) : (
+          <EmptyState
+            icon="📊"
+            title="This dashboard is empty"
+            description="Add widgets to start building this dashboard."
+          />
+        )}
       </div>
     )
   }
@@ -37,7 +51,7 @@ export default function DashboardZones({ dashboard, scope, onDrill }) {
           {z.key === 'header' ? (
             // KPIs tile evenly across the full header width — no trailing gap.
             <div className="grid h-full gap-3" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(min(180px,100%), 1fr))' }}>
-              {layout.header.map((p, i) => renderCard(p, i, z.key, '', byId, scope, onDrill))}
+              {filtered.header.map((p, i) => renderCard(p, i, z.key, '', byId, scope, onDrill))}
             </div>
           ) : (
             <div
@@ -45,7 +59,7 @@ export default function DashboardZones({ dashboard, scope, onDrill }) {
                 z.key === 'sidebar' ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
               }`}
             >
-              {layout[z.key].map((p, i) =>
+              {filtered[z.key].map((p, i) =>
                 renderCard(p, i, z.key, z.key === 'sidebar' ? '' : SIZE_SPAN_CLASS[p.size] || 'sm:col-span-2', byId, scope, onDrill),
               )}
             </div>

@@ -11,6 +11,7 @@ import { useDashboards } from '../state/DashboardsContext.jsx'
 import { WIDGET_SIZES } from '../data/mock.js'
 import { dashboardLayout } from '../data/layout.js'
 import { vizRecommendation, vizInterchangeable, VIZ_OPTIONS } from '../data/preview.js'
+import { AUDIENCE_ROLES, placementAudiences, audienceSummary } from '../data/audiences.js'
 
 // Responsive column span per size — capped to the tracks available at each
 // breakpoint (1 col mobile, 2 at sm, 3 at lg) so a Large widget never overflows.
@@ -26,7 +27,6 @@ const ZONES = [
   { key: 'main', label: 'Main', cls: 'zone-main', span: 'col-span-1 md:col-span-3', text: 'text-gray-400' },
   { key: 'bottom', label: 'Bottom', cls: 'zone-bottom', span: 'col-span-1 md:col-span-4', text: 'text-aims-aging' },
 ]
-const AUDIENCES = ['All audiences', 'Sales Agent', 'Support Agent', 'Manager']
 const QUICK_ACTIONS = ['Create Task', 'Escalate / Handoff', 'Notify']
 const DENSITY_WARN = 3
 const DENSITY_ALERT = 5
@@ -73,7 +73,7 @@ export default function DashboardCanvas() {
       widgetId: widget.id,
       fixed: false,
       size,
-      audience: 'All audiences',
+      audiences: [], // [] = visible to all audiences
       quickActions: [],
     }
     commit((prev) => ({ ...prev, [zone]: [...prev[zone], placement] }))
@@ -440,7 +440,7 @@ function Zone({
                 <div className="mt-2 flex items-center gap-1.5 border-t border-gray-100 pt-1.5 dark:border-white/5">
                   {w?.freshness && <FreshnessBadge status={w.freshness} label={w.freshness} />}
                   {p.viewAs && <span className="truncate text-[10px] text-gray-400 dark:text-slate-500">as {p.viewAs}</span>}
-                  <span className="ml-auto truncate text-[10px] text-gray-400 dark:text-slate-500">{p.audience}</span>
+                  <span className="ml-auto truncate text-[10px] text-gray-400 dark:text-slate-500">{audienceSummary(p)}</span>
                 </div>
               </div>
             )
@@ -464,6 +464,7 @@ function ConfigPanel({ placement, widget, onChange }) {
 
   const rec = widget ? vizRecommendation(widget) : null
   const currentViz = placement.viewAs || widget?.skeleton
+  const allowedAudiences = placementAudiences(placement)
   return (
     <div className="space-y-5">
       <div>
@@ -564,20 +565,33 @@ function ConfigPanel({ placement, widget, onChange }) {
         </p>
       </div>
 
-      {/* Audience restriction (S91) */}
+      {/* Audience restriction (S91) — multi-select; none = visible to everyone */}
       <div>
         <div className="mb-1.5 text-sm font-medium text-gray-700 dark:text-slate-200">Audience restriction</div>
-        <select
-          className="input"
-          value={placement.audience}
-          onChange={(e) => onChange({ audience: e.target.value })}
-        >
-          {AUDIENCES.map((a) => (
-            <option key={a} value={a}>
-              {a}
-            </option>
-          ))}
-        </select>
+        <div className="flex flex-wrap gap-1.5">
+          {AUDIENCE_ROLES.map((r) => {
+            const on = allowedAudiences.includes(r)
+            return (
+              <button
+                key={r}
+                onClick={() => onChange({ audiences: on ? allowedAudiences.filter((x) => x !== r) : [...allowedAudiences, r] })}
+                aria-pressed={on}
+                className={`rounded-full border px-2.5 py-1 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aims-blue/40 ${
+                  on
+                    ? 'border-aims-blue/40 bg-aims-blue/10 text-aims-blue'
+                    : 'border-gray-300 text-gray-500 hover:text-gray-700 dark:border-white/15 dark:text-slate-400 dark:hover:text-slate-200'
+                }`}
+              >
+                {r}
+              </button>
+            )
+          })}
+        </div>
+        <p className="mt-1.5 text-xs text-gray-400 dark:text-slate-500">
+          {allowedAudiences.length === 0
+            ? 'Visible to everyone who can see this dashboard.'
+            : `Only visible to: ${allowedAudiences.join(', ')}.`}
+        </p>
       </div>
 
       {/* Quick actions (S92) */}
