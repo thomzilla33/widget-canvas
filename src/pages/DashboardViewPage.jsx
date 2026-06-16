@@ -7,6 +7,7 @@ import DashboardControls, { DEFAULT_SCOPE } from '../components/dashboard/Dashbo
 import WidgetDrilldownModal from '../components/dashboard/WidgetDrilldownModal.jsx'
 import { useDashboards } from '../state/DashboardsContext.jsx'
 import { useWidgets } from '../state/WidgetsContext.jsx'
+import { useLive } from '../state/LiveContext.jsx'
 import { placementLabel } from '../data/mock.js'
 import { dashboardLayout } from '../data/layout.js'
 import { isStale } from '../data/governance.js'
@@ -18,8 +19,11 @@ export default function DashboardViewPage() {
   const navigate = useNavigate()
   const { dashboards } = useDashboards()
   const { widgets } = useWidgets()
+  const { tick, paused } = useLive()
   const dashboard = dashboards.find((d) => d.id === id)
   const [scope, setScope] = useState(DEFAULT_SCOPE)
+  // Live tick + pause flag ride along the scope into every tile (Phase 7).
+  const liveScope = { ...scope, tick, paused }
   const [drill, setDrill] = useState(null) // widget opened in the drill-down
   const [viewAs, setViewAs] = useState(ALL_AUDIENCES) // "view as role" audience preview
 
@@ -98,11 +102,11 @@ export default function DashboardViewPage() {
             </div>
           )}
           <DashboardControls scope={scope} onChange={setScope} />
-          <DashboardZones dashboard={dashboard} scope={scope} onDrill={setDrill} viewerRole={viewAs} />
+          <DashboardZones dashboard={dashboard} scope={liveScope} onDrill={setDrill} viewerRole={viewAs} />
         </div>
       </div>
 
-      {drill && <WidgetDrilldownModal widget={drill} scope={scope} onClose={() => setDrill(null)} />}
+      {drill && <WidgetDrilldownModal widget={drill} scope={liveScope} onClose={() => setDrill(null)} />}
     </div>
   )
 }

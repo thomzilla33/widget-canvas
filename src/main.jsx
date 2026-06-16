@@ -7,6 +7,7 @@ import { WidgetsProvider } from './state/WidgetsContext.jsx'
 import { DashboardsProvider } from './state/DashboardsContext.jsx'
 import { FeedbackProvider } from './state/FeedbackContext.jsx'
 import { NotificationsProvider } from './state/NotificationsContext.jsx'
+import { LiveProvider } from './state/LiveContext.jsx'
 import './index.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
@@ -17,7 +18,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           <WidgetsProvider>
             <FeedbackProvider>
               <NotificationsProvider>
-                <App />
+                <LiveProvider>
+                  <App />
+                </LiveProvider>
               </NotificationsProvider>
             </FeedbackProvider>
           </WidgetsProvider>

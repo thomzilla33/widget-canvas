@@ -1,5 +1,6 @@
-import { CalendarRange, X, Layers, Users } from 'lucide-react'
+import { CalendarRange, X, Layers, Users, Pause, Play } from 'lucide-react'
 import { ENVIRONMENTS, SCOPES, scopeLabel as scopeRollupLabel, environmentLabel } from '../../data/governance.js'
+import { useLive } from '../../state/LiveContext.jsx'
 
 // Consumption controls for the dashboard view: a global date range plus
 // dashboard-level filters that cascade into every widget's data sample.
@@ -29,6 +30,7 @@ export function scopeLabel(scope) {
 }
 
 export default function DashboardControls({ scope, onChange }) {
+  const { paused, setPaused } = useLive()
   const setRange = (key) => onChange({ ...scope, range: key })
   const setFilter = (key, value) => {
     const filters = { ...scope.filters }
@@ -138,6 +140,22 @@ export default function DashboardControls({ scope, onChange }) {
             Reset
           </button>
         )}
+
+        {/* Live stream pause/resume — freezes every live tile at once */}
+        <button
+          type="button"
+          onClick={() => setPaused((p) => !p)}
+          aria-pressed={!paused}
+          className="ml-auto inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-2.5 py-1 text-xs font-semibold text-gray-600 hover:bg-gray-50 dark:border-white/15 dark:text-slate-300 dark:hover:bg-white/5"
+          title={paused ? 'Resume live updates' : 'Pause live updates'}
+        >
+          {paused ? <Play size={12} /> : <Pause size={12} />}
+          <span className="relative flex h-1.5 w-1.5">
+            {!paused && <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-aims-fresh opacity-75" />}
+            <span className={`relative inline-flex h-1.5 w-1.5 rounded-full ${paused ? 'bg-gray-400 dark:bg-slate-500' : 'bg-aims-fresh'}`} />
+          </span>
+          {paused ? 'Paused' : 'Live'}
+        </button>
       </div>
 
       {/* Active filter chips */}

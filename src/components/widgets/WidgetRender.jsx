@@ -26,8 +26,10 @@ const H = { sm: 52, md: 84, lg: 150 }
 // Compact, real mini-visualization of a catalog widget, rendered by its
 // `skeleton` AND `size` (sm/md/lg) so the detail level scales with the widget.
 export default function WidgetRender({ widget, size = 'md', scope, viewAs }) {
+  // Tick only re-keys live widgets, so static tiles don't re-render every interval.
+  const liveTick = widget?.freshness === 'live' && scope?.tick ? scope.tick : ''
   const scopeKey = scope
-    ? `${scope.range || ''}|${Object.values(scope.filters || {}).filter((v) => v && v !== 'All').join(',')}|${scope.rollup || ''}|${scope.env || ''}`
+    ? `${scope.range || ''}|${Object.values(scope.filters || {}).filter((v) => v && v !== 'All').join(',')}|${scope.rollup || ''}|${scope.env || ''}|${liveTick}`
     : ''
   // Table-backed widgets pull REAL computed table data; scope (range/filters) doesn't apply to them.
   const data = useMemo(

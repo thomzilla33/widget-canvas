@@ -88,6 +88,19 @@ export function ScopeBadge({ label }) {
   )
 }
 
+// Live data badge (Phase 7) — a pulsing dot signals a real-time tile.
+export function LiveBadge({ paused = false }) {
+  return (
+    <span className="inline-flex items-center gap-1.5 rounded-full border border-green-200 bg-green-50 px-2 py-0.5 text-xs font-semibold text-aims-governed dark:border-green-500/25 dark:bg-green-500/10">
+      <span className="relative flex h-1.5 w-1.5">
+        {!paused && <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-aims-fresh opacity-75" />}
+        <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-aims-fresh" />
+      </span>
+      {paused ? 'Paused' : 'Live'}
+    </span>
+  )
+}
+
 export function GovernedBadge({ governed = true }) {
   return governed ? (
     <span className="badge-governed">

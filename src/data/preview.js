@@ -198,7 +198,10 @@ const RANGE_MULT = { '7d': 0.45, '30d': 0.78, '90d': 1, qtd: 0.9, '12m': 1.7 }
 export function widgetSample(widget, scope) {
   const base = widget?.id || widget?.name || ''
   const filterVals = scope?.filters ? Object.values(scope.filters).filter((v) => v && v !== 'All') : []
-  const salt = scope ? `${scope.range || ''}|${filterVals.join(',')}|${scope.rollup || ''}|${scope.env || ''}` : ''
+  // Live tiles fold the tick into the salt so they re-sample each interval (Phase 7).
+  const live = widget?.freshness === 'live'
+  const tickN = live && scope?.tick ? scope.tick : 0
+  const salt = scope ? `${scope.range || ''}|${filterVals.join(',')}|${scope.rollup || ''}|${scope.env || ''}|${tickN ? `t${tickN}` : ''}` : ''
   const hStable = hashId(base) // widget identity → stable KPI/gauge semantics
   const h = salt ? hashId(`${base}#${salt}`) : hStable // scoped jitter → shapes shift with controls
   const rangeMult = (scope && RANGE_MULT[scope.range]) || 1
@@ -229,6 +232,25 @@ export function widgetSample(widget, scope) {
     x: Math.max(2, Math.round(p.x * factor + ((h >> i) % 10))),
     y: Math.max(2, Math.round(p.y * factor + ((h >> (i + 2)) % 12))),
   }))
+  // Live tiles wobble their headline + move the gauge each tick (count/currency only;
+  // percent/duration/score keep their stable value but still stream their charts).
+  const kStable = semanticKpi(name, hStable)
+  let kpiValue = kStable.value
+  let kpiRawV = kStable.raw
+  if (tickN) {
+    const u = metricUnit(name)
+    if (u === 'count' || u === 'currency') {
+      const wob = 1 + (((h % 9) - 4) / 100) // ±4% jitter, deterministic per tick
+      kpiRawV = Math.max(1, Math.round(kStable.raw * wob))
+      kpiValue =
+        u === 'currency'
+          ? formatValue(kpiRawV, { style: 'currency', abbreviate: true, decimals: 1 })
+          : kpiRawV < 10000
+            ? kpiRawV.toLocaleString('en-US')
+            : formatValue(kpiRawV, { abbreviate: true, decimals: 1 })
+    }
+  }
+  const gaugeBase = GAUGE_VARIANTS[(live ? h : hStable) % GAUGE_VARIANTS.length]
   return {
     ...SAMPLE,
     series,
@@ -237,9 +259,9 @@ export function widgetSample(widget, scope) {
     records,
     twoVar,
     matrix: { ...SAMPLE.matrix, cells },
-    kpi: { value: semanticKpi(name, hStable).value, delta: DELTAS[hStable % DELTAS.length][0], deltaDir: DELTAS[hStable % DELTAS.length][1] },
-    kpiRaw: semanticKpi(name, hStable).raw,
-    gauge: { value: Math.min(99, Math.max(5, Math.round(GAUGE_VARIANTS[hStable % GAUGE_VARIANTS.length] * (0.85 + 0.15 * m)))), label: 'of target' },
+    kpi: { value: kpiValue, delta: DELTAS[hStable % DELTAS.length][0], deltaDir: DELTAS[hStable % DELTAS.length][1] },
+    kpiRaw: kpiRawV,
+    gauge: { value: Math.min(99, Math.max(5, Math.round(gaugeBase * (0.85 + 0.15 * m)))), label: 'of target' },
   }
 }
 

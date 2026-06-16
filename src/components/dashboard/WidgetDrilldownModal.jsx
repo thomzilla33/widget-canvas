@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { X, Table2, ShieldCheck, FileText, GitBranch, BadgeCheck, Workflow } from 'lucide-react'
 import WidgetRender from '../widgets/WidgetRender.jsx'
 import { FreshnessBadge, DataPlaneBadge, EnvironmentBadge } from '../common/index.jsx'
@@ -48,7 +49,10 @@ function BridgeCitation({ widget }) {
 export default function WidgetDrilldownModal({ widget, scope, onClose }) {
   const dialogRef = useFocusTrap()
 
-  const sample = widgetSample(widget, scope)
+  // Re-sample only when the scope that actually affects this widget changes (tick only for live).
+  const liveTick = widget?.freshness === 'live' && scope?.tick ? scope.tick : ''
+  const scopeKey = `${widget?.id}|${scope?.range || ''}|${scope?.rollup || ''}|${scope?.env || ''}|${liveTick}`
+  const sample = useMemo(() => widgetSample(widget, scope), [scopeKey]) // eslint-disable-line react-hooks/exhaustive-deps
   const records = sample.records || []
   const fresh = freshnessState(widget)
 
