@@ -41,7 +41,8 @@ Have: KPI, Line, Bar, Gauge, Table, List, Map, Heat Map, Scatter, Pie(builder), 
 ### Phase 4 — Seed the AIMS widget catalog (from the Field Specs)
 - **4.1 [NEW]** Seed representative named widgets per domain (the W-EXEC / W-GOV / W-TRUTH / W-HTL / W-UCP / W-BILL / W-HELM / W-CONV / W-AGENT / W-CONN / W-DIAN / W-DRIVE / W-TABLE catalog) so the Library is rich with AIMS tiles out of the box, each with a sensible default size + tile type.
 
-### Phase 5 — Governance & guardrail UI (cross-cutting)
+### Phase 5 — Governance & guardrail UI (cross-cutting) — ✅ DONE (commit `e38e97c`)
+> Shipped in `src/data/governance.js` + surfaced across cards, builder, tiles, controls, drill-down. Seeded `d-aims-ops` "AIMS Operations" dashboard showcases every guardrail out of the box.
 - **5.1 [NEW]** **Truth vs Sandbox** label/badge on widgets; never blend in one number.
 - **5.2 [NEW]** **Environment dimension** (prod/sandbox/dev) on consumption tiles; cost views default to prod.
 - **5.3 [NEW]** **Unified credits only** on billing widgets (expose unified + GE count + TP count; never GE-COMM/FIN/COMP).
@@ -50,8 +51,9 @@ Have: KPI, Line, Bar, Gauge, Table, List, Map, Heat Map, Scatter, Pie(builder), 
 - **5.6 [PARTIAL]** **Freshness states** fresh / approaching-TTL / stale + **stale-pause** behavior + re-pin (we have re-pin/schema-drift + freshness badges; add approaching-TTL/stale + a "workflows paused on stale data" tile).
 - **5.7 [EXISTS]** Default size + Dashboard Builder registration per tile (we already declare sizes + delegate layout).
 
-### Phase 6 — Formula Table Definitions ("build a table → display it")
-- **6.1 [NEW]** **Table Definition primitive**: user-authored table with **literal + formula (F)** columns, governed (scope/owner/TTL/freshness). Bind any column to a tile slot (value/category/column) — no new tile type. This delivers Mike's "pull our tables in" AND the deferred **calculated fields**. Worked example in the spec: "BDC Coaching KPIs" → KPI/Bar/Table/Gauge from one table.
+### Phase 6 — Formula Table Definitions ("build a table → display it") — ✅ DONE (commits `070be7c` + `e27803d`)
+> `src/data/tables.js` (formula engine) + Tables page + the table-as-builder-source path. Worked example "BDC Coaching KPIs" → KPI/Bar/Table from one table, with calculated fields.
+- **6.1 [DONE]** **Table Definition primitive**: user-authored table with **literal + formula (F)** columns, governed (scope/owner/TTL/freshness). Bind any column to a tile slot (value/category/column) — no new tile type. This delivers Mike's "pull our tables in" AND the deferred **calculated fields**. Worked example in the spec: "BDC Coaching KPIs" → KPI/Bar/Table/Gauge from one table.
 
 ### Phase 7 — Live tiles (real-time)
 - **7.1 [NEW]** Simulated **live tiles** (WS-stream feel): queue depth, running-now, live ops board, **Alerts** with acknowledge, recent-activity Feed.
