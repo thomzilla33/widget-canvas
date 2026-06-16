@@ -3,12 +3,23 @@ import { useNavigate } from 'react-router-dom'
 import { Search, Flag, Store } from 'lucide-react'
 import { PageHeader, HealthBadge, FreshnessBadge } from '../components/common/index.jsx'
 import { WidgetGlyph } from '../components/widgets/glyph.jsx'
+import WidgetRender from '../components/widgets/WidgetRender.jsx'
 import RepinModal from '../components/widgets/RepinModal.jsx'
 import FlagDetailModal from '../components/widgets/FlagDetailModal.jsx'
 import WidgetMarketplace from '../components/widgets/WidgetMarketplace.jsx'
 import { useWidgets } from '../state/WidgetsContext.jsx'
 import { useFeedback } from '../state/FeedbackContext.jsx'
-import { entities } from '../data/mock.js'
+import { entities, SCHEMA_DRIFT } from '../data/mock.js'
+
+// Action-oriented hint per flag reason, shown when there's no concrete
+// schema-drift fix to perform (the descriptive line tells the user what to do).
+const FIX_HINT = {
+  'Wrong number': 'verify the calculation with the data owner',
+  'Stale / outdated': 're-pin the widget to restore freshness',
+  'Wrong records shown': 'review the record filter and scope',
+  'Missing data': 're-pin to remap the missing fields',
+  Other: 'review and resolve',
+}
 
 // S37–S47 catalog + health · S121–S123 Needs Attention / flag resolution
 export default function WidgetLibrary() {
@@ -89,24 +100,39 @@ export default function WidgetLibrary() {
             <div className="space-y-2">
               {openFlags.map((f) => {
                 const w = widgetById(f.widgetId)
+                const drift = SCHEMA_DRIFT[f.widgetId]
+                const canRepin = Boolean(drift && w)
+                const n = drift?.broken?.length || 0
+                const problem = drift
+                  ? `${n} field${n === 1 ? '' : 's'} changed in ${drift.source} (${drift.changedOn}) — re-pin to restore this widget.`
+                  : `${f.details || 'Flagged for review'}${FIX_HINT[f.reason] ? ` — ${FIX_HINT[f.reason]}.` : ''}`
                 return (
                   <div
                     key={f.id}
-                    className="flex flex-col sm:flex-row sm:items-center gap-3 rounded-lg border border-gray-200 bg-white p-2.5 dark:border-white/10 dark:bg-[#131a2c]"
+                    className="flex flex-col sm:flex-row sm:items-start gap-3 rounded-lg border border-gray-200 bg-white p-2.5 dark:border-white/10 dark:bg-[#131a2c]"
                   >
                     <WidgetGlyph skeleton={w?.skeleton || 'KPI'} sm />
                     <div className="min-w-0 flex-1">
-                      <div className="truncate text-sm font-semibold text-gray-900 dark:text-slate-100">
-                        {w?.name || f.widgetId}
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="truncate text-sm font-semibold text-gray-900 dark:text-slate-100">
+                          {w?.name || f.widgetId}
+                        </span>
+                        <span className="cap-chip cap-chip-tool shrink-0">{f.reason}</span>
                       </div>
-                      <div className="truncate text-[11px] text-gray-400 dark:text-slate-500">
-                        {entityById(f.entityId)?.name || f.entityId} · {f.reporter} · {f.createdAt}
+                      <div className="mt-0.5 text-xs text-gray-600 dark:text-slate-300">{problem}</div>
+                      <div className="mt-0.5 truncate text-[11px] text-gray-400 dark:text-slate-500">
+                        Flagged by {f.reporter} on {entityById(f.entityId)?.name || f.entityId} · {f.createdAt}
                       </div>
                     </div>
-                    <span className="cap-chip cap-chip-tool shrink-0">{f.reason}</span>
-                    <button className="btn-secondary !py-1.5 !px-3 text-xs shrink-0" onClick={() => setDetailFlag(f)}>
-                      Review
-                    </button>
+                    {canRepin ? (
+                      <button className="btn-primary !py-1.5 !px-3 text-xs shrink-0" onClick={() => setRepinWidget(w)}>
+                        Re-pin widget
+                      </button>
+                    ) : (
+                      <button className="btn-secondary !py-1.5 !px-3 text-xs shrink-0" onClick={() => setDetailFlag(f)}>
+                        Review &amp; resolve
+                      </button>
+                    )}
                   </div>
                 )
               })}
@@ -119,7 +145,7 @@ export default function WidgetLibrary() {
             <button
               key={w.id}
               onClick={() => (w.health === 'review' ? setRepinWidget(w) : navigate('/widgets/new'))}
-              className="catalog-card min-h-[164px]"
+              className="catalog-card min-h-[240px]"
             >
               <div className="absolute top-3 right-3">
                 <HealthBadge health={w.health} />
@@ -140,6 +166,11 @@ export default function WidgetLibrary() {
                 <span className={`cap-chip ${w.governed ? 'cap-chip-data' : 'cap-chip-tool'}`}>
                   {w.governed ? 'Governed' : 'Ungoverned'}
                 </span>
+              </div>
+
+              {/* Live preview of what the widget shows */}
+              <div className="pointer-events-none h-[64px] overflow-hidden rounded-md border border-gray-100 bg-gray-50/40 px-2 py-1.5 dark:border-white/10 dark:bg-white/[0.02]">
+                <WidgetRender widget={w} size="sm" />
               </div>
 
               <div className="mt-auto flex items-center justify-between gap-2 border-t border-gray-100 pt-2.5 dark:border-white/10">
