@@ -18,6 +18,7 @@ import { Sparkles, Phone, Mail, MessageSquare, AlertTriangle, AlertCircle, Chevr
 import { useChartTheme, SERIES } from '../playground/WidgetPreview.jsx'
 import { widgetSample, formatValue, tableData } from '../../data/preview.js'
 import { getTable, formatCell } from '../../data/tables.js'
+import { isBillingWidget, creditBreakdown } from '../../data/governance.js'
 
 // Chart heights per size — small is a sparkline, large gets axis room.
 const H = { sm: 52, md: 84, lg: 150 }
@@ -26,7 +27,7 @@ const H = { sm: 52, md: 84, lg: 150 }
 // `skeleton` AND `size` (sm/md/lg) so the detail level scales with the widget.
 export default function WidgetRender({ widget, size = 'md', scope, viewAs }) {
   const scopeKey = scope
-    ? `${scope.range || ''}|${Object.values(scope.filters || {}).filter((v) => v && v !== 'All').join(',')}`
+    ? `${scope.range || ''}|${Object.values(scope.filters || {}).filter((v) => v && v !== 'All').join(',')}|${scope.rollup || ''}|${scope.env || ''}`
     : ''
   // Table-backed widgets pull REAL computed table data; scope (range/filters) doesn't apply to them.
   const data = useMemo(
@@ -37,8 +38,13 @@ export default function WidgetRender({ widget, size = 'md', scope, viewAs }) {
     return <div className="grid h-[88px] place-items-center text-[10px] text-gray-500 dark:text-slate-400">No data</div>
   }
   const props = { data, size, format: widget.format, goal: widget.goal }
+  const skel = viewAs || widget.skeleton
+  // Billing single-value tiles show the UNIFIED credit pool with its GE/TP split (never the legacy GE-COMM/FIN/COMP).
+  if (isBillingWidget(widget) && (skel === 'KPI' || skel === 'Stat Row')) {
+    return <CreditsMini widget={widget} size={size} />
+  }
   // A placement can override how the widget is rendered ("best way to show the data").
-  switch (viewAs || widget.skeleton) {
+  switch (skel) {
     case 'KPI':
       return <KpiMini {...props} />
     case 'Gauge':
@@ -100,6 +106,30 @@ function KpiMini({ data, size, format, goal }) {
               <Line type="monotone" dataKey="y" stroke={SERIES[0]} strokeWidth={2} dot={false} />
             </LineChart>
           </ResponsiveContainer>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// Unified credit pool with its only sanctioned split: GE (engine) vs TP (third-party).
+function CreditsMini({ widget, size }) {
+  const { unified, ge, tp } = creditBreakdown(widget)
+  const fmt = (n) => formatValue(n, { abbreviate: true, decimals: 1 })
+  return (
+    <div className="py-1">
+      <div className={`num font-bold tracking-tight text-gray-900 dark:text-slate-100 ${size === 'sm' ? 'text-xl' : size === 'lg' ? 'text-4xl' : 'text-2xl'}`}>
+        {fmt(unified)}
+      </div>
+      <div className="text-[10px] uppercase tracking-wide text-gray-500 dark:text-slate-400">unified credits</div>
+      {size !== 'sm' && (
+        <div className="mt-1.5 flex gap-3 text-[11px]">
+          <span className="text-gray-600 dark:text-slate-300">
+            <span className="font-semibold text-gray-900 dark:text-slate-100">{fmt(ge)}</span> GE
+          </span>
+          <span className="text-gray-600 dark:text-slate-300">
+            <span className="font-semibold text-gray-900 dark:text-slate-100">{fmt(tp)}</span> TP
+          </span>
         </div>
       )}
     </div>

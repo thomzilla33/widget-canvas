@@ -41,6 +41,8 @@ export const widgets = [
   // Truth Plane
   W({ id: 'w-aims-facts', name: 'Active Facts', skeleton: 'KPI', category: 'AIMS OS', usedIn: 3, source: 'AIMS OS — Truth Plane' }),
   W({ id: 'w-aims-facttier', name: 'Facts by Tier', skeleton: 'Chart', category: 'AIMS OS', usedIn: 1, source: 'AIMS OS — Truth Plane' }),
+  // Sandbox plane — unverified candidate facts (never blended with Truth)
+  W({ id: 'w-aims-candidatefacts', name: 'Candidate Facts (Sandbox)', skeleton: 'KPI', category: 'AIMS OS', dataPlane: 'sandbox', usedIn: 1, source: 'AIMS OS — Truth Plane' }),
   // Human Touch Layer
   W({ id: 'w-aims-queue', name: 'Queue Depth', skeleton: 'KPI', category: 'AIMS OS', freshness: 'live', usedIn: 4, source: 'AIMS OS — Human Touch Layer' }),
   W({ id: 'w-aims-sla', name: 'SLA Compliance Rate', skeleton: 'Gauge', category: 'AIMS OS', freshness: 'live', usedIn: 3, source: 'AIMS OS — Human Touch Layer' }),
@@ -58,7 +60,9 @@ export const widgets = [
   W({ id: 'w-aims-valuecat', name: 'Value by Category', skeleton: 'Chart', category: 'AIMS OS', usedIn: 2, source: 'AIMS OS — Helm (ROI)' }),
   // Data Studio
   W({ id: 'w-aims-uptime', name: 'Connector Uptime', skeleton: 'Gauge', category: 'AIMS OS', freshness: 'live', usedIn: 2, source: 'AIMS OS — Data Studio' }),
-  W({ id: 'w-aims-syncfail', name: 'Sync Failures', skeleton: 'KPI', category: 'AIMS OS', usedIn: 1, source: 'AIMS OS — Data Studio' }),
+  W({ id: 'w-aims-syncfail', name: 'Sync Failures', skeleton: 'KPI', category: 'AIMS OS', freshness: 'aging', usedIn: 1, source: 'AIMS OS — Data Studio' }),
+  // Stale — its source schema changed, so dependent workflows are paused until re-pinned
+  W({ id: 'w-aims-leadfeed', name: 'Lead Enrichment Feed', skeleton: 'Chart', category: 'AIMS OS', freshness: 'stale', health: 'review', usedIn: 2, source: 'AIMS OS — Data Studio' }),
   W({ id: 'w-revenue', name: 'Total Revenue', skeleton: 'KPI', category: 'Intelligence', freshness: 'live', usedIn: 9, source: 'Finance Data View' }),
   W({ id: 'w-mrr', name: 'MRR Trend', skeleton: 'Chart', category: 'Intelligence', freshness: 'live', usedIn: 7, source: 'Stripe' }),
   W({ id: 'w-arr', name: 'ARR Snapshot', skeleton: 'KPI', category: 'Intelligence', usedIn: 12, source: 'Finance Data View' }),
@@ -93,6 +97,7 @@ export const widgets = [
 export const DEACTIVATED_OWNERS = ['Robert Chen', 'Aisha Khan']
 
 export const dashboards = [
+  { id: 'd-aims-ops', template: 't-aims-ops', name: 'AIMS Operations', entity: 'Report', audience: 'Manager', owner: 'Priya Nair', status: 'published', widgets: 7, updated: '1 hour ago', placement: { surface: 'report', collection: 'Operations' } },
   { id: 'd-sales-acct', template: 't-acct360', name: 'Sales — Account 360', entity: 'Company', audience: 'Sales Agent', owner: 'Priya Nair', status: 'published', widgets: 8, updated: '2 days ago', placement: { surface: 'profile', profileType: 'Company', scope: 'all', entityId: null, entityName: null, tab: 'Overview' } },
   { id: 'd-support-acct', template: 't-support', name: 'Support — Account Health', entity: 'Company', audience: 'Support Agent', owner: 'Dana Lee', status: 'draft', widgets: 5, updated: '5 hours ago', placement: { surface: 'profile', profileType: 'Company', scope: 'entity', entityId: 'acme-001', entityName: 'Acme Corporation', tab: 'Activity' } },
   { id: 'd-mgr-overview', template: 't-exec', name: 'Manager Overview', entity: 'Report', audience: 'Manager', owner: 'Priya Nair', status: 'pending', widgets: 12, updated: '1 week ago', placement: { surface: 'report', collection: 'Executive' } },
@@ -359,6 +364,16 @@ export const TEMPLATE_SEED = {
     { zone: 'main', widgetId: 'w-margin' },
     { zone: 'sidebar', widgetId: 'w-churn' },
     { zone: 'bottom', widgetId: 'w-execsummary' },
+  ],
+  // AIMS Operations — showcases the Phase 5 guardrails (Truth/Sandbox, credits, Bridge ID, stale-pause).
+  't-aims-ops': [
+    { zone: 'header', widgetId: 'w-aims-hitl' },
+    { zone: 'header', widgetId: 'w-aims-credits' },
+    { zone: 'main', widgetId: 'w-aims-runs' },
+    { zone: 'main', widgetId: 'w-aims-outcomes' },
+    { zone: 'main', widgetId: 'w-aims-roi' },
+    { zone: 'sidebar', widgetId: 'w-aims-candidatefacts' },
+    { zone: 'bottom', widgetId: 'w-aims-leadfeed' },
   ],
 }
 

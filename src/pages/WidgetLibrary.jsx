@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Search, Flag, Store } from 'lucide-react'
-import { PageHeader, HealthBadge, FreshnessBadge, EmptyState } from '../components/common/index.jsx'
+import { PageHeader, HealthBadge, FreshnessBadge, EmptyState, DataPlaneBadge } from '../components/common/index.jsx'
+import { dataPlaneOf } from '../data/governance.js'
 import { WidgetGlyph } from '../components/widgets/glyph.jsx'
 import WidgetRender from '../components/widgets/WidgetRender.jsx'
 import RepinModal from '../components/widgets/RepinModal.jsx'
@@ -173,6 +174,7 @@ export default function WidgetLibrary() {
                 <span className={`cap-chip ${w.governed ? 'cap-chip-data' : 'cap-chip-tool'}`}>
                   {w.governed ? 'Governed' : 'Ungoverned'}
                 </span>
+                <DataPlaneBadge plane={dataPlaneOf(w)} />
               </div>
 
               {/* Live preview of what the widget shows */}

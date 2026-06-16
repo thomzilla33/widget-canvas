@@ -19,7 +19,8 @@ import {
   PolarAngleAxis,
 } from 'recharts'
 import { ChevronLeft, ChevronRight, Lock, Sparkles } from 'lucide-react'
-import { GovernedBadge, FreshnessBadge } from '../common/index.jsx'
+import { GovernedBadge, FreshnessBadge, DataPlaneBadge } from '../common/index.jsx'
+import { dataPlaneOf } from '../../data/governance.js'
 import { useTheme } from '../../state/ThemeContext.jsx'
 import { previewData, formatValue, tableData } from '../../data/preview.js'
 import { formatCell } from '../../data/tables.js'
@@ -66,7 +67,13 @@ export default function WidgetPreview({ typeId, metric, source, name, freshness,
             </div>
           )}
         </div>
-        {ready && <GovernedBadge governed={!!source.governed} />}
+        {ready && (
+          <div className="flex shrink-0 items-center gap-1.5">
+            {/* dataPlaneOf reads `.source`; the builder has no widget yet, so pass the source name in that shape. */}
+            <DataPlaneBadge plane={dataPlaneOf({ source: source.name })} />
+            <GovernedBadge governed={!!source.governed} />
+          </div>
+        )}
       </div>
 
       <div className="mt-3 flex-1">

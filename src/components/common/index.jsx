@@ -1,4 +1,4 @@
-import { ShieldCheck, ShieldAlert } from 'lucide-react'
+import { ShieldCheck, ShieldAlert, FlaskConical, Layers, Users } from 'lucide-react'
 
 const badgeStyles = {
   published: 'bg-green-50 text-aims-governed border-green-200 dark:bg-green-500/10 dark:border-green-500/25',
@@ -27,12 +27,14 @@ const freshnessClass = {
   live: 'freshness-live',
   fresh: 'freshness-fresh',
   aging: 'freshness-aging',
+  approaching: 'freshness-aging',
   stale: 'freshness-stale',
 }
 const freshnessDot = {
   live: 'bg-aims-fresh',
   fresh: 'bg-aims-fresh',
   aging: 'bg-aims-aging',
+  approaching: 'bg-aims-aging',
   stale: 'bg-aims-stale',
 }
 
@@ -41,6 +43,47 @@ export function FreshnessBadge({ status = 'fresh', label }) {
     <span className={freshnessClass[status] || freshnessClass.fresh}>
       <span className={`h-1.5 w-1.5 rounded-full ${freshnessDot[status] || freshnessDot.fresh}`} />
       {label || status}
+    </span>
+  )
+}
+
+// Truth vs Sandbox data plane (5.1). Truth = verified facts; Sandbox = unverified claims.
+export function DataPlaneBadge({ plane }) {
+  if (!plane) return null
+  if (plane === 'sandbox') {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-xs font-semibold text-aims-ungoverned dark:border-amber-500/25 dark:bg-amber-500/10" title="Unverified candidate data — not promoted to Truth">
+        <FlaskConical size={11} /> Sandbox
+      </span>
+    )
+  }
+  return (
+    <span className="inline-flex items-center gap-1 rounded-full border border-sky-200 bg-sky-50 px-2 py-0.5 text-xs font-semibold text-sky-600 dark:border-sky-500/25 dark:bg-sky-500/10 dark:text-sky-300" title="Verified facts on the Truth Plane">
+      <ShieldCheck size={11} /> Truth
+    </span>
+  )
+}
+
+// Environment chip (5.2). Suppressed for prod unless `always` (cost views pin prod).
+export function EnvironmentBadge({ env = 'prod', always = false }) {
+  if (env === 'prod' && !always) return null
+  const tone =
+    env === 'prod'
+      ? 'border-gray-200 text-gray-500 dark:border-white/10 dark:text-slate-400'
+      : 'border-purple-200 bg-purple-50 text-purple-600 dark:border-purple-500/25 dark:bg-purple-500/10 dark:text-purple-300'
+  const label = env === 'prod' ? 'Prod' : env === 'sandbox' ? 'Sandbox' : 'Dev'
+  return (
+    <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-semibold ${tone}`}>
+      <Layers size={10} /> {label}
+    </span>
+  )
+}
+
+// Scope rollup chip (5.5) — Me / My Team / All / Tenant…
+export function ScopeBadge({ label }) {
+  return (
+    <span className="inline-flex items-center gap-1 rounded-full border border-gray-200 px-2 py-0.5 text-[11px] font-medium text-gray-500 dark:border-white/10 dark:text-slate-400">
+      <Users size={10} /> {label}
     </span>
   )
 }

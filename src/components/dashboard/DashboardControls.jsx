@@ -1,4 +1,5 @@
-import { CalendarRange, X } from 'lucide-react'
+import { CalendarRange, X, Layers, Users } from 'lucide-react'
+import { ENVIRONMENTS, SCOPES, scopeLabel as scopeRollupLabel, environmentLabel } from '../../data/governance.js'
 
 // Consumption controls for the dashboard view: a global date range plus
 // dashboard-level filters that cascade into every widget's data sample.
@@ -15,13 +16,16 @@ export const FILTERS = [
   { key: 'region', label: 'Region', options: ['All', 'North America', 'EMEA', 'APAC', 'LATAM'] },
 ]
 
-export const DEFAULT_SCOPE = { range: '90d', filters: {} }
+// rollup = PBAC scope (Me/Team/All/Tenant…); env = infra plane (prod default).
+export const DEFAULT_SCOPE = { range: '90d', filters: {}, rollup: 'all', env: 'prod' }
 
 // Human-readable summary of the active scope (used in the drill-down context line).
 export function scopeLabel(scope) {
   const range = RANGES.find((r) => r.key === scope?.range)?.full || 'Last 90 days'
   const active = Object.values(scope?.filters || {}).filter((v) => v && v !== 'All')
-  return [range, ...active].join(' · ')
+  const rollup = scopeRollupLabel(scope?.rollup || 'all')
+  const env = scope?.env && scope.env !== 'prod' ? environmentLabel(scope.env) : null
+  return [range, rollup, ...active, env].filter(Boolean).join(' · ')
 }
 
 export default function DashboardControls({ scope, onChange }) {
@@ -33,10 +37,16 @@ export default function DashboardControls({ scope, onChange }) {
     onChange({ ...scope, filters })
   }
   const clearFilter = (key) => setFilter(key, 'All')
+  const setRollup = (key) => onChange({ ...scope, rollup: key })
+  const setEnv = (key) => onChange({ ...scope, env: key })
   const reset = () => onChange({ ...DEFAULT_SCOPE })
 
   const active = Object.entries(scope?.filters || {}).filter(([, v]) => v && v !== 'All')
-  const dirty = active.length > 0 || scope?.range !== DEFAULT_SCOPE.range
+  const dirty =
+    active.length > 0 ||
+    scope?.range !== DEFAULT_SCOPE.range ||
+    (scope?.rollup || 'all') !== DEFAULT_SCOPE.rollup ||
+    (scope?.env || 'prod') !== DEFAULT_SCOPE.env
 
   return (
     <div className="mb-4 flex flex-col gap-3 rounded-xl border border-gray-200 bg-white p-3 dark:border-white/10 dark:bg-[#131a2c]">
@@ -84,6 +94,44 @@ export default function DashboardControls({ scope, onChange }) {
             </select>
           </label>
         ))}
+
+        <span className="mx-1 hidden h-5 w-px bg-gray-200 dark:bg-white/10 sm:block" aria-hidden="true" />
+
+        {/* Scope rollup (PBAC) */}
+        <label className="inline-flex items-center gap-1.5 text-xs text-gray-500 dark:text-slate-400">
+          <Users size={13} aria-hidden="true" />
+          <span className="font-medium">Scope</span>
+          <select
+            className="input !h-8 !w-auto !py-1 !pl-2 !pr-7 text-xs"
+            value={scope?.rollup || 'all'}
+            onChange={(e) => setRollup(e.target.value)}
+            aria-label="Scope rollup"
+          >
+            {SCOPES.map((s) => (
+              <option key={s.key} value={s.key}>
+                {s.label}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        {/* Environment (infra plane) */}
+        <label className="inline-flex items-center gap-1.5 text-xs text-gray-500 dark:text-slate-400">
+          <Layers size={13} aria-hidden="true" />
+          <span className="font-medium">Env</span>
+          <select
+            className="input !h-8 !w-auto !py-1 !pl-2 !pr-7 text-xs"
+            value={scope?.env || 'prod'}
+            onChange={(e) => setEnv(e.target.value)}
+            aria-label="Environment"
+          >
+            {ENVIRONMENTS.map((e) => (
+              <option key={e.key} value={e.key}>
+                {e.label}
+              </option>
+            ))}
+          </select>
+        </label>
 
         {dirty && (
           <button type="button" onClick={reset} className="btn-ghost !px-2 !py-1 text-xs">

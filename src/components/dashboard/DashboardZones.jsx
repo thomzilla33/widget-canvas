@@ -1,9 +1,10 @@
 import { Lock, Maximize2 } from 'lucide-react'
-import { EmptyState, FreshnessBadge } from '../common/index.jsx'
+import { EmptyState, FreshnessBadge, DataPlaneBadge, EnvironmentBadge } from '../common/index.jsx'
 import WidgetRender from '../widgets/WidgetRender.jsx'
 import { useWidgets } from '../../state/WidgetsContext.jsx'
 import { dashboardLayout, VIEW_ZONES } from '../../data/layout.js'
 import { audienceVisibleTo, ALL_AUDIENCES } from '../../data/audiences.js'
+import { dataPlaneOf, freshnessState } from '../../data/governance.js'
 
 // Per-size column span — same responsive caps as the canvas (no overflow).
 const SIZE_SPAN_CLASS = { sm: '', md: 'sm:col-span-2', lg: 'sm:col-span-2 lg:col-span-3' }
@@ -83,6 +84,8 @@ function renderCard(p, i, zoneKey, span, byId, scope, onDrill) {
       </div>
     )
   }
+  const plane = dataPlaneOf(w)
+  const fresh = freshnessState(w)
   const inner = (
     <>
       <div className="flex items-center justify-between gap-1">
@@ -97,11 +100,11 @@ function renderCard(p, i, zoneKey, span, byId, scope, onDrill) {
       <div className="mt-2 flex flex-1 flex-col justify-center">
         <WidgetRender widget={w} size={p.size} scope={scope} viewAs={p.viewAs} />
       </div>
-      {w?.freshness && (
-        <div className="mt-2 border-t border-gray-100 pt-1.5 dark:border-white/5">
-          <FreshnessBadge status={w.freshness} label={w.freshness} />
-        </div>
-      )}
+      <div className="mt-2 flex flex-wrap items-center gap-1.5 border-t border-gray-100 pt-1.5 dark:border-white/5">
+        <FreshnessBadge status={fresh.tone} label={fresh.label} />
+        <DataPlaneBadge plane={plane} />
+        <EnvironmentBadge env={scope?.env} />
+      </div>
     </>
   )
   if (onDrill) {

@@ -1,13 +1,15 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { Pencil, ChevronLeft, MapPin } from 'lucide-react'
+import { Pencil, ChevronLeft, MapPin, PauseCircle } from 'lucide-react'
 import { PageHeader, Badge } from '../components/common/index.jsx'
 import DashboardZones from '../components/dashboard/DashboardZones.jsx'
 import DashboardControls, { DEFAULT_SCOPE } from '../components/dashboard/DashboardControls.jsx'
 import WidgetDrilldownModal from '../components/dashboard/WidgetDrilldownModal.jsx'
 import { useDashboards } from '../state/DashboardsContext.jsx'
+import { useWidgets } from '../state/WidgetsContext.jsx'
 import { placementLabel } from '../data/mock.js'
 import { dashboardLayout } from '../data/layout.js'
+import { isStale } from '../data/governance.js'
 import { AUDIENCE_OPTIONS, ALL_AUDIENCES, audienceVisibleTo } from '../data/audiences.js'
 
 // Read-only consumption view of a dashboard (vs the /canvas editor).
@@ -15,17 +17,18 @@ export default function DashboardViewPage() {
   const { id } = useParams()
   const navigate = useNavigate()
   const { dashboards } = useDashboards()
+  const { widgets } = useWidgets()
   const dashboard = dashboards.find((d) => d.id === id)
   const [scope, setScope] = useState(DEFAULT_SCOPE)
   const [drill, setDrill] = useState(null) // widget opened in the drill-down
   const [viewAs, setViewAs] = useState(ALL_AUDIENCES) // "view as role" audience preview
 
-  const hiddenForRole =
-    dashboard && viewAs !== ALL_AUDIENCES
-      ? Object.values(dashboardLayout(dashboard))
-          .flat()
-          .filter((p) => !audienceVisibleTo(p, viewAs)).length
-      : 0
+  const placements = dashboard ? Object.values(dashboardLayout(dashboard)).flat() : []
+  const hiddenForRole = viewAs !== ALL_AUDIENCES ? placements.filter((p) => !audienceVisibleTo(p, viewAs)).length : 0
+  // Stale tiles pause the workflows that depend on them (5.6).
+  const stalePaused = placements
+    .map((p) => widgets.find((w) => w.id === p.widgetId))
+    .filter((w) => w && isStale(w)).length
 
   if (!dashboard) {
     return (
@@ -81,6 +84,17 @@ export default function DashboardViewPage() {
           {hiddenForRole > 0 && (
             <div className="mb-3 inline-flex items-center gap-1.5 rounded-lg border border-amber-300/40 bg-amber-500/10 px-2.5 py-1 text-[11px] font-medium text-aims-ungoverned">
               {hiddenForRole} widget{hiddenForRole === 1 ? '' : 's'} hidden for {viewAs}
+            </div>
+          )}
+          {stalePaused > 0 && (
+            <div className="mb-3 flex items-start gap-2 rounded-lg border border-red-300/40 bg-red-500/10 px-3 py-2 text-xs text-aims-stale">
+              <PauseCircle size={15} className="mt-0.5 shrink-0" aria-hidden="true" />
+              <span>
+                <span className="font-semibold">
+                  {stalePaused} tile{stalePaused === 1 ? '' : 's'} paused on stale data.
+                </span>{' '}
+                Workflows that depend on {stalePaused === 1 ? 'it' : 'them'} are paused until the source is re-pinned.
+              </span>
             </div>
           )}
           <DashboardControls scope={scope} onChange={setScope} />

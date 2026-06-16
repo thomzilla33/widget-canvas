@@ -1,4 +1,5 @@
 import { computeTable, formatCell, columnAvg, tableDimColumn } from './tables.js'
+import { scopeMult } from './governance.js'
 
 // Canned preview datasets for the Widget Playground. A single bundle is returned
 // so any (metric, widget-type) pair can render something sensible.
@@ -184,12 +185,13 @@ const RANGE_MULT = { '7d': 0.45, '30d': 0.78, '90d': 1, qtd: 0.9, '12m': 1.7 }
 export function widgetSample(widget, scope) {
   const base = widget?.id || widget?.name || ''
   const filterVals = scope?.filters ? Object.values(scope.filters).filter((v) => v && v !== 'All') : []
-  const salt = scope ? `${scope.range || ''}|${filterVals.join(',')}` : ''
+  const salt = scope ? `${scope.range || ''}|${filterVals.join(',')}|${scope.rollup || ''}|${scope.env || ''}` : ''
   const hStable = hashId(base) // widget identity → stable KPI/gauge semantics
   const h = salt ? hashId(`${base}#${salt}`) : hStable // scoped jitter → shapes shift with controls
   const rangeMult = (scope && RANGE_MULT[scope.range]) || 1
   const filterScale = 1 - Math.min(0.4, filterVals.length * 0.15) // each active filter narrows the data
-  const m = rangeMult * filterScale
+  const rollupMult = scope?.rollup ? scopeMult(scope.rollup) : 1 // broader PBAC scope → larger aggregates
+  const m = rangeMult * filterScale * rollupMult
   const name = widget?.name || ''
   const factor = (0.65 + (hStable % 8) * 0.11) * m
   const series = SAMPLE.series.map((d, i) => ({ x: d.x, y: Math.max(8, Math.round(d.y * factor + ((h >> i) % 22) - 10)) }))
