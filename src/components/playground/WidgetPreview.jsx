@@ -229,8 +229,9 @@ function GaugeView({ data, display }) {
 /* ── Custom views ── */
 function KpiView({ data, display }) {
   const fmt = display?.format
+  const useFmt = fmt && fmt.style && fmt.style !== 'auto'
   const goal = display?.goal
-  const value = fmt ? formatValue(data.kpiRaw, fmt) : data.kpi.value
+  const value = useFmt ? formatValue(data.kpiRaw, fmt) : data.kpi.value
   const met = goalMet(data.kpiRaw, goal)
   const valueColor = met == null ? 'text-gray-900 dark:text-slate-100' : met ? 'text-aims-governed' : 'text-aims-stale'
   const missLabel = goal?.direction === 'lower' ? 'above target' : 'below target'
@@ -240,7 +241,7 @@ function KpiView({ data, display }) {
       <div className="num mt-1 text-sm font-semibold text-aims-governed">{data.kpi.delta} vs last quarter</div>
       {goal?.value != null && (
         <div className="mt-1.5 text-xs text-gray-500 dark:text-slate-400">
-          Goal: {fmt ? formatValue(goal.value, fmt) : goal.value} ·{' '}
+          Goal: {useFmt ? formatValue(goal.value, fmt) : goal.value} ·{' '}
           <span className={met ? 'font-semibold text-aims-governed' : 'font-semibold text-aims-stale'}>{met ? 'met' : missLabel}</span>
         </div>
       )}

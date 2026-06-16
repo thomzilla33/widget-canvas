@@ -51,7 +51,7 @@ export default function WidgetBuilder() {
   const [saved, setSaved] = useState(false)
   const [browsing, setBrowsing] = useState(false)
   const [previewSize, setPreviewSize] = useState('lg')
-  const [format, setFormatState] = useState({ style: 'number', decimals: 0, abbreviate: true, prefix: '', suffix: '' })
+  const [format, setFormatState] = useState({ style: 'auto', decimals: 0, abbreviate: true, prefix: '', suffix: '' })
   const [goal, setGoalState] = useState({ value: null, direction: 'higher' })
   const setFormat = (patch) => setFormatState((f) => ({ ...f, ...patch }))
   const setGoal = (patch) => setGoalState((g) => ({ ...g, ...patch }))
@@ -111,7 +111,7 @@ export default function WidgetBuilder() {
       health: 'unused',
       usedIn: 0,
       source: source.name,
-      format,
+      format: format.style === 'auto' ? undefined : format,
       goal: goal.value != null ? goal : undefined,
     })
     setSaved(true)

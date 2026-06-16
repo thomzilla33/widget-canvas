@@ -60,7 +60,8 @@ export default function WidgetRender({ widget, size = 'md', scope, viewAs }) {
 
 function KpiMini({ data, size, format, goal }) {
   const down = data.kpi.deltaDir === 'down'
-  const value = format ? formatValue(data.kpiRaw, format) : data.kpi.value
+  const useFmt = format && format.style && format.style !== 'auto'
+  const value = useFmt ? formatValue(data.kpiRaw, format) : data.kpi.value
   const met = goal && goal.value != null ? (goal.direction === 'lower' ? data.kpiRaw <= goal.value : data.kpiRaw >= goal.value) : null
   const valueColor = met == null ? 'text-gray-900 dark:text-slate-100' : met ? 'text-aims-governed' : 'text-aims-stale'
   return (

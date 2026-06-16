@@ -285,11 +285,15 @@ export function FormatPanel({ format, setFormat, goal, setGoal }) {
           value={f.style}
           onChange={(v) => setFormat({ style: v })}
           options={[
+            ['auto', 'Auto'],
             ['number', 'Number'],
             ['currency', 'Currency'],
             ['percent', 'Percent'],
           ]}
         />
+        {f.style === 'auto' && (
+          <p className="mt-1 text-xs text-gray-500 dark:text-slate-400">Matches the metric automatically (count, currency, %, duration…).</p>
+        )}
       </Field>
 
       <div className="grid grid-cols-2 gap-3">

@@ -68,28 +68,77 @@ export function formatValue(n, f = {}) {
   return `${prefix}${str}${suffix}`
 }
 
-// Returns the full sample bundle, lightly labeled by the chosen metric.
-export function previewData(metric) {
-  return { ...SAMPLE, label: metric?.name || 'Value' }
+// ── Make the sample data MEAN something for the metric ──────────────
+// Infer the unit and category set from the metric name so a "Conversations
+// Handled" KPI shows a count (not "$1.24M") and an "Actions by Type" bar uses
+// action labels (not pipeline stages).
+function metricUnit(name = '') {
+  if (/retention|\bnrr\b|\bgrr\b/i.test(name)) return 'percent' // NRR/GRR are ratios, not $ (beats the "revenue" rule)
+  if (/revenue|\barr\b|\bmrr\b|spend|cash|burn|\bcost\b|price|deal size|payment|payroll|margin|\bgpu\b|gross|p&l|cogs|\blabor\b|\$/i.test(name)) return 'currency'
+  if (/\btime\b|\bdays?\b|cycle|to hire|to resolve|\bmttr\b|velocity|runtime/i.test(name)) return 'duration'
+  if (/csat|\bnps\b|score|rating|satisfaction/i.test(name)) return 'score'
+  if (/rate|win|churn|\bctr\b|roas|attrition|breach|acceptance|utiliz|conversion|open rate/i.test(name)) return 'percent'
+  return 'count'
 }
 
-// Deterministic per-widget variation so a board of widgets looks realistic
-// (distinct KPI values, gauge levels, and chart shapes) instead of identical.
-const KPI_VARIANTS = [
-  { value: '$1.24M', delta: '+8.2%', deltaDir: 'up' },
-  { value: '94.2%', delta: '+1.1%', deltaDir: 'up' },
-  { value: '1,284', delta: '-3.0%', deltaDir: 'down' },
-  { value: '$486K', delta: '+12.4%', deltaDir: 'up' },
-  { value: '28 days', delta: '-2 days', deltaDir: 'up' },
-  { value: '4.6 / 5', delta: '+0.3', deltaDir: 'up' },
-  { value: '$92.4K', delta: '-5.1%', deltaDir: 'down' },
-]
+// A semantically-appropriate KPI value (raw number + display string) for a metric.
+function semanticKpi(name, h) {
+  const pick = (arr) => arr[h % arr.length]
+  switch (metricUnit(name)) {
+    case 'currency': {
+      const v = pick([1243200, 486000, 92400, 2140000, 318000])
+      return { raw: v, value: formatValue(v, { style: 'currency', abbreviate: true, decimals: 1 }) }
+    }
+    case 'percent': {
+      const v = pick([94.2, 28.4, 67.5, 88, 12.3])
+      return { raw: v, value: `${v}%` }
+    }
+    case 'duration': {
+      const o = pick([{ raw: 28, s: '28 days' }, { raw: 1.4, s: '1.4 h' }, { raw: 3, s: '3 days' }, { raw: 42, s: '42 min' }])
+      return { raw: o.raw, value: o.s }
+    }
+    case 'score': {
+      const v = pick([4.6, 4.2, 3.9])
+      return { raw: v, value: `${v} / 5` }
+    }
+    default: {
+      const v = pick([1284, 86400, 12480, 540, 3120, 21000])
+      return { raw: v, value: v < 10000 ? v.toLocaleString('en-US') : formatValue(v, { abbreviate: true, decimals: 1 }) }
+    }
+  }
+}
+
+// Category labels that match the metric (stages / channels / regions / …).
+function breakdownCats(name = '') {
+  if (/stage|pipeline|funnel|\bmql\b|\bsql\b/i.test(name)) return ['Prospecting', 'Qualified', 'Proposal', 'Negotiation', 'Closed']
+  if (/channel/i.test(name)) return ['Email', 'Social', 'Search', 'Direct', 'Referral']
+  if (/region/i.test(name)) return ['North America', 'EMEA', 'APAC', 'LATAM']
+  if (/plan|tier|subscription/i.test(name)) return ['Free', 'Pro', 'Team', 'Enterprise']
+  if (/action|type/i.test(name)) return ['Email', 'SMS', 'Call', 'Forward', 'Note']
+  if (/\bdept\b|department|\bteam\b/i.test(name)) return ['Sales', 'Support', 'Success', 'Ops']
+  if (/priority/i.test(name)) return ['Critical', 'High', 'Medium', 'Low']
+  if (/category|expense/i.test(name)) return ['Payroll', 'Software', 'Marketing', 'Travel', 'Other']
+  if (/business unit/i.test(name)) return ['North', 'South', 'East', 'West']
+  return ['Segment A', 'Segment B', 'Segment C', 'Segment D']
+}
+
+const DELTAS = [['+8.2%', 'up'], ['+1.1%', 'up'], ['-3.0%', 'down'], ['+12.4%', 'up'], ['-5.1%', 'down']]
 const GAUGE_VARIANTS = [68, 82, 45, 91, 73, 57, 88]
 
 function hashId(s = '') {
   let h = 0
   for (let i = 0; i < s.length; i += 1) h = (h * 31 + s.charCodeAt(i)) >>> 0
   return h
+}
+
+// Returns the sample bundle with KPI value + breakdown labels that fit the metric.
+export function previewData(metric) {
+  const name = metric?.name || 'Value'
+  const h = hashId(name)
+  const k = semanticKpi(name, h)
+  const cats = breakdownCats(name)
+  const breakdown = cats.map((label, i) => ({ label, value: SAMPLE.breakdown[i % SAMPLE.breakdown.length].value }))
+  return { ...SAMPLE, label: name, kpi: { ...SAMPLE.kpi, value: k.value }, kpiRaw: k.raw, breakdown }
 }
 
 // Consumption controls: a date range scales magnitude (longer = bigger cumulative
@@ -106,9 +155,14 @@ export function widgetSample(widget, scope) {
   const rangeMult = (scope && RANGE_MULT[scope.range]) || 1
   const filterScale = 1 - Math.min(0.4, filterVals.length * 0.15) // each active filter narrows the data
   const m = rangeMult * filterScale
+  const name = widget?.name || ''
   const factor = (0.65 + (hStable % 8) * 0.11) * m
   const series = SAMPLE.series.map((d, i) => ({ x: d.x, y: Math.max(8, Math.round(d.y * factor + ((h >> i) % 22) - 10)) }))
-  const breakdown = SAMPLE.breakdown.map((b, i) => ({ ...b, value: Math.max(6, Math.round(b.value * factor + ((h >> (i + 1)) % 16))) }))
+  const cats = breakdownCats(name)
+  const breakdown = cats.map((label, i) => ({
+    label,
+    value: Math.max(6, Math.round(SAMPLE.breakdown[i % SAMPLE.breakdown.length].value * factor + ((h >> (i + 1)) % 16))),
+  }))
   const geo = SAMPLE.geo.map((g, i) => ({ ...g, value: Math.max(5, Math.round(g.value * factor + ((h >> (i + 3)) % 18))) }))
   const cells = SAMPLE.matrix.cells.map((row, ri) =>
     row.map((v, ci) => Math.min(100, Math.max(10, Math.round(v * factor + ((h >> (ri + ci)) % 20))))),
@@ -128,8 +182,8 @@ export function widgetSample(widget, scope) {
     records,
     twoVar,
     matrix: { ...SAMPLE.matrix, cells },
-    kpi: KPI_VARIANTS[hStable % KPI_VARIANTS.length],
-    kpiRaw: Math.round(SAMPLE.kpiRaw * factor),
+    kpi: { value: semanticKpi(name, hStable).value, delta: DELTAS[hStable % DELTAS.length][0], deltaDir: DELTAS[hStable % DELTAS.length][1] },
+    kpiRaw: semanticKpi(name, hStable).raw,
     gauge: { value: Math.min(99, Math.max(5, Math.round(GAUGE_VARIANTS[hStable % GAUGE_VARIANTS.length] * (0.85 + 0.15 * m)))), label: 'of target' },
   }
 }
