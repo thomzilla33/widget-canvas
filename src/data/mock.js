@@ -129,7 +129,7 @@ export const HTL_ITEMS = [
   { id: 'h1', source: 'Agent', title: 'Sales Copilot — send renewal email to Acme Corp?', detail: 'Drafted a follow-up. Awaiting your approval before it sends.', action: 'Approve', priority: 'high', when: '8m ago' },
   { id: 'h2', source: 'Workflow', title: 'Invoice approval — $84,200 over threshold', detail: 'NetSuite workflow paused for sign-off above $50k.', action: 'Review', priority: 'high', when: '22m ago' },
   { id: 'h3', source: 'Escalation', title: 'Support ticket #4821 needs a human', detail: 'AI couldn’t resolve; customer escalated to a person.', action: 'Take', priority: 'high', when: '40m ago' },
-  { id: 'h4', source: 'System', title: 'Schema drift — “NPS Trend” needs re-pin', detail: 'Survey Data View changed; 2 fields were removed.', action: 'Review', priority: 'med', when: '1h ago' },
+  { id: 'h4', source: 'System', title: 'Schema drift — “NPS Trend” needs re-pin', detail: 'Survey Data View changed; 2 fields were removed.', action: 'Review', priority: 'med', when: '1h ago', flow: 'repin', widgetId: 'w-nps' },
   { id: 'h5', source: 'Agent', title: 'Churn-risk agent flagged Globex Inc.', detail: 'Confidence 0.82 — recommends an outreach play.', action: 'Assign', priority: 'med', when: '2h ago' },
   { id: 'h6', source: 'Workflow', title: 'New-hire access — María González', detail: 'Approve dashboard access for onboarding.', action: 'Approve', priority: 'low', when: '1d ago' },
 ]

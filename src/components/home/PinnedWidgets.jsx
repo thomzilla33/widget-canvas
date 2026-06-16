@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   Inbox,
   ListChecks,
@@ -12,6 +12,8 @@ import {
   X,
 } from 'lucide-react'
 import { HOME_INBOX, HOME_TASKS, HTL_ITEMS } from '../../data/mock.js'
+import { useWidgets } from '../../state/WidgetsContext.jsx'
+import RepinModal from '../widgets/RepinModal.jsx'
 
 // Fixed/suggested Home widgets: Inbox, Tasks, and the Human Touch Layer (HITL).
 export default function PinnedWidgets() {
@@ -133,7 +135,9 @@ const PRIORITY = {
 }
 
 function HtlCard() {
+  const { widgets } = useWidgets()
   const [resolved, setResolved] = useState(new Set())
+  const [active, setActive] = useState(null) // item being acted on (opens a flow)
   const pending = HTL_ITEMS.filter((i) => !resolved.has(i.id))
   const resolve = (id) => setResolved((s) => new Set(s).add(id))
   return (
@@ -164,7 +168,7 @@ function HtlCard() {
                   <div className="mt-1 text-[11px] text-gray-400 dark:text-slate-500">{item.source} · {item.when}</div>
                 </div>
                 <div className="flex shrink-0 items-center gap-1.5">
-                  <button className="btn-primary !px-3 !py-1.5 text-xs" onClick={() => resolve(item.id)}>{item.action}</button>
+                  <button className="btn-primary !px-3 !py-1.5 text-xs" onClick={() => setActive(item)}>{item.action}</button>
                   <button
                     onClick={() => resolve(item.id)}
                     title="Dismiss"
@@ -179,6 +183,73 @@ function HtlCard() {
           })}
         </div>
       )}
+
+      {active && active.flow === 'repin' && (
+        <RepinModal
+          widget={widgets.find((w) => w.id === active.widgetId) || { id: active.widgetId, name: active.title }}
+          onClose={() => setActive(null)}
+          onComplete={() => resolve(active.id)}
+        />
+      )}
+      {active && active.flow !== 'repin' && (
+        <HtlActionModal
+          item={active}
+          onAct={() => {
+            resolve(active.id)
+            setActive(null)
+          }}
+          onClose={() => setActive(null)}
+        />
+      )}
+    </div>
+  )
+}
+
+const ACTION_BLURB = {
+  Approve: 'Approving lets the agent or workflow proceed with this action on your behalf.',
+  Review: 'Review the details below, then resolve the item.',
+  Take: 'You’ll be assigned as the owner and the item leaves the queue.',
+  Assign: 'Hand this off to a teammate to action.',
+}
+
+function HtlActionModal({ item, onAct, onClose }) {
+  const s = SOURCE[item.source] || SOURCE.System
+  const Icon = s.icon
+  const dialogRef = useRef(null)
+  useEffect(() => {
+    dialogRef.current?.focus()
+  }, [])
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-label={item.title}
+      onKeyDown={(e) => e.key === 'Escape' && onClose()}
+    >
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
+      <div ref={dialogRef} tabIndex={-1} className="card relative z-10 w-[460px] max-w-full overflow-hidden p-0 outline-none">
+        <div className="flex items-start gap-3 border-b border-gray-200 p-5 dark:border-white/10">
+          <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-lg ${s.cls}`}>
+            <Icon size={16} />
+          </span>
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="text-sm font-semibold text-gray-900 dark:text-slate-100">{item.title}</span>
+              <span className={`rounded-md border px-1.5 text-[10px] font-bold uppercase leading-[15px] ${PRIORITY[item.priority]}`}>{item.priority}</span>
+            </div>
+            <div className="mt-0.5 text-[11px] text-gray-400 dark:text-slate-500">{item.source} · {item.when}</div>
+          </div>
+        </div>
+        <div className="p-5">
+          <p className="text-sm text-gray-700 dark:text-slate-200">{item.detail}</p>
+          <p className="mt-2 text-xs text-gray-500 dark:text-slate-400">{ACTION_BLURB[item.action] || 'Resolve this item.'}</p>
+        </div>
+        <div className="flex items-center justify-end gap-2 border-t border-gray-200 px-5 py-3 dark:border-white/10">
+          <button className="btn-secondary" onClick={onClose}>Not now</button>
+          <button className="btn-primary" onClick={onAct}>{item.action}</button>
+        </div>
+      </div>
     </div>
   )
 }
