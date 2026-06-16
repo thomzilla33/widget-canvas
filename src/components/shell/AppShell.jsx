@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
-import { LayoutDashboard, Boxes, UserRound, Sun, Moon, Palette, Settings, LogOut, Home, FileBarChart } from 'lucide-react'
+import { LayoutDashboard, Boxes, UserRound, Sun, Moon, Palette, Settings, LogOut, Home, FileBarChart, Table2 } from 'lucide-react'
 import { useTheme } from '../../state/ThemeContext.jsx'
 import { useNotifications } from '../../state/NotificationsContext.jsx'
 import NotificationsMenu from './NotificationsMenu.jsx'
@@ -13,6 +13,7 @@ const adminNav = [
   { to: '/dashboards', label: 'Dashboards', icon: LayoutDashboard },
   { to: '/reports', label: 'Reports', icon: FileBarChart },
   { to: '/widgets', label: 'Widgets', icon: Boxes },
+  { to: '/tables', label: 'Tables', icon: Table2 },
 ]
 const userNav = [{ to: '/ucp/acme-001', label: 'Unified Profile', icon: UserRound }]
 
