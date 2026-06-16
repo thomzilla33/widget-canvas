@@ -6,6 +6,7 @@ import WidgetRender from '../components/widgets/WidgetRender.jsx'
 import WidgetLibraryModal from '../components/widgets/WidgetLibraryModal.jsx'
 import PublishModal from '../components/dashboard/PublishModal.jsx'
 import ShareModal from '../components/dashboard/ShareModal.jsx'
+import EntityContextHeader, { entityHeaderApplies } from '../components/dashboard/EntityContextHeader.jsx'
 import { useWidgets } from '../state/WidgetsContext.jsx'
 import { useDashboards } from '../state/DashboardsContext.jsx'
 import { WIDGET_SIZES } from '../data/mock.js'
@@ -179,6 +180,7 @@ export default function DashboardCanvas() {
 
       <div className="flex-1 overflow-hidden relative">
         <div className="h-full overflow-auto px-6 py-4">
+          {entityHeaderApplies(dashboard?.placement) && <EntityContextHeader placement={dashboard.placement} />}
           {allPlacements.length === 0 ? (
             <div className="rounded-lg border-2 border-dashed border-gray-300 bg-gray-50/40 dark:border-white/10 dark:bg-white/[0.02]">
               <EmptyState
