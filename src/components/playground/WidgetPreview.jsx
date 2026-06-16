@@ -109,6 +109,11 @@ function Renderer({ typeId, metric, pii, display }) {
     case 'list': return <ListView data={data} />
     case 'summary': return <SummaryView data={data} />
     case 'map': return <MapView data={data} />
+    case 'funnel': return <FunnelView data={data} />
+    case 'board': return <BoardView data={data} />
+    case 'feed': return <FeedView data={data} />
+    case 'alerts': return <AlertsView data={data} />
+    case 'statrow': return <StatRowView data={data} />
     default: return <KpiView data={data} display={display} />
   }
 }
@@ -399,6 +404,125 @@ function MapView({ data }) {
           </li>
         ))}
       </ul>
+    </div>
+  )
+}
+
+function FunnelView({ data }) {
+  const stages = [...data.breakdown].sort((a, b) => b.value - a.value)
+  const max = stages.length ? Math.max(...stages.map((s) => s.value)) : 0
+  return (
+    <ul className="space-y-2">
+      {stages.map((s, i) => (
+        <li key={s.label} className="flex items-center gap-2 text-xs">
+          <span className="w-24 shrink-0 truncate text-gray-700 dark:text-slate-200">{s.label}</span>
+          <span className="h-6 flex-1 overflow-hidden rounded bg-gray-100 dark:bg-white/10">
+            <span className="flex h-full items-center justify-end rounded px-2 text-[11px] font-semibold text-white" style={{ width: `${max > 0 ? (s.value / max) * 100 : 0}%`, background: SERIES[i % SERIES.length] }}>
+              <span className="num">{s.value}</span>
+            </span>
+          </span>
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+const BOARD_STATUS = {
+  Active: 'bg-aims-governed/10 text-aims-governed',
+  Idle: 'bg-gray-500/10 text-gray-500 dark:text-slate-400',
+  Paused: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
+  Error: 'bg-aims-stale/10 text-aims-stale',
+}
+
+function BoardView({ data }) {
+  const { statuses, items } = data.board
+  return (
+    <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${statuses.length}, 1fr)` }}>
+      {statuses.map((status) => {
+        const colItems = items.filter((it) => it.status === status)
+        const tint = BOARD_STATUS[status] || BOARD_STATUS.Idle
+        return (
+          <div key={status} className="rounded-lg border border-gray-200 p-2 dark:border-white/10">
+            <div className="mb-2 flex items-center justify-between text-[11px] font-semibold">
+              <span className={`rounded px-1.5 py-0.5 ${tint}`}>{status}</span>
+              <span className="num text-gray-500 dark:text-slate-400">{colItems.length}</span>
+            </div>
+            <ul className="space-y-1">
+              {colItems.map((it) => (
+                <li key={it.name} className="truncate rounded bg-gray-50 px-2 py-1 text-[11px] text-gray-700 dark:bg-white/5 dark:text-slate-200">
+                  {it.name}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+function FeedView({ data }) {
+  return (
+    <ul className="space-y-2.5">
+      {data.feed.map((e, i) => (
+        <li key={i} className="flex items-start gap-2">
+          <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full" style={{ background: SERIES[i % SERIES.length] }} />
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-1.5">
+              <span className="truncate text-xs text-gray-900 dark:text-slate-100">{e.summary}</span>
+              <span className="shrink-0 rounded bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium text-gray-500 dark:bg-white/10 dark:text-slate-400">{e.type}</span>
+            </div>
+            <div className="text-[11px] text-gray-500 dark:text-slate-400">{e.actor} · {e.when}</div>
+          </div>
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+const ALERT_ACCENT = { high: 'bg-aims-stale', med: 'bg-amber-500', low: 'bg-gray-400 dark:bg-slate-500' }
+
+function AlertsView({ data }) {
+  const [acked, setAcked] = useState([]) // by message — stable across re-renders
+  const open = data.alerts.filter((a) => !acked.includes(a.message))
+  if (open.length === 0) {
+    return (
+      <div className="grid h-full min-h-[180px] place-items-center text-sm text-gray-500 dark:text-slate-400">
+        All clear
+      </div>
+    )
+  }
+  return (
+    <ul className="space-y-2">
+      {open.map((a) => (
+        <li key={a.message} className="flex items-center gap-2 overflow-hidden rounded-lg border border-gray-200 dark:border-white/10">
+          <span className={`h-9 w-1 shrink-0 ${ALERT_ACCENT[a.severity] || ALERT_ACCENT.low}`} />
+          <div className="min-w-0 flex-1 py-1.5">
+            <div className="truncate text-xs text-gray-900 dark:text-slate-100">{a.message}</div>
+            <div className="text-[11px] text-gray-500 dark:text-slate-400">{a.when}</div>
+          </div>
+          <button
+            onClick={() => setAcked((x) => [...x, a.message])}
+            className="mr-2 shrink-0 rounded-md border border-gray-200 px-2 py-1 text-[11px] font-semibold text-gray-500 hover:text-aims-blue dark:border-white/15 dark:text-slate-400"
+          >
+            Ack
+          </button>
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+function StatRowView({ data }) {
+  return (
+    <div className="flex flex-wrap gap-4">
+      {data.stats.map((s) => (
+        <div key={s.label} className="min-w-[88px]">
+          <div className="num text-2xl font-bold tracking-tight text-gray-900 dark:text-slate-100">{s.value}</div>
+          <div className="text-[11px] text-gray-500 dark:text-slate-400">{s.label}</div>
+          <div className={`num text-xs font-semibold ${s.deltaDir === 'up' ? 'text-aims-governed' : 'text-aims-stale'}`}>{s.delta}</div>
+        </div>
+      ))}
     </div>
   )
 }

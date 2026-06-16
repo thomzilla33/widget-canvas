@@ -12,6 +12,11 @@ import {
   List,
   Sparkles,
   Map as MapIcon,
+  Filter,
+  Columns3,
+  Rss,
+  Bell,
+  Rows3,
   Lock,
   Check,
   Search,
@@ -34,6 +39,11 @@ const TYPE_ICONS = {
   List,
   Sparkles,
   Map: MapIcon,
+  Filter,
+  Columns3,
+  Rss,
+  Bell,
+  Rows3,
 }
 
 export const FRESHNESS_OPTIONS = [

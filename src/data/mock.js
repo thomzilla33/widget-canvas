@@ -31,7 +31,13 @@ export const widgets = [
   W({ id: 'w-aims-actions', name: 'Actions by Type', skeleton: 'Chart', category: 'AIMS OS', usedIn: 2, source: 'AIMS OS — Agentic Studio' }),
   // Governance / Council
   W({ id: 'w-aims-blocked', name: 'Blocked Actions', skeleton: 'KPI', category: 'AIMS OS', freshness: 'live', usedIn: 2, source: 'AIMS OS — Governance' }),
-  W({ id: 'w-aims-outcomes', name: 'Council Outcomes', skeleton: 'Chart', category: 'AIMS OS', usedIn: 2, source: 'AIMS OS — Governance' }),
+  W({ id: 'w-aims-outcomes', name: 'Council Outcomes', skeleton: 'Donut', category: 'AIMS OS', usedIn: 2, source: 'AIMS OS — Governance' }),
+  // Showcase the new tile types
+  W({ id: 'w-aims-agentboard', name: 'Agent Status Board', skeleton: 'Board', category: 'AIMS OS', freshness: 'live', usedIn: 1, source: 'AIMS OS — Agents (AMP)' }),
+  W({ id: 'w-aims-activity', name: 'Recent Activity', skeleton: 'Feed', category: 'AIMS OS', freshness: 'live', usedIn: 2, source: 'AIMS OS — Platform' }),
+  W({ id: 'w-aims-govalerts', name: 'Governance Alerts', skeleton: 'Alerts', category: 'AIMS OS', freshness: 'live', usedIn: 2, source: 'AIMS OS — Governance' }),
+  W({ id: 'w-aims-conversionfunnel', name: 'Conversion Funnel', skeleton: 'Funnel', category: 'AIMS OS', usedIn: 1, source: 'AIMS OS — Data Studio' }),
+  W({ id: 'w-aims-platformstats', name: 'Platform Snapshot', skeleton: 'Stat Row', category: 'AIMS OS', freshness: 'live', usedIn: 2, source: 'AIMS OS — Platform' }),
   // Truth Plane
   W({ id: 'w-aims-facts', name: 'Active Facts', skeleton: 'KPI', category: 'AIMS OS', usedIn: 3, source: 'AIMS OS — Truth Plane' }),
   W({ id: 'w-aims-facttier', name: 'Facts by Tier', skeleton: 'Chart', category: 'AIMS OS', usedIn: 1, source: 'AIMS OS — Truth Plane' }),
@@ -376,15 +382,20 @@ export const MARKETPLACE_WIDGETS = [
 // Widget Playground — expanded widget types (visual gallery)
 export const WIDGET_TYPES = [
   { id: 'kpi', label: 'KPI', category: 'Metric', iconName: 'Hash' },
+  { id: 'statrow', label: 'Stat Row', category: 'Metric', iconName: 'Rows3' },
+  { id: 'gauge', label: 'Gauge', category: 'Metric', iconName: 'Gauge' },
   { id: 'line', label: 'Line Chart', category: 'Trend', iconName: 'LineChart' },
   { id: 'bar', label: 'Bar Chart', category: 'Breakdown', iconName: 'BarChart3' },
-  { id: 'pie', label: 'Pie / Donut', category: 'Breakdown', iconName: 'PieChart' },
+  { id: 'pie', label: 'Donut', category: 'Breakdown', iconName: 'PieChart' },
+  { id: 'funnel', label: 'Funnel', category: 'Breakdown', iconName: 'Filter' },
   { id: 'table', label: 'Table', category: 'Records', iconName: 'Table2' },
+  { id: 'list', label: 'List', category: 'Records', iconName: 'List' },
+  { id: 'carousel', label: 'Carousel', category: 'Records', iconName: 'GalleryHorizontalEnd' },
   { id: 'heatmap', label: 'Heat Map', category: 'Relationship', iconName: 'Grid3x3' },
   { id: 'scatter', label: 'Correlation', category: 'Relationship', iconName: 'ScatterChart' },
-  { id: 'carousel', label: 'Carousel', category: 'Records', iconName: 'GalleryHorizontalEnd' },
-  { id: 'gauge', label: 'Gauge', category: 'Metric', iconName: 'Gauge' },
-  { id: 'list', label: 'List', category: 'Records', iconName: 'List' },
+  { id: 'board', label: 'Board', category: 'Status', iconName: 'Columns3' },
+  { id: 'feed', label: 'Feed', category: 'Activity', iconName: 'Rss' },
+  { id: 'alerts', label: 'Alerts', category: 'Activity', iconName: 'Bell' },
   { id: 'summary', label: 'AI Summary', category: 'Narrative', iconName: 'Sparkles' },
   { id: 'map', label: 'Map', category: 'Geo', iconName: 'Map' },
 ]

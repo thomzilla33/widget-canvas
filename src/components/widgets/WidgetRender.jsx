@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import {
   ResponsiveContainer,
   LineChart,
@@ -11,6 +11,8 @@ import {
   RadialBarChart,
   RadialBar,
   PolarAngleAxis,
+  PieChart,
+  Pie,
 } from 'recharts'
 import { Sparkles, Phone, Mail, MessageSquare, AlertTriangle, AlertCircle, ChevronRight } from 'lucide-react'
 import { useChartTheme, SERIES } from '../playground/WidgetPreview.jsx'
@@ -46,6 +48,18 @@ export default function WidgetRender({ widget, size = 'md', scope, viewAs }) {
       return <HeatMini {...props} />
     case 'AI Summary':
       return <SummaryMini {...props} />
+    case 'Donut':
+      return <DonutMini {...props} />
+    case 'Funnel':
+      return <FunnelMini {...props} />
+    case 'Board':
+      return <BoardMini {...props} />
+    case 'Feed':
+      return <FeedMini {...props} />
+    case 'Alerts':
+      return <AlertsMini {...props} />
+    case 'Stat Row':
+      return <StatRowMini {...props} />
     case 'Timeline': // marketplace-only skeleton — show as a trend line
       return <LineMini {...props} />
     case 'Chart':
@@ -295,6 +309,181 @@ function SummaryMini({ data, size }) {
           ))}
         </ul>
       )}
+    </div>
+  )
+}
+
+function DonutMini({ data, size }) {
+  const t = useChartTheme()
+  const segs = data.breakdown
+  const h = size === 'sm' ? 64 : size === 'lg' ? 140 : 96
+  const inner = size === 'sm' ? '60%' : '64%'
+  const label = `Donut chart — ${segs.map((b) => `${b.label} ${b.value}`).join(', ')}.`
+  return (
+    <div role="img" aria-label={label} className={size === 'lg' ? 'flex items-center gap-2' : ''}>
+      <div className={size === 'lg' ? 'flex-1' : ''}>
+        <ResponsiveContainer width="100%" height={h}>
+          <PieChart>
+            <Pie data={segs} dataKey="value" nameKey="label" innerRadius={inner} outerRadius="92%" stroke={t.grid} strokeWidth={1} paddingAngle={2}>
+              {segs.map((entry, i) => (
+                <Cell key={entry.label} fill={SERIES[i % SERIES.length]} />
+              ))}
+            </Pie>
+          </PieChart>
+        </ResponsiveContainer>
+      </div>
+      {size === 'lg' && (
+        <ul className="space-y-1 text-[10px]">
+          {segs.map((b, i) => (
+            <li key={b.label} className="flex items-center gap-1.5">
+              <span className="h-2 w-2 shrink-0 rounded-sm" style={{ background: SERIES[i % SERIES.length] }} />
+              <span className="text-gray-600 dark:text-slate-300">{b.label}</span>
+              <span className="num font-medium text-gray-900 dark:text-slate-100">{b.value}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  )
+}
+
+function FunnelMini({ data, size }) {
+  const segs = [...data.breakdown].sort((a, b) => b.value - a.value)
+  const max = segs.length ? Math.max(...segs.map((s) => s.value)) : 0
+  const detailed = size !== 'sm'
+  return (
+    <div className="space-y-1">
+      {segs.map((b, i) => (
+        <div key={b.label} className="flex items-center gap-1.5 text-[10px]">
+          {detailed && <span className="w-14 shrink-0 truncate text-gray-600 dark:text-slate-300">{b.label}</span>}
+          <span className="flex-1">
+            <span
+              className="block h-3 rounded-sm"
+              style={{ width: `${max > 0 ? (b.value / max) * 100 : 0}%`, background: SERIES[i % SERIES.length] }}
+            />
+          </span>
+          {detailed && <span className="num w-8 shrink-0 text-right font-medium text-gray-900 dark:text-slate-100">{b.value}</span>}
+        </div>
+      ))}
+    </div>
+  )
+}
+
+// Status → dark-aware accent classes for the board view.
+const BOARD_STATUS = {
+  Active: 'bg-green-500/10 text-green-600 dark:text-green-400',
+  Idle: 'bg-slate-500/10 text-slate-600 dark:text-slate-300',
+  Paused: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
+  Error: 'bg-red-500/10 text-red-600 dark:text-red-400',
+}
+
+function BoardMini({ data, size }) {
+  const { statuses, items } = data.board
+  if (size === 'lg') {
+    return (
+      <div className="flex gap-1.5">
+        {statuses.map((s) => {
+          const col = items.filter((it) => it.status === s)
+          return (
+            <div key={s} className="min-w-0 flex-1">
+              <div className={`mb-1 truncate rounded px-1.5 py-0.5 text-[10px] font-semibold ${BOARD_STATUS[s] || BOARD_STATUS.Idle}`}>
+                {s} · {col.length}
+              </div>
+              <div className="space-y-1">
+                {col.slice(0, 3).map((it) => (
+                  <div key={it.name} className="truncate rounded border border-gray-100 px-1.5 py-1 text-[10px] text-gray-700 dark:border-white/10 dark:text-slate-200">
+                    {it.name}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    )
+  }
+  return (
+    <div className="flex flex-wrap gap-1">
+      {statuses.map((s) => {
+        const count = items.filter((it) => it.status === s).length
+        return (
+          <span key={s} className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${BOARD_STATUS[s] || BOARD_STATUS.Idle}`}>
+            {s}: <span className="num">{count}</span>
+          </span>
+        )
+      })}
+    </div>
+  )
+}
+
+function FeedMini({ data, size }) {
+  const rows = data.feed.slice(0, size === 'sm' ? 2 : size === 'lg' ? 5 : 3)
+  return (
+    <ul className="space-y-1.5">
+      {rows.map((f, i) => (
+        <li key={`${f.when}-${i}`} className="flex min-w-0 gap-1.5">
+          <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-aims-blue" />
+          <div className="min-w-0">
+            <div className="truncate text-[11px] text-gray-700 dark:text-slate-200">{f.summary}</div>
+            <div className="truncate text-[10px] text-gray-500 dark:text-slate-400">{f.actor} · {f.when}</div>
+          </div>
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+// Severity → dark-aware accent classes for alerts.
+const ALERT_SEV = {
+  high: 'border-l-red-500 bg-red-500/5',
+  med: 'border-l-amber-500 bg-amber-500/5',
+  low: 'border-l-slate-400 bg-slate-500/5',
+}
+
+function AlertsMini({ data, size }) {
+  const [dismissed, setDismissed] = useState([]) // by message — stable across re-samples
+  const visible = data.alerts.filter((a) => !dismissed.includes(a.message))
+  const rows = size === 'lg' ? visible : visible.slice(0, size === 'sm' ? 2 : 3)
+  if (rows.length === 0) {
+    return <div className="grid place-items-center py-2 text-[11px] text-aims-governed">All clear</div>
+  }
+  return (
+    <ul className="space-y-1">
+      {rows.map((a) => (
+        <li key={a.message} className={`flex items-center gap-1.5 rounded border-l-2 px-2 py-1 ${ALERT_SEV[a.severity] || ALERT_SEV.low}`}>
+          <div className="min-w-0 flex-1">
+            <div className="truncate text-[11px] text-gray-700 dark:text-slate-200">{a.message}</div>
+            <div className="truncate text-[10px] text-gray-500 dark:text-slate-400">{a.when}</div>
+          </div>
+          {size === 'lg' && (
+            <button
+              type="button"
+              onClick={() => setDismissed((d) => [...d, a.message])}
+              className="shrink-0 rounded border border-gray-200 px-1.5 py-0.5 text-[10px] font-medium text-gray-600 hover:bg-gray-50 dark:border-white/10 dark:text-slate-300 dark:hover:bg-white/5"
+            >
+              Ack
+            </button>
+          )}
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+function StatRowMini({ data, size }) {
+  return (
+    <div className="flex flex-wrap gap-x-4 gap-y-2">
+      {data.stats.map((s) => (
+        <div key={s.label} className="min-w-0">
+          <div className={`num font-bold tracking-tight text-gray-900 dark:text-slate-100 ${size === 'lg' ? 'text-xl' : 'text-base'}`}>
+            {s.value}
+          </div>
+          <div className="flex items-center gap-1 text-[10px]">
+            <span className="truncate text-gray-500 dark:text-slate-400">{s.label}</span>
+            <span className={`num font-semibold ${s.deltaDir === 'down' ? 'text-aims-stale' : 'text-aims-governed'}`}>{s.delta}</span>
+          </div>
+        </div>
+      ))}
     </div>
   )
 }

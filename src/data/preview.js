@@ -44,6 +44,39 @@ const SAMPLE = {
   kpiRaw: 1243200, // raw number behind the KPI, so display formatting can be applied live
   gauge: { value: 68, label: 'of target' },
   recordTotal: 1284, // realistic row count for record-set previews (truncated display)
+  // Board: items grouped into status columns (agent/employee/node states).
+  board: {
+    statuses: ['Active', 'Idle', 'Paused', 'Error'],
+    items: [
+      { name: 'Sales Copilot', status: 'Active' },
+      { name: 'Support Triage', status: 'Active' },
+      { name: 'Invoice Bot', status: 'Active' },
+      { name: 'Renewal Agent', status: 'Idle' },
+      { name: 'Churn Watch', status: 'Paused' },
+      { name: 'Onboarding PA', status: 'Error' },
+    ],
+  },
+  // Feed: recent activity entries (timestamp · type · summary · actor).
+  feed: [
+    { when: '2m ago', type: 'Run', summary: 'Completed a renewal outreach', actor: 'Sales Copilot' },
+    { when: '14m ago', type: 'Escalation', summary: 'Escalated ticket #4821 to a human', actor: 'Support Triage' },
+    { when: '38m ago', type: 'Truth', summary: 'Promoted 3 candidate facts to Truth', actor: 'Governance' },
+    { when: '1h ago', type: 'Push', summary: 'Pushed 12 tickets to Salesforce', actor: 'Invoice Bot' },
+    { when: '2h ago', type: 'Block', summary: 'Council blocked an out-of-policy refund', actor: 'Council' },
+  ],
+  // Alerts: severity-ranked, acknowledgeable.
+  alerts: [
+    { severity: 'high', message: 'SLA breach risk on 3 tickets in the support queue', when: '5m ago' },
+    { severity: 'high', message: 'Salesforce sync failed — credentials expired', when: '3h ago' },
+    { severity: 'med', message: '“NPS Trend” is stale — source schema changed', when: '1h ago' },
+    { severity: 'low', message: '12 facts approaching TTL this week', when: '6h ago' },
+  ],
+  // Stat row: a few related measures side by side.
+  stats: [
+    { label: 'Runs', value: '3,120', delta: '+8%', deltaDir: 'up' },
+    { label: 'Success', value: '94.2%', delta: '+1pt', deltaDir: 'up' },
+    { label: 'Escalations', value: '212', delta: '-5%', deltaDir: 'down' },
+  ],
 }
 
 // Format a raw number per a widget's display config (currency/percent/abbrev/etc).
@@ -191,13 +224,14 @@ export function widgetSample(widget, scope) {
 // Soft fit of a widget type to a metric kind — drives the gallery's recommend/grey.
 const GOOD = {
   timeseries: ['line', 'bar', 'table', 'kpi', 'carousel', 'summary'],
-  breakdown: ['bar', 'pie', 'table', 'list', 'heatmap'],
-  kpi: ['kpi', 'gauge', 'summary'],
+  breakdown: ['bar', 'pie', 'funnel', 'table', 'list', 'heatmap'],
+  kpi: ['kpi', 'gauge', 'statrow', 'summary'],
   twoVar: ['scatter', 'table'],
   matrix: ['heatmap', 'table'],
-  records: ['table', 'list', 'carousel'],
+  records: ['table', 'list', 'board', 'feed', 'carousel'],
   geo: ['map', 'list', 'bar'],
-  narrative: ['summary', 'list'],
+  narrative: ['summary', 'list', 'feed'],
+  alert: ['alerts', 'list', 'table'],
 }
 export function fitScore(kind, typeId) {
   return (GOOD[kind] || []).includes(typeId) ? 'good' : 'poor'
@@ -209,9 +243,15 @@ export function fitScore(kind, typeId) {
 const SKELETON_KIND = {
   KPI: 'kpi',
   Gauge: 'kpi',
+  'Stat Row': 'kpi',
   Chart: 'timeseries',
+  Donut: 'breakdown',
+  Funnel: 'breakdown',
   Table: 'records',
   List: 'breakdown',
+  Board: 'records',
+  Feed: 'narrative',
+  Alerts: 'alert',
   'Heat Map': 'matrix',
   Map: 'geo',
   'AI Summary': 'narrative',
@@ -220,12 +260,17 @@ const SKELETON_KIND = {
 // Chart type id → the renderable skeleton label WidgetRender understands.
 const TYPEID_SKELETON = {
   kpi: 'KPI',
+  statrow: 'Stat Row',
   gauge: 'Gauge',
   line: 'Chart',
   bar: 'Chart',
-  pie: 'Chart',
+  pie: 'Donut',
+  funnel: 'Funnel',
   table: 'Table',
   list: 'List',
+  board: 'Board',
+  feed: 'Feed',
+  alerts: 'Alerts',
   heatmap: 'Heat Map',
   scatter: 'Chart',
   carousel: 'List',
@@ -233,7 +278,7 @@ const TYPEID_SKELETON = {
   map: 'Map',
 }
 // All renderable visualization options (what a placement can be shown as).
-export const VIZ_OPTIONS = ['KPI', 'Chart', 'Gauge', 'Table', 'List', 'Heat Map', 'Map', 'AI Summary']
+export const VIZ_OPTIONS = ['KPI', 'Stat Row', 'Chart', 'Donut', 'Funnel', 'Gauge', 'Table', 'List', 'Board', 'Feed', 'Alerts', 'Heat Map', 'Map', 'AI Summary']
 
 // KPI and Gauge are interchangeable single-value views — don't nag to swap between them.
 export function vizInterchangeable(a, b) {

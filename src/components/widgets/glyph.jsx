@@ -14,6 +14,12 @@ export const SKELETON_COLOR = {
   'Heat Map': '#EF4444',
   Correlation: '#14B8A6',
   Carousel: '#F59E0B',
+  Donut: '#A78BFA',
+  Funnel: '#F97316',
+  Board: '#0EA5E9',
+  Feed: '#22C55E',
+  Alerts: '#EF4444',
+  'Stat Row': '#2563EB',
 }
 
 export function WidgetGlyph({ skeleton = 'KPI', sm = false }) {
