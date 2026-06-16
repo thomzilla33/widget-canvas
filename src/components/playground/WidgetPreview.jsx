@@ -21,7 +21,8 @@ import {
 import { ChevronLeft, ChevronRight, Lock, Sparkles } from 'lucide-react'
 import { GovernedBadge, FreshnessBadge } from '../common/index.jsx'
 import { useTheme } from '../../state/ThemeContext.jsx'
-import { previewData, formatValue } from '../../data/preview.js'
+import { previewData, formatValue, tableData } from '../../data/preview.js'
+import { formatCell } from '../../data/tables.js'
 import { TYPE_LABEL } from '../../data/mock.js'
 
 // Is a raw value meeting its goal, given direction? null when no goal set.
@@ -70,7 +71,8 @@ export default function WidgetPreview({ typeId, metric, source, name, freshness,
 
       <div className="mt-3 flex-1">
         {ready ? (
-          <ChartBoundary key={typeId}>
+          // Key on type AND data identity so a prior render error clears when the table/column changes.
+          <ChartBoundary key={`${typeId}|${metric._table ? `${metric._table.def?.id}:${metric._table.valueKey}` : metric.id}`}>
             <Renderer typeId={typeId} metric={metric} pii={!!source.hasPII} display={display} />
           </ChartBoundary>
         ) : (
@@ -96,7 +98,8 @@ export default function WidgetPreview({ typeId, metric, source, name, freshness,
 
 // Renders only the selected view, so an unused view can't throw or do work.
 function Renderer({ typeId, metric, pii, display }) {
-  const data = previewData(metric)
+  // Table-backed widgets render REAL computed table data; everything else uses the canned sample.
+  const data = metric?._table ? tableData(metric._table.def, metric._table.valueKey) : previewData(metric)
   switch (typeId) {
     case 'line': return <LineView data={data} />
     case 'bar': return <BarView data={data} />
@@ -243,7 +246,7 @@ function KpiView({ data, display }) {
   return (
     <div className="flex h-full min-h-[180px] flex-col justify-center">
       <div className={`num text-4xl font-bold tracking-tight ${valueColor}`}>{value}</div>
-      <div className="num mt-1 text-sm font-semibold text-aims-governed">{data.kpi.delta} vs last quarter</div>
+      {data.kpi.delta && <div className="num mt-1 text-sm font-semibold text-aims-governed">{data.kpi.delta} vs last quarter</div>}
       {goal?.value != null && (
         <div className="mt-1.5 text-xs text-gray-500 dark:text-slate-400">
           Goal: {useFmt ? formatValue(goal.value, fmt) : goal.value} ·{' '}
@@ -262,6 +265,8 @@ function maskName(s) {
 }
 
 function TableView({ data, pii }) {
+  // Table-backed widget → render the real computed grid (literal/measure/formula columns).
+  if (data.tableGrid) return <TableGridView grid={data.tableGrid} />
   return (
     <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-white/10">
       <table className="w-full text-left text-xs">
@@ -288,6 +293,36 @@ function TableView({ data, pii }) {
           Showing 5 of {data.recordTotal.toLocaleString()} records
         </div>
       )}
+    </div>
+  )
+}
+
+// The real computed table grid — formula columns flagged with ƒ.
+function TableGridView({ grid }) {
+  return (
+    <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-white/10">
+      <table className="w-full text-left text-xs">
+        <thead className="bg-gray-50 text-[10px] uppercase tracking-wide text-gray-500 dark:bg-white/5 dark:text-slate-400">
+          <tr>
+            {grid.columns.map((c) => (
+              <th key={c.key} className="px-3 py-2 font-semibold" title={c.kind === 'formula' ? `ƒ = ${c.formula}` : c.kind}>
+                {c.label}{c.kind === 'formula' && <span className="ml-0.5 text-indigo-500 dark:text-indigo-300">ƒ</span>}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {grid.rows.map((r, i) => (
+            <tr key={i} className="border-t border-gray-100 dark:border-white/5">
+              {grid.columns.map((c) => (
+                <td key={c.key} className={`px-3 py-2 ${c.type === 'number' ? 'num text-gray-700 dark:text-slate-200' : 'font-medium text-gray-900 dark:text-slate-100'}`}>
+                  {formatCell(r[c.key], c.format)}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   )
 }

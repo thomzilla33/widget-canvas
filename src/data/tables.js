@@ -109,3 +109,18 @@ export function columnAvg(computed, key) {
   const vals = computed.rows.map((r) => Number(r[key])).filter((n) => Number.isFinite(n))
   return vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : 0
 }
+
+// ── Builder integration: a table as a widget data source ──
+export function getTable(id) {
+  return TABLE_DEFINITIONS.find((t) => t.id === id) || null
+}
+
+// Columns you can chart as a value — measures and formulas (not labels).
+export function tableValueColumns(def) {
+  return def ? def.columns.filter((c) => c.kind === 'measure' || c.kind === 'formula') : []
+}
+
+// The label/category column (first text column) used as the x-axis / row label.
+export function tableDimColumn(def) {
+  return def ? def.columns.find((c) => c.type === 'text') || def.columns[0] : null
+}

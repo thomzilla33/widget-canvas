@@ -4,8 +4,11 @@ import { Check } from 'lucide-react'
 import { PageHeader } from '../components/common/index.jsx'
 import { useWidgets } from '../state/WidgetsContext.jsx'
 import { EXTERNAL_SOURCES, TYPE_LABEL, sourceFields, WIDGET_SIZES } from '../data/mock.js'
+import { getTable } from '../data/tables.js'
 import {
   SourcePicker,
+  TablePicker,
+  TableColumnPicker,
   MetricPicker,
   TypeGallery,
   ConfigPanel,
@@ -39,8 +42,11 @@ export default function WidgetBuilder() {
   const navigate = useNavigate()
   const { addWidget } = useWidgets()
 
+  const [sourceMode, setSourceMode] = useState('connected') // 'connected' | 'table'
   const [sourceId, setSourceId] = useState(null)
   const [metricId, setMetricId] = useState(null)
+  const [tableId, setTableId] = useState(null)
+  const [tableColumn, setTableColumn] = useState(null)
   const [typeId, setTypeId] = useState(null)
   const [typeTouched, setTypeTouched] = useState(false)
   const [name, setName] = useState('')
@@ -56,10 +62,37 @@ export default function WidgetBuilder() {
   const setFormat = (patch) => setFormatState((f) => ({ ...f, ...patch }))
   const setGoal = (patch) => setGoalState((g) => ({ ...g, ...patch }))
 
-  const source = EXTERNAL_SOURCES.find((s) => s.id === sourceId) || null
-  // A "field" is either an aggregate metric or a row-level record set.
-  const metric = sourceFields(source).find((f) => f.id === metricId) || null
+  const extSource = sourceMode === 'connected' ? EXTERNAL_SOURCES.find((s) => s.id === sourceId) || null : null
+  const tableDef = sourceMode === 'table' ? getTable(tableId) : null
+  const valueCol = tableDef && tableColumn ? tableDef.columns.find((c) => c.key === tableColumn) || null : null
 
+  // A table presents to the rest of the builder as a governed, PII-free source.
+  const source =
+    sourceMode === 'table'
+      ? tableDef
+        ? { id: tableDef.id, name: tableDef.name, governed: true, hasPII: false }
+        : null
+      : extSource
+  // A "field" is an aggregate metric, a row-level record set, or a table value column.
+  const metric =
+    sourceMode === 'table'
+      ? valueCol
+        ? { id: `${tableId}:${tableColumn}`, name: valueCol.label, kind: 'breakdown', recommendedType: 'bar', _table: { def: tableDef, valueKey: tableColumn } }
+        : null
+      : extSource
+        ? sourceFields(extSource).find((f) => f.id === metricId) || null
+        : null
+
+  function selectMode(mode) {
+    if (mode === sourceMode) return
+    setSourceMode(mode)
+    setSourceId(null)
+    setMetricId(null)
+    setTableId(null)
+    setTableColumn(null)
+    setTypeId(null)
+    setTypeTouched(false)
+  }
   function selectSource(id) {
     if (id === sourceId) return // re-selecting the active source shouldn't wipe the metric/type
     setSourceId(id)
@@ -69,8 +102,19 @@ export default function WidgetBuilder() {
   }
   function selectMetric(id) {
     setMetricId(id)
-    const m = sourceFields(source).find((x) => x.id === id)
+    const m = sourceFields(extSource).find((x) => x.id === id)
     if (m && !typeTouched) setTypeId(m.recommendedType) // auto-pick recommended
+  }
+  function selectTable(id) {
+    if (id === tableId) return
+    setTableId(id)
+    setTableColumn(null)
+    setTypeId(null)
+    setTypeTouched(false)
+  }
+  function selectColumn(key) {
+    setTableColumn(key)
+    if (!typeTouched) setTypeId('bar') // a value-by-row bar is the natural default for a table column
   }
   function selectType(id) {
     setTypeId(id)
@@ -111,6 +155,8 @@ export default function WidgetBuilder() {
       health: 'unused',
       usedIn: 0,
       source: source.name,
+      tableId: sourceMode === 'table' ? tableId : undefined,
+      tableColumn: sourceMode === 'table' ? tableColumn : undefined,
       format: format.style === 'auto' ? undefined : format,
       goal: goal.value != null ? goal : undefined,
     })
@@ -141,12 +187,42 @@ export default function WidgetBuilder() {
           {/* Left: build */}
           <div className="order-2 w-full space-y-7 lg:order-1 lg:w-1/2 lg:min-w-0">
             <section>
-              <SectionHeading n={1} title="Data source" sub="Map from a specific external system or data view." />
-              <SourcePicker sourceId={sourceId} onSelect={selectSource} onBrowse={() => setBrowsing(true)} />
+              <SectionHeading n={1} title="Data source" sub="An external system, or one of your governed Tables." />
+              <div className="mb-3 flex overflow-hidden rounded-lg border border-gray-300 text-sm dark:border-white/15">
+                {[
+                  ['connected', 'Connected sources'],
+                  ['table', 'Tables'],
+                ].map(([v, label]) => (
+                  <button
+                    key={v}
+                    onClick={() => selectMode(v)}
+                    aria-pressed={sourceMode === v}
+                    className={`flex-1 px-2 py-1.5 font-medium transition-colors ${
+                      sourceMode === v ? 'bg-aims-blue text-white' : 'bg-white text-gray-600 hover:bg-gray-50 dark:bg-white/5 dark:text-slate-300 dark:hover:bg-white/10'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+              {sourceMode === 'table' ? (
+                <TablePicker tableId={tableId} onSelect={selectTable} />
+              ) : (
+                <SourcePicker sourceId={sourceId} onSelect={selectSource} onBrowse={() => setBrowsing(true)} />
+              )}
             </section>
             <section>
-              <SectionHeading n={2} title="Metric" sub="Pick the specific metric this widget shows." />
-              <MetricPicker source={source} metricId={metricId} onSelect={selectMetric} />
+              {sourceMode === 'table' ? (
+                <>
+                  <SectionHeading n={2} title="Column" sub="Pick a measure or formula (ƒ) column to visualize." />
+                  <TableColumnPicker table={tableDef} valueKey={tableColumn} onSelect={selectColumn} />
+                </>
+              ) : (
+                <>
+                  <SectionHeading n={2} title="Metric" sub="Pick the specific metric this widget shows." />
+                  <MetricPicker source={source} metricId={metricId} onSelect={selectMetric} />
+                </>
+              )}
             </section>
             <section>
               <SectionHeading n={3} title="Widget type" sub="Choose how to visualize it — recommended type is marked." />

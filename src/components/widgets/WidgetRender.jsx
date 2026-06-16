@@ -16,7 +16,8 @@ import {
 } from 'recharts'
 import { Sparkles, Phone, Mail, MessageSquare, AlertTriangle, AlertCircle, ChevronRight } from 'lucide-react'
 import { useChartTheme, SERIES } from '../playground/WidgetPreview.jsx'
-import { widgetSample, formatValue } from '../../data/preview.js'
+import { widgetSample, formatValue, tableData } from '../../data/preview.js'
+import { getTable, formatCell } from '../../data/tables.js'
 
 // Chart heights per size — small is a sparkline, large gets axis room.
 const H = { sm: 52, md: 84, lg: 150 }
@@ -27,7 +28,11 @@ export default function WidgetRender({ widget, size = 'md', scope, viewAs }) {
   const scopeKey = scope
     ? `${scope.range || ''}|${Object.values(scope.filters || {}).filter((v) => v && v !== 'All').join(',')}`
     : ''
-  const data = useMemo(() => (widget ? widgetSample(widget, scope) : null), [widget, scopeKey])
+  // Table-backed widgets pull REAL computed table data; scope (range/filters) doesn't apply to them.
+  const data = useMemo(
+    () => (widget ? (widget.tableId ? tableData(getTable(widget.tableId), widget.tableColumn) : widgetSample(widget, scope)) : null),
+    [widget, scopeKey],
+  )
   if (!widget) {
     return <div className="grid h-[88px] place-items-center text-[10px] text-gray-500 dark:text-slate-400">No data</div>
   }
@@ -83,7 +88,7 @@ function KpiMini({ data, size, format, goal }) {
       <div className={`num font-bold tracking-tight ${valueColor} ${size === 'sm' ? 'text-xl' : size === 'lg' ? 'text-4xl' : 'text-2xl'}`}>
         {value}
       </div>
-      {size !== 'sm' && (
+      {size !== 'sm' && data.kpi.delta && (
         <div className={`num mt-0.5 font-semibold ${down ? 'text-aims-stale' : 'text-aims-governed'} ${size === 'lg' ? 'text-sm' : 'text-[11px]'}`}>
           {data.kpi.delta} vs last quarter
         </div>
@@ -161,6 +166,8 @@ function GaugeMini({ data, size, goal }) {
 }
 
 function TableMini({ data, size }) {
+  // Table-backed widget → show the real computed grid (formula columns get a ƒ mark).
+  if (data.tableGrid) return <TableGridMini grid={data.tableGrid} size={size} />
   const rows = data.records.slice(0, size === 'sm' ? 2 : size === 'lg' ? 5 : 3)
   const detailed = size === 'lg'
   return (
@@ -183,6 +190,38 @@ function TableMini({ data, size }) {
               {detailed && <td className="px-2 py-1 text-gray-500 dark:text-slate-400">{r.owner}</td>}
               <td className="num px-2 py-1 text-right font-medium text-gray-900 dark:text-slate-100">{r.value}</td>
               {detailed && <td className="px-2 py-1 text-right text-gray-500 dark:text-slate-400">{r.status}</td>}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
+}
+
+// Compact computed-table grid for table-backed widgets. Column count scales with size.
+function TableGridMini({ grid, size }) {
+  const cols = size === 'sm' ? grid.columns.slice(0, 2) : size === 'lg' ? grid.columns : grid.columns.slice(0, 4)
+  const rows = grid.rows.slice(0, size === 'sm' ? 2 : size === 'lg' ? 6 : 4)
+  return (
+    <div className="overflow-hidden rounded-md border border-gray-100 text-[10px] dark:border-white/10">
+      <table className="w-full">
+        <thead>
+          <tr className="bg-gray-50 text-left font-semibold text-gray-500 dark:bg-white/5 dark:text-slate-400">
+            {cols.map((c) => (
+              <th key={c.key} className={`px-2 py-1 font-semibold ${c.type === 'number' ? 'text-right' : ''}`}>
+                {c.label}{c.kind === 'formula' && <span className="ml-0.5 text-indigo-500 dark:text-indigo-300">ƒ</span>}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((r, i) => (
+            <tr key={i} className="border-b border-gray-100 last:border-0 dark:border-white/5">
+              {cols.map((c) => (
+                <td key={c.key} className={`px-2 py-1 ${c.type === 'number' ? 'num text-right font-medium text-gray-900 dark:text-slate-100' : 'truncate text-gray-700 dark:text-slate-200'}`}>
+                  {formatCell(r[c.key], c.format)}
+                </td>
+              ))}
             </tr>
           ))}
         </tbody>
