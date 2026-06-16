@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { ListChecks, Circle, Clock, AlertTriangle, RefreshCw, Loader2, CheckCircle2 } from 'lucide-react'
 import { HOME_TASKS } from '../../data/mock.js'
 import CardHeader from './CardHeader.jsx'
+import ItemDetailModal from './ItemDetailModal.jsx'
 
 const DUE_TONE = { Overdue: 'text-aims-stale', Today: 'text-aims-ungoverned' }
 const PRIORITY_DOT = { high: 'bg-aims-stale', med: 'bg-aims-ungoverned', low: 'bg-gray-300 dark:bg-slate-600' }
@@ -20,10 +21,11 @@ export default function TasksCard({ notify }) {
   const [snoozed, setSnoozed] = useState(new Set())
   const [retrying, setRetrying] = useState(new Set())
   const [recovered, setRecovered] = useState(new Set())
+  const [detail, setDetail] = useState(null) // task open in the detail modal
   const retryTimers = useRef(new Map())
   useEffect(() => () => retryTimers.current.forEach(clearTimeout), [])
 
-  const open = HOME_TASKS.filter((t) => !done.has(t.id))
+  const openTasks = HOME_TASKS.filter((t) => !done.has(t.id))
   const dueOf = (t) => (snoozed.has(t.id) ? 'This week' : t.due)
   const isErr = (t) => t.status === 'error' && !recovered.has(t.id)
 
@@ -63,14 +65,14 @@ export default function TasksCard({ notify }) {
 
   return (
     <div className="card flex flex-col p-4">
-      <CardHeader icon={ListChecks} title="Tasks" count={open.length} sub="Assigned to you" />
-      {open.length === 0 ? (
+      <CardHeader icon={ListChecks} title="Tasks" count={openTasks.length} sub="Assigned to you" />
+      {openTasks.length === 0 ? (
         <EmptyTasks />
       ) : (
         <>
           <div className="mt-2 space-y-2">
             {BUCKETS.map((b) => {
-              const rows = open.filter((t) => b.has(dueOf(t)))
+              const rows = openTasks.filter((t) => b.has(dueOf(t)))
               if (rows.length === 0) return null
               return (
                 <div key={b.key}>
@@ -80,7 +82,7 @@ export default function TasksCard({ notify }) {
                   <ul className="-mx-1">
                     {rows.map((t) =>
                       isErr(t) ? (
-                        <ErrorTaskRow key={t.id} t={t} retrying={retrying.has(t.id)} onRetry={() => retry(t)} />
+                        <ErrorTaskRow key={t.id} t={t} retrying={retrying.has(t.id)} onRetry={() => retry(t)} onOpen={() => setDetail(t)} />
                       ) : (
                         <TaskRow
                           key={t.id}
@@ -89,6 +91,7 @@ export default function TasksCard({ notify }) {
                           snoozed={snoozed.has(t.id)}
                           onComplete={() => complete(t)}
                           onSnooze={() => snooze(t)}
+                          onOpen={() => setDetail(t)}
                         />
                       ),
                     )}
@@ -98,24 +101,33 @@ export default function TasksCard({ notify }) {
             })}
           </div>
           <div className="mt-1.5 px-2 text-[11px] text-gray-400 dark:text-slate-500">
-            {open.length} open · {done.size} completed · {snoozed.size} snoozed
+            {openTasks.length} open · {done.size} completed · {snoozed.size} snoozed
           </div>
         </>
+      )}
+
+      {detail && (
+        <ItemDetailModal
+          item={detail}
+          kind="task"
+          onClose={() => setDetail(null)}
+          onComplete={() => complete(detail)}
+        />
       )}
     </div>
   )
 }
 
-function TaskRow({ t, due, snoozed, onComplete, onSnooze }) {
+function TaskRow({ t, due, snoozed, onComplete, onSnooze, onOpen }) {
   return (
     <li className="group flex items-center gap-2 rounded-md px-2 py-1.5 hover:bg-gray-50 dark:hover:bg-white/5">
       <button onClick={onComplete} aria-label="Mark complete" className="shrink-0 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-aims-governed/50">
         <Circle size={15} className="text-gray-300 transition-colors hover:text-aims-governed dark:text-slate-600" />
       </button>
-      <span className="min-w-0 flex-1 truncate text-xs text-gray-700 dark:text-slate-200">
+      <button onClick={onOpen} className="min-w-0 flex-1 truncate text-left text-xs text-gray-700 dark:text-slate-200">
         {t.title}
         {snoozed && <span className="ml-1 text-[10px] text-gray-400 dark:text-slate-500">· snoozed</span>}
-      </span>
+      </button>
       <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${PRIORITY_DOT[t.priority]}`} title={`${t.priority} priority`} />
       <span className={`shrink-0 text-[10px] font-medium ${DUE_TONE[due] || 'text-gray-400 dark:text-slate-500'}`}>{due}</span>
       <button
@@ -130,14 +142,14 @@ function TaskRow({ t, due, snoozed, onComplete, onSnooze }) {
   )
 }
 
-function ErrorTaskRow({ t, retrying, onRetry }) {
+function ErrorTaskRow({ t, retrying, onRetry, onOpen }) {
   return (
     <li className="mx-1 flex items-start gap-2 rounded-md border border-red-200 bg-red-50/70 px-2 py-2 dark:border-red-500/30 dark:bg-red-500/10">
       <AlertTriangle size={14} className="mt-0.5 shrink-0 text-aims-stale" />
-      <div className="min-w-0 flex-1">
+      <button onClick={onOpen} className="min-w-0 flex-1 text-left">
         <span className="block truncate text-xs font-semibold text-gray-900 dark:text-slate-100">{t.title}</span>
         <span className="block truncate text-[11px] text-gray-400 dark:text-slate-500">{t.errorMsg}</span>
-      </div>
+      </button>
       <button onClick={onRetry} disabled={retrying} className="btn-secondary !h-auto !px-2 !py-1 text-xs">
         {retrying ? <Loader2 size={12} className="animate-spin" /> : <RefreshCw size={12} />}
         {retrying ? 'Retrying' : 'Retry'}

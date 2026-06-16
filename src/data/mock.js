@@ -107,33 +107,161 @@ export const HOME_SCOPES = [
 ]
 
 // ── Home pinned widgets: Inbox, Tasks, and the Human Touch Layer (HITL) ──
-// status: 'error' rows are failed syncs/notifications that the user can Retry
-// (error-recovery edge case). Everything else is a normal message.
+// Each item carries full origin context for the detail modal:
+//   origin: 'contact' | 'agent' | 'workflow' | 'system' | 'escalation'
+//   actor:  { name, email?, role?, system? }  (system actors have no inbox/email)
+//   at:     absolute generation timestamp; `when` is the relative label for the row
+//   body:   full message text shown in the detail modal
+//   related:{ widgetId?, dashboardId?, label } drives the in-modal preview / Open action
+//   meta:   origin-specific fields (connector, confidence, runId, step, trigger…)
+// status: 'error' rows are failed syncs the user can Retry (error-recovery edge case).
 export const HOME_INBOX = [
-  { id: 'm-sync', from: 'Salesforce', subject: 'Sync failed — credentials expired', when: '3m ago', unread: true, status: 'error' },
-  { id: 'm1', from: 'Dana Lee', subject: 'Flagged “NPS Trend” — looks frozen', when: '12m ago', unread: true },
-  { id: 'm2', from: 'María González', subject: 'Shared “Employee Performance” with you', when: '1h ago', unread: true },
-  { id: 'm3', from: 'RevOps', subject: '3 dashboards you follow were updated', when: '3h ago', unread: true },
-  { id: 'm4', from: 'James Okonkwo', subject: 'Can you grant access to Finance Close?', when: '4h ago', unread: true },
-  { id: 'm5', from: 'Stripe', subject: 'Sync completed — 64,000 customers refreshed', when: '5h ago', unread: false },
-  { id: 'm6', from: 'Priya Nair', subject: 'Re: Q3 pipeline forecast', when: '1d ago', unread: false },
-  { id: 'm7', from: 'Workspace', subject: 'Weekly digest — 12 dashboards, 3 need attention', when: '1d ago', unread: false },
-  { id: 'm8', from: 'Elena Petrova', subject: 'Comment on “Marketing Performance”', when: '2d ago', unread: false },
-  { id: 'm9', from: 'Security', subject: 'New sign-in from a new device approved', when: '2d ago', unread: false },
-  { id: 'm10', from: 'Liam Murphy', subject: 'Re: Deal Room access for Globex', when: '3d ago', unread: false },
-  { id: 'm11', from: 'Workflow Engine', subject: 'Nightly ETL finished — 0 errors', when: '3d ago', unread: false },
+  {
+    id: 'm-sync', origin: 'system', subject: 'Sync failed — credentials expired', when: '3m ago',
+    at: 'Jun 16, 2026 · 9:51 AM', unread: true, status: 'error',
+    actor: { name: 'Salesforce sync', system: true },
+    body: 'The scheduled Salesforce sync could not authenticate — the OAuth token expired and needs to be refreshed. 3 widgets sourced from Salesforce are showing stale data until this is resolved.',
+    meta: { category: 'Integration', source: 'Salesforce', lastOk: 'Jun 15, 2026 · 11:00 PM' },
+    related: { widgetId: 'w-pipeline', dashboardId: 'd-sales-acct', label: 'Sales — Account 360' },
+  },
+  {
+    id: 'm1', origin: 'contact', subject: 'Flagged “NPS Trend” — looks frozen', when: '12m ago',
+    at: 'Jun 16, 2026 · 9:42 AM', unread: true,
+    actor: { name: 'Dana Lee', email: 'dana.lee@contoso.com', role: 'Support Lead' },
+    body: 'Hey — the NPS Trend widget hasn’t moved in two weeks on the CS Health board. Can you check if the Survey Data View is still syncing? Customers are asking why the score looks flat.',
+    related: { widgetId: 'w-nps', dashboardId: 'd-cs-health', label: 'CS Health' },
+  },
+  {
+    id: 'm2', origin: 'contact', subject: 'Shared “Employee Performance” with you', when: '1h ago',
+    at: 'Jun 16, 2026 · 8:50 AM', unread: true,
+    actor: { name: 'María González', email: 'maria.gonzalez@contoso.com', role: 'People Analytics' },
+    body: 'I gave you Editor access to the Employee Performance dashboard so you can add the attrition widget we discussed. Let me know if the headcount numbers look right.',
+    related: { dashboardId: 'd-employee-perf', label: 'Employee Performance' },
+  },
+  {
+    id: 'm3', origin: 'system', subject: '3 dashboards you follow were updated', when: '3h ago',
+    at: 'Jun 16, 2026 · 6:40 AM', unread: true,
+    actor: { name: 'RevOps', system: true },
+    body: 'Revenue Exec Report, Marketing Performance, and Finance Close were updated in the last 24 hours. Widgets were added or re-pinned.',
+    meta: { category: 'Activity' },
+    related: { dashboardId: 'd-rev-exec', label: 'Revenue Exec Report' },
+  },
+  {
+    id: 'm4', origin: 'contact', subject: 'Can you grant access to Finance Close?', when: '4h ago',
+    at: 'Jun 16, 2026 · 5:30 AM', unread: true,
+    actor: { name: 'James Okonkwo', email: 'james.okonkwo@contoso.com', role: 'Support Director' },
+    body: 'Could you add me as a viewer on Finance Close? I need the AP aging numbers for the board deck on Thursday.',
+    related: { dashboardId: 'd-finance', label: 'Finance Close' },
+  },
+  {
+    id: 'm5', origin: 'system', subject: 'Sync completed — 64,000 customers refreshed', when: '5h ago',
+    at: 'Jun 16, 2026 · 4:15 AM', unread: false,
+    actor: { name: 'Stripe sync', system: true },
+    body: 'Nightly Stripe sync finished successfully. 64,000 customer records and 12 metrics refreshed. MRR Trend and Churn Rate are up to date.',
+    meta: { category: 'Integration', source: 'Stripe' },
+    related: { widgetId: 'w-mrr', label: 'MRR Trend' },
+  },
+  {
+    id: 'm6', origin: 'contact', subject: 'Re: Q3 pipeline forecast', when: '1d ago',
+    at: 'Jun 15, 2026 · 3:20 PM', unread: false,
+    actor: { name: 'Priya Nair', email: 'priya.nair@contoso.com', role: 'VP Sales' },
+    body: 'Thanks for the forecast — the pipeline-by-stage view is exactly what I needed. Can we add win rate by segment before the QBR?',
+    related: { widgetId: 'w-pipeline', dashboardId: 'd-sales-acct', label: 'Pipeline by Stage' },
+  },
+  {
+    id: 'm7', origin: 'system', subject: 'Weekly digest — 12 dashboards, 3 need attention', when: '1d ago',
+    at: 'Jun 15, 2026 · 8:00 AM', unread: false,
+    actor: { name: 'Workspace', system: true },
+    body: 'This week: 12 active dashboards, 480 widget views, 3 dashboards need attention (stale data or offboarded owners).',
+    meta: { category: 'Digest' },
+  },
+  {
+    id: 'm8', origin: 'contact', subject: 'Comment on “Marketing Performance”', when: '2d ago',
+    at: 'Jun 14, 2026 · 2:10 PM', unread: false,
+    actor: { name: 'Elena Petrova', email: 'elena.petrova@contoso.com', role: 'Marketing Lead' },
+    body: 'Left a comment on the ROAS widget — the attribution window looks off for the paid social channel. Can you confirm the source?',
+    related: { dashboardId: 'd-marketing', label: 'Marketing Performance' },
+  },
+  {
+    id: 'm9', origin: 'system', subject: 'New sign-in from a new device approved', when: '2d ago',
+    at: 'Jun 14, 2026 · 9:05 AM', unread: false,
+    actor: { name: 'Security', system: true },
+    body: 'A new sign-in to your account from Chrome on macOS was approved via SSO. If this wasn’t you, review your active sessions.',
+    meta: { category: 'Security' },
+  },
+  {
+    id: 'm10', origin: 'contact', subject: 'Re: Deal Room access for Globex', when: '3d ago',
+    at: 'Jun 13, 2026 · 4:45 PM', unread: false,
+    actor: { name: 'Liam Murphy', email: 'liam.murphy@contoso.com', role: 'Account Exec' },
+    body: 'Got it, thanks for setting up the Globex deal room. The churn-risk flag is helpful — keeping an eye on it.',
+    related: { dashboardId: 'd-deal-room', label: 'Deal Room' },
+  },
+  {
+    id: 'm11', origin: 'workflow', subject: 'Nightly ETL finished — 0 errors', when: '3d ago',
+    at: 'Jun 13, 2026 · 2:00 AM', unread: false,
+    actor: { name: 'Nightly ETL', system: true },
+    body: 'The nightly ETL pipeline completed in 14 minutes with 0 errors. 28 widgets refreshed across 14 dashboards.',
+    meta: { runId: 'etl-20260613-0200', step: 'Completed', trigger: 'Schedule · 2:00 AM daily' },
+  },
 ]
 
 // due: 'Overdue' | 'Today' | 'Tomorrow' | 'This week' (grouped into Overdue/Today/Upcoming).
+// Same origin/actor/at/body/related/meta context as inbox items (used by the detail modal).
 // status: 'error' is an automated step that failed and offers a Retry (error-recovery edge case).
 export const HOME_TASKS = [
-  { id: 't-err', title: 'Auto-reassign “CS Health” to you', due: 'Overdue', priority: 'high', status: 'error', errorMsg: 'Reassignment failed — previous owner still offboarded' },
-  { id: 't1', title: 'Approve “Marketing Performance” for publish', due: 'Today', priority: 'high' },
-  { id: 't2', title: 'Respond to Dana Lee’s data flag on NPS', due: 'Today', priority: 'med' },
-  { id: 't3', title: 'Review widget access request from James', due: 'Today', priority: 'med' },
-  { id: 't4', title: 'Review Q3 pipeline forecast', due: 'Tomorrow', priority: 'med' },
-  { id: 't5', title: 'Add widgets to “New Hire Onboarding”', due: 'This week', priority: 'low' },
-  { id: 't6', title: 'Audit deactivated owners across 14 dashboards', due: 'This week', priority: 'low' },
+  {
+    id: 't-err', origin: 'workflow', title: 'Auto-reassign “CS Health” to you', due: 'Overdue', priority: 'high',
+    status: 'error', errorMsg: 'Reassignment failed — previous owner still offboarded', at: 'Jun 16, 2026 · 8:00 AM',
+    actor: { name: 'Governance Workflow', system: true },
+    body: 'The governance workflow tried to auto-reassign the CS Health dashboard because its owner (Aisha Khan) was offboarded, but the reassignment step failed. Retry to take ownership.',
+    meta: { runId: 'gov-reassign-4471', step: 'Reassign owner', trigger: 'Owner offboarded' },
+    related: { dashboardId: 'd-cs-health', label: 'CS Health' },
+  },
+  {
+    id: 't1', origin: 'workflow', title: 'Approve “Marketing Performance” for publish', due: 'Today', priority: 'high',
+    at: 'Jun 16, 2026 · 7:30 AM',
+    actor: { name: 'Publish Workflow', system: true },
+    body: 'Elena Petrova requested publishing the Marketing Performance dashboard. It’s in Pending review and needs your approval to go live to the Sales Reports collection.',
+    meta: { step: 'Awaiting approval', trigger: 'Publish request', requestedBy: 'Elena Petrova' },
+    related: { dashboardId: 'd-marketing', label: 'Marketing Performance' },
+  },
+  {
+    id: 't2', origin: 'contact', title: 'Respond to Dana Lee’s data flag on NPS', due: 'Today', priority: 'med',
+    at: 'Jun 16, 2026 · 9:42 AM',
+    actor: { name: 'Dana Lee', email: 'dana.lee@contoso.com', role: 'Support Lead' },
+    body: 'Dana flagged the NPS Trend widget as frozen. Respond with whether the Survey Data View is syncing, or re-pin the widget if the schema changed.',
+    related: { widgetId: 'w-nps', dashboardId: 'd-cs-health', label: 'NPS Trend' },
+  },
+  {
+    id: 't3', origin: 'contact', title: 'Review widget access request from James', due: 'Today', priority: 'med',
+    at: 'Jun 16, 2026 · 5:30 AM',
+    actor: { name: 'James Okonkwo', email: 'james.okonkwo@contoso.com', role: 'Support Director' },
+    body: 'James requested viewer access to Finance Close. Review and grant or decline.',
+    related: { dashboardId: 'd-finance', label: 'Finance Close' },
+  },
+  {
+    id: 't4', origin: 'agent', title: 'Review Q3 pipeline forecast', due: 'Tomorrow', priority: 'med',
+    at: 'Jun 15, 2026 · 6:00 PM',
+    actor: { name: 'Forecast Copilot', system: true },
+    body: 'The forecast agent generated a Q3 pipeline projection with 0.78 confidence. Review the assumptions before sharing with the VP.',
+    meta: { confidence: '0.78', model: 'forecast-v2', trigger: 'Weekly forecast' },
+    related: { widgetId: 'w-pipeline', dashboardId: 'd-sales-acct', label: 'Pipeline by Stage' },
+  },
+  {
+    id: 't5', origin: 'system', title: 'Add widgets to “New Hire Onboarding”', due: 'This week', priority: 'low',
+    at: 'Jun 14, 2026 · 10:00 AM',
+    actor: { name: 'You', system: false },
+    body: 'Self-assigned: the New Hire Onboarding dashboard only has 5 widgets. Add headcount and time-to-hire widgets before the next cohort.',
+    related: { dashboardId: 'd-onboarding', label: 'New Hire Onboarding' },
+  },
+  {
+    id: 't6', origin: 'agent', title: 'Audit deactivated owners across 14 dashboards', due: 'This week', priority: 'low',
+    at: 'Jun 14, 2026 · 9:00 AM',
+    actor: { name: 'Governance Copilot', system: true },
+    body: 'The governance agent detected 2 dashboards owned by offboarded users across 14 dashboards. Audit and reassign as needed.',
+    meta: { confidence: '0.95', model: 'governance-v1' },
+    related: { dashboardId: 'd-cs-health', label: 'CS Health' },
+  },
 ]
 
 // HITL queue — agents, workflows, or escalations waiting on a human decision.
