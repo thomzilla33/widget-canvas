@@ -28,7 +28,7 @@ import EntityContextHeader, { profileSupportsHeader } from '../components/dashbo
 import { useWidgets } from '../state/WidgetsContext.jsx'
 import { useFeedback } from '../state/FeedbackContext.jsx'
 import { useDashboards } from '../state/DashboardsContext.jsx'
-import { entities } from '../data/mock.js'
+import { entities, PROFILE_TYPES, MANDATORY_TABS } from '../data/mock.js'
 
 // Map an entity's type to the placement profile type used by dashboards.
 const PROFILE_OF = { Account: 'Company', Contact: 'Contact', Employee: 'Employee', Deal: 'Deal', Case: 'Case' }
@@ -61,20 +61,43 @@ export default function UCPView() {
   const profileDashboards = dashboards.filter(
     (d) => d.placement?.surface === 'profile' && d.placement.profileType === profileType && (d.placement.scope === 'all' || d.placement.entityId === entityId),
   )
-  // Profile tabs are the placement tab names (Overview, Activity…), not dashboard names.
-  const profileTabs = ['Overview', ...new Set(profileDashboards.map((d) => d.placement.tab || 'Overview'))].filter(
-    (t, i, a) => a.indexOf(t) === i,
-  )
+  // Tabs are first-class on a profile: the type's canonical set + any tab that a
+  // placed dashboard targets. Overview/Activity/Snapshot are mandatory; the rest can
+  // be removed and custom tabs added (admin can edit, in-memory for the prototype).
+  const seedTabs = [
+    ...new Set([
+      ...(PROFILE_TYPES.find((t) => t.id === profileType)?.tabs || MANDATORY_TABS),
+      ...profileDashboards.map((d) => d.placement.tab || 'Overview'),
+    ]),
+  ]
+  const [tabs, setTabs] = useState(seedTabs)
   const [activeTab, setActiveTab] = useState('Overview')
+  const [addingTab, setAddingTab] = useState(false)
+  const [newTab, setNewTab] = useState('')
   const tabDashboards = profileDashboards.filter((d) => (d.placement.tab || 'Overview') === activeTab)
+
+  function addTab() {
+    const name = newTab.trim()
+    if (name && !tabs.some((t) => t.toLowerCase() === name.toLowerCase())) setTabs([...tabs, name])
+    setNewTab('')
+    setAddingTab(false)
+  }
+  function removeTab(name) {
+    if (MANDATORY_TABS.includes(name)) return // Overview/Activity/Snapshot can't be removed
+    setTabs((prev) => prev.filter((t) => t !== name))
+    if (activeTab === name) setActiveTab('Overview')
+  }
 
   // Brief initial load so widgets stream in with a skeleton instead of popping.
   const [loaded, setLoaded] = useState(false)
   useEffect(() => {
     setLoaded(false)
     setActiveTab('Overview')
+    setTabs(seedTabs)
+    setAddingTab(false)
     const t = setTimeout(() => setLoaded(true), 700)
     return () => clearTimeout(t)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [entityId])
 
   const [collapsed, setCollapsed] = useState({})
@@ -133,17 +156,59 @@ export default function UCPView() {
         description="Unified Contact Profile — every widget shows its freshness and data origin."
       />
 
-      {profileDashboards.length > 0 && (
-        <div className="border-b border-gray-200 bg-white px-6 dark:border-white/10 dark:bg-[#0f1629]">
-          <div className="flex gap-1 overflow-x-auto">
-            {profileTabs.map((t) => (
-              <TabBtn key={t} active={activeTab === t} onClick={() => setActiveTab(t)}>
-                {t}
-              </TabBtn>
-            ))}
-          </div>
+      <div className="border-b border-gray-200 bg-white px-6 dark:border-white/10 dark:bg-[#0f1629]">
+        <div className="flex items-center gap-0.5 overflow-x-auto">
+          {tabs.map((t) => {
+            const mandatory = MANDATORY_TABS.includes(t)
+            return (
+              <div key={t} className="group relative flex shrink-0 items-center">
+                <TabBtn active={activeTab === t} onClick={() => setActiveTab(t)}>
+                  {t}
+                </TabBtn>
+                {!mandatory && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      removeTab(t)
+                    }}
+                    aria-label={`Remove ${t} tab`}
+                    title={`Remove ${t} tab`}
+                    className="absolute right-0.5 top-1.5 grid h-4 w-4 place-items-center rounded-full text-gray-400 opacity-0 transition-opacity hover:bg-gray-200 hover:text-gray-700 focus:opacity-100 group-hover:opacity-100 dark:hover:bg-white/10 dark:hover:text-slate-200"
+                  >
+                    <X size={11} aria-hidden="true" />
+                  </button>
+                )}
+              </div>
+            )
+          })}
+
+          {addingTab ? (
+            <input
+              autoFocus
+              value={newTab}
+              onChange={(e) => setNewTab(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') addTab()
+                if (e.key === 'Escape') {
+                  setNewTab('')
+                  setAddingTab(false)
+                }
+              }}
+              onBlur={addTab}
+              placeholder="Tab name…"
+              aria-label="New tab name"
+              className="my-1 ml-1 w-32 rounded-md border border-aims-blue/40 bg-white px-2 py-1 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-aims-blue/30 dark:bg-white/5 dark:text-slate-100"
+            />
+          ) : (
+            <button
+              onClick={() => setAddingTab(true)}
+              className="ml-1 inline-flex shrink-0 items-center gap-1 rounded-md px-2 py-1.5 text-sm font-medium text-gray-500 hover:bg-gray-100 hover:text-aims-blue dark:text-slate-400 dark:hover:bg-white/5"
+            >
+              <Plus size={14} aria-hidden="true" /> Add tab
+            </button>
+          )}
         </div>
-      )}
+      </div>
 
       <div className="flex-1 overflow-auto relative">
         {profileSupportsHeader(profileType) && (
@@ -153,14 +218,24 @@ export default function UCPView() {
         )}
         {activeTab !== 'Overview' ? (
           <div className="mx-auto w-full max-w-[1800px] space-y-6 px-6 py-5 lg:px-8 2xl:px-12">
-            {tabDashboards.map((d) => (
-              <section key={d.id}>
-                {tabDashboards.length > 1 && (
-                  <div className="mb-2 text-sm font-semibold text-gray-900 dark:text-slate-100">{d.name}</div>
-                )}
-                <DashboardZones dashboard={d} />
-              </section>
-            ))}
+            {tabDashboards.length === 0 ? (
+              <div className="rounded-xl border-2 border-dashed border-gray-200 dark:border-white/10">
+                <EmptyState
+                  icon="🗂️"
+                  title={`No dashboard on “${activeTab}” yet`}
+                  description="Place a dashboard on this tab to fill it, or remove the tab if it’s not needed."
+                />
+              </div>
+            ) : (
+              tabDashboards.map((d) => (
+                <section key={d.id}>
+                  {tabDashboards.length > 1 && (
+                    <div className="mb-2 text-sm font-semibold text-gray-900 dark:text-slate-100">{d.name}</div>
+                  )}
+                  <DashboardZones dashboard={d} />
+                </section>
+              ))
+            )}
           </div>
         ) : (
         <div className="mx-auto w-full max-w-[1800px] px-6 py-5 lg:px-8 2xl:px-12">

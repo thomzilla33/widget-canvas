@@ -127,12 +127,17 @@ export const PLACEMENT_SURFACES = [
 ]
 
 // Profile types you can nest a dashboard into, each with its own default tabs.
+// Every profile has Overview / Activity / Snapshot as mandatory tabs; the rest are
+// default-but-removable, and admins can add custom tabs (Garage is the automotive
+// example — present only where it applies).
+export const MANDATORY_TABS = ['Overview', 'Activity', 'Snapshot']
+
 export const PROFILE_TYPES = [
-  { id: 'Company', label: 'Company / Account', entityType: 'Account', tabs: ['Overview', 'Financials', 'Activity', 'Relationships'] },
-  { id: 'Contact', label: 'Contact (UCP)', entityType: 'Contact', tabs: ['Overview', 'Activity', 'Opportunities', 'Notes'] },
-  { id: 'Employee', label: 'Employee (UEP)', entityType: 'Employee', tabs: ['Overview', 'Performance', 'Org chart', 'Compensation'] },
-  { id: 'Deal', label: 'Deal', entityType: 'Deal', tabs: ['Overview', 'Timeline', 'Stakeholders'] },
-  { id: 'Case', label: 'Case', entityType: 'Case', tabs: ['Overview', 'Activity', 'Resolution'] },
+  { id: 'Company', label: 'Company / Account', entityType: 'Account', tabs: ['Overview', 'Activity', 'Snapshot', 'Financials', 'Relationships'] },
+  { id: 'Contact', label: 'Contact (UCP)', entityType: 'Contact', tabs: ['Overview', 'Activity', 'Snapshot', 'Appointments', 'Repair Orders', 'Tasks'] },
+  { id: 'Employee', label: 'Employee (UEP)', entityType: 'Employee', tabs: ['Overview', 'Activity', 'Snapshot', 'Performance', 'Org chart'] },
+  { id: 'Deal', label: 'Deal', entityType: 'Deal', tabs: ['Overview', 'Activity', 'Snapshot', 'Timeline', 'Stakeholders'] },
+  { id: 'Case', label: 'Case', entityType: 'Case', tabs: ['Overview', 'Activity', 'Snapshot', 'Resolution'] },
 ]
 
 export const REPORT_COLLECTIONS = ['Sales Reports', 'Finance Reports', 'Support Reports', 'Executive']
