@@ -22,7 +22,8 @@ Synthesized from three spec docs: **Internal Data-Point Catalog v2** (endpoint m
 
 Legend: **EXISTS** (we have it) · **UPGRADE** (extend ours) · **NEW** · **BLOCKED** (per docs).
 
-### Phase 1 — Field & tile model (foundational; unblocks the rest)
+### Phase 1 — Field & tile model (foundational; unblocks the rest) — ✅ DONE (commit `b6cd19a`)
+> `src/data/fields.js` + builder rework: Measure × Dimension → tile Slots, with Transforms. Additive/back-compat. Note: aggregation (avg/p95) is a light label; rate(X/Y)/forecast/freshness-flag transforms deferred.
 - **1.1 [UPGRADE]** Type every source field as **Dimension or Measure** (`role: 'dimension'|'measure'`; we already have an approximate `kind`). Dimensions become filters/axes/group-by; measures become tile values.
 - **1.2 [NEW]** **Slot model per tile type** — declare the slots each tile needs and let the builder bind a field to each slot (KPI value/label/trend/target, Bar category/value/series, Gauge value/target/thresholds, Table columns[], Donut segment/value, Funnel stage/value, Board entity/status, Feed, Alerts, Stat row, Leaderboard).
 - **1.3 [UPGRADE]** **Builder flow → measure(s) × dimension(s) → slots** (instead of single-metric → type). Pick a measure, slice by a dimension, choose tile; recommended tile from the measure/dimension shape (we already recommend a type).
