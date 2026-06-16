@@ -56,8 +56,9 @@ Have: KPI, Line, Bar, Gauge, Table, List, Map, Heat Map, Scatter, Pie(builder), 
 > `src/data/tables.js` (formula engine) + Tables page + the table-as-builder-source path. Worked example "BDC Coaching KPIs" → KPI/Bar/Table from one table, with calculated fields.
 - **6.1 [DONE]** **Table Definition primitive**: user-authored table with **literal + formula (F)** columns, governed (scope/owner/TTL/freshness). Bind any column to a tile slot (value/category/column) — no new tile type. This delivers Mike's "pull our tables in" AND the deferred **calculated fields**. Worked example in the spec: "BDC Coaching KPIs" → KPI/Bar/Table/Gauge from one table.
 
-### Phase 7 — Live tiles (real-time)
-- **7.1 [NEW]** Simulated **live tiles** (WS-stream feel): queue depth, running-now, live ops board, **Alerts** with acknowledge, recent-activity Feed.
+### Phase 7 — Live tiles (real-time) — ✅ DONE (commit `c5a95b6`)
+> `src/state/LiveContext.jsx` (deterministic tick counter + pause) drives live tiles; LiveBadge + Live/Pause toggle on the view. Live KPIs/gauges/charts stream each tick; static tiles bail re-render (React.memo). **Phases 1–7 all complete.**
+- **7.1 [DONE]** Simulated **live tiles** (WS-stream feel): queue depth, running-now, live ops board, **Alerts** with acknowledge, recent-activity Feed.
 
 ### Cross-cutting (non-feature)
 - **C.1 [COPY]** Disambiguate dashboard **"Widget/Tile"** vs the webchat **"Widget"** product across UI copy + internal docs.
