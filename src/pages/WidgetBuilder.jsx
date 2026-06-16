@@ -9,6 +9,7 @@ import {
   MetricPicker,
   TypeGallery,
   ConfigPanel,
+  FormatPanel,
   SectionHeading,
 } from '../components/playground/BuilderPanels.jsx'
 import WidgetPreview from '../components/playground/WidgetPreview.jsx'
@@ -50,6 +51,10 @@ export default function WidgetBuilder() {
   const [saved, setSaved] = useState(false)
   const [browsing, setBrowsing] = useState(false)
   const [previewSize, setPreviewSize] = useState('lg')
+  const [format, setFormatState] = useState({ style: 'number', decimals: 0, abbreviate: true, prefix: '', suffix: '' })
+  const [goal, setGoalState] = useState({ value: null, direction: 'higher' })
+  const setFormat = (patch) => setFormatState((f) => ({ ...f, ...patch }))
+  const setGoal = (patch) => setGoalState((g) => ({ ...g, ...patch }))
 
   const source = EXTERNAL_SOURCES.find((s) => s.id === sourceId) || null
   // A "field" is either an aggregate metric or a row-level record set.
@@ -106,6 +111,8 @@ export default function WidgetBuilder() {
       health: 'unused',
       usedIn: 0,
       source: source.name,
+      format,
+      goal: goal.value != null ? goal : undefined,
     })
     setSaved(true)
   }
@@ -132,7 +139,7 @@ export default function WidgetBuilder() {
       <div className="flex-1 overflow-auto">
         <div className="mx-auto flex w-full max-w-[1600px] flex-col gap-6 p-6 lg:px-8 2xl:px-10 lg:flex-row">
           {/* Left: build */}
-          <div className="order-2 w-full shrink-0 space-y-7 lg:order-1 lg:w-[440px]">
+          <div className="order-2 w-full space-y-7 lg:order-1 lg:w-1/2 lg:min-w-0">
             <section>
               <SectionHeading n={1} title="Data source" sub="Map from a specific external system or data view." />
               <SourcePicker sourceId={sourceId} onSelect={selectSource} onBrowse={() => setBrowsing(true)} />
@@ -161,10 +168,14 @@ export default function WidgetBuilder() {
                 setUngovernedAck={setUngovernedAck}
               />
             </section>
+            <section>
+              <SectionHeading n={5} title="Format & display" sub="Number format, units, and a goal with conditional color." />
+              <FormatPanel format={format} setFormat={setFormat} goal={goal} setGoal={setGoal} />
+            </section>
           </div>
 
           {/* Right: live preview */}
-          <div className="order-1 min-w-0 flex-1 lg:order-2">
+          <div className="order-1 min-w-0 lg:order-2 lg:w-1/2">
             <div className="lg:sticky lg:top-0">
               <div className="mb-2 flex items-center justify-between gap-2">
                 <span className="text-[10px] font-bold uppercase tracking-wide text-gray-500 dark:text-slate-400">Live preview</span>
@@ -191,6 +202,7 @@ export default function WidgetBuilder() {
                   source={source}
                   name={name}
                   freshness={FRESHNESS_STATUS[freshness] || 'fresh'}
+                  display={{ format, goal }}
                 />
               </div>
               {typeId && (

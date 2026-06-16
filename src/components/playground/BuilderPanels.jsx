@@ -275,6 +275,105 @@ export function ConfigPanel({
   )
 }
 
+// Format & display: number formatting, units, and a goal/target with conditional color.
+export function FormatPanel({ format, setFormat, goal, setGoal }) {
+  const f = format
+  return (
+    <div className="space-y-4">
+      <Field label="Value format">
+        <Segmented
+          value={f.style}
+          onChange={(v) => setFormat({ style: v })}
+          options={[
+            ['number', 'Number'],
+            ['currency', 'Currency'],
+            ['percent', 'Percent'],
+          ]}
+        />
+      </Field>
+
+      <div className="grid grid-cols-2 gap-3">
+        <Field label="Decimals">
+          <Segmented
+            value={String(f.decimals)}
+            onChange={(v) => setFormat({ decimals: Number(v) })}
+            options={[
+              ['0', '0'],
+              ['1', '1'],
+              ['2', '2'],
+            ]}
+          />
+        </Field>
+        <div className="flex items-end">
+          <label className="flex cursor-pointer items-center gap-2 text-sm text-gray-700 dark:text-slate-200">
+            <input type="checkbox" className="checkbox" checked={f.abbreviate} onChange={(e) => setFormat({ abbreviate: e.target.checked })} />
+            Abbreviate (1.2M)
+          </label>
+        </div>
+      </div>
+
+      {/* Currency already adds “$” and Percent adds “%”, so hide the matching field to avoid double symbols. */}
+      <div className="grid grid-cols-2 gap-3">
+        {f.style !== 'currency' && (
+          <Field label="Prefix">
+            <input className="input" placeholder="e.g. €" value={f.prefix} onChange={(e) => setFormat({ prefix: e.target.value })} />
+          </Field>
+        )}
+        {f.style !== 'percent' && (
+          <Field label="Suffix">
+            <input className="input" placeholder="e.g. /mo" value={f.suffix} onChange={(e) => setFormat({ suffix: e.target.value })} />
+          </Field>
+        )}
+      </div>
+
+      <Field label="Goal / target (optional)">
+        <input
+          type="number"
+          className="input"
+          placeholder="e.g. 1000000"
+          value={goal.value ?? ''}
+          onChange={(e) => setGoal({ value: e.target.value === '' ? null : Number(e.target.value) })}
+        />
+      </Field>
+      {goal.value != null && (
+        <Field label="Goal direction">
+          <Segmented
+            value={goal.direction}
+            onChange={(v) => setGoal({ direction: v })}
+            options={[
+              ['higher', 'Higher is better'],
+              ['lower', 'Lower is better'],
+            ]}
+          />
+        </Field>
+      )}
+
+      <p className="text-xs text-gray-500 dark:text-slate-400">
+        Formatting applies to single-value widgets (KPI, gauge). A goal colors the value green when met and red when missed.
+      </p>
+    </div>
+  )
+}
+
+function Segmented({ value, onChange, options }) {
+  return (
+    <div className="flex overflow-hidden rounded-lg border border-gray-300 text-sm dark:border-white/15">
+      {options.map(([v, label]) => (
+        <button
+          key={v}
+          onClick={() => onChange(v)}
+          aria-pressed={value === v}
+          className={`flex-1 px-2 py-1.5 font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-aims-blue/40 ${
+            value === v ? 'bg-aims-blue text-white' : 'bg-white text-gray-600 hover:bg-gray-50 dark:bg-white/5 dark:text-slate-300 dark:hover:bg-white/10'
+          }`}
+        >
+          {label}
+        </button>
+      ))}
+    </div>
+  )
+}
+
 function Field({ label, children }) {
   return (
     <div>

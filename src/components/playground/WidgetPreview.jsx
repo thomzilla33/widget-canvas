@@ -21,8 +21,14 @@ import {
 import { ChevronLeft, ChevronRight, Lock, Sparkles } from 'lucide-react'
 import { GovernedBadge, FreshnessBadge } from '../common/index.jsx'
 import { useTheme } from '../../state/ThemeContext.jsx'
-import { previewData } from '../../data/preview.js'
+import { previewData, formatValue } from '../../data/preview.js'
 import { TYPE_LABEL } from '../../data/mock.js'
+
+// Is a raw value meeting its goal, given direction? null when no goal set.
+function goalMet(raw, goal) {
+  if (!goal || goal.value == null) return null
+  return goal.direction === 'lower' ? raw <= goal.value : raw >= goal.value
+}
 
 export const SERIES = ['#2563EB', '#06B6D4', '#A78BFA', '#10B981', '#F59E0B', '#EC4899']
 
@@ -46,7 +52,7 @@ export function useChartTheme() {
 const H = 220
 
 // ── Trust header + type switcher ─────────────────────────────
-export default function WidgetPreview({ typeId, metric, source, name, freshness }) {
+export default function WidgetPreview({ typeId, metric, source, name, freshness, display }) {
   const ready = source && metric && typeId
   return (
     <div className="card flex flex-col p-4">
@@ -65,7 +71,7 @@ export default function WidgetPreview({ typeId, metric, source, name, freshness 
       <div className="mt-3 flex-1">
         {ready ? (
           <ChartBoundary key={typeId}>
-            <Renderer typeId={typeId} metric={metric} pii={!!source.hasPII} />
+            <Renderer typeId={typeId} metric={metric} pii={!!source.hasPII} display={display} />
           </ChartBoundary>
         ) : (
           <div className="grid h-full min-h-[220px] place-items-center rounded-lg border-2 border-dashed border-gray-200 text-center text-sm text-gray-400 dark:border-white/10 dark:text-slate-500">
@@ -89,7 +95,7 @@ export default function WidgetPreview({ typeId, metric, source, name, freshness 
 }
 
 // Renders only the selected view, so an unused view can't throw or do work.
-function Renderer({ typeId, metric, pii }) {
+function Renderer({ typeId, metric, pii, display }) {
   const data = previewData(metric)
   switch (typeId) {
     case 'line': return <LineView data={data} />
@@ -99,11 +105,11 @@ function Renderer({ typeId, metric, pii }) {
     case 'heatmap': return <HeatmapView data={data} />
     case 'scatter': return <ScatterView data={data} />
     case 'carousel': return <CarouselView data={data} pii={pii} />
-    case 'gauge': return <GaugeView data={data} />
+    case 'gauge': return <GaugeView data={data} display={display} />
     case 'list': return <ListView data={data} />
     case 'summary': return <SummaryView data={data} />
     case 'map': return <MapView data={data} />
-    default: return <KpiView data={data} />
+    default: return <KpiView data={data} display={display} />
   }
 }
 
@@ -191,19 +197,29 @@ function ScatterView({ data }) {
   )
 }
 
-function GaugeView({ data }) {
+// RAG color when a goal is set: ≥67% on track (green), ≥34% (amber), else red.
+const RAG = (v) => (v >= 67 ? '#16A34A' : v >= 34 ? '#D97706' : '#DC2626')
+
+function GaugeView({ data, display }) {
   const t = useChartTheme()
   const v = data.gauge.value
+  const goalSet = display?.goal?.value != null
+  const color = goalSet ? RAG(v) : SERIES[0]
   return (
     <div className="relative" style={{ height: H }}>
       <ResponsiveContainer width="100%" height="100%">
         <RadialBarChart innerRadius="68%" outerRadius="100%" data={[{ value: v }]} startAngle={210} endAngle={-30}>
           <PolarAngleAxis type="number" domain={[0, 100]} tick={false} />
-          <RadialBar dataKey="value" cornerRadius={8} fill={SERIES[0]} background={{ fill: t.grid }} />
+          <RadialBar dataKey="value" cornerRadius={8} fill={color} background={{ fill: t.grid }} />
         </RadialBarChart>
       </ResponsiveContainer>
       <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-        <span className="num text-3xl font-bold tracking-tight text-gray-900 dark:text-slate-100">{v}%</span>
+        <span
+          className={`num text-3xl font-bold tracking-tight ${goalSet ? '' : 'text-gray-900 dark:text-slate-100'}`}
+          style={goalSet ? { color } : undefined}
+        >
+          {v}%
+        </span>
         <span className="text-xs text-gray-500 dark:text-slate-400">{data.gauge.label}</span>
       </div>
     </div>
@@ -211,11 +227,23 @@ function GaugeView({ data }) {
 }
 
 /* ── Custom views ── */
-function KpiView({ data }) {
+function KpiView({ data, display }) {
+  const fmt = display?.format
+  const goal = display?.goal
+  const value = fmt ? formatValue(data.kpiRaw, fmt) : data.kpi.value
+  const met = goalMet(data.kpiRaw, goal)
+  const valueColor = met == null ? 'text-gray-900 dark:text-slate-100' : met ? 'text-aims-governed' : 'text-aims-stale'
+  const missLabel = goal?.direction === 'lower' ? 'above target' : 'below target'
   return (
     <div className="flex h-full min-h-[180px] flex-col justify-center">
-      <div className="num text-4xl font-bold tracking-tight text-gray-900 dark:text-slate-100">{data.kpi.value}</div>
+      <div className={`num text-4xl font-bold tracking-tight ${valueColor}`}>{value}</div>
       <div className="num mt-1 text-sm font-semibold text-aims-governed">{data.kpi.delta} vs last quarter</div>
+      {goal?.value != null && (
+        <div className="mt-1.5 text-xs text-gray-500 dark:text-slate-400">
+          Goal: {fmt ? formatValue(goal.value, fmt) : goal.value} ·{' '}
+          <span className={met ? 'font-semibold text-aims-governed' : 'font-semibold text-aims-stale'}>{met ? 'met' : missLabel}</span>
+        </div>
+      )}
     </div>
   )
 }

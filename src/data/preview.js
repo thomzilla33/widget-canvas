@@ -41,8 +41,31 @@ const SAMPLE = {
     bullets: ['ARR $1.24M (+8.2%)', 'Win rate 28% (+3 pts)', '2 deals at risk'],
   },
   kpi: { value: '$1.24M', delta: '+8.2%', deltaDir: 'up' },
+  kpiRaw: 1243200, // raw number behind the KPI, so display formatting can be applied live
   gauge: { value: 68, label: 'of target' },
   recordTotal: 1284, // realistic row count for record-set previews (truncated display)
+}
+
+// Format a raw number per a widget's display config (currency/percent/abbrev/etc).
+export function formatValue(n, f = {}) {
+  if (n == null || Number.isNaN(Number(n))) return '—'
+  const { style = 'number', decimals = 0, abbreviate = false, prefix = '', suffix = '' } = f
+  const num = Number(n)
+  const abs = Math.abs(num)
+  let str
+  if (abbreviate && style !== 'percent' && abs >= 1000) {
+    const [uv, us] = [
+      [1e9, 'B'],
+      [1e6, 'M'],
+      [1e3, 'K'],
+    ].find(([v]) => abs >= v)
+    str = (num / uv).toFixed(decimals) + us
+  } else {
+    str = num.toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals })
+  }
+  if (style === 'currency') str = `$${str}`
+  else if (style === 'percent') str = `${str}%`
+  return `${prefix}${str}${suffix}`
 }
 
 // Returns the full sample bundle, lightly labeled by the chosen metric.
@@ -106,6 +129,7 @@ export function widgetSample(widget, scope) {
     twoVar,
     matrix: { ...SAMPLE.matrix, cells },
     kpi: KPI_VARIANTS[hStable % KPI_VARIANTS.length],
+    kpiRaw: Math.round(SAMPLE.kpiRaw * factor),
     gauge: { value: Math.min(99, Math.max(5, Math.round(GAUGE_VARIANTS[hStable % GAUGE_VARIANTS.length] * (0.85 + 0.15 * m)))), label: 'of target' },
   }
 }

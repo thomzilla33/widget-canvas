@@ -14,7 +14,7 @@ import {
 } from 'recharts'
 import { Sparkles, Phone, Mail, MessageSquare, AlertTriangle, AlertCircle, ChevronRight } from 'lucide-react'
 import { useChartTheme, SERIES } from '../playground/WidgetPreview.jsx'
-import { widgetSample } from '../../data/preview.js'
+import { widgetSample, formatValue } from '../../data/preview.js'
 
 // Chart heights per size — small is a sparkline, large gets axis room.
 const H = { sm: 52, md: 84, lg: 150 }
@@ -29,7 +29,7 @@ export default function WidgetRender({ widget, size = 'md', scope, viewAs }) {
   if (!widget) {
     return <div className="grid h-[88px] place-items-center text-[10px] text-gray-500 dark:text-slate-400">No data</div>
   }
-  const props = { data, size }
+  const props = { data, size, format: widget.format, goal: widget.goal }
   // A placement can override how the widget is rendered ("best way to show the data").
   switch (viewAs || widget.skeleton) {
     case 'KPI':
@@ -58,12 +58,15 @@ export default function WidgetRender({ widget, size = 'md', scope, viewAs }) {
   }
 }
 
-function KpiMini({ data, size }) {
+function KpiMini({ data, size, format, goal }) {
   const down = data.kpi.deltaDir === 'down'
+  const value = format ? formatValue(data.kpiRaw, format) : data.kpi.value
+  const met = goal && goal.value != null ? (goal.direction === 'lower' ? data.kpiRaw <= goal.value : data.kpiRaw >= goal.value) : null
+  const valueColor = met == null ? 'text-gray-900 dark:text-slate-100' : met ? 'text-aims-governed' : 'text-aims-stale'
   return (
     <div className="py-1">
-      <div className={`num font-bold tracking-tight text-gray-900 dark:text-slate-100 ${size === 'sm' ? 'text-xl' : size === 'lg' ? 'text-4xl' : 'text-2xl'}`}>
-        {data.kpi.value}
+      <div className={`num font-bold tracking-tight ${valueColor} ${size === 'sm' ? 'text-xl' : size === 'lg' ? 'text-4xl' : 'text-2xl'}`}>
+        {value}
       </div>
       {size !== 'sm' && (
         <div className={`num mt-0.5 font-semibold ${down ? 'text-aims-stale' : 'text-aims-governed'} ${size === 'lg' ? 'text-sm' : 'text-[11px]'}`}>
@@ -120,20 +123,22 @@ function BarMini({ data, size }) {
   )
 }
 
-function GaugeMini({ data, size }) {
+function GaugeMini({ data, size, goal }) {
   const t = useChartTheme()
   const v = data.gauge.value
   const h = size === 'sm' ? 64 : size === 'lg' ? 132 : 88
+  const goalSet = goal && goal.value != null
+  const color = goalSet ? (v >= 67 ? '#16A34A' : v >= 34 ? '#D97706' : '#DC2626') : SERIES[0]
   return (
     <div className="relative" style={{ height: h }} role="img" aria-label={`${v}% ${data.gauge.label}`}>
       <ResponsiveContainer width="100%" height="100%">
         <RadialBarChart innerRadius="70%" outerRadius="100%" data={[{ value: v }]} startAngle={210} endAngle={-30}>
           <PolarAngleAxis type="number" domain={[0, 100]} tick={false} />
-          <RadialBar dataKey="value" cornerRadius={6} fill={SERIES[0]} background={{ fill: t.grid }} />
+          <RadialBar dataKey="value" cornerRadius={6} fill={color} background={{ fill: t.grid }} />
         </RadialBarChart>
       </ResponsiveContainer>
       <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-        <span className={`num font-bold text-gray-900 dark:text-slate-100 ${size === 'lg' ? 'text-3xl' : 'text-lg'}`}>{v}%</span>
+        <span className={`num font-bold ${size === 'lg' ? 'text-3xl' : 'text-lg'} ${goalSet ? '' : 'text-gray-900 dark:text-slate-100'}`} style={goalSet ? { color } : undefined}>{v}%</span>
         {size === 'lg' && <span className="text-[11px] text-gray-500 dark:text-slate-400">{data.gauge.label}</span>}
       </div>
     </div>
