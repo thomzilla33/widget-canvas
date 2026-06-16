@@ -29,6 +29,30 @@ export const widgets = [
   W({ id: 'w-aims-escalation', name: 'Escalation Rate', skeleton: 'Gauge', category: 'AIMS OS', usedIn: 2, source: 'AIMS OS — Agentic Studio' }),
   W({ id: 'w-aims-messages', name: 'Messages Sent', skeleton: 'Chart', category: 'AIMS OS', freshness: 'live', usedIn: 1, source: 'AIMS OS — Agentic Studio' }),
   W({ id: 'w-aims-actions', name: 'Actions by Type', skeleton: 'Chart', category: 'AIMS OS', usedIn: 2, source: 'AIMS OS — Agentic Studio' }),
+  // Governance / Council
+  W({ id: 'w-aims-blocked', name: 'Blocked Actions', skeleton: 'KPI', category: 'AIMS OS', freshness: 'live', usedIn: 2, source: 'AIMS OS — Governance' }),
+  W({ id: 'w-aims-outcomes', name: 'Council Outcomes', skeleton: 'Chart', category: 'AIMS OS', usedIn: 2, source: 'AIMS OS — Governance' }),
+  // Truth Plane
+  W({ id: 'w-aims-facts', name: 'Active Facts', skeleton: 'KPI', category: 'AIMS OS', usedIn: 3, source: 'AIMS OS — Truth Plane' }),
+  W({ id: 'w-aims-facttier', name: 'Facts by Tier', skeleton: 'Chart', category: 'AIMS OS', usedIn: 1, source: 'AIMS OS — Truth Plane' }),
+  // Human Touch Layer
+  W({ id: 'w-aims-queue', name: 'Queue Depth', skeleton: 'KPI', category: 'AIMS OS', freshness: 'live', usedIn: 4, source: 'AIMS OS — Human Touch Layer' }),
+  W({ id: 'w-aims-sla', name: 'SLA Compliance Rate', skeleton: 'Gauge', category: 'AIMS OS', freshness: 'live', usedIn: 3, source: 'AIMS OS — Human Touch Layer' }),
+  // Credits & Billing
+  W({ id: 'w-aims-credits', name: 'Credits Consumed', skeleton: 'KPI', category: 'AIMS OS', freshness: 'live', usedIn: 5, source: 'AIMS OS — Credits & Billing' }),
+  W({ id: 'w-aims-balance', name: 'Balance Remaining', skeleton: 'Gauge', category: 'AIMS OS', usedIn: 2, source: 'AIMS OS — Credits & Billing' }),
+  // Conversations
+  W({ id: 'w-aims-activeconv', name: 'Active Conversations', skeleton: 'KPI', category: 'AIMS OS', freshness: 'live', usedIn: 2, source: 'AIMS OS — Conversations' }),
+  W({ id: 'w-aims-split', name: 'Agent vs Human Messages', skeleton: 'Chart', category: 'AIMS OS', usedIn: 1, source: 'AIMS OS — Conversations' }),
+  // Agents (AMP)
+  W({ id: 'w-aims-agents', name: 'Active Agents', skeleton: 'KPI', category: 'AIMS OS', usedIn: 3, source: 'AIMS OS — Agents (AMP)' }),
+  W({ id: 'w-aims-topagents', name: 'Top Agents by Runs', skeleton: 'List', category: 'AIMS OS', usedIn: 1, source: 'AIMS OS — Agents (AMP)' }),
+  // Helm (ROI)
+  W({ id: 'w-aims-roi', name: 'Net AI Workforce ROI', skeleton: 'KPI', category: 'AIMS OS', usedIn: 4, source: 'AIMS OS — Helm (ROI)' }),
+  W({ id: 'w-aims-valuecat', name: 'Value by Category', skeleton: 'Chart', category: 'AIMS OS', usedIn: 2, source: 'AIMS OS — Helm (ROI)' }),
+  // Data Studio
+  W({ id: 'w-aims-uptime', name: 'Connector Uptime', skeleton: 'Gauge', category: 'AIMS OS', freshness: 'live', usedIn: 2, source: 'AIMS OS — Data Studio' }),
+  W({ id: 'w-aims-syncfail', name: 'Sync Failures', skeleton: 'KPI', category: 'AIMS OS', usedIn: 1, source: 'AIMS OS — Data Studio' }),
   W({ id: 'w-revenue', name: 'Total Revenue', skeleton: 'KPI', category: 'Intelligence', freshness: 'live', usedIn: 9, source: 'Finance Data View' }),
   W({ id: 'w-mrr', name: 'MRR Trend', skeleton: 'Chart', category: 'Intelligence', freshness: 'live', usedIn: 7, source: 'Stripe' }),
   W({ id: 'w-arr', name: 'ARR Snapshot', skeleton: 'KPI', category: 'Intelligence', usedIn: 12, source: 'Finance Data View' }),

@@ -74,10 +74,10 @@ export function formatValue(n, f = {}) {
 // action labels (not pipeline stages).
 function metricUnit(name = '') {
   if (/retention|\bnrr\b|\bgrr\b/i.test(name)) return 'percent' // NRR/GRR are ratios, not $ (beats the "revenue" rule)
-  if (/revenue|\barr\b|\bmrr\b|spend|cash|burn|\bcost\b|price|deal size|payment|payroll|margin|\bgpu\b|gross|p&l|cogs|\blabor\b|\$/i.test(name)) return 'currency'
+  if (/revenue|\barr\b|\bmrr\b|spend|cash|burn|\bcost\b|price|deal size|payment|payroll|margin|\bgpu\b|gross|p&l|cogs|\blabor\b|\broi\b|\bvalue\b|\$/i.test(name)) return 'currency'
   if (/\btime\b|\bdays?\b|cycle|to hire|to resolve|\bmttr\b|velocity|runtime/i.test(name)) return 'duration'
   if (/csat|\bnps\b|score|rating|satisfaction/i.test(name)) return 'score'
-  if (/rate|win|churn|\bctr\b|roas|attrition|breach|acceptance|utiliz|conversion|open rate/i.test(name)) return 'percent'
+  if (/rate|win|churn|\bctr\b|roas|attrition|breach|acceptance|utiliz|conversion|open rate|uptime|adherence|completeness|compliance/i.test(name)) return 'percent'
   return 'count'
 }
 
