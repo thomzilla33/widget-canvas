@@ -107,20 +107,33 @@ export const HOME_SCOPES = [
 ]
 
 // ── Home pinned widgets: Inbox, Tasks, and the Human Touch Layer (HITL) ──
+// status: 'error' rows are failed syncs/notifications that the user can Retry
+// (error-recovery edge case). Everything else is a normal message.
 export const HOME_INBOX = [
+  { id: 'm-sync', from: 'Salesforce', subject: 'Sync failed — credentials expired', when: '3m ago', unread: true, status: 'error' },
   { id: 'm1', from: 'Dana Lee', subject: 'Flagged “NPS Trend” — looks frozen', when: '12m ago', unread: true },
   { id: 'm2', from: 'María González', subject: 'Shared “Employee Performance” with you', when: '1h ago', unread: true },
   { id: 'm3', from: 'RevOps', subject: '3 dashboards you follow were updated', when: '3h ago', unread: true },
-  { id: 'm4', from: 'Stripe', subject: 'Sync completed — 64,000 customers refreshed', when: '5h ago', unread: false },
-  { id: 'm5', from: 'Priya Nair', subject: 'Re: Q3 pipeline forecast', when: '1d ago', unread: false },
+  { id: 'm4', from: 'James Okonkwo', subject: 'Can you grant access to Finance Close?', when: '4h ago', unread: true },
+  { id: 'm5', from: 'Stripe', subject: 'Sync completed — 64,000 customers refreshed', when: '5h ago', unread: false },
+  { id: 'm6', from: 'Priya Nair', subject: 'Re: Q3 pipeline forecast', when: '1d ago', unread: false },
+  { id: 'm7', from: 'Workspace', subject: 'Weekly digest — 12 dashboards, 3 need attention', when: '1d ago', unread: false },
+  { id: 'm8', from: 'Elena Petrova', subject: 'Comment on “Marketing Performance”', when: '2d ago', unread: false },
+  { id: 'm9', from: 'Security', subject: 'New sign-in from a new device approved', when: '2d ago', unread: false },
+  { id: 'm10', from: 'Liam Murphy', subject: 'Re: Deal Room access for Globex', when: '3d ago', unread: false },
+  { id: 'm11', from: 'Workflow Engine', subject: 'Nightly ETL finished — 0 errors', when: '3d ago', unread: false },
 ]
 
+// due: 'Overdue' | 'Today' | 'Tomorrow' | 'This week' (grouped into Overdue/Today/Upcoming).
+// status: 'error' is an automated step that failed and offers a Retry (error-recovery edge case).
 export const HOME_TASKS = [
+  { id: 't-err', title: 'Auto-reassign “CS Health” to you', due: 'Overdue', priority: 'high', status: 'error', errorMsg: 'Reassignment failed — previous owner still offboarded' },
   { id: 't1', title: 'Approve “Marketing Performance” for publish', due: 'Today', priority: 'high' },
-  { id: 't2', title: 'Reassign “CS Health” — owner offboarded', due: 'Overdue', priority: 'high' },
-  { id: 't3', title: 'Respond to Dana Lee’s data flag on NPS', due: 'Today', priority: 'med' },
+  { id: 't2', title: 'Respond to Dana Lee’s data flag on NPS', due: 'Today', priority: 'med' },
+  { id: 't3', title: 'Review widget access request from James', due: 'Today', priority: 'med' },
   { id: 't4', title: 'Review Q3 pipeline forecast', due: 'Tomorrow', priority: 'med' },
   { id: 't5', title: 'Add widgets to “New Hire Onboarding”', due: 'This week', priority: 'low' },
+  { id: 't6', title: 'Audit deactivated owners across 14 dashboards', due: 'This week', priority: 'low' },
 ]
 
 // HITL queue — agents, workflows, or escalations waiting on a human decision.
