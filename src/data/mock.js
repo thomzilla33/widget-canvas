@@ -20,8 +20,15 @@ export const entities = [
 // Widget catalog — realistic for an enterprise BI workspace (dozens of widgets
 // across sources, with usage counts and varied health/freshness).
 const W = (o) => ({ governed: true, freshness: 'fresh', health: 'active', usedIn: 0, category: 'Operational', ...o })
-export const CATALOG_CATEGORIES = ['Operational', 'Engagement', 'Intelligence']
+export const CATALOG_CATEGORIES = ['AIMS OS', 'Operational', 'Engagement', 'Intelligence']
 export const widgets = [
+  // ── AIMS OS — our own platform activity (the V1 differentiator) ──
+  W({ id: 'w-aims-hitl', name: 'Human-in-the-Loops', skeleton: 'KPI', category: 'AIMS OS', freshness: 'live', usedIn: 3, source: 'AIMS OS — Agentic Studio' }),
+  W({ id: 'w-aims-runs', name: 'Workflow Runs', skeleton: 'Chart', category: 'AIMS OS', freshness: 'live', usedIn: 4, source: 'AIMS OS — Agentic Studio' }),
+  W({ id: 'w-aims-conversations', name: 'Conversations Handled', skeleton: 'KPI', category: 'AIMS OS', freshness: 'live', usedIn: 2, source: 'AIMS OS — Agentic Studio' }),
+  W({ id: 'w-aims-escalation', name: 'Escalation Rate', skeleton: 'Gauge', category: 'AIMS OS', usedIn: 2, source: 'AIMS OS — Agentic Studio' }),
+  W({ id: 'w-aims-messages', name: 'Messages Sent', skeleton: 'Chart', category: 'AIMS OS', freshness: 'live', usedIn: 1, source: 'AIMS OS — Agentic Studio' }),
+  W({ id: 'w-aims-actions', name: 'Actions by Type', skeleton: 'Chart', category: 'AIMS OS', usedIn: 2, source: 'AIMS OS — Agentic Studio' }),
   W({ id: 'w-revenue', name: 'Total Revenue', skeleton: 'KPI', category: 'Intelligence', freshness: 'live', usedIn: 9, source: 'Finance Data View' }),
   W({ id: 'w-mrr', name: 'MRR Trend', skeleton: 'Chart', category: 'Intelligence', freshness: 'live', usedIn: 7, source: 'Stripe' }),
   W({ id: 'w-arr', name: 'ARR Snapshot', skeleton: 'KPI', category: 'Intelligence', usedIn: 12, source: 'Finance Data View' }),

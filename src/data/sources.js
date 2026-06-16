@@ -6,6 +6,7 @@
 // Kept in its own module (not mock.js) so the ~40-source catalog stays readable.
 
 export const SOURCE_CATEGORIES = [
+  'AIMS OS',
   'CRM',
   'Marketing',
   'Support',
@@ -57,6 +58,48 @@ function S(o) {
 }
 
 export const EXTERNAL_SOURCES = [
+  // ── AIMS OS (our own platform — the V1 differentiator) ──
+  // What you've done WITH your data: agentic workflows, conversations, and
+  // human-in-the-loops. Powered from the Agentic Studio + Data Studio.
+  S({
+    id: 'src-aims-agentic', name: 'AIMS OS — Agentic Studio', category: 'AIMS OS', logoColor: '#155DFC', initials: 'AI',
+    status: 'connected', featured: true, realtime: true, governed: true, owner: 'AIMS OS', reviewed: 'Jun 2026',
+    description: 'Your own platform activity — agentic workflow performance, conversations, messages, and human-in-the-loops.',
+    metrics: [
+      { id: 'aims-runs', name: 'Workflow Runs', kind: 'timeseries', recommendedType: 'line' },
+      { id: 'aims-conversations', name: 'Conversations Handled', kind: 'kpi', recommendedType: 'kpi' },
+      { id: 'aims-messages', name: 'Messages Sent', kind: 'timeseries', recommendedType: 'line' },
+      { id: 'aims-hitl', name: 'Human-in-the-Loops', kind: 'kpi', recommendedType: 'kpi' },
+      { id: 'aims-escalation', name: 'Escalation Rate', kind: 'kpi', recommendedType: 'gauge' },
+      { id: 'aims-resolution', name: 'Auto-Resolution Rate', kind: 'kpi', recommendedType: 'gauge' },
+      { id: 'aims-actions', name: 'Actions by Type', kind: 'breakdown', recommendedType: 'bar' },
+      { id: 'aims-outreach', name: 'Outreach Attempts', kind: 'timeseries', recommendedType: 'line' },
+      { id: 'aims-pushed', name: 'Tickets Pushed to CRM', kind: 'kpi', recommendedType: 'kpi' },
+    ],
+    recordSets: [
+      { id: 'aims-rs-workflows', name: 'Agentic Workflows', entityType: 'Workflow', count: 48, recommendedType: 'list' },
+      { id: 'aims-rs-hitl', name: 'Human-in-the-Loop Queue', entityType: 'Case', count: 1240, recommendedType: 'list' },
+      { id: 'aims-rs-conversations', name: 'Conversations', entityType: 'Conversation', count: 86400, recommendedType: 'list' },
+    ],
+  }),
+  S({
+    id: 'src-aims-platform', name: 'AIMS OS — Platform', category: 'AIMS OS', logoColor: '#00C2C2', initials: 'OS',
+    status: 'connected', featured: true, governed: true, owner: 'AIMS OS', reviewed: 'Jun 2026',
+    description: 'Cross-platform usage and activity across the AIMS OS workspace.',
+    metrics: [
+      { id: 'aimsp-active', name: 'Active Agents', kind: 'kpi', recommendedType: 'kpi' },
+      { id: 'aimsp-usage', name: 'Platform Usage Over Time', kind: 'timeseries', recommendedType: 'line' },
+      { id: 'aimsp-hitl-team', name: 'Human-in-the-Loops by Team', kind: 'breakdown', recommendedType: 'bar' },
+      { id: 'aimsp-handle', name: 'Avg Handle Time', kind: 'kpi', recommendedType: 'kpi' },
+      { id: 'aimsp-interactions', name: 'Customer Interactions', kind: 'timeseries', recommendedType: 'line' },
+      { id: 'aimsp-region', name: 'Activity by Region', kind: 'geo', recommendedType: 'map' },
+    ],
+    recordSets: [
+      { id: 'aimsp-rs-runs', name: 'Agent Runs', entityType: 'Event', count: 312000 },
+      { id: 'aimsp-rs-feedback', name: 'Feedback & Flags', entityType: 'Case', count: 980, recommendedType: 'list' },
+    ],
+  }),
+
   // ── CRM ──
   S({
     id: 'src-salesforce', name: 'Salesforce', category: 'CRM', logoColor: '#00A1E0', initials: 'SF',
