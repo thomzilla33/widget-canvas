@@ -130,6 +130,7 @@ export const HOME_INBOX = [
     actor: { name: 'Dana Lee', email: 'dana.lee@contoso.com', role: 'Support Lead' },
     body: 'Hey — the NPS Trend widget hasn’t moved in two weeks on the CS Health board. Can you check if the Survey Data View is still syncing? Customers are asking why the score looks flat.',
     related: { widgetId: 'w-nps', dashboardId: 'd-cs-health', label: 'CS Health' },
+    action: { kind: 'repin', label: 'Re-pin widget' },
   },
   {
     id: 'm2', origin: 'contact', subject: 'Shared “Employee Performance” with you', when: '1h ago',
@@ -152,6 +153,7 @@ export const HOME_INBOX = [
     actor: { name: 'James Okonkwo', email: 'james.okonkwo@contoso.com', role: 'Support Director' },
     body: 'Could you add me as a viewer on Finance Close? I need the AP aging numbers for the board deck on Thursday.',
     related: { dashboardId: 'd-finance', label: 'Finance Close' },
+    action: { kind: 'share', label: 'Grant access' },
   },
   {
     id: 'm5', origin: 'system', subject: 'Sync completed — 64,000 customers refreshed', when: '5h ago',
@@ -216,6 +218,7 @@ export const HOME_TASKS = [
     body: 'The governance workflow tried to auto-reassign the CS Health dashboard because its owner (Aisha Khan) was offboarded, but the reassignment step failed. Retry to take ownership.',
     meta: { runId: 'gov-reassign-4471', step: 'Reassign owner', trigger: 'Owner offboarded' },
     related: { dashboardId: 'd-cs-health', label: 'CS Health' },
+    action: { kind: 'reassign', label: 'Reassign to me' },
   },
   {
     id: 't1', origin: 'workflow', title: 'Approve “Marketing Performance” for publish', due: 'Today', priority: 'high',
@@ -224,6 +227,7 @@ export const HOME_TASKS = [
     body: 'Elena Petrova requested publishing the Marketing Performance dashboard. It’s in Pending review and needs your approval to go live to the Sales Reports collection.',
     meta: { step: 'Awaiting approval', trigger: 'Publish request', requestedBy: 'Elena Petrova' },
     related: { dashboardId: 'd-marketing', label: 'Marketing Performance' },
+    action: { kind: 'publish', label: 'Review & publish' },
   },
   {
     id: 't2', origin: 'contact', title: 'Respond to Dana Lee’s data flag on NPS', due: 'Today', priority: 'med',
@@ -231,6 +235,7 @@ export const HOME_TASKS = [
     actor: { name: 'Dana Lee', email: 'dana.lee@contoso.com', role: 'Support Lead' },
     body: 'Dana flagged the NPS Trend widget as frozen. Respond with whether the Survey Data View is syncing, or re-pin the widget if the schema changed.',
     related: { widgetId: 'w-nps', dashboardId: 'd-cs-health', label: 'NPS Trend' },
+    action: { kind: 'repin', label: 'Re-pin widget' },
   },
   {
     id: 't3', origin: 'contact', title: 'Review widget access request from James', due: 'Today', priority: 'med',
@@ -238,6 +243,7 @@ export const HOME_TASKS = [
     actor: { name: 'James Okonkwo', email: 'james.okonkwo@contoso.com', role: 'Support Director' },
     body: 'James requested viewer access to Finance Close. Review and grant or decline.',
     related: { dashboardId: 'd-finance', label: 'Finance Close' },
+    action: { kind: 'share', label: 'Review access request' },
   },
   {
     id: 't4', origin: 'agent', title: 'Review Q3 pipeline forecast', due: 'Tomorrow', priority: 'med',
