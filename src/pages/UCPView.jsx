@@ -89,26 +89,20 @@ export default function UCPView() {
   // tabs whose content that role can't see. Mandatory + empty tabs always show.
   const [viewAs, setViewAs] = useState(ALL_AUDIENCES)
   const previewing = viewAs !== ALL_AUDIENCES
-  const tabVisibleTo = (t) => {
-    if (!previewing || MANDATORY_TABS.includes(t)) return true
-    const ds = profileDashboards.filter((d) => (d.placement.tab || 'Overview') === t)
-    if (ds.length === 0) return true // an empty/configured tab — keep it
-    return ds.some((d) => audienceVisibleTo({ audience: d.audience }, viewAs))
-  }
-  const shownTabs = tabs.filter(tabVisibleTo)
-  const hiddenTabCount = tabs.length - shownTabs.length
-  // Switching role: if the active tab is now hidden, fall back to Overview.
-  function changeViewAs(role) {
-    setViewAs(role)
-    if (role !== ALL_AUDIENCES && !MANDATORY_TABS.includes(activeTab) && !tabVisibleToFor(activeTab, role)) {
-      setActiveTab('Overview')
-    }
-  }
-  function tabVisibleToFor(t, role) {
+  // A tab is visible to `role` if it's mandatory, has no dashboards (empty/configured),
+  // or at least one of its dashboards is visible to that role.
+  function tabVisibleTo(t, role) {
     if (role === ALL_AUDIENCES || MANDATORY_TABS.includes(t)) return true
     const ds = profileDashboards.filter((d) => (d.placement.tab || 'Overview') === t)
     if (ds.length === 0) return true
     return ds.some((d) => audienceVisibleTo({ audience: d.audience }, role))
+  }
+  const shownTabs = tabs.filter((t) => tabVisibleTo(t, viewAs))
+  const hiddenTabCount = tabs.length - shownTabs.length
+  // Switching role: if the active tab is now hidden, fall back to Overview.
+  function changeViewAs(role) {
+    setViewAs(role)
+    if (!tabVisibleTo(activeTab, role)) setActiveTab('Overview')
   }
 
   // All tab mutations persist the placement-FREE list: placement tabs are derived
