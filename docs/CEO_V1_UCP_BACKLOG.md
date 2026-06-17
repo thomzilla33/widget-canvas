@@ -151,10 +151,15 @@ Studio.
 **Dep:** U0 (kinds), U1 (tabs) for accurate "what you've built" counts.
 
 **Activities**
-- ☑ U5.1 `src/components/common/StudioWelcome.jsx` — hero + "what you can do" cards + "what
-  you've built" count + primary CTA; dismissible per studio (localStorage).
-- ◐ U5.2 Wired on DashboardList, WidgetLibrary, TablesPage (dismissible intro). Reports/Home deferred.
-- ☑ U5.3 Per-studio copy + CTAs (dashboards → New dashboard, widgets → New widget, tables → none).
+- ☑ U5.1 `src/components/common/StudioWelcome.jsx` — RICH walkthrough (eyebrow pill + title +
+  subtitle + numbered setup steps + primary & secondary CTAs + helper links + hero badge +
+  "what you've built" count); dismissible per studio (localStorage), `dismissible={false}` for
+  full-page heroes. Modeled on the production "Welcome to Data Studio".
+- ☑ U5.2 Wired on DashboardList, WidgetLibrary, TablesPage; NEW **Data Studio** page (/data-studio
+  + nav) is a full-page welcome. Reports/Home deferred.
+- ☑ U5.3 Per-studio copy/steps/CTAs (dashboards/widgets/tables/datastudio).
+- ☑ U5.5 (new) **Data Studio landing** — 6-step source-setup walkthrough + "Connect your first
+  source" (opens the source marketplace) + a "Data Sync candidates" grid of not-yet-connected connectors.
 - ◐ U5.4 Kind chip + Entity/Global filter shipped in U0; owner/freshness/audience filters deferred.
 
 **Cases covered:** first-run (nothing built) vs returning (recents), each studio's distinct
