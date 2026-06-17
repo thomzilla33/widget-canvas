@@ -3,8 +3,12 @@ import { useNavigate } from 'react-router-dom'
 import { AlertTriangle, ChevronLeft, ChevronRight, LayoutGrid, Sparkles, Check, MapPin } from 'lucide-react'
 import { PageHeader, StepIndicator } from '../components/common/index.jsx'
 import PlacementForm, { StartCard, overlaps, placeKey } from '../components/dashboard/PlacementForm.jsx'
+import { DescribeComposer } from '../components/common/DescribeComposer.jsx'
 import { useDashboards } from '../state/DashboardsContext.jsx'
 import { dashboardTemplates, TEMPLATE_SEED, placementLabel } from '../data/mock.js'
+import { describeDashboard } from '../data/describe.js'
+
+const DEFAULT_SEED = { name: '', audience: 'Sales Agent', placement: { surface: 'profile', profileType: 'Company', scope: 'all', entityId: null, entityName: null, tab: 'Overview' } }
 
 const STEPS = ['Placement', 'Start point']
 
@@ -15,11 +19,26 @@ export default function NewDashboard() {
 
   const [step, setStep] = useState(0)
   // The placement form drives name + audience + placement; we hold its last emit.
-  const [form, setForm] = useState({ name: '', audience: 'Sales Agent', placement: { surface: 'profile', profileType: 'Company', scope: 'all', entityId: null, entityName: null, tab: 'Overview' }, valid: false })
+  const [form, setForm] = useState({ ...DEFAULT_SEED, valid: false })
+  // Describe-to-build re-seeds the PlacementForm by remounting it (key bump).
+  const [seed, setSeed] = useState(DEFAULT_SEED)
+  const [seedKey, setSeedKey] = useState(0)
 
   const [startMode, setStartMode] = useState('blank')
   const [templateId, setTemplateId] = useState(null)
   const [overrodeConflict, setOverrodeConflict] = useState(false)
+
+  // Describe a dashboard → prefill placement/audience/name + preselect a template
+  // (the first-preview layout). The user reviews, then Creates onto a seeded canvas.
+  function applyDescription(text) {
+    const r = describeDashboard(text)
+    if (!r) return false
+    setSeed({ name: r.name, audience: r.audience, placement: r.placement })
+    setSeedKey((k) => k + 1)
+    setStartMode('template')
+    setTemplateId(r.templateId)
+    return true
+  }
 
   const placement = form.placement
   const myKey = placeKey(placement, form.audience)
@@ -76,7 +95,12 @@ export default function NewDashboard() {
         <div className="max-w-2xl mx-auto space-y-6">
           {step === 0 ? (
             <>
-              <PlacementForm initial={form} onChange={setForm} />
+              <DescribeComposer
+                placeholder="e.g. Support health dashboard for managers"
+                examples={['Account 360 for sales', 'Support health for managers', 'Executive revenue report', 'Team home for sales']}
+                onGenerate={applyDescription}
+              />
+              <PlacementForm key={seedKey} initial={seed} onChange={setForm} />
 
               {conflict && (
                 <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-500/25 dark:bg-amber-500/10">

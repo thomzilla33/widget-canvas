@@ -6,6 +6,8 @@ import { useWidgets } from '../state/WidgetsContext.jsx'
 import { EXTERNAL_SOURCES, TYPE_LABEL, sourceFields, WIDGET_SIZES } from '../data/mock.js'
 import { getTable } from '../data/tables.js'
 import { dimensionById, recommendTile } from '../data/fields.js'
+import { describeWidget } from '../data/describe.js'
+import { DescribeComposer } from '../components/common/DescribeComposer.jsx'
 import {
   SourcePicker,
   TablePicker,
@@ -142,6 +144,25 @@ export default function WidgetBuilder() {
     setTypeTouched(true)
   }
 
+  // Describe-to-build: map a description to a config and apply it via direct setters
+  // (not the chained select* helpers, which read stale derived state mid-handler).
+  function applyDescription(text) {
+    const r = describeWidget(text)
+    if (!r) return false
+    setSourceMode('connected')
+    setTableId(null)
+    setTableColumn(null)
+    setSourceId(r.sourceId)
+    setMetricId(r.metricId)
+    setDimensionId(r.dimensionId || 'none')
+    setTransform('none')
+    setAggregation('sum')
+    setTypeId(r.typeId)
+    setTypeTouched(true)
+    setName(r.name)
+    return true
+  }
+
   const canSave =
     !!source &&
     !!metric &&
@@ -216,6 +237,11 @@ export default function WidgetBuilder() {
         <div className="mx-auto flex w-full max-w-[1600px] flex-col gap-6 p-6 lg:px-8 2xl:px-10 lg:flex-row">
           {/* Left: build */}
           <div className="order-2 w-full space-y-7 lg:order-1 lg:w-1/2 lg:min-w-0">
+            <DescribeComposer
+              placeholder="e.g. Pipeline by stage as a funnel"
+              examples={['Win Rate gauge', 'Workflow Runs over time', 'Human-in-the-Loops by team', 'Accounts by region on a map']}
+              onGenerate={applyDescription}
+            />
             <section>
               <SectionHeading n={1} title="Data source" sub="An external system, or one of your governed Tables." />
               <div className="mb-3 flex overflow-hidden rounded-lg border border-gray-300 text-sm dark:border-white/15">
