@@ -54,6 +54,8 @@ export default function WidgetDrilldownModal({ widget, scope, onClose }) {
   const scopeKey = `${widget?.id}|${scope?.range || ''}|${scope?.rollup || ''}|${scope?.env || ''}|${liveTick}`
   const sample = useMemo(() => widgetSample(widget, scope), [scopeKey]) // eslint-disable-line react-hooks/exhaustive-deps
   const records = sample.records || []
+  const recordHeaders = sample.recordHeaders || ['Segment', 'Value']
+  const withShare = recordHeaders.length >= 3
   const fresh = freshnessState(widget)
 
   return (
@@ -107,43 +109,33 @@ export default function WidgetDrilldownModal({ widget, scope, onClose }) {
           {hasBridgeCitation(widget) && <BridgeCitation widget={widget} />}
 
           <div className="mt-4 mb-1.5 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-gray-500 dark:text-slate-400">
-            <Table2 size={12} aria-hidden="true" /> Underlying records
+            <Table2 size={12} aria-hidden="true" /> Underlying data
           </div>
           <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-white/10">
             <table className="w-full text-left text-xs">
               <thead className="bg-gray-50 text-[10px] uppercase tracking-wide text-gray-400 dark:bg-white/5 dark:text-slate-500">
                 <tr>
-                  <th className="px-3 py-2 font-semibold">Account</th>
-                  <th className="px-3 py-2 font-semibold">Owner</th>
-                  <th className="px-3 py-2 text-right font-semibold">Value</th>
-                  <th className="px-3 py-2 font-semibold">Status</th>
+                  {recordHeaders.map((h, i) => (
+                    <th key={h} className={`px-3 py-2 font-semibold ${i > 0 ? 'text-right' : ''}`}>{h}</th>
+                  ))}
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 dark:divide-white/5">
                 {records.map((r) => (
                   <tr key={r.name} className="text-gray-700 dark:text-slate-200">
                     <td className="truncate px-3 py-2 font-medium">{r.name}</td>
-                    <td className="px-3 py-2 text-gray-500 dark:text-slate-400">{r.owner}</td>
                     <td className="num px-3 py-2 text-right">{r.value}</td>
-                    <td className="px-3 py-2">
-                      <span className={`cap-chip ${STATUS_CHIP[r.status] || 'cap-chip-neutral'}`}>{r.status}</span>
-                    </td>
+                    {withShare && <td className="num px-3 py-2 text-right text-gray-500 dark:text-slate-400">{r.share}</td>}
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
           <div className="mt-2 text-[11px] text-gray-500 dark:text-slate-400">
-            Showing {records.length} of {sample.recordTotal?.toLocaleString() || records.length} records · sample data
+            {records.length} {recordHeaders[0]?.toLowerCase() || 'row'}s · sample data
           </div>
         </div>
       </div>
     </div>
   )
-}
-
-const STATUS_CHIP = {
-  Active: 'cap-chip-data',
-  'At risk': 'cap-chip-tool',
-  Churned: 'cap-chip-neutral',
 }

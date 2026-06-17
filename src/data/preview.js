@@ -1,6 +1,6 @@
 import { computeTable, formatCell, columnAvg, tableDimColumn } from './tables.js'
 import { scopeMult } from './governance.js'
-import { dimensionCats, applyTransform } from './fields.js'
+import { dimensionCats, applyTransform, dimensionById } from './fields.js'
 
 // Canned preview datasets for the Widget Playground. A single bundle is returned
 // so any (metric, widget-type) pair can render something sensible.
@@ -160,7 +160,6 @@ function breakdownCats(name = '') {
 }
 
 const DELTAS = [['+8.2%', 'up'], ['+1.1%', 'up'], ['-3.0%', 'down'], ['+12.4%', 'up'], ['-5.1%', 'down']]
-const GAUGE_VARIANTS = [68, 82, 45, 91, 73, 57, 88]
 
 function hashId(s = '') {
   let h = 0
@@ -214,24 +213,17 @@ function dimLabelOf(name = '') {
 // the consumption surfaces; declared here so previewData (below) can read it safely.
 const RANGE_MULT = { '7d': 0.45, '30d': 0.78, '90d': 1, qtd: 0.9, '12m': 1.7 }
 
-// Builds a FULLY metric-derived sample bundle, so EVERY widget type (KPI, bar, table,
-// heatmap, scatter, map, summary…) shows the SAME selected metric — switching the type
-// only re-visualizes it, never swaps in unrelated canned data.
-// `opts` = { dimension, transform, range, filterCount } — slice + reshape + narrow.
-export function previewData(metric, opts) {
-  const name = metric?.name || 'Value'
-  const h = hashId(name)
+// ── Shared metric-coherent facet builder ────────────────────────────────────
+// Builds EVERY facet (kpi/breakdown/series/records/geo/matrix/scatter/narrative/
+// gauge) from the metric NAME, so the builder preview AND the placed dashboard
+// widget render the SAME data — switching the widget type only re-visualizes it,
+// never swaps in unrelated canned rows. `h` seeds variety (stable per identity),
+// `m` is the magnitude multiplier (date range × filters × scope rollup).
+function metricBundle(name, { h = 0, m = 1, dimensionId, transform } = {}) {
   const unit = metricUnit(name)
   const additive = unit === 'currency' || unit === 'count'
   const k = semanticKpi(name, h)
-  const transformed = !!(opts?.transform && opts.transform !== 'none')
-
-  // Interactive filters (Issue A) narrow magnitude; date range scales it. Ratio
-  // units (rates/scores/durations) keep their headline — a date range doesn't
-  // multiply a win rate — so only additive metrics scale.
-  const rangeMult = (opts && RANGE_MULT[opts.range]) || 1
-  const filterScale = 1 - Math.min(0.4, (opts?.filterCount || 0) * 0.15)
-  const m = additive ? rangeMult * filterScale : 1
+  const transformed = !!(transform && transform !== 'none')
   const kpiRaw = additive ? Math.max(1, Math.round(k.raw * m)) : k.raw
   const kpiValue = additive ? formatMetric(kpiRaw, unit) : k.value
 
@@ -246,7 +238,7 @@ export function previewData(metric, opts) {
       ? { label, value: Math.max(1, Math.round(kpiRaw * (weights[i] / wsum))) }
       : { label, value: clampUnit(unit, k.raw * (0.55 + (weights[i] / maxw) * 0.5)) },
   )
-  const breakdown = opts ? shapeBreakdown(rawBreakdown, { dimensionId: opts.dimension?.id, transform: opts.transform }) : rawBreakdown
+  const breakdown = dimensionId || transform ? shapeBreakdown(rawBreakdown, { dimensionId, transform }) : rawBreakdown
   // Share is computed from the SHAPED breakdown (a dimension can re-slice the set),
   // so per-row shares always add up to 100%.
   const total = breakdown.reduce((a, b) => a + b.value, 0) || 1
@@ -259,7 +251,7 @@ export function previewData(metric, opts) {
   }))
 
   // Records: the breakdown AS a table — Dimension | Metric | Share (no fake owners).
-  const dimLabel = opts?.dimension && opts.dimension.id !== 'none' ? opts.dimension.name : dimLabelOf(name)
+  const dimLabel = dimensionId && dimensionId !== 'none' ? dimensionById(dimensionId)?.name || dimLabelOf(name) : dimLabelOf(name)
   const records = breakdown.map((b) => ({
     name: b.label,
     value: transformed ? `${b.value}` : formatMetric(b.value, unit),
@@ -294,9 +286,8 @@ export function previewData(metric, opts) {
         : Math.min(99, Math.max(5, Math.round((58 + (h % 34)) * (0.85 + 0.15 * m))))
 
   return {
-    ...SAMPLE,
     label: name,
-    kpi: { value: kpiValue, delta: SAMPLE.kpi.delta, deltaDir: SAMPLE.kpi.deltaDir },
+    kpi: { value: kpiValue, delta: DELTAS[h % DELTAS.length][0], deltaDir: DELTAS[h % DELTAS.length][1] },
     kpiRaw,
     breakdown,
     series,
@@ -311,74 +302,59 @@ export function previewData(metric, opts) {
   }
 }
 
+// Builder preview: the metric + its slice/transform, narrowed by the preview's
+// interactive filters (date range × chips). Ratio units keep their headline.
+// `opts` = { dimension, transform, range, filterCount }.
+export function previewData(metric, opts) {
+  const name = metric?.name || 'Value'
+  const additive = (() => { const u = metricUnit(name); return u === 'currency' || u === 'count' })()
+  const rangeMult = (opts && RANGE_MULT[opts.range]) || 1
+  const filterScale = 1 - Math.min(0.4, (opts?.filterCount || 0) * 0.15)
+  const m = additive ? rangeMult * filterScale : 1
+  return { ...SAMPLE, ...metricBundle(name, { h: hashId(name), m, dimensionId: opts?.dimension?.id, transform: opts?.transform }) }
+}
+
+// Dashboard/library render: the SAME metricBundle as the builder preview (so a
+// saved widget looks identical where it's placed), scaled by the consumption
+// scope (date range × filters × PBAC rollup). The KPI base stays stable per
+// widget identity; only its magnitude scales — except live tiles, which wobble
+// the headline ±4% per tick on top (count/currency).
 export function widgetSample(widget, scope) {
   const base = widget?.id || widget?.name || ''
+  const name = widget?.name || ''
   const filterVals = scope?.filters ? Object.values(scope.filters).filter((v) => v && v !== 'All') : []
-  // Live tiles fold the tick into the salt so they re-sample each interval (Phase 7).
   const live = widget?.freshness === 'live'
   const tickN = live && scope?.tick ? scope.tick : 0
-  const salt = scope ? `${scope.range || ''}|${filterVals.join(',')}|${scope.rollup || ''}|${scope.env || ''}|${tickN ? `t${tickN}` : ''}` : ''
-  const hStable = hashId(base) // widget identity → stable KPI/gauge semantics
-  const h = salt ? hashId(`${base}#${salt}`) : hStable // scoped jitter → shapes shift with controls
+  const hStable = hashId(base) // stable identity → stable base values + chart shapes
   const rangeMult = (scope && RANGE_MULT[scope.range]) || 1
   const filterScale = 1 - Math.min(0.4, filterVals.length * 0.15) // each active filter narrows the data
   const rollupMult = scope?.rollup ? scopeMult(scope.rollup) : 1 // broader PBAC scope → larger aggregates
   const m = rangeMult * filterScale * rollupMult
-  const name = widget?.name || ''
-  const factor = (0.65 + (hStable % 8) * 0.11) * m
-  const series = SAMPLE.series.map((d, i) => ({ x: d.x, y: Math.max(8, Math.round(d.y * factor + ((h >> i) % 22) - 10)) }))
-  const cats = breakdownCats(name)
-  const rawBreakdown = cats.map((label, i) => ({
-    label,
-    value: Math.max(6, Math.round(SAMPLE.breakdown[i % SAMPLE.breakdown.length].value * factor + ((h >> (i + 1)) % 16))),
-  }))
-  // A saved widget can carry a dimension/transform (Phase 1) — slice + reshape accordingly.
-  const breakdown =
-    widget?.dimension || widget?.transform
-      ? shapeBreakdown(rawBreakdown, { dimensionId: widget.dimension, transform: widget.transform })
-      : rawBreakdown
-  const geo = SAMPLE.geo.map((g, i) => ({ ...g, value: Math.max(5, Math.round(g.value * factor + ((h >> (i + 3)) % 18))) }))
-  const cells = SAMPLE.matrix.cells.map((row, ri) =>
-    row.map((v, ci) => Math.min(100, Math.max(10, Math.round(v * factor + ((h >> (ri + ci)) % 20))))),
-  )
-  // Rotate the record set per widget so two tables/lists don't show identical rows.
-  const start = h % SAMPLE.records.length
-  const records = [...SAMPLE.records.slice(start), ...SAMPLE.records.slice(0, start)]
-  const twoVar = SAMPLE.twoVar.map((p, i) => ({
-    x: Math.max(2, Math.round(p.x * factor + ((h >> i) % 10))),
-    y: Math.max(2, Math.round(p.y * factor + ((h >> (i + 2)) % 12))),
-  }))
-  // Live tiles wobble their headline + move the gauge each tick (count/currency only;
-  // percent/duration/score keep their stable value but still stream their charts).
-  const kStable = semanticKpi(name, hStable)
-  let kpiValue = kStable.value
-  let kpiRawV = kStable.raw
+
+  const bundle = metricBundle(name, { h: hStable, m, dimensionId: widget?.dimension, transform: widget?.transform })
+
+  // Live tiles wobble the headline each tick (count/currency only; the salt folds
+  // in the tick so the jitter actually changes between intervals).
   if (tickN) {
     const u = metricUnit(name)
     if (u === 'count' || u === 'currency') {
-      const wob = 1 + (((h % 9) - 4) / 100) // ±4% jitter, deterministic per tick
-      kpiRawV = Math.max(1, Math.round(kStable.raw * wob))
-      kpiValue =
-        u === 'currency'
-          ? formatValue(kpiRawV, { style: 'currency', abbreviate: true, decimals: 1 })
-          : kpiRawV < 10000
-            ? kpiRawV.toLocaleString('en-US')
-            : formatValue(kpiRawV, { abbreviate: true, decimals: 1 })
+      const salt = `${scope.range || ''}|${filterVals.join(',')}|${scope.rollup || ''}|t${tickN}`
+      const hTick = hashId(`${base}#${salt}`)
+      const wob = 1 + (((hTick % 9) - 4) / 100) // ±4%, deterministic per tick
+      const raw = Math.max(1, Math.round(bundle.kpiRaw * wob))
+      bundle.kpiRaw = raw
+      bundle.kpi = {
+        ...bundle.kpi,
+        value:
+          u === 'currency'
+            ? formatValue(raw, { style: 'currency', abbreviate: true, decimals: 1 })
+            : raw < 10000
+              ? raw.toLocaleString('en-US')
+              : formatValue(raw, { abbreviate: true, decimals: 1 }),
+      }
     }
   }
-  const gaugeBase = GAUGE_VARIANTS[(live ? h : hStable) % GAUGE_VARIANTS.length]
-  return {
-    ...SAMPLE,
-    series,
-    breakdown,
-    geo,
-    records,
-    twoVar,
-    matrix: { ...SAMPLE.matrix, cells },
-    kpi: { value: kpiValue, delta: DELTAS[hStable % DELTAS.length][0], deltaDir: DELTAS[hStable % DELTAS.length][1] },
-    kpiRaw: kpiRawV,
-    gauge: { value: Math.min(99, Math.max(5, Math.round(gaugeBase * (0.85 + 0.15 * m)))), label: 'of target' },
-  }
+  return { ...SAMPLE, ...bundle }
 }
 
 // ── Table-backed widgets: REAL computed table data in the preview/render contract ──

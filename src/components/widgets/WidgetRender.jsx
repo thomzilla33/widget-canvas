@@ -14,7 +14,7 @@ import {
   PieChart,
   Pie,
 } from 'recharts'
-import { Sparkles, Phone, Mail, MessageSquare, AlertTriangle, AlertCircle, ChevronRight } from 'lucide-react'
+import { Sparkles } from 'lucide-react'
 import { useChartTheme, SERIES } from '../playground/WidgetPreview.jsx'
 import { widgetSample, formatValue, tableData } from '../../data/preview.js'
 import { getTable, formatCell } from '../../data/tables.js'
@@ -200,18 +200,21 @@ function GaugeMini({ data, size, goal }) {
 function TableMini({ data, size }) {
   // Table-backed widget → show the real computed grid (formula columns get a ƒ mark).
   if (data.tableGrid) return <TableGridMini grid={data.tableGrid} size={size} />
+  // Metric widget → the breakdown as a table (Dimension | Metric | Share), the same
+  // data the bar/list show. Header + Share appear at the detailed (large) size.
   const rows = data.records.slice(0, size === 'sm' ? 2 : size === 'lg' ? 5 : 3)
   const detailed = size === 'lg'
+  const headers = data.recordHeaders || ['Segment', 'Value']
+  const withShare = detailed && headers.length >= 3
   return (
     <div className="overflow-hidden rounded-md border border-gray-100 text-[10px] dark:border-white/10">
       <table className="w-full">
         {detailed && (
           <thead>
             <tr className="bg-gray-50 text-left font-semibold text-gray-500 dark:bg-white/5 dark:text-slate-400">
-              <th className="px-2 py-1 font-semibold">Account</th>
-              <th className="px-2 py-1 font-semibold">Owner</th>
-              <th className="px-2 py-1 text-right font-semibold">Value</th>
-              <th className="px-2 py-1 text-right font-semibold">Status</th>
+              <th className="px-2 py-1 font-semibold">{headers[0]}</th>
+              <th className="px-2 py-1 text-right font-semibold">{headers[1]}</th>
+              {withShare && <th className="px-2 py-1 text-right font-semibold">{headers[2]}</th>}
             </tr>
           </thead>
         )}
@@ -219,9 +222,8 @@ function TableMini({ data, size }) {
           {rows.map((r) => (
             <tr key={r.name} className="border-b border-gray-100 last:border-0 dark:border-white/5">
               <td className="truncate px-2 py-1 text-gray-700 dark:text-slate-200">{r.name}</td>
-              {detailed && <td className="px-2 py-1 text-gray-500 dark:text-slate-400">{r.owner}</td>}
               <td className="num px-2 py-1 text-right font-medium text-gray-900 dark:text-slate-100">{r.value}</td>
-              {detailed && <td className="px-2 py-1 text-right text-gray-500 dark:text-slate-400">{r.status}</td>}
+              {withShare && <td className="num px-2 py-1 text-right text-gray-500 dark:text-slate-400">{r.share}</td>}
             </tr>
           ))}
         </tbody>
@@ -262,31 +264,25 @@ function TableGridMini({ grid, size }) {
   )
 }
 
-// Activity-style icons for the detailed (large) list view.
-const ACT_ICONS = [Phone, Mail, Phone, MessageSquare]
-const ACT_STATUS = [AlertTriangle, null, AlertCircle, null]
-const ACT_STATUS_COLOR = ['text-aims-aging', '', 'text-aims-stale', '']
-
 function ListMini({ data, size }) {
-  // Large = detailed activity feed (icon · title · person + message · time · status)
+  // Large = detailed ranked breakdown (category · bar · value · share) — the same
+  // metric the bar/table show, just listed.
   if (size === 'lg') {
+    const max = Math.max(0, ...data.breakdown.map((b) => b.value))
     return (
       <div className="space-y-1.5">
-        {data.records.slice(0, 4).map((r, i) => {
-          const Icon = ACT_ICONS[i % ACT_ICONS.length]
-          const Status = ACT_STATUS[i % ACT_STATUS.length]
+        {data.records.slice(0, 5).map((r, i) => {
+          const raw = data.breakdown[i]?.value ?? 0
           return (
-            <div key={r.name} className="rounded-md border border-gray-100 px-2.5 py-1.5 hover:bg-gray-50 dark:border-white/10 dark:hover:bg-white/5">
+            <div key={r.name} className="rounded-md border border-gray-100 px-2.5 py-1.5 dark:border-white/10">
               <div className="flex min-w-0 items-center gap-2">
-                <Icon size={12} className="shrink-0 text-aims-blue" />
                 <span className="min-w-0 flex-1 truncate text-xs font-medium text-gray-900 dark:text-slate-100">{r.name}</span>
-                {Status && <Status size={12} className={`shrink-0 ${ACT_STATUS_COLOR[i % ACT_STATUS_COLOR.length]}`} />}
-                <span className="shrink-0 text-[10px] text-gray-500 dark:text-slate-400">4h ago</span>
-                <ChevronRight size={12} className="shrink-0 text-gray-300 dark:text-slate-600" />
+                <span className="num shrink-0 text-xs font-semibold text-gray-900 dark:text-slate-100">{r.value}</span>
+                {r.share && r.share !== '—' && <span className="num w-8 shrink-0 text-right text-[10px] text-gray-400 dark:text-slate-500">{r.share}</span>}
               </div>
-              <div className="mt-0.5 truncate text-[11px] text-gray-500 dark:text-slate-400">
-                <span className="font-medium text-gray-700 dark:text-slate-300">{r.owner}</span> · {r.status} · {r.value}
-              </div>
+              <span className="mt-1 block h-1.5 overflow-hidden rounded-full bg-gray-100 dark:bg-white/10">
+                <span className="block h-full rounded-full" style={{ width: `${max > 0 ? (raw / max) * 100 : 0}%`, background: SERIES[i % SERIES.length] }} />
+              </span>
             </div>
           )
         })}
