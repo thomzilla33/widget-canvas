@@ -1,15 +1,25 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { LayoutDashboard, Search, MapPin, UserX, RotateCcw } from 'lucide-react'
+import { LayoutDashboard, MapPin, UserX, RotateCcw } from 'lucide-react'
 import { PageHeader, Badge, EmptyState } from '../components/common/index.jsx'
 import StudioWelcome from '../components/common/StudioWelcome.jsx'
+import FilterToolbar from '../components/common/FilterToolbar.jsx'
 import { useDashboards } from '../state/DashboardsContext.jsx'
 import { useRole } from '../state/RoleContext.jsx'
 import { placementLabel, DEACTIVATED_OWNERS, dashboardKind } from '../data/mock.js'
 import { widgetCount } from '../data/layout.js'
 
-const STATUS_FILTERS = ['All', 'Published', 'Draft', 'Pending']
-const KIND_FILTERS = ['All', 'Entity', 'Global']
+const STATUS_OPTIONS = [
+  { value: 'All', label: 'All statuses' },
+  { value: 'Published', label: 'Published' },
+  { value: 'Draft', label: 'Draft' },
+  { value: 'Pending', label: 'Pending' },
+]
+const KIND_OPTIONS = [
+  { value: 'All', label: 'All kinds' },
+  { value: 'Entity', label: 'Entity' },
+  { value: 'Global', label: 'Global' },
+]
 
 // S76–S79 — dashboard list with search + status filter
 export default function DashboardList() {
@@ -19,18 +29,28 @@ export default function DashboardList() {
   const [search, setSearch] = useState('')
   const [status, setStatus] = useState('All')
   const [kind, setKind] = useState('All')
+  const [sortBy, setSortBy] = useState('recent')
+  const [sortDir, setSortDir] = useState('desc')
 
   // Governance recovery: dashboards owned by an offboarded user need reassigning.
   const orphaned = dashboards.filter((d) => DEACTIVATED_OWNERS.includes(d.owner))
   const reassign = (id) => updateDashboard(id, { owner: 'You (admin)' })
 
   const publishedCount = dashboards.filter((d) => d.status === 'published').length
-  const shown = dashboards.filter((d) => {
+  const filtered = dashboards.filter((d) => {
     const matchStatus = status === 'All' || d.status === status.toLowerCase()
     const matchKind = kind === 'All' || dashboardKind(d) === kind.toLowerCase()
     const matchSearch = !search || d.name.toLowerCase().includes(search.toLowerCase())
     return matchStatus && matchKind && matchSearch
   })
+  // 'recent' keeps the seed order (newest first); 'name' sorts alphabetically. Dir flips either.
+  const shown = (() => {
+    if (sortBy === 'name') {
+      const arr = [...filtered].sort((a, b) => a.name.localeCompare(b.name))
+      return sortDir === 'asc' ? arr : arr.reverse()
+    }
+    return sortDir === 'desc' ? filtered : [...filtered].reverse()
+  })()
 
   return (
     <div className="h-full flex flex-col">
@@ -46,49 +66,22 @@ export default function DashboardList() {
         }
       />
 
-      {/* Filters (S78) */}
-      <div className="flex items-center gap-2 flex-wrap px-6 py-3 border-b border-gray-200 dark:border-white/10">
-        <div className="relative w-full sm:w-auto">
-          <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-500 dark:text-slate-400" />
-          <input
-            className="input h-9 w-full sm:w-52 pl-8"
-            placeholder="Search dashboards…"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
-        <div className="flex items-center gap-1.5 flex-wrap">
-          {STATUS_FILTERS.map((c) => (
-            <button
-              key={c}
-              onClick={() => setStatus(c)}
-              className={`h-7 rounded-full border px-3 text-xs font-semibold transition-colors ${
-                status === c
-                  ? 'border-aims-blue/40 bg-aims-blue/10 text-aims-blue'
-                  : 'border-gray-300 text-gray-500 hover:text-gray-700 dark:border-white/15 dark:text-slate-400 dark:hover:text-slate-200'
-              }`}
-            >
-              {c}
-            </button>
-          ))}
-        </div>
-        <span className="hidden h-5 w-px bg-gray-200 sm:block dark:bg-white/10" aria-hidden="true" />
-        <div className="flex items-center gap-1.5 flex-wrap" role="group" aria-label="Filter by kind">
-          {KIND_FILTERS.map((k) => (
-            <button
-              key={k}
-              onClick={() => setKind(k)}
-              className={`h-7 rounded-full border px-3 text-xs font-semibold transition-colors ${
-                kind === k
-                  ? 'border-aims-blue/40 bg-aims-blue/10 text-aims-blue'
-                  : 'border-gray-300 text-gray-500 hover:text-gray-700 dark:border-white/15 dark:text-slate-400 dark:hover:text-slate-200'
-              }`}
-            >
-              {k}
-            </button>
-          ))}
-        </div>
-      </div>
+      <FilterToolbar
+        searchValue={search}
+        onSearch={setSearch}
+        searchPlaceholder="Search dashboards…"
+        filters={[
+          { id: 'status', label: 'Status', value: status, onChange: setStatus, options: STATUS_OPTIONS },
+          { id: 'kind', label: 'Kind', value: kind, onChange: setKind, options: KIND_OPTIONS },
+        ]}
+        sort={{
+          value: sortBy,
+          onChange: setSortBy,
+          options: [{ value: 'recent', label: 'Recently updated' }, { value: 'name', label: 'Name' }],
+          dir: sortDir,
+          onToggleDir: () => setSortDir((d) => (d === 'asc' ? 'desc' : 'asc')),
+        }}
+      />
 
       <div className="flex-1 overflow-auto px-6 py-4">
         <StudioWelcome

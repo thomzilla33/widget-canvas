@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Search, Flag, Store } from 'lucide-react'
+import { Flag, Store } from 'lucide-react'
 import { PageHeader, HealthBadge, FreshnessBadge, EmptyState, DataPlaneBadge } from '../components/common/index.jsx'
 import { dataPlaneOf } from '../data/governance.js'
 import { WidgetGlyph } from '../components/widgets/glyph.jsx'
@@ -10,6 +10,7 @@ import FlagDetailModal from '../components/widgets/FlagDetailModal.jsx'
 import WidgetMarketplace from '../components/widgets/WidgetMarketplace.jsx'
 import SourceTemplatesBanner from '../components/widgets/SourceTemplatesBanner.jsx'
 import StudioWelcome from '../components/common/StudioWelcome.jsx'
+import FilterToolbar from '../components/common/FilterToolbar.jsx'
 import { useWidgets } from '../state/WidgetsContext.jsx'
 import { useRole } from '../state/RoleContext.jsx'
 import { useFeedback } from '../state/FeedbackContext.jsx'
@@ -31,22 +32,28 @@ export default function WidgetLibrary() {
   const { widgets, updateWidget } = useWidgets()
   const { isAdmin } = useRole()
   const { flags, resolveFlag } = useFeedback()
-  const [cat, setCat] = useState('All') // primary axis: category (chips)
-  const [type, setType] = useState('All') // secondary axis: tile type (select)
+  const [cat, setCat] = useState('All') // category
+  const [type, setType] = useState('All') // tile type
   const [search, setSearch] = useState('')
+  const [sortBy, setSortBy] = useState('name')
+  const [sortDir, setSortDir] = useState('asc')
   const [repinWidget, setRepinWidget] = useState(null)
   const [detailFlag, setDetailFlag] = useState(null)
   const [marketplace, setMarketplace] = useState(false)
 
-  // Chips filter by Category (the catalog's grouping); the long tile-type axis is a select.
-  const cats = ['All', ...CATALOG_CATEGORIES]
-  const types = ['All', ...Array.from(new Set(widgets.map((w) => w.skeleton)))]
-  const shown = widgets.filter(
-    (w) =>
-      (cat === 'All' || w.category === cat) &&
-      (type === 'All' || w.skeleton === type) &&
-      (!search || w.name.toLowerCase().includes(search.toLowerCase())),
-  )
+  const catOptions = [{ value: 'All', label: 'All categories' }, ...CATALOG_CATEGORIES.map((c) => ({ value: c, label: c }))]
+  const typeOptions = [{ value: 'All', label: 'All types' }, ...Array.from(new Set(widgets.map((w) => w.skeleton))).map((t) => ({ value: t, label: t }))]
+  const shown = widgets
+    .filter(
+      (w) =>
+        (cat === 'All' || w.category === cat) &&
+        (type === 'All' || w.skeleton === type) &&
+        (!search || w.name.toLowerCase().includes(search.toLowerCase())),
+    )
+    .sort((a, b) => {
+      const d = sortBy === 'usage' ? (a.usedIn || 0) - (b.usedIn || 0) : a.name.localeCompare(b.name)
+      return sortDir === 'asc' ? d : -d
+    })
   const governedCount = widgets.filter((w) => w.governed).length
   const openFlags = flags.filter((f) => f.status === 'open')
   const widgetById = (id) => widgets.find((w) => w.id === id)
@@ -71,52 +78,22 @@ export default function WidgetLibrary() {
         }
       />
 
-      {/* Filters (matches .filters / .chip) */}
-      <div className="flex items-center gap-2 flex-wrap px-6 py-3 border-b border-gray-200 dark:border-white/10">
-        <div className="relative w-full sm:w-auto">
-          <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-500 dark:text-slate-400" />
-          <input
-            className="input h-9 w-full sm:w-52 pl-8"
-            placeholder="Search widgets…"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
-        <div className="flex items-center gap-1.5 flex-wrap" role="group" aria-label="Filter by category">
-          {cats.map((c) => (
-            <button
-              key={c}
-              onClick={() => setCat(c)}
-              className={`h-7 rounded-full border px-3 text-xs font-semibold transition-colors ${
-                cat === c
-                  ? 'border-aims-blue/40 bg-aims-blue/10 text-aims-blue'
-                  : 'border-gray-300 text-gray-500 hover:text-gray-700 dark:border-white/15 dark:text-slate-400 dark:hover:text-slate-200'
-              }`}
-            >
-              {c}
-            </button>
-          ))}
-        </div>
-
-        <span className="mx-1 hidden h-5 w-px bg-gray-200 sm:block dark:bg-white/10" aria-hidden="true" />
-
-        {/* Secondary axis: tile type (the long list moved out of chips into a select) */}
-        <label className="inline-flex items-center gap-1.5 text-xs text-gray-500 dark:text-slate-400">
-          <span className="font-medium">Type</span>
-          <select
-            className="input !h-8 !w-auto !py-1 !pl-2 !pr-7 text-xs"
-            value={type}
-            onChange={(e) => setType(e.target.value)}
-            aria-label="Filter by tile type"
-          >
-            {types.map((t) => (
-              <option key={t} value={t}>
-                {t === 'All' ? 'All types' : t}
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
+      <FilterToolbar
+        searchValue={search}
+        onSearch={setSearch}
+        searchPlaceholder="Search widgets…"
+        filters={[
+          { id: 'cat', label: 'Category', value: cat, onChange: setCat, options: catOptions },
+          { id: 'type', label: 'Type', value: type, onChange: setType, options: typeOptions },
+        ]}
+        sort={{
+          value: sortBy,
+          onChange: setSortBy,
+          options: [{ value: 'name', label: 'Name' }, { value: 'usage', label: 'Most used' }],
+          dir: sortDir,
+          onToggleDir: () => setSortDir((d) => (d === 'asc' ? 'desc' : 'asc')),
+        }}
+      />
 
       <div className="flex-1 overflow-auto px-6 py-4">
         <StudioWelcome

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { X, FunctionSquare, Table2 } from 'lucide-react'
 import { PageHeader, FreshnessBadge } from '../components/common/index.jsx'
 import StudioWelcome from '../components/common/StudioWelcome.jsx'
+import FilterToolbar from '../components/common/FilterToolbar.jsx'
 import { useFocusTrap } from '../hooks/useFocusTrap.js'
 import { SERIES } from '../components/playground/WidgetPreview.jsx'
 import { TABLE_DEFINITIONS, computeTable, formatCell, tableStats, columnAvg } from '../data/tables.js'
@@ -10,6 +11,14 @@ import { TABLE_DEFINITIONS, computeTable, formatCell, tableStats, columnAvg } fr
 // "one table → many widgets" display path.
 export default function TablesPage() {
   const [open, setOpen] = useState(null) // table def open in the detail modal
+  const [search, setSearch] = useState('')
+  const [sortBy, setSortBy] = useState('name')
+  const [sortDir, setSortDir] = useState('asc')
+
+  const tables = TABLE_DEFINITIONS.filter((t) => !search || t.name.toLowerCase().includes(search.toLowerCase())).sort((a, b) => {
+    const d = sortBy === 'rows' ? a.rows.length - b.rows.length : a.name.localeCompare(b.name)
+    return sortDir === 'asc' ? d : -d
+  })
 
   return (
     <div className="flex h-full flex-col">
@@ -17,11 +26,23 @@ export default function TablesPage() {
         title="Tables"
         description="Governed tables you build from normalized data — literal, measure, and formula (ƒ) columns you can chart."
       />
+      <FilterToolbar
+        searchValue={search}
+        onSearch={setSearch}
+        searchPlaceholder="Search tables…"
+        sort={{
+          value: sortBy,
+          onChange: setSortBy,
+          options: [{ value: 'name', label: 'Name' }, { value: 'rows', label: 'Row count' }],
+          dir: sortDir,
+          onToggleDir: () => setSortDir((d) => (d === 'asc' ? 'desc' : 'asc')),
+        }}
+      />
       <div className="flex-1 overflow-auto">
         <div className="mx-auto w-full max-w-[1400px] px-6 py-5 lg:px-8">
           <StudioWelcome studioId="tables" built={{ count: TABLE_DEFINITIONS.length, label: 'tables' }} />
           <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill,minmax(min(300px,100%),1fr))' }}>
-            {TABLE_DEFINITIONS.map((t) => {
+            {tables.map((t) => {
               const s = tableStats(t)
               return (
                 <button key={t.id} onClick={() => setOpen(t)} className="catalog-card min-h-[150px]">
