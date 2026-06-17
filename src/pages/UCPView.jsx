@@ -33,6 +33,7 @@ import { useProfileConfig } from '../state/ProfileConfigContext.jsx'
 import { useRole } from '../state/RoleContext.jsx'
 import { entities, MANDATORY_TABS } from '../data/mock.js'
 import { suggestTabs } from '../data/suggestions.js'
+import { ALL_AUDIENCES, AUDIENCE_OPTIONS, audienceVisibleTo } from '../data/audiences.js'
 
 // Map an entity's type to the placement profile type used by dashboards.
 const PROFILE_OF = { Account: 'Company', Contact: 'Contact', Employee: 'Employee', Deal: 'Deal', Case: 'Case' }
@@ -83,6 +84,32 @@ export default function UCPView() {
   const [dragTab, setDragTab] = useState(null) // tab name being dragged
   const [suggestTabsOpen, setSuggestTabsOpen] = useState(false) // U3 suggested-tabs popover
   const tabDashboards = profileDashboards.filter((d) => (d.placement.tab || 'Overview') === activeTab)
+
+  // U1.5 — tab-level audience visibility: preview the profile as a role and hide
+  // tabs whose content that role can't see. Mandatory + empty tabs always show.
+  const [viewAs, setViewAs] = useState(ALL_AUDIENCES)
+  const previewing = viewAs !== ALL_AUDIENCES
+  const tabVisibleTo = (t) => {
+    if (!previewing || MANDATORY_TABS.includes(t)) return true
+    const ds = profileDashboards.filter((d) => (d.placement.tab || 'Overview') === t)
+    if (ds.length === 0) return true // an empty/configured tab — keep it
+    return ds.some((d) => audienceVisibleTo({ audience: d.audience }, viewAs))
+  }
+  const shownTabs = tabs.filter(tabVisibleTo)
+  const hiddenTabCount = tabs.length - shownTabs.length
+  // Switching role: if the active tab is now hidden, fall back to Overview.
+  function changeViewAs(role) {
+    setViewAs(role)
+    if (role !== ALL_AUDIENCES && !MANDATORY_TABS.includes(activeTab) && !tabVisibleToFor(activeTab, role)) {
+      setActiveTab('Overview')
+    }
+  }
+  function tabVisibleToFor(t, role) {
+    if (role === ALL_AUDIENCES || MANDATORY_TABS.includes(t)) return true
+    const ds = profileDashboards.filter((d) => (d.placement.tab || 'Overview') === t)
+    if (ds.length === 0) return true
+    return ds.some((d) => audienceVisibleTo({ audience: d.audience }, role))
+  }
 
   // All tab mutations persist the placement-FREE list: placement tabs are derived
   // (recomputed each render), so a tab that exists only because a dashboard targets
@@ -218,7 +245,7 @@ export default function UCPView() {
       <div className="border-b border-gray-200 bg-white px-6 dark:border-white/10 dark:bg-[#0f1629]">
         <div className="flex items-center">
           <div className="flex min-w-0 items-center gap-0.5 overflow-x-auto">
-          {tabs.map((t) => {
+          {shownTabs.map((t) => {
             const mandatory = MANDATORY_TABS.includes(t)
             if (renaming === t) {
               return (
@@ -255,11 +282,11 @@ export default function UCPView() {
                 <TabBtn
                   active={activeTab === t}
                   onClick={() => setActiveTab(t)}
-                  onDoubleClick={mandatory || !isAdmin ? undefined : () => startRename(t)}
+                  onDoubleClick={mandatory || !isAdmin || previewing ? undefined : () => startRename(t)}
                 >
                   {t}
                 </TabBtn>
-                {!mandatory && isAdmin && (
+                {!mandatory && isAdmin && !previewing && (
                   <button
                     type="button"
                     onClick={(e) => {
@@ -277,7 +304,7 @@ export default function UCPView() {
             )
           })}
 
-          {isAdmin && (addingTab ? (
+          {isAdmin && !previewing && (addingTab ? (
             <input
               autoFocus
               value={newTab}
@@ -305,7 +332,7 @@ export default function UCPView() {
           </div>
 
           {/* U3 — suggested tabs (outside the scroll container so the popover isn't clipped) */}
-          {isAdmin && suggestTabs(profileType, tabs).length > 0 && (
+          {isAdmin && !previewing && suggestTabs(profileType, tabs).length > 0 && (
             <div className="relative shrink-0">
               <button
                 onClick={() => setSuggestTabsOpen((o) => !o)}
@@ -339,6 +366,30 @@ export default function UCPView() {
               )}
             </div>
           )}
+
+          {/* U1.5 — preview the profile as a role; tabs that role can't see are hidden. */}
+          {isAdmin && (
+            <div className="ml-auto flex shrink-0 items-center gap-2 pl-3">
+              {previewing && hiddenTabCount > 0 && (
+                <span className="hidden items-center gap-1 rounded-full border border-amber-300/40 bg-amber-500/10 px-2 py-0.5 text-[11px] font-medium text-aims-ungoverned sm:inline-flex">
+                  {hiddenTabCount} tab{hiddenTabCount === 1 ? '' : 's'} hidden
+                </span>
+              )}
+              <label className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-slate-400">
+                <span className="hidden font-medium sm:inline">Viewing as</span>
+                <select
+                  className="input !h-8 !w-auto !py-1 !pl-2 !pr-7 text-xs"
+                  value={viewAs}
+                  onChange={(e) => changeViewAs(e.target.value)}
+                  aria-label="Preview this profile as a role"
+                >
+                  {AUDIENCE_OPTIONS.map((a) => (
+                    <option key={a} value={a}>{a === ALL_AUDIENCES ? 'Admin (all tabs)' : a}</option>
+                  ))}
+                </select>
+              </label>
+            </div>
+          )}
         </div>
       </div>
 
@@ -369,7 +420,7 @@ export default function UCPView() {
                   {tabDashboards.length > 1 && (
                     <div className="mb-2 text-sm font-semibold text-gray-900 dark:text-slate-100">{d.name}</div>
                   )}
-                  <DashboardZones dashboard={d} />
+                  <DashboardZones dashboard={d} viewerRole={viewAs} />
                 </section>
               ))
             )}
