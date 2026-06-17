@@ -251,8 +251,8 @@ export default function UCPView() {
       )}
 
       <div className="border-b border-gray-200 bg-white px-6 dark:border-white/10 dark:bg-[#0f1629]">
-        <div className="flex items-center">
-          <div className="flex min-w-0 items-center gap-0.5 overflow-x-auto">
+        <div className="flex items-center gap-2">
+          <div className="flex min-w-0 flex-1 items-center gap-0.5 overflow-x-auto">
           {shownTabs.map((t) => {
             const mandatory = MANDATORY_TABS.includes(t)
             if (renaming === t) {
@@ -339,8 +339,12 @@ export default function UCPView() {
           ))}
           </div>
 
-          {/* U3 — suggested tabs (outside the scroll container so the popover isn't clipped) */}
-          {isAdmin && !previewing && suggestTabs(profileType, tabs).length > 0 && (
+          {/* Right cluster — Suggest tabs + Viewing-as. shrink-0 so it never collides
+              with the scrollable tabs strip; sits outside the scroll so the popover/select
+              aren't clipped. */}
+          {isAdmin && (
+          <div className="flex shrink-0 items-center gap-2 pl-2">
+          {!previewing && suggestTabs(profileType, tabs).length > 0 && (
             <div className="relative shrink-0">
               <button
                 onClick={() => setSuggestTabsOpen((o) => !o)}
@@ -376,27 +380,25 @@ export default function UCPView() {
           )}
 
           {/* U1.5 — preview the profile as a role; tabs that role can't see are hidden. */}
-          {isAdmin && (
-            <div className="ml-auto flex shrink-0 items-center gap-2 pl-3">
-              {previewing && hiddenTabCount > 0 && (
-                <span className="hidden items-center gap-1 rounded-full border border-amber-300/40 bg-amber-500/10 px-2 py-0.5 text-[11px] font-medium text-aims-ungoverned sm:inline-flex">
-                  {hiddenTabCount} tab{hiddenTabCount === 1 ? '' : 's'} hidden
-                </span>
-              )}
-              <label className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-slate-400">
-                <span className="hidden font-medium sm:inline">Viewing as</span>
-                <select
-                  className="input !h-8 !w-auto !py-1 !pl-2 !pr-7 text-xs"
-                  value={viewAs}
-                  onChange={(e) => changeViewAs(e.target.value)}
-                  aria-label="Preview this profile as a role"
-                >
-                  {AUDIENCE_OPTIONS.map((a) => (
-                    <option key={a} value={a}>{a === ALL_AUDIENCES ? 'Admin (all tabs)' : a}</option>
-                  ))}
-                </select>
-              </label>
-            </div>
+            {previewing && hiddenTabCount > 0 && (
+              <span className="hidden items-center gap-1 rounded-full border border-amber-300/40 bg-amber-500/10 px-2 py-0.5 text-[11px] font-medium text-aims-ungoverned sm:inline-flex">
+                {hiddenTabCount} tab{hiddenTabCount === 1 ? '' : 's'} hidden
+              </span>
+            )}
+            <label className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-slate-400">
+              <span className="hidden font-medium sm:inline">Viewing as</span>
+              <select
+                className="input !h-8 !w-auto !py-1 !pl-2 !pr-7 text-xs"
+                value={viewAs}
+                onChange={(e) => changeViewAs(e.target.value)}
+                aria-label="Preview this profile as a role"
+              >
+                {AUDIENCE_OPTIONS.map((a) => (
+                  <option key={a} value={a}>{a === ALL_AUDIENCES ? 'Admin (all tabs)' : a}</option>
+                ))}
+              </select>
+            </label>
+          </div>
           )}
         </div>
       </div>
