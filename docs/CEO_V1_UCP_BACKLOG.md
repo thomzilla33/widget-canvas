@@ -170,19 +170,19 @@ links to its primary action.
 
 ---
 
-## Phase U6 — Talk to your dashboard (agentic) ☐
+## Phase U6 — Talk to your dashboard (agentic) ☑ (commit `f90152f`)
 **Goal:** an Amazon-Q-style assistant tuned to a dashboard's / entity's data.
 
 **Dep:** U2 (entity chat groundwork), U3 (data understanding).
 
 **Activities**
-- ☐ U6.1 A dashboard-level "Ask" panel (reuse `AgentChatPanel`) seeded with the dashboard's
-  widgets/metrics as context.
-- ☐ U6.2 Canned, deterministic answers driven by the on-screen widgets (e.g. "why is win rate
-  down?" → references the gauge + scope); suggested prompts.
-- ☐ U6.3 Entity-network awareness on UCP (the assistant knows related records); general
-  dashboards get a synthesized context.
-- ☐ U6.4 "Add this answer as a widget" hook into U3 suggestions.
+- ☑ U6.1 `src/components/dashboard/AskDashboardModal.jsx` — Ask panel seeded with the
+  dashboard's widget names + scope; floating "✨ Ask" FAB on DashboardViewPage.
+- ☑ U6.2 `answerFor(q, ctx)` — deterministic answers citing the real widgets + scope
+  (summarize / why-down / top / changed / widget-hit / fallback); suggested-prompt chips.
+- ◐ U6.3 Dashboard context synthesized from its widgets; UCP entity-network depth deferred
+  (the UCP already has its entity chat from U2).
+- ☐ U6.4 "Add this answer as a widget" — deferred.
 
 **Cases covered:** dashboard with no widgets, entity vs global context, ambiguous question
 (asks to clarify), prototype "canned response" marker.
@@ -235,5 +235,5 @@ U0  Entity vs Global   ─┬─►  U1 Tabs ─┐
    run continuously but signed off last.
 
 > Status snapshot: U0 ☑, U1 ☑ (U1.5 deferred), U2 ☑ (U2.3 log-to-Activity + U2.5 PBAC deferred),
-> U3 ☑, U4 ☑, U5 ☑ (Reports/Home welcome deferred); U6–U7 open. Ship one phase at a time,
+> U3 ☑, U4 ☑, U5 ☑, U6 ☑ (U6.4 deferred); **only U7 (QA gate) open.** Ship one phase at a time,
 > each with build + browser-verify + code-review + deploy (the established workflow).
