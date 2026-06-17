@@ -49,9 +49,12 @@ export default function DashboardViewPage() {
   // dashboard (admin only). The free text rides on `note` (widgetSample renders it).
   function saveAnswerAsWidget(answer, question) {
     if (!dashboard) return
-    const stamp = `${placements.length}-${(question || answer).length}` // deterministic, no Date in render path
+    // Event handler (not a render-path data fn) → Date.now() is fine + unique, matching
+    // the WidgetBuilder id convention; avoids the pid/widget-id collisions a length-based
+    // stamp could produce for two same-length answers.
+    const stamp = Date.now().toString(36)
     const title = (question || 'Saved answer').replace(/\s+/g, ' ').trim().slice(0, 48) || 'Saved answer'
-    const wid = `w-answer-${dashboard.id}-${stamp}`
+    const wid = `w-answer-${stamp}`
     addWidget({
       id: wid,
       name: title,
