@@ -121,19 +121,20 @@ places real widgets; suggested tab sets apply to the tab bar.
 
 ---
 
-## Phase U4 — Per-source templates (auto-appear on integration add) ☐
+## Phase U4 — Per-source templates (auto-appear on integration add) ☑ (commit `4766b93`)
 **Goal:** connecting an integration in Data Studio surfaces ready-made dashboard/widget
 templates for it.
 
 **Dep:** U3 (suggestions), sources registry (done).
 
 **Activities**
-- ☐ U4.1 Define `SOURCE_TEMPLATES[sourceId]` → curated widget/dashboard bundles (mock) for the
-  top sources (Salesforce, Zendesk, Stripe, AIMS domains…).
-- ☐ U4.2 On a source's `status` flipping to `connected`, show a "Templates for {source}" banner
-  in the DataSourceMarketplace + WidgetLibrary with one-click install.
-- ☐ U4.3 A "Templates" section in NewDashboard filtered by the connected sources.
-- ☐ U4.4 Dedupe against already-installed widgets (templateId, as the marketplace does).
+- ☑ U4.1 `SOURCE_TEMPLATES[sourceId]` in sources.js — bundles for Salesforce/Zendesk/Stripe/
+  HubSpot/AIMS Agentic; `templatesForSource` + `sourcesWithTemplates`.
+- ◐ U4.2 `SourceTemplatesBanner` in the WidgetLibrary (card per connected source + one-click
+  Install). DataSourceMarketplace banner deferred (library surface covers the demo).
+- ☐ U4.3 NewDashboard "Templates" section — deferred.
+- ☑ U4.4 Dedupe by templateId (a source drops off the banner once fully installed). *Caveat:
+  dedup is templateId-only, so a template whose name matches a seed widget makes a distinct card.*
 
 **Cases covered:** newly connected vs long-connected source, source with no template (fallback
 to U3 suggestions), multiple sources connected.
@@ -230,5 +231,5 @@ U0  Entity vs Global   ─┬─►  U1 Tabs ─┐
    run continuously but signed off last.
 
 > Status snapshot: U0 ☑, U1 ☑ (U1.5 deferred), U2 ☑ (U2.3 log-to-Activity + U2.5 PBAC deferred),
-> U3 ☑ (U3.4 NewDashboard entry deferred); U4–U7 open. Ship one phase at a time,
+> U3 ☑ (U3.4 deferred), U4 ☑ (U4.3 deferred); U5–U7 open. Ship one phase at a time,
 > each with build + browser-verify + code-review + deploy (the established workflow).
