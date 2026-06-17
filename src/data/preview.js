@@ -232,7 +232,7 @@ function metricBundle(name, { h = 0, m = 1, dimensionId, transform } = {}) {
   const cats = breakdownCats(name)
   const weights = cats.map((_, i) => SAMPLE.breakdown[i % SAMPLE.breakdown.length].value)
   const wsum = weights.reduce((a, b) => a + b, 0) || 1
-  const maxw = Math.max(...weights)
+  const maxw = Math.max(...weights) || 1
   const rawBreakdown = cats.map((label, i) =>
     additive
       ? { label, value: Math.max(1, Math.round(kpiRaw * (weights[i] / wsum))) }
@@ -334,7 +334,9 @@ export function widgetSample(widget, scope) {
   const bundle = metricBundle(name, { h: hStable, m, dimensionId: widget?.dimension, transform: widget?.transform })
 
   // Live tiles wobble the headline each tick (count/currency only; the salt folds
-  // in the tick so the jitter actually changes between intervals).
+  // in the tick so the jitter actually changes between intervals). Build the
+  // override immutably rather than mutating the bundle.
+  let kpiOverride = null
   if (tickN) {
     const u = metricUnit(name)
     if (u === 'count' || u === 'currency') {
@@ -342,19 +344,16 @@ export function widgetSample(widget, scope) {
       const hTick = hashId(`${base}#${salt}`)
       const wob = 1 + (((hTick % 9) - 4) / 100) // ±4%, deterministic per tick
       const raw = Math.max(1, Math.round(bundle.kpiRaw * wob))
-      bundle.kpiRaw = raw
-      bundle.kpi = {
-        ...bundle.kpi,
-        value:
-          u === 'currency'
-            ? formatValue(raw, { style: 'currency', abbreviate: true, decimals: 1 })
-            : raw < 10000
-              ? raw.toLocaleString('en-US')
-              : formatValue(raw, { abbreviate: true, decimals: 1 }),
-      }
+      const value =
+        u === 'currency'
+          ? formatValue(raw, { style: 'currency', abbreviate: true, decimals: 1 })
+          : raw < 10000
+            ? raw.toLocaleString('en-US')
+            : formatValue(raw, { abbreviate: true, decimals: 1 })
+      kpiOverride = { kpiRaw: raw, kpi: { ...bundle.kpi, value } }
     }
   }
-  return { ...SAMPLE, ...bundle }
+  return { ...SAMPLE, ...bundle, ...(kpiOverride || {}) }
 }
 
 // ── Table-backed widgets: REAL computed table data in the preview/render contract ──
@@ -377,7 +376,7 @@ export function tableData(def, valueKey) {
   const avg = columnAvg(computed, valueKey)
   const max = Math.max(0, ...rows.map((r) => Number(r[valueKey]) || 0))
   const gaugeVal = fmt === 'percent' ? Math.round(avg * 100) : max > 0 ? Math.round((avg / max) * 100) : 0
-  const records = rows.map((r) => ({ name: String(r[dim.key]), owner: '—', value: formatCell(r[valueKey], fmt), status: '' }))
+  const records = rows.map((r) => ({ name: String(r[dim.key]), value: formatCell(r[valueKey], fmt), share: '—' }))
   return {
     ...SAMPLE,
     label: col.label,
@@ -388,6 +387,7 @@ export function tableData(def, valueKey) {
     kpiRaw: fmt === 'percent' ? round1(avg * 100) : avg,
     gauge: { value: Math.min(100, Math.max(0, gaugeVal)), label: col.label },
     records,
+    recordHeaders: [dim.label, col.label],
     recordTotal: rows.length,
     tableGrid: { columns: def.columns, rows },
   }
