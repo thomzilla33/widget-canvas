@@ -13,7 +13,7 @@ import StudioWelcome from '../components/common/StudioWelcome.jsx'
 import { useWidgets } from '../state/WidgetsContext.jsx'
 import { useRole } from '../state/RoleContext.jsx'
 import { useFeedback } from '../state/FeedbackContext.jsx'
-import { entities, SCHEMA_DRIFT } from '../data/mock.js'
+import { entities, SCHEMA_DRIFT, CATALOG_CATEGORIES } from '../data/mock.js'
 
 // Action-oriented hint per flag reason, shown when there's no concrete
 // schema-drift fix to perform (the descriptive line tells the user what to do).
@@ -31,16 +31,20 @@ export default function WidgetLibrary() {
   const { widgets, updateWidget } = useWidgets()
   const { isAdmin } = useRole()
   const { flags, resolveFlag } = useFeedback()
-  const [cat, setCat] = useState('All')
+  const [cat, setCat] = useState('All') // primary axis: category (chips)
+  const [type, setType] = useState('All') // secondary axis: tile type (select)
   const [search, setSearch] = useState('')
   const [repinWidget, setRepinWidget] = useState(null)
   const [detailFlag, setDetailFlag] = useState(null)
   const [marketplace, setMarketplace] = useState(false)
 
-  const cats = ['All', ...Array.from(new Set(widgets.map((w) => w.skeleton)))]
+  // Chips filter by Category (the catalog's grouping); the long tile-type axis is a select.
+  const cats = ['All', ...CATALOG_CATEGORIES]
+  const types = ['All', ...Array.from(new Set(widgets.map((w) => w.skeleton)))]
   const shown = widgets.filter(
     (w) =>
-      (cat === 'All' || w.skeleton === cat) &&
+      (cat === 'All' || w.category === cat) &&
+      (type === 'All' || w.skeleton === type) &&
       (!search || w.name.toLowerCase().includes(search.toLowerCase())),
   )
   const governedCount = widgets.filter((w) => w.governed).length
@@ -78,7 +82,7 @@ export default function WidgetLibrary() {
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <div className="flex items-center gap-1.5 flex-wrap">
+        <div className="flex items-center gap-1.5 flex-wrap" role="group" aria-label="Filter by category">
           {cats.map((c) => (
             <button
               key={c}
@@ -93,6 +97,25 @@ export default function WidgetLibrary() {
             </button>
           ))}
         </div>
+
+        <span className="mx-1 hidden h-5 w-px bg-gray-200 sm:block dark:bg-white/10" aria-hidden="true" />
+
+        {/* Secondary axis: tile type (the long list moved out of chips into a select) */}
+        <label className="inline-flex items-center gap-1.5 text-xs text-gray-500 dark:text-slate-400">
+          <span className="font-medium">Type</span>
+          <select
+            className="input !h-8 !w-auto !py-1 !pl-2 !pr-7 text-xs"
+            value={type}
+            onChange={(e) => setType(e.target.value)}
+            aria-label="Filter by tile type"
+          >
+            {types.map((t) => (
+              <option key={t} value={t}>
+                {t === 'All' ? 'All types' : t}
+              </option>
+            ))}
+          </select>
+        </label>
       </div>
 
       <div className="flex-1 overflow-auto px-6 py-4">
