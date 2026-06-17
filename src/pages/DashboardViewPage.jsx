@@ -147,7 +147,7 @@ export default function DashboardViewPage() {
               </span>
             </div>
           )}
-          {entityHeaderApplies(dashboard.placement) && <EntityContextHeader placement={dashboard.placement} entity={profileEntity} />}
+          {entityHeaderApplies(dashboard.placement) && <EntityContextHeader placement={dashboard.placement} entity={profileEntity} viewerRole={viewAs} />}
           <DashboardControls scope={scope} onChange={setScope} />
           <DashboardZones dashboard={dashboard} scope={liveScope} onDrill={setDrill} viewerRole={viewAs} />
         </div>

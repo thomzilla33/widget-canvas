@@ -6,6 +6,7 @@ import {
 } from 'lucide-react'
 import { useFocusTrap } from '../../hooks/useFocusTrap.js'
 import { PopoverPanel } from '../common/Popover.jsx'
+import { actionAllowedFor } from '../../data/audiences.js'
 
 // CEO V1 (P1a/P1b) — the fixed/locked entity "top line" on profile surfaces
 // (Company/Account, Contact/UCP, Employee/UEP). Part of the template, not a widget.
@@ -84,11 +85,15 @@ const SMS_TEMPLATES = [
 ]
 const CHAT_PROMPTS = ['Summarize recent activity', 'Any open items?', 'Draft a follow-up email']
 
-export default function EntityContextHeader({ placement, entity }) {
+export default function EntityContextHeader({ placement, entity, viewerRole }) {
   const navigate = useNavigate()
   const [open, setOpen] = useState(false)
   const [panel, setPanel] = useState(null) // 'email' | 'sms' | 'chat'
   const [menuOpen, setMenuOpen] = useState(false)
+  // U2.5 — PBAC: gate the action buttons by the previewed/consuming role.
+  const can = (action) => actionAllowedFor(action, viewerRole)
+  const denyTip = (verb) => `Not available for ${viewerRole} — this role can't ${verb}`
+  // verbs are article-free to avoid "a employee" (send email / send texts).
 
   const profileType = entity ? ENTITY_TO_PROFILE[entity.type] || 'Contact' : placement?.profileType
   const base = PERSONAS[profileType] || PERSONAS.Contact
@@ -129,13 +134,14 @@ export default function EntityContextHeader({ placement, entity }) {
           <button
             type="button"
             onClick={() => setPanel('email')}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-aims-blue px-2.5 py-1.5 text-xs font-semibold text-white hover:bg-aims-blue/90"
-            title={`Email this ${lower}`}
+            disabled={!can('email')}
+            className="inline-flex items-center gap-1.5 rounded-lg bg-aims-blue px-2.5 py-1.5 text-xs font-semibold text-white hover:bg-aims-blue/90 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-aims-blue"
+            title={can('email') ? `Email this ${lower}` : denyTip('send email')}
             aria-label={`Email this ${lower}`}
           >
             <Mail size={14} aria-hidden="true" /> <span className="hidden md:inline">Email</span>
           </button>
-          <IconBtn label={`Text this ${lower}`} onClick={() => setPanel('sms')}><MessageSquare size={15} /></IconBtn>
+          <IconBtn label={can('sms') ? `Text this ${lower}` : denyTip('send texts')} onClick={() => setPanel('sms')} disabled={!can('sms')}><MessageSquare size={15} /></IconBtn>
           <button
             type="button"
             onClick={() => setPanel('chat')}
@@ -149,7 +155,7 @@ export default function EntityContextHeader({ placement, entity }) {
           <div className="relative">
             <IconBtn label="More" onClick={() => setMenuOpen((m) => !m)} expanded={menuOpen}><MoreHorizontal size={15} /></IconBtn>
             {menuOpen && (
-              <MoreMenu info={info} entityId={entity?.id} navigate={navigate} onClose={() => setMenuOpen(false)} />
+              <MoreMenu info={info} entityId={entity?.id} canContact={can('contact')} navigate={navigate} onClose={() => setMenuOpen(false)} />
             )}
           </div>
           <IconBtn label={open ? 'Hide details' : 'Show details'} onClick={() => setOpen((o) => !o)} expanded={open}>
@@ -175,15 +181,16 @@ export default function EntityContextHeader({ placement, entity }) {
   )
 }
 
-function IconBtn({ label, onClick, expanded, children }) {
+function IconBtn({ label, onClick, expanded, disabled, children }) {
   return (
     <button
       type="button"
       onClick={onClick}
+      disabled={disabled}
       aria-label={label}
       aria-expanded={expanded}
       title={label}
-      className="grid h-8 w-8 place-items-center rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 dark:border-white/15 dark:text-slate-400 dark:hover:bg-white/5"
+      className="grid h-8 w-8 place-items-center rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent dark:border-white/15 dark:text-slate-400 dark:hover:bg-white/5"
     >
       {children}
     </button>
@@ -202,8 +209,8 @@ function DetailField({ icon: Icon, label, value }) {
   )
 }
 
-// "More" dropdown — copy details / open the full profile.
-function MoreMenu({ info, entityId, navigate, onClose }) {
+// "More" dropdown — open the full profile (always) / copy contact data (PBAC-gated).
+function MoreMenu({ info, entityId, canContact, navigate, onClose }) {
   const copy = (text) => {
     navigator.clipboard?.writeText(text).catch(() => {})
     onClose()
@@ -213,8 +220,14 @@ function MoreMenu({ info, entityId, navigate, onClose }) {
       {entityId && (
         <MenuItem icon={ExternalLink} onClick={() => { onClose(); navigate(`/ucp/${entityId}`) }}>View full profile</MenuItem>
       )}
-      <MenuItem icon={Copy} onClick={() => copy(info.email)}>Copy email</MenuItem>
-      <MenuItem icon={Copy} onClick={() => copy(info.phone)}>Copy phone</MenuItem>
+      {canContact ? (
+        <>
+          <MenuItem icon={Copy} onClick={() => copy(info.email)}>Copy email</MenuItem>
+          <MenuItem icon={Copy} onClick={() => copy(info.phone)}>Copy phone</MenuItem>
+        </>
+      ) : (
+        <div className="px-3 py-1.5 text-[11px] text-gray-400 dark:text-slate-500">Contact details restricted for this role</div>
+      )}
     </PopoverPanel>
   )
 }

@@ -390,7 +390,7 @@ export default function UCPView() {
       <div className="flex-1 overflow-auto relative">
         {profileSupportsHeader(profileType) && (
           <div className="mx-auto w-full max-w-[1800px] px-6 pt-5 lg:px-8 2xl:px-12">
-            <EntityContextHeader entity={entity} />
+            <EntityContextHeader entity={entity} viewerRole={viewAs} />
           </div>
         )}
         {activeTab !== 'Overview' ? (

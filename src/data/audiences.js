@@ -34,3 +34,19 @@ export function audienceSummary(p) {
   if (a.length <= 2) return a.join(', ')
   return `${a.length} audiences`
 }
+
+// ── PBAC for entity-header actions (U2.5) ──
+// Which roles may perform each header action. Customer-facing roles can reach out
+// (email/sms) and copy contact data; observers (e.g. Executive) cannot. AI chat is
+// read-only assist, available to everyone. ALL_AUDIENCES (admin / preview-all) = all.
+const ACTION_ROLES = {
+  email: ['Sales Agent', 'Support Agent', 'Manager', 'Revenue Operations'],
+  sms: ['Sales Agent', 'Support Agent', 'Manager'],
+  contact: ['Sales Agent', 'Support Agent', 'Manager', 'Revenue Operations'], // copy email/phone (PII egress)
+  chat: AUDIENCE_ROLES, // AI assist for all roles
+}
+export function actionAllowedFor(action, role) {
+  if (!role || role === ALL_AUDIENCES) return true
+  const allowed = ACTION_ROLES[action]
+  return !allowed || allowed.includes(role)
+}
