@@ -55,6 +55,7 @@ export default function ReportsPage() {
             built={{ count: reports.length, label: 'reports' }}
             ctaLabel={isAdmin ? 'New dashboard' : undefined}
             onCta={isAdmin ? () => navigate('/dashboard/new') : undefined}
+            links={[{ label: 'Browse all dashboards', onClick: () => navigate('/dashboards') }]}
           />
           {reports.length === 0 ? (
             <EmptyState

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { LayoutDashboard, MapPin, UserX, RotateCcw } from 'lucide-react'
+import { LayoutDashboard, MapPin, UserX, RotateCcw, FileBarChart, ArrowRight } from 'lucide-react'
 import { PageHeader, Badge, EmptyState } from '../components/common/index.jsx'
 import StudioWelcome from '../components/common/StudioWelcome.jsx'
 import FilterToolbar from '../components/common/FilterToolbar.jsx'
@@ -101,6 +101,14 @@ export default function DashboardList() {
           ctaLabel={isAdmin ? 'New dashboard' : undefined}
           onCta={isAdmin ? () => navigate('/dashboard/new') : undefined}
         />
+        {/* IA: Dashboards is the full catalog; Reports is the same Standalone dashboards
+            grouped by collection. Cross-link when the user filters to Standalone. */}
+        {kind === 'Global' && (
+          <button onClick={() => navigate('/reports')} className="mb-3 inline-flex items-center gap-1.5 text-xs font-medium text-aims-blue hover:underline">
+            <FileBarChart size={13} aria-hidden="true" /> Standalone dashboards are also grouped by collection in Reports
+            <ArrowRight size={12} aria-hidden="true" />
+          </button>
+        )}
         {orphaned.length > 0 && (
           <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-3 dark:border-amber-500/25 dark:bg-amber-500/10">
             <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-slate-100">
