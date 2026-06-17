@@ -25,24 +25,21 @@ created, listed, edited, and consumed — that is Phase U0.
 
 ---
 
-## Phase U0 — Formalize Entity vs Global (foundational) ☐
+## Phase U0 — Formalize Entity vs Global (foundational) ☑ (commit pending)
 **Goal:** a single, explicit `kind` ∈ {`entity`, `global`} derived from placement, surfaced in
 every dashboard touchpoint, so the two worlds never blur.
 
 **Dep:** none (builds on existing placement model).
 
 **Activities**
-- ☐ U0.1 Add a derived helper `dashboardKind(dashboard)` → `'entity' | 'global'` (entity ⇐
-  `surface==='profile'`) in `src/data/layout.js` or a new `src/data/dashboardKind.js`.
-- ☐ U0.2 **NewDashboard** step 1: lead with an explicit **Entity vs Global** choice that then
-  reveals the relevant placement sub-form (profile type/scope/tab for entity; collection/home
-  scope for global). Re-label copy accordingly.
-- ☐ U0.3 **DashboardList** cards: a `kind` chip ("Entity · Contact" vs "Global · Report") + a
-  filter toggle (All / Entity / Global), reusing the existing status chips pattern.
-- ☐ U0.4 **DashboardViewPage / Canvas**: show the kind in the header description; entity
-  dashboards already get the locked header (done) — gate it strictly on `kind==='entity'`.
-- ☐ U0.5 Empty/edge copy: a global dashboard never shows the entity header or entity tabs; an
-  entity dashboard always does, even with zero widgets.
+- ☑ U0.1 `dashboardKind(dashboard)` + `dashboardKindLabel(dashboard)` in `src/data/mock.js`
+  (entity ⇐ `surface==='profile'`).
+- ☑ U0.2 **NewDashboard**: leads with an explicit **Entity vs Global** card choice; Global
+  reveals a Report/Home sub-choice, Entity reveals the profile sub-form.
+- ☑ U0.3 **DashboardList**: `kind` chip on every card + an All/Entity/Global filter group.
+- ☑ U0.4 **DashboardViewPage / Canvas**: header shows the kind label; entity header gated on
+  `surface==='profile'` (= entity kind).
+- ☑ U0.5 Global dashboards never render the entity header/tabs; entity ones always do (verified).
 
 **Cases covered:** entity-with-specific-record, entity-type-wide (all profiles), report,
 home/personal, home/team, dashboard with no placement (treat as global draft).
@@ -238,5 +235,5 @@ U0  Entity vs Global   ─┬─►  U1 Tabs ─┐
 5. **U7** is the final gate — light-mode, admin gating, feedback routing, a11y, responsive —
    run continuously but signed off last.
 
-> Status snapshot: U1.1, U2.1 shipped; U0 and the rest are open. Ship one phase at a time,
+> Status snapshot: U0 ☑, U1.1 ☑, U2.1 ☑ shipped; U1.2+, U2.2+, U3–U7 open. Ship one phase at a time,
 > each with build + browser-verify + code-review + deploy (the established workflow).

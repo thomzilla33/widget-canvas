@@ -9,7 +9,7 @@ import ShareModal from '../components/dashboard/ShareModal.jsx'
 import EntityContextHeader, { entityHeaderApplies } from '../components/dashboard/EntityContextHeader.jsx'
 import { useWidgets } from '../state/WidgetsContext.jsx'
 import { useDashboards } from '../state/DashboardsContext.jsx'
-import { WIDGET_SIZES } from '../data/mock.js'
+import { WIDGET_SIZES, dashboardKindLabel } from '../data/mock.js'
 import { dashboardLayout } from '../data/layout.js'
 import { vizRecommendation, vizInterchangeable, VIZ_OPTIONS } from '../data/preview.js'
 import { AUDIENCE_ROLES, placementAudiences, audienceSummary } from '../data/audiences.js'
@@ -145,7 +145,7 @@ export default function DashboardCanvas() {
         title={dashboard?.name || 'Dashboard canvas'}
         description={
           dashboard
-            ? `${dashboard.entity} · ${dashboard.audience}${allPlacements.length ? ` · ${lockedCount}/${allPlacements.length} widgets locked` : ' — drop widgets into zones'}`
+            ? `${dashboardKindLabel(dashboard)} · ${dashboard.audience}${allPlacements.length ? ` · ${lockedCount}/${allPlacements.length} widgets locked` : ' — drop widgets into zones'}`
             : 'Drop widgets into zones; permissions are set per widget here.'
         }
         actions={

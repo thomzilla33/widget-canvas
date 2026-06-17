@@ -8,8 +8,6 @@ import {
   Sparkles,
   Check,
   UserSquare,
-  FileBarChart,
-  Home,
   MapPin,
 } from 'lucide-react'
 import { PageHeader, StepIndicator } from '../components/common/index.jsx'
@@ -19,7 +17,6 @@ import {
   audiences,
   dashboardTemplates,
   TEMPLATE_SEED,
-  PLACEMENT_SURFACES,
   PROFILE_TYPES,
   REPORT_COLLECTIONS,
   HOME_SCOPES,
@@ -27,7 +24,6 @@ import {
 } from '../data/mock.js'
 
 const STEPS = ['Placement', 'Start point']
-const SURFACE_ICONS = { UserSquare, FileBarChart, Home }
 
 // Stable signature for a placement + audience — used to detect when the
 // destination changed (to reset the conflict override).
@@ -74,6 +70,12 @@ export default function NewDashboard() {
 
   const currentType = PROFILE_TYPES.find((t) => t.id === profileType) || PROFILE_TYPES[0]
   const entitiesForType = entities.filter((e) => e.type === currentType.entityType)
+
+  // Entity (attached to a profile) vs Global (report / home). The explicit top-level choice.
+  const kind = surface === 'profile' ? 'entity' : 'global'
+  function selectKind(k) {
+    selectSurface(k === 'entity' ? 'profile' : 'report')
+  }
 
   function buildPlacement() {
     if (surface === 'report') return { surface, collection }
@@ -179,23 +181,34 @@ export default function NewDashboard() {
               </Field>
 
               <div>
-                <div className="mb-1.5 text-sm font-medium text-gray-700 dark:text-slate-200">Where should this dashboard live?</div>
-                <div className="grid gap-3 sm:grid-cols-3">
-                  {PLACEMENT_SURFACES.map((s) => {
-                    const Icon = SURFACE_ICONS[s.iconName] || LayoutGrid
-                    return (
-                      <StartCard
-                        key={s.id}
-                        selected={surface === s.id}
-                        onClick={() => selectSurface(s.id)}
-                        icon={<Icon size={20} className="text-aims-blue" />}
-                        title={s.label}
-                        desc={s.desc}
-                      />
-                    )
-                  })}
+                <div className="mb-1.5 text-sm font-medium text-gray-700 dark:text-slate-200">What kind of dashboard?</div>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <StartCard
+                    selected={kind === 'entity'}
+                    onClick={() => selectKind('entity')}
+                    icon={<UserSquare size={20} className="text-aims-blue" />}
+                    title="Entity dashboard"
+                    desc="Attached to a profile — Company, Contact, Employee, Deal, or Case. Lives in that profile's tabs."
+                  />
+                  <StartCard
+                    selected={kind === 'global'}
+                    onClick={() => selectKind('global')}
+                    icon={<LayoutGrid size={20} className="text-aims-blue" />}
+                    title="Global dashboard"
+                    desc="A workspace, team, or report rollup. Not tied to any single record."
+                  />
                 </div>
               </div>
+
+              {kind === 'global' && (
+                <div>
+                  <div className="mb-1.5 text-sm font-medium text-gray-700 dark:text-slate-200">Where should it live?</div>
+                  <div className="flex flex-wrap gap-2">
+                    <Chip active={surface === 'report'} onClick={() => selectSurface('report')}>Report collection</Chip>
+                    <Chip active={surface === 'home'} onClick={() => selectSurface('home')}>Home / Workspace</Chip>
+                  </div>
+                </div>
+              )}
 
               {surface === 'profile' && (
                 <div className="space-y-4 rounded-xl border border-gray-200 p-4 dark:border-white/10">

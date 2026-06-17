@@ -338,6 +338,19 @@ export function placementLabel(p) {
   const where = p.scope === 'entity' ? p.entityName || 'a specific profile' : `All ${ptLabel} profiles`
   return `${ptLabel} · ${where} · ${p.tab || 'Overview'}`
 }
+// A dashboard is either ENTITY (attached to a profile) or GLOBAL (report / home /
+// workspace). Derived from the placement surface — the single source for the distinction.
+export function dashboardKind(dashboard) {
+  return dashboard?.placement?.surface === 'profile' ? 'entity' : 'global'
+}
+export function dashboardKindLabel(dashboard) {
+  const p = dashboard?.placement
+  if (p?.surface === 'profile') return `Entity · ${PROFILE_TYPES.find((t) => t.id === p.profileType)?.id || 'Profile'}`
+  if (p?.surface === 'report') return 'Global · Report'
+  if (p?.surface === 'home') return 'Global · Home'
+  return 'Global'
+}
+
 export const dashboardTemplates = [
   { id: 't-acct360', name: 'Account 360', desc: 'KPIs, pipeline, and recent activity.', entity: 'Company' },
   { id: 't-support', name: 'Support Health', desc: 'Open tickets, SLA, and CSAT.', entity: 'Company' },

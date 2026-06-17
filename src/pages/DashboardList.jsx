@@ -3,10 +3,11 @@ import { useNavigate } from 'react-router-dom'
 import { LayoutDashboard, Search, MapPin, UserX, RotateCcw } from 'lucide-react'
 import { PageHeader, Badge, EmptyState } from '../components/common/index.jsx'
 import { useDashboards } from '../state/DashboardsContext.jsx'
-import { placementLabel, DEACTIVATED_OWNERS } from '../data/mock.js'
+import { placementLabel, DEACTIVATED_OWNERS, dashboardKind } from '../data/mock.js'
 import { widgetCount } from '../data/layout.js'
 
 const STATUS_FILTERS = ['All', 'Published', 'Draft', 'Pending']
+const KIND_FILTERS = ['All', 'Entity', 'Global']
 
 // S76–S79 — dashboard list with search + status filter
 export default function DashboardList() {
@@ -14,6 +15,7 @@ export default function DashboardList() {
   const { dashboards, updateDashboard } = useDashboards()
   const [search, setSearch] = useState('')
   const [status, setStatus] = useState('All')
+  const [kind, setKind] = useState('All')
 
   // Governance recovery: dashboards owned by an offboarded user need reassigning.
   const orphaned = dashboards.filter((d) => DEACTIVATED_OWNERS.includes(d.owner))
@@ -22,8 +24,9 @@ export default function DashboardList() {
   const publishedCount = dashboards.filter((d) => d.status === 'published').length
   const shown = dashboards.filter((d) => {
     const matchStatus = status === 'All' || d.status === status.toLowerCase()
+    const matchKind = kind === 'All' || dashboardKind(d) === kind.toLowerCase()
     const matchSearch = !search || d.name.toLowerCase().includes(search.toLowerCase())
-    return matchStatus && matchSearch
+    return matchStatus && matchKind && matchSearch
   })
 
   return (
@@ -61,6 +64,22 @@ export default function DashboardList() {
               }`}
             >
               {c}
+            </button>
+          ))}
+        </div>
+        <span className="hidden h-5 w-px bg-gray-200 sm:block dark:bg-white/10" aria-hidden="true" />
+        <div className="flex items-center gap-1.5 flex-wrap" role="group" aria-label="Filter by kind">
+          {KIND_FILTERS.map((k) => (
+            <button
+              key={k}
+              onClick={() => setKind(k)}
+              className={`h-7 rounded-full border px-3 text-xs font-semibold transition-colors ${
+                kind === k
+                  ? 'border-aims-blue/40 bg-aims-blue/10 text-aims-blue'
+                  : 'border-gray-300 text-gray-500 hover:text-gray-700 dark:border-white/15 dark:text-slate-400 dark:hover:text-slate-200'
+              }`}
+            >
+              {k}
             </button>
           ))}
         </div>
@@ -127,9 +146,14 @@ export default function DashboardList() {
                     <div className="truncate text-sm font-semibold text-gray-900 dark:text-slate-100">
                       {d.name}
                     </div>
-                    <div className="flex items-center gap-1 text-[11px] text-gray-500 dark:text-slate-400">
-                      <MapPin size={11} className="shrink-0" />
-                      <span className="truncate">{placementLabel(d.placement)}</span>
+                    <div className="flex items-center gap-1.5">
+                      <span className={`cap-chip ${dashboardKind(d) === 'entity' ? 'cap-chip-blue' : 'cap-chip-neutral'}`}>
+                        {dashboardKind(d) === 'entity' ? 'Entity' : 'Global'}
+                      </span>
+                      <span className="flex items-center gap-1 truncate text-[11px] text-gray-500 dark:text-slate-400">
+                        <MapPin size={11} className="shrink-0" />
+                        <span className="truncate">{placementLabel(d.placement)}</span>
+                      </span>
                     </div>
                     <div className="mt-0.5 flex items-center gap-1 truncate text-[11px] text-gray-500 dark:text-slate-400">
                       Owner · {d.owner}

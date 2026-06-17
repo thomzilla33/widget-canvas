@@ -9,7 +9,7 @@ import EntityContextHeader, { entityHeaderApplies } from '../components/dashboar
 import { useDashboards } from '../state/DashboardsContext.jsx'
 import { useWidgets } from '../state/WidgetsContext.jsx'
 import { useLive } from '../state/LiveContext.jsx'
-import { placementLabel } from '../data/mock.js'
+import { placementLabel, dashboardKindLabel } from '../data/mock.js'
 import { dashboardLayout } from '../data/layout.js'
 import { isStale } from '../data/governance.js'
 import { AUDIENCE_OPTIONS, ALL_AUDIENCES, audienceVisibleTo } from '../data/audiences.js'
@@ -52,7 +52,7 @@ export default function DashboardViewPage() {
     <div className="flex h-full flex-col">
       <PageHeader
         title={dashboard.name}
-        description={`${dashboard.entity} · ${dashboard.audience} · Owner ${dashboard.owner || '—'}`}
+        description={`${dashboardKindLabel(dashboard)} · ${dashboard.audience} · Owner ${dashboard.owner || '—'}`}
         actions={
           <>
             <Badge variant={dashboard.status} />
