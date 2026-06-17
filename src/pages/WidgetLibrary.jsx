@@ -42,7 +42,7 @@ export default function WidgetLibrary() {
   const usageById = useMemo(() => {
     const m = {}
     dashboards.forEach((d) => {
-      const ids = new Set(Object.values(dashboardLayout(d)).flat().map((p) => p.widgetId))
+      const ids = new Set(dashboardLayout(d).map((p) => p.widgetId))
       ids.forEach((wid) => { m[wid] = (m[wid] || 0) + 1 })
     })
     return m

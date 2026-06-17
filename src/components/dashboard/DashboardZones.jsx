@@ -3,38 +3,37 @@ import { Lock, Maximize2 } from 'lucide-react'
 import { EmptyState, FreshnessBadge, DataPlaneBadge, EnvironmentBadge, LiveBadge } from '../common/index.jsx'
 import WidgetRender from '../widgets/WidgetRender.jsx'
 import { useWidgets } from '../../state/WidgetsContext.jsx'
-import { dashboardLayout, VIEW_ZONES } from '../../data/layout.js'
+import { dashboardLayout } from '../../data/layout.js'
 import { audienceVisibleTo, ALL_AUDIENCES } from '../../data/audiences.js'
 import { dataPlaneOf, freshnessState } from '../../data/governance.js'
 
-// Per-size column span — same responsive caps as the canvas (no overflow).
+// Per-size column span — a widget's size IS its width in the free grid (no overflow).
 const SIZE_SPAN_CLASS = { sm: '', md: 'sm:col-span-2', lg: 'sm:col-span-2 lg:col-span-3' }
 
-// Read-only render of a dashboard's zones + real widgets. Used by the dashboard
+// Read-only render of a dashboard's free-form widget grid. Used by the dashboard
 // view page and inside the profile (UCP) tabs — the consumption side of placement.
 // `scope` (date range + filters + live tick) is threaded into each widget's sample.
 // `onDrill(widget)` makes each card clickable to open the drill-down (omitted on UCP).
 export default function DashboardZones({ dashboard, scope, onDrill, viewerRole }) {
   const { widgets } = useWidgets()
   const byId = (id) => widgets.find((w) => w.id === id)
-  // Memoize the layout so placement objects keep a stable identity across live ticks.
-  const layout = useMemo(() => dashboardLayout(dashboard), [dashboard])
+  // Memoize the layout so placement objects keep a stable identity across live ticks —
+  // key on the layout/template/id, not the dashboard object (which a parent re-render can
+  // hand us as a fresh reference even when the layout is unchanged).
+  const layout = useMemo(() => dashboardLayout(dashboard), [dashboard?.layout, dashboard?.template, dashboard?.id]) // eslint-disable-line react-hooks/exhaustive-deps
   // A scope that excludes the live tick — stable across ticks, so static tiles (which
   // get this) don't re-render every interval. Only live tiles receive the ticking scope.
   const staticKey = `${scope?.range || ''}|${Object.values(scope?.filters || {}).join(',')}|${scope?.rollup || ''}|${scope?.env || ''}`
   const staticScope = useMemo(() => scope, [staticKey]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Filter by the "view as" role — empty restriction or admin/all sees everything.
-  const filtered = {}
-  for (const k of Object.keys(layout)) filtered[k] = (layout[k] || []).filter((p) => audienceVisibleTo(p, viewerRole))
-  const zones = VIEW_ZONES.filter((z) => filtered[z.key]?.length)
+  const visible = layout.filter((p) => audienceVisibleTo(p, viewerRole))
   const roleScoped = viewerRole && viewerRole !== ALL_AUDIENCES
-  const anyWidgets = Object.values(layout).some((a) => a.length)
 
-  if (!zones.length) {
+  if (!visible.length) {
     return (
       <div className="rounded-xl border-2 border-dashed border-gray-200 dark:border-white/10">
-        {roleScoped && anyWidgets ? (
+        {roleScoped && layout.length ? (
           <EmptyState
             icon="🔒"
             title={`Nothing visible for ${viewerRole}`}
@@ -47,33 +46,14 @@ export default function DashboardZones({ dashboard, scope, onDrill, viewerRole }
     )
   }
 
-  // Live tiles get the ticking scope; everything else gets the stable one (memo bails).
-  const card = (p, i, zoneKey, span) => {
-    const w = byId(p.widgetId)
-    const cardScope = w?.freshness === 'live' ? scope : staticScope
-    return <WidgetCard key={p.pid ?? `${zoneKey}-${i}`} placement={p} widget={w} span={span} scope={cardScope} onDrill={onDrill} />
-  }
-
   return (
-    <div className="grid grid-cols-1 items-stretch gap-3 md:grid-cols-4">
-      {zones.map((z) => (
-        <div key={z.key} className={`col-span-1 ${z.span}`}>
-          {z.key === 'header' ? (
-            // KPIs tile evenly across the full header width — no trailing gap.
-            <div className="grid h-full gap-3" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(min(180px,100%), 1fr))' }}>
-              {filtered.header.map((p, i) => card(p, i, z.key, ''))}
-            </div>
-          ) : (
-            <div
-              className={`grid h-full auto-rows-fr gap-3 ${
-                z.key === 'sidebar' ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
-              }`}
-            >
-              {filtered[z.key].map((p, i) => card(p, i, z.key, z.key === 'sidebar' ? '' : SIZE_SPAN_CLASS[p.size] || 'sm:col-span-2'))}
-            </div>
-          )}
-        </div>
-      ))}
+    <div className="grid auto-rows-fr grid-cols-1 items-stretch gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      {visible.map((p, i) => {
+        const w = byId(p.widgetId)
+        // Live tiles get the ticking scope; everything else gets the stable one (memo bails).
+        const cardScope = w?.freshness === 'live' ? scope : staticScope
+        return <WidgetCard key={p.pid ?? i} placement={p} widget={w} span={SIZE_SPAN_CLASS[p.size] ?? ''} scope={cardScope} onDrill={onDrill} />
+      })}
     </div>
   )
 }

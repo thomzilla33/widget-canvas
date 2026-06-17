@@ -38,7 +38,7 @@ export default function DashboardViewPage() {
     dashboard?.placement?.scope === 'entity' && dashboard.placement.entityId
       ? entities.find((e) => e.id === dashboard.placement.entityId)
       : null
-  const placements = dashboard ? Object.values(dashboardLayout(dashboard)).flat() : []
+  const placements = dashboard ? dashboardLayout(dashboard) : []
   const hiddenForRole = viewAs !== ALL_AUDIENCES ? placements.filter((p) => !audienceVisibleTo(p, viewAs)).length : 0
   // Stale tiles pause the workflows that depend on them (5.6).
   const stalePaused = placements
@@ -67,10 +67,8 @@ export default function DashboardViewPage() {
       category: 'Intelligence',
       note: answer,
     })
-    const layout = dashboardLayout(dashboard)
-    const next = { ...layout, main: [...(layout.main || []), { pid: `p-ans-${stamp}`, widgetId: wid, fixed: false, size: 'md', audiences: [], quickActions: [] }] }
-    const count = Object.values(next).reduce((n, arr) => n + arr.length, 0)
-    updateDashboard(dashboard.id, { layout: next, widgets: count })
+    const next = [...placements, { pid: `p-ans-${stamp}`, widgetId: wid, fixed: false, size: 'md', audiences: [], quickActions: [] }]
+    updateDashboard(dashboard.id, { layout: next, widgets: next.length })
   }
 
   if (!dashboard) {

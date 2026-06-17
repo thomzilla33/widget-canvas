@@ -19,7 +19,7 @@ export default function EditSetupModal({ dashboard, onClose, onSave }) {
 
   // Changing the dashboard audience can leave per-widget audience restrictions
   // pointing at the old role — warn (only) when that's actually the case.
-  const hasRestricted = Object.values(dashboardLayout(dashboard)).flat().some((p) => Array.isArray(p.audiences) && p.audiences.length > 0)
+  const hasRestricted = dashboardLayout(dashboard).some((p) => Array.isArray(p.audiences) && p.audiences.length > 0)
   const audienceChanged = form.audience !== dashboard.audience && hasRestricted
 
   const save = () => {

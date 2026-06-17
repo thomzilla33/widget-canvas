@@ -4,14 +4,9 @@ import { AUDIENCE_ROLES, audienceVisibleTo } from '../../data/audiences.js'
 import { useFocusTrap } from '../../hooks/useFocusTrap.js'
 
 const ROLES = AUDIENCE_ROLES
-const ZONES = [
-  { key: 'header', label: 'Header' },
-  { key: 'sidebar', label: 'Sidebar' },
-  { key: 'main', label: 'Main' },
-  { key: 'bottom', label: 'Bottom' },
-]
 
-// S99–S104 — preview by role, publish confirm, version history, rollback
+// S99–S104 — preview by role, publish confirm, version history, rollback.
+// `placements` is the flat layout array (free grid — no zones).
 export default function PublishModal({ dashboard, placements, widgetById, onClose, onPublish, onShare }) {
   const trapRef = useFocusTrap()
   const [tab, setTab] = useState('preview')
@@ -23,8 +18,9 @@ export default function PublishModal({ dashboard, placements, widgetById, onClos
     { id: 'v1', label: 'Initial publish', status: 'published', when: '2 days ago' },
   ])
 
-  const all = Object.values(placements).flat()
-  const hiddenCount = all.filter((p) => !audienceVisibleTo(p, role)).length
+  const all = placements
+  const visibleForRole = all.filter((p) => audienceVisibleTo(p, role))
+  const hiddenCount = all.length - visibleForRole.length
 
   function publish() {
     onPublish?.()
@@ -101,28 +97,21 @@ export default function PublishModal({ dashboard, placements, widgetById, onClos
                     </div>
                   )}
 
-                  <div className="space-y-2">
-                    {ZONES.map((z) => {
-                      const items = placements[z.key].filter((p) => audienceVisibleTo(p, role))
-                      return (
-                        <div key={z.key} className="rounded-lg border border-gray-200 p-3 dark:border-white/10">
-                          <div className="mb-1.5 text-[10px] font-bold uppercase tracking-wide text-gray-500 dark:text-slate-400">
-                            {z.label}
-                          </div>
-                          {items.length === 0 ? (
-                            <div className="text-xs text-gray-500 dark:text-slate-400">— empty for this role</div>
-                          ) : (
-                            <div className="flex flex-wrap gap-1.5">
-                              {items.map((p) => (
-                                <span key={p.pid} className="cap-chip cap-chip-neutral">
-                                  {widgetById(p.widgetId)?.name || 'Widget'}
-                                </span>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      )
-                    })}
+                  <div className="rounded-lg border border-gray-200 p-3 dark:border-white/10">
+                    <div className="mb-1.5 text-[10px] font-bold uppercase tracking-wide text-gray-500 dark:text-slate-400">
+                      Visible widgets
+                    </div>
+                    {visibleForRole.length === 0 ? (
+                      <div className="text-xs text-gray-500 dark:text-slate-400">— nothing visible for this role</div>
+                    ) : (
+                      <div className="flex flex-wrap gap-1.5">
+                        {visibleForRole.map((p) => (
+                          <span key={p.pid} className="cap-chip cap-chip-neutral">
+                            {widgetById(p.widgetId)?.name || 'Widget'}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </>
               ) : (

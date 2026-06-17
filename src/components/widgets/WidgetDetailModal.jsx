@@ -25,7 +25,7 @@ export default function WidgetDetailModal({ widget, isAdmin, onClose, onPlace, o
   // Dashboards hosting this widget — from the resolved layout (template seed OR
   // persisted edits), so this matches the live count shown on the Library card.
   const usedOn = dashboards.filter((d) =>
-    Object.values(dashboardLayout(d)).flat().some((p) => p.widgetId === widget.id),
+    dashboardLayout(d).some((p) => p.widgetId === widget.id),
   )
 
   return (
