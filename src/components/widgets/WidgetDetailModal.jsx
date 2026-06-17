@@ -136,7 +136,7 @@ export default function WidgetDetailModal({ widget, isAdmin, onClose, onPlace, o
 
 function InfoBox({ icon: Icon, label, children }) {
   return (
-    <div className="rounded-lg border border-gray-200 bg-gray-50/60 p-3 dark:border-white/10 dark:bg-white/[0.02]">
+    <div className="surface-sunken rounded-lg p-3">
       <div className="mb-1 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-500">
         <Icon size={12} aria-hidden="true" /> {label}
       </div>

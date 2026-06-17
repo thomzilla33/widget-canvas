@@ -338,7 +338,7 @@ export default function WidgetBuilder() {
 
               {typeId && TYPE_INFO[typeId] && (
                 <div className="mt-4 space-y-2">
-                  <div className="rounded-lg border border-gray-200 bg-gray-50/70 p-3 dark:border-white/10 dark:bg-white/[0.02]">
+                  <div className="surface-sunken rounded-lg p-3">
                     <div className="text-xs font-semibold text-gray-900 dark:text-slate-100">About this widget</div>
                     <p className="mt-0.5 text-xs text-gray-500 dark:text-slate-400">{TYPE_INFO[typeId].about}</p>
                   </div>

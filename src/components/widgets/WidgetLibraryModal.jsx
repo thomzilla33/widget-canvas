@@ -131,7 +131,7 @@ function Card({ widget, onOpen, onAdd }) {
           <div className="truncate text-[11px] text-gray-500 dark:text-slate-400">{widget.source}</div>
         </div>
       </div>
-      <div className="rounded-md border border-gray-100 bg-gray-50/60 p-2 dark:border-white/5 dark:bg-white/[0.02]">
+      <div className="surface-sunken rounded-md p-2">
         <WidgetRender widget={widget} size="md" />
       </div>
       <div className="flex flex-wrap items-center gap-1.5">

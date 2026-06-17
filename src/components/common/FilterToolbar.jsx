@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Search, SlidersHorizontal, ArrowUp, ArrowDown } from 'lucide-react'
+import { PopoverPanel } from './Popover.jsx'
 
 // Design-system filter/search toolbar — the canonical pattern for every list/catalog:
 // Search + inline "main filter" dropdowns (left) · All filters + sort dir + sort field (right).
@@ -54,21 +55,18 @@ export default function FilterToolbar({ searchValue, onSearch, searchPlaceholder
               <SlidersHorizontal size={14} aria-hidden="true" /> All filters
             </button>
             {allOpen && (
-              <>
-                <div className="fixed inset-0 z-10" onClick={() => setAllOpen(false)} aria-hidden="true" />
-                <div role="menu" className="absolute right-0 z-20 mt-1 w-60 space-y-2.5 rounded-lg border border-gray-200 bg-white p-3 shadow-lg dark:border-white/10 dark:bg-[#131a2c]">
-                  {filters.map((f) => (
-                    <div key={f.id}>
-                      <div className="mb-1 text-[11px] font-semibold text-gray-700 dark:text-slate-200">{f.label}</div>
-                      <select className="input h-8 w-full text-xs" value={f.value} onChange={(e) => f.onChange(e.target.value)} aria-label={f.label}>
-                        {f.options.map((o) => (
-                          <option key={o.value} value={o.value}>{o.label}</option>
-                        ))}
-                      </select>
-                    </div>
-                  ))}
-                </div>
-              </>
+              <PopoverPanel onClose={() => setAllOpen(false)} align="right" className="w-60 space-y-2.5 p-3">
+                {filters.map((f) => (
+                  <div key={f.id}>
+                    <div className="mb-1 text-[11px] font-semibold text-gray-700 dark:text-slate-200">{f.label}</div>
+                    <select className="input h-8 w-full text-xs" value={f.value} onChange={(e) => f.onChange(e.target.value)} aria-label={f.label}>
+                      {f.options.map((o) => (
+                        <option key={o.value} value={o.value}>{o.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                ))}
+              </PopoverPanel>
             )}
           </div>
         )}

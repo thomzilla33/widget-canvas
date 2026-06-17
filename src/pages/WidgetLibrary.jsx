@@ -207,7 +207,7 @@ export default function WidgetLibrary() {
               </div>
 
               {/* Live preview of what the widget shows */}
-              <div className="pointer-events-none h-[64px] overflow-hidden rounded-md border border-gray-100 bg-gray-50/40 px-2 py-1.5 dark:border-white/10 dark:bg-white/[0.02]">
+              <div className="surface-sunken pointer-events-none h-[64px] overflow-hidden rounded-md px-2 py-1.5">
                 <WidgetRender widget={w} size="sm" />
               </div>
 

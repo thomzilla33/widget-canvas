@@ -504,7 +504,7 @@ function ConfigPanel({ placement, widget, onChange }) {
       {/* Size (resizing) — live preview reflects the chosen size + visualization */}
       <div>
         <div className="mb-1.5 text-sm font-medium text-gray-700 dark:text-slate-200">Size</div>
-        <div className="rounded-lg border border-gray-200 bg-gray-50/60 p-3 dark:border-white/10 dark:bg-white/[0.02]">
+        <div className="surface-sunken rounded-lg p-3">
           <WidgetRender widget={widget} size={placement.size} viewAs={placement.viewAs} />
         </div>
         <div className="mt-2 flex overflow-hidden rounded-lg border border-gray-300 text-sm dark:border-white/15">

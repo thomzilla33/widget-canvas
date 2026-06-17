@@ -5,6 +5,7 @@ import {
   Briefcase, MessageSquare, MoreHorizontal, X, Send, Bot, Copy, ExternalLink,
 } from 'lucide-react'
 import { useFocusTrap } from '../../hooks/useFocusTrap.js'
+import { PopoverPanel } from '../common/Popover.jsx'
 
 // CEO V1 (P1a/P1b) — the fixed/locked entity "top line" on profile surfaces
 // (Company/Account, Contact/UCP, Employee/UEP). Part of the template, not a widget.
@@ -208,16 +209,13 @@ function MoreMenu({ info, entityId, navigate, onClose }) {
     onClose()
   }
   return (
-    <>
-      <div className="fixed inset-0 z-10" onClick={onClose} aria-hidden="true" />
-      <div role="menu" className="absolute right-0 z-20 mt-1 w-48 overflow-hidden rounded-lg border border-gray-200 bg-white py-1 shadow-lg dark:border-white/10 dark:bg-[#131a2c]">
-        {entityId && (
-          <MenuItem icon={ExternalLink} onClick={() => { onClose(); navigate(`/ucp/${entityId}`) }}>View full profile</MenuItem>
-        )}
-        <MenuItem icon={Copy} onClick={() => copy(info.email)}>Copy email</MenuItem>
-        <MenuItem icon={Copy} onClick={() => copy(info.phone)}>Copy phone</MenuItem>
-      </div>
-    </>
+    <PopoverPanel onClose={onClose} align="right" className="w-48 overflow-hidden py-1">
+      {entityId && (
+        <MenuItem icon={ExternalLink} onClick={() => { onClose(); navigate(`/ucp/${entityId}`) }}>View full profile</MenuItem>
+      )}
+      <MenuItem icon={Copy} onClick={() => copy(info.email)}>Copy email</MenuItem>
+      <MenuItem icon={Copy} onClick={() => copy(info.phone)}>Copy phone</MenuItem>
+    </PopoverPanel>
   )
 }
 function MenuItem({ icon: Icon, onClick, children }) {

@@ -22,6 +22,7 @@ import {
   GripVertical,
 } from 'lucide-react'
 import { PageHeader, GovernedBadge, FreshnessBadge, EmptyState } from '../components/common/index.jsx'
+import { PopoverPanel } from '../components/common/Popover.jsx'
 import FeedbackPanel from '../components/ucp/FeedbackPanel.jsx'
 import DashboardZones from '../components/dashboard/DashboardZones.jsx'
 import EntityContextHeader, { profileSupportsHeader } from '../components/dashboard/EntityContextHeader.jsx'
@@ -315,29 +316,26 @@ export default function UCPView() {
                 <Sparkles size={14} aria-hidden="true" /> Suggest tabs
               </button>
               {suggestTabsOpen && (
-                <>
-                  <div className="fixed inset-0 z-10" onClick={() => setSuggestTabsOpen(false)} aria-hidden="true" />
-                  <div role="menu" className="absolute left-0 top-full z-20 mt-1 w-64 overflow-hidden rounded-lg border border-gray-200 bg-white py-1 shadow-lg dark:border-white/10 dark:bg-[#131a2c]">
-                    <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-500">Suggested for {profileType}</div>
-                    {suggestTabs(profileType, tabs).map((s) => (
-                      <button
-                        key={s.tab}
-                        role="menuitem"
-                        onClick={() => {
-                          persistFrom([...tabs, s.tab])
-                          setSuggestTabsOpen(false)
-                        }}
-                        className="flex w-full items-start gap-2 px-3 py-2 text-left hover:bg-gray-50 dark:hover:bg-white/5"
-                      >
-                        <Plus size={13} className="mt-0.5 shrink-0 text-aims-blue" aria-hidden="true" />
-                        <span className="min-w-0">
-                          <span className="block text-sm font-medium text-gray-900 dark:text-slate-100">{s.tab}</span>
-                          <span className="block text-[11px] text-gray-500 dark:text-slate-400">{s.why}</span>
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                </>
+                <PopoverPanel onClose={() => setSuggestTabsOpen(false)} align="left" className="top-full w-64 overflow-hidden py-1">
+                  <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-500">Suggested for {profileType}</div>
+                  {suggestTabs(profileType, tabs).map((s) => (
+                    <button
+                      key={s.tab}
+                      role="menuitem"
+                      onClick={() => {
+                        persistFrom([...tabs, s.tab])
+                        setSuggestTabsOpen(false)
+                      }}
+                      className="flex w-full items-start gap-2 px-3 py-2 text-left hover:bg-gray-50 dark:hover:bg-white/5"
+                    >
+                      <Plus size={13} className="mt-0.5 shrink-0 text-aims-blue" aria-hidden="true" />
+                      <span className="min-w-0">
+                        <span className="block text-sm font-medium text-gray-900 dark:text-slate-100">{s.tab}</span>
+                        <span className="block text-[11px] text-gray-500 dark:text-slate-400">{s.why}</span>
+                      </span>
+                    </button>
+                  ))}
+                </PopoverPanel>
               )}
             </div>
           )}
