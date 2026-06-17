@@ -49,6 +49,7 @@ export default function WidgetLibrary() {
   }, [dashboards])
   const [cat, setCat] = useState('All') // category
   const [type, setType] = useState('All') // tile type
+  const [fresh, setFresh] = useState('All') // freshness state
   const [search, setSearch] = useState('')
   const [sortBy, setSortBy] = useState('name')
   const [sortDir, setSortDir] = useState('asc')
@@ -59,11 +60,16 @@ export default function WidgetLibrary() {
 
   const catOptions = [{ value: 'All', label: 'All categories' }, ...CATALOG_CATEGORIES.map((c) => ({ value: c, label: c }))]
   const typeOptions = [{ value: 'All', label: 'All types' }, ...Array.from(new Set(widgets.map((w) => w.skeleton))).map((t) => ({ value: t, label: t }))]
+  const freshOptions = [
+    { value: 'All', label: 'All freshness' },
+    ...Array.from(new Set(widgets.map((w) => w.freshness).filter(Boolean))).map((f) => ({ value: f, label: f.charAt(0).toUpperCase() + f.slice(1) })),
+  ]
   const shown = widgets
     .filter(
       (w) =>
         (cat === 'All' || w.category === cat) &&
         (type === 'All' || w.skeleton === type) &&
+        (fresh === 'All' || w.freshness === fresh) &&
         (!search || w.name.toLowerCase().includes(search.toLowerCase())),
     )
     .sort((a, b) => {
@@ -101,6 +107,7 @@ export default function WidgetLibrary() {
         filters={[
           { id: 'cat', label: 'Category', value: cat, onChange: setCat, options: catOptions },
           { id: 'type', label: 'Type', value: type, onChange: setType, options: typeOptions },
+          { id: 'fresh', label: 'Freshness', value: fresh, onChange: setFresh, options: freshOptions },
         ]}
         sort={{
           value: sortBy,

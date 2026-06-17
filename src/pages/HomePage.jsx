@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { PageHeader } from '../components/common/index.jsx'
 import FilterToolbar from '../components/common/FilterToolbar.jsx'
+import StudioWelcome from '../components/common/StudioWelcome.jsx'
 import DashboardCards from '../components/dashboard/DashboardCards.jsx'
 import PinnedWidgets from '../components/home/PinnedWidgets.jsx'
 import { useDashboards } from '../state/DashboardsContext.jsx'
@@ -29,6 +30,7 @@ export default function HomePage() {
       <PageHeader title="Home" description="What needs you, your tasks, and your landing dashboards" />
       <div className="flex-1 overflow-auto">
         <div className="mx-auto w-full max-w-[1800px] space-y-6 px-6 py-5 lg:px-8 2xl:px-12">
+          <StudioWelcome studioId="home" built={{ count: homes.length, label: 'home dashboards' }} />
           <PinnedWidgets />
 
           {hasAnyHome && (

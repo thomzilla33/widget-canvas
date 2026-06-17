@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { LayoutDashboard, Boxes, Table2, Database, Sparkles, X, ArrowRight } from 'lucide-react'
+import { LayoutDashboard, Boxes, Table2, Database, Sparkles, X, ArrowRight, FileBarChart, Home } from 'lucide-react'
 
 // U5 — per-studio welcome/intro (modeled on the production "Welcome to Data Studio"):
 // eyebrow pill + title + subtitle + a numbered setup walkthrough + primary & secondary
@@ -42,6 +42,29 @@ const STUDIOS = {
       ['Add', ' formula (ƒ) columns'],
       ['Watch', ' calculated fields compute live'],
       ['Chart', ' any column as a widget'],
+    ],
+  },
+  reports: {
+    icon: FileBarChart,
+    eyebrow: 'Standalone reports',
+    title: 'Reports',
+    subtitle: 'Standalone dashboards grouped by collection — not tied to any single record.',
+    steps: [
+      ['Open', ' a report to read it'],
+      ['Browse', ' by collection'],
+      ['Create', ' a new Standalone dashboard'],
+      ['Publish & share', ' with roles'],
+    ],
+  },
+  home: {
+    icon: Home,
+    eyebrow: 'Your workspace home',
+    title: 'Home',
+    subtitle: 'Your inbox, tasks, and the Human Touch Layer up top — your landing dashboards below.',
+    steps: [
+      ['Clear', ' your inbox & tasks'],
+      ['Action', ' the Human Touch Layer queue'],
+      ['Open', ' a landing dashboard'],
     ],
   },
   datastudio: {

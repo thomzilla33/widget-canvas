@@ -29,6 +29,7 @@ export default function DashboardList() {
   const [search, setSearch] = useState('')
   const [status, setStatus] = useState('All')
   const [kind, setKind] = useState('All')
+  const [owner, setOwner] = useState('All')
   const [sortBy, setSortBy] = useState('recent')
   const [sortDir, setSortDir] = useState('desc')
 
@@ -36,12 +37,21 @@ export default function DashboardList() {
   const orphaned = dashboards.filter((d) => DEACTIVATED_OWNERS.includes(d.owner))
   const reassign = (id) => updateDashboard(id, { owner: 'You (admin)' })
 
+  // Owner filter — distinct owners across the catalog (enterprise scale).
+  const ownerOptions = [
+    { value: 'All', label: 'All owners' },
+    ...Array.from(new Set(dashboards.map((d) => d.owner).filter(Boolean)))
+      .sort((a, b) => a.localeCompare(b))
+      .map((o) => ({ value: o, label: o })),
+  ]
+
   const publishedCount = dashboards.filter((d) => d.status === 'published').length
   const filtered = dashboards.filter((d) => {
     const matchStatus = status === 'All' || d.status === status.toLowerCase()
     const matchKind = kind === 'All' || dashboardKind(d) === kind.toLowerCase()
+    const matchOwner = owner === 'All' || d.owner === owner
     const matchSearch = !search || d.name.toLowerCase().includes(search.toLowerCase())
-    return matchStatus && matchKind && matchSearch
+    return matchStatus && matchKind && matchOwner && matchSearch
   })
   // 'recent' keeps the seed order (newest first); 'name' sorts alphabetically. Dir flips either.
   const shown = (() => {
@@ -73,6 +83,7 @@ export default function DashboardList() {
         filters={[
           { id: 'status', label: 'Status', value: status, onChange: setStatus, options: STATUS_OPTIONS },
           { id: 'kind', label: 'Kind', value: kind, onChange: setKind, options: KIND_OPTIONS },
+          { id: 'owner', label: 'Owner', value: owner, onChange: setOwner, options: ownerOptions },
         ]}
         sort={{
           value: sortBy,

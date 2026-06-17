@@ -1,13 +1,18 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { PageHeader, EmptyState } from '../components/common/index.jsx'
 import FilterToolbar from '../components/common/FilterToolbar.jsx'
+import StudioWelcome from '../components/common/StudioWelcome.jsx'
 import DashboardCards from '../components/dashboard/DashboardCards.jsx'
 import { useDashboards } from '../state/DashboardsContext.jsx'
+import { useRole } from '../state/RoleContext.jsx'
 import { REPORT_COLLECTIONS } from '../data/mock.js'
 
 // Consumption surface for dashboards placed as standalone reports, by collection.
 export default function ReportsPage() {
+  const navigate = useNavigate()
   const { dashboards } = useDashboards()
+  const { isAdmin } = useRole()
   const [search, setSearch] = useState('')
   const [collection, setCollection] = useState('All')
   const [sortBy, setSortBy] = useState('name')
@@ -45,6 +50,12 @@ export default function ReportsPage() {
       />
       <div className="flex-1 overflow-auto">
         <div className="mx-auto w-full max-w-[1800px] space-y-6 px-6 py-5 lg:px-8 2xl:px-12">
+          <StudioWelcome
+            studioId="reports"
+            built={{ count: reports.length, label: 'reports' }}
+            ctaLabel={isAdmin ? 'New dashboard' : undefined}
+            onCta={isAdmin ? () => navigate('/dashboard/new') : undefined}
+          />
           {reports.length === 0 ? (
             <EmptyState
               icon="📊"
