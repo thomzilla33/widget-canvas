@@ -22,9 +22,10 @@ export default function DashboardCards({ items }) {
             <span className="logo-sq" style={{ background: 'var(--grad)' }}>
               <LayoutDashboard size={18} aria-hidden="true" />
             </span>
-            <div className="min-w-0 pr-24">
-              <div className="truncate text-sm font-semibold text-gray-900 dark:text-slate-100">{d.name}</div>
-              <div className="flex items-center gap-1 text-[11px] text-gray-500 dark:text-slate-400">
+            <div className="min-w-0 flex-1">
+              {/* only the title clears the absolute status badge */}
+              <div className="truncate pr-20 text-sm font-semibold text-gray-900 dark:text-slate-100">{d.name}</div>
+              <div className="mt-0.5 flex min-w-0 items-center gap-1 text-[11px] text-gray-500 dark:text-slate-400">
                 <MapPin size={11} aria-hidden="true" className="shrink-0" />
                 <span className="truncate">{placementLabel(d.placement)}</span>
               </div>

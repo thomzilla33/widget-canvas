@@ -165,23 +165,24 @@ export default function DashboardList() {
                   <span className="logo-sq" style={{ background: 'var(--grad)' }}>
                     <LayoutDashboard size={18} />
                   </span>
-                  <div className="min-w-0 pr-24">
-                    <div className="truncate text-sm font-semibold text-gray-900 dark:text-slate-100">
+                  <div className="min-w-0 flex-1">
+                    {/* only the title clears the absolute status badge — not the rows below */}
+                    <div className="truncate pr-20 text-sm font-semibold text-gray-900 dark:text-slate-100">
                       {d.name}
                     </div>
-                    <div className="flex items-center gap-1.5">
-                      <span className={`cap-chip ${dashboardKind(d) === 'entity' ? 'cap-chip-blue' : 'cap-chip-neutral'}`}>
+                    <div className="mt-0.5 flex min-w-0 items-center gap-1.5">
+                      <span className={`cap-chip shrink-0 ${dashboardKind(d) === 'entity' ? 'cap-chip-blue' : 'cap-chip-neutral'}`}>
                         {dashboardKind(d) === 'entity' ? 'Profile' : 'Standalone'}
                       </span>
-                      <span className="flex items-center gap-1 truncate text-[11px] text-gray-500 dark:text-slate-400">
+                      <span className="flex min-w-0 items-center gap-1 text-[11px] text-gray-500 dark:text-slate-400">
                         <MapPin size={11} className="shrink-0" />
                         <span className="truncate">{placementLabel(d.placement)}</span>
                       </span>
                     </div>
-                    <div className="mt-0.5 flex items-center gap-1 truncate text-[11px] text-gray-500 dark:text-slate-400">
-                      Owner · {d.owner}
+                    <div className="mt-0.5 flex min-w-0 items-center gap-1 text-[11px] text-gray-500 dark:text-slate-400">
+                      <span className="truncate">Owner · {d.owner}</span>
                       {DEACTIVATED_OWNERS.includes(d.owner) && (
-                        <span className="cap-chip cap-chip-neutral !border-amber-300 !text-aims-ungoverned dark:!border-amber-500/30 dark:!text-amber-400">offboarded</span>
+                        <span className="cap-chip cap-chip-neutral shrink-0 !border-amber-300 !text-aims-ungoverned dark:!border-amber-500/30 dark:!text-amber-400">offboarded</span>
                       )}
                     </div>
                   </div>
