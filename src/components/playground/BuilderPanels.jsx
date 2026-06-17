@@ -22,6 +22,7 @@ import {
   Search,
   Database,
   FunctionSquare,
+  ChevronLeft,
 } from 'lucide-react'
 import { EmptyState, ConnectionBadge } from '../common/index.jsx'
 import { EXTERNAL_SOURCES, WIDGET_TYPES, TYPE_LABEL } from '../../data/mock.js'
@@ -81,7 +82,15 @@ function groupByCategory(sources) {
 
 export function SourcePicker({ sourceId, onSelect, onBrowse }) {
   const [q, setQ] = useState('')
+  const [editing, setEditing] = useState(false)
   const selected = EXTERNAL_SOURCES.find((s) => s.id === sourceId)
+
+  // Collapsed state: once a source is chosen, show it as locked-in and let
+  // everything below build on it. "Change" re-opens the picker.
+  if (selected && !editing) {
+    return <SelectedSource source={selected} onChange={() => { setQ(''); setEditing(true) }} />
+  }
+
   // Show connected sources; if the chosen source isn't connected (picked from
   // the catalog), surface it at the top so the selection stays visible.
   let pool = EXTERNAL_SOURCES.filter((s) => s.connected)
@@ -92,9 +101,15 @@ export function SourcePicker({ sourceId, onSelect, onBrowse }) {
     ? pool.filter((s) => s.name.toLowerCase().includes(query) || s.category.toLowerCase().includes(query))
     : pool
   const groups = groupByCategory(filtered)
+  const pick = (id) => { onSelect(id); setEditing(false) }
 
   return (
     <div className="space-y-3">
+      {selected && (
+        <button onClick={() => setEditing(false)} className="inline-flex items-center gap-1 text-xs font-medium text-gray-500 hover:text-aims-blue dark:text-slate-400">
+          <ChevronLeft size={13} aria-hidden="true" /> Keep {selected.name}
+        </button>
+      )}
       <div className="relative">
         <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-500 dark:text-slate-400" />
         <input
@@ -116,7 +131,7 @@ export function SourcePicker({ sourceId, onSelect, onBrowse }) {
               <div className="mb-1 text-[10px] font-bold uppercase tracking-wide text-gray-500 dark:text-slate-400">{cat}</div>
               <div className="space-y-1.5">
                 {items.map((s) => (
-                  <SourceRow key={s.id} source={s} selected={sourceId === s.id} onSelect={onSelect} />
+                  <SourceRow key={s.id} source={s} selected={sourceId === s.id} onSelect={pick} />
                 ))}
               </div>
             </div>
@@ -127,6 +142,25 @@ export function SourcePicker({ sourceId, onSelect, onBrowse }) {
       <button className="btn-secondary w-full" onClick={onBrowse}>
         <Database size={15} /> Browse all {EXTERNAL_SOURCES.length} sources
       </button>
+    </div>
+  )
+}
+
+// Locked-in source: a compact confirmation card with a Change affordance.
+function SelectedSource({ source, onChange }) {
+  return (
+    <div className="flex items-center gap-3 rounded-lg border border-aims-blue/40 bg-aims-blue/5 p-3 dark:bg-aims-blue/10">
+      <span className="logo-sq !h-9 !w-9 !text-[11px]" style={{ background: source.logoColor }}>{source.initials}</span>
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-1.5">
+          <span className="truncate text-sm font-semibold text-gray-900 dark:text-slate-100">{source.name}</span>
+          <Check size={13} className="shrink-0 text-aims-blue" aria-hidden="true" />
+          {source.hasPII && <Lock size={11} className="shrink-0 text-gray-500 dark:text-slate-400" />}
+        </div>
+        <div className="truncate text-[11px] text-gray-500 dark:text-slate-400">{source.category}</div>
+      </div>
+      <ConnectionBadge status={source.status} />
+      <button onClick={onChange} className="btn-secondary !h-8 shrink-0 !px-3 text-xs">Change</button>
     </div>
   )
 }
@@ -152,12 +186,42 @@ function SourceRow({ source, selected, onSelect }) {
 
 /* ── 1b. Table picker — your governed Table Definitions as a data source ── */
 export function TablePicker({ tableId, onSelect }) {
+  const [editing, setEditing] = useState(false)
+  const selected = TABLE_DEFINITIONS.find((t) => t.id === tableId)
+
+  // Collapsed: a chosen table locks in, everything below builds on it. Change re-opens.
+  if (selected && !editing) {
+    return (
+      <div className="flex items-center gap-3 rounded-lg border border-aims-blue/40 bg-aims-blue/5 p-3 dark:bg-aims-blue/10">
+        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-indigo-500/10 text-indigo-500 dark:text-indigo-300">
+          <Table2 size={16} />
+        </span>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-1.5">
+            <span className="truncate text-sm font-semibold text-gray-900 dark:text-slate-100">{selected.name}</span>
+            <Check size={13} className="shrink-0 text-aims-blue" aria-hidden="true" />
+          </div>
+          <div className="truncate text-[11px] text-gray-500 dark:text-slate-400">
+            {selected.scope} · Owner {selected.owner} · {tableValueColumns(selected).length} value columns
+          </div>
+        </div>
+        <button onClick={() => setEditing(true)} className="btn-secondary !h-8 shrink-0 !px-3 text-xs">Change</button>
+      </div>
+    )
+  }
+
+  const pick = (id) => { onSelect(id); setEditing(false) }
   return (
     <div className="space-y-1.5">
+      {selected && (
+        <button onClick={() => setEditing(false)} className="mb-1 inline-flex items-center gap-1 text-xs font-medium text-gray-500 hover:text-aims-blue dark:text-slate-400">
+          <ChevronLeft size={13} aria-hidden="true" /> Keep {selected.name}
+        </button>
+      )}
       {TABLE_DEFINITIONS.map((t) => (
         <button
           key={t.id}
-          onClick={() => onSelect(t.id)}
+          onClick={() => pick(t.id)}
           className={`flex w-full cursor-pointer items-center gap-2.5 rounded-lg border p-2.5 text-left transition-shadow hover:bg-gray-50 hover:shadow-sm dark:hover:bg-white/5 ${
             tableId === t.id ? 'border-aims-blue ring-2 ring-aims-blue/30' : 'border-gray-200 dark:border-white/10'
           }`}

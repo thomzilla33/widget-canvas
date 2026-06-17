@@ -189,10 +189,22 @@ function formatMetric(raw, unit) {
   }
 }
 // Keep a per-category value plausible for its unit (percent ≤100, score ≤5, …).
+// Ratio units keep one decimal (a duration like 1.4 h must not round to 1).
 function clampUnit(unit, v) {
   if (unit === 'percent') return Math.min(100, Math.max(1, Math.round(v * 10) / 10))
   if (unit === 'score') return Math.min(5, Math.max(1, Math.round(v * 10) / 10))
-  return Math.max(1, Math.round(v))
+  return Math.max(1, Math.round(v * 10) / 10)
+}
+// Re-render a ratio headline at a new raw value, preserving its original unit
+// (percent → %, score → /5, duration → keeps its "h"/"days"/"min" suffix).
+function reformatRatio(unit, raw, originalValueStr = '') {
+  if (unit === 'percent') return `${Math.round(raw * 10) / 10}%`
+  if (unit === 'score') return `${Math.round(raw * 10) / 10} / 5`
+  if (unit === 'duration') {
+    const suffix = (String(originalValueStr).match(/[a-zA-Z]+\s*$/) || [''])[0].trim()
+    return `${Math.round(raw * 10) / 10}${suffix ? ` ${suffix}` : ''}`
+  }
+  return formatMetric(raw, unit)
 }
 // The first-column label for a metric's breakdown (mirrors breakdownCats' branches).
 function dimLabelOf(name = '') {
@@ -219,13 +231,24 @@ const RANGE_MULT = { '7d': 0.45, '30d': 0.78, '90d': 1, qtd: 0.9, '12m': 1.7 }
 // widget render the SAME data — switching the widget type only re-visualizes it,
 // never swaps in unrelated canned rows. `h` seeds variety (stable per identity),
 // `m` is the magnitude multiplier (date range × filters × scope rollup).
-function metricBundle(name, { h = 0, m = 1, dimensionId, transform } = {}) {
+function metricBundle(name, { h = 0, m = 1, filterCount = 0, dimensionId, transform } = {}) {
   const unit = metricUnit(name)
   const additive = unit === 'currency' || unit === 'count'
   const k = semanticKpi(name, h)
   const transformed = !!(transform && transform !== 'none')
-  const kpiRaw = additive ? Math.max(1, Math.round(k.raw * m)) : k.raw
-  const kpiValue = additive ? formatMetric(kpiRaw, unit) : k.value
+  // Additive metrics scale in MAGNITUDE (date range × filters × scope rollup).
+  // Ratio metrics (rate/score/duration) don't scale with a date range — but active
+  // dimension FILTERS re-scope them to a plausibly different sub-population value
+  // (filtering Escalation Rate by Agent shows that agent's rate, deterministically).
+  let kpiRaw, kpiValue
+  if (additive) {
+    kpiRaw = Math.max(1, Math.round(k.raw * m))
+    kpiValue = formatMetric(kpiRaw, unit)
+  } else {
+    const shift = filterCount > 0 ? (((h + filterCount * 31) % 17) - 8) / 100 : 0 // deterministic ±8%
+    kpiRaw = clampUnit(unit, k.raw * (1 + shift))
+    kpiValue = reformatRatio(unit, kpiRaw, k.value)
+  }
 
   // Breakdown by the metric's natural categories. Additive units distribute the
   // KPI across categories (Σ ≈ KPI); ratio units carry a per-category rate/score.
@@ -236,7 +259,7 @@ function metricBundle(name, { h = 0, m = 1, dimensionId, transform } = {}) {
   const rawBreakdown = cats.map((label, i) =>
     additive
       ? { label, value: Math.max(1, Math.round(kpiRaw * (weights[i] / wsum))) }
-      : { label, value: clampUnit(unit, k.raw * (0.55 + (weights[i] / maxw) * 0.5)) },
+      : { label, value: clampUnit(unit, kpiRaw * (0.55 + (weights[i] / maxw) * 0.5)) },
   )
   const breakdown = dimensionId || transform ? shapeBreakdown(rawBreakdown, { dimensionId, transform }) : rawBreakdown
   // Share is computed from the SHAPED breakdown (a dimension can re-slice the set),
@@ -244,7 +267,7 @@ function metricBundle(name, { h = 0, m = 1, dimensionId, transform } = {}) {
   const total = breakdown.reduce((a, b) => a + b.value, 0) || 1
 
   // Series: the metric over time, scaled to its magnitude.
-  const seriesBase = additive ? kpiRaw / cats.length : k.raw
+  const seriesBase = additive ? kpiRaw / cats.length : kpiRaw
   const series = MONTHS.map((mo, i) => ({
     x: mo,
     y: Math.max(0, Math.round(seriesBase * (0.7 + 0.45 * Math.sin(i / 1.6) + i * 0.05) + ((h >> i) % 7) - 3)),
@@ -265,7 +288,7 @@ function metricBundle(name, { h = 0, m = 1, dimensionId, transform } = {}) {
   const geo = SAMPLE.geo.map((g) =>
     additive
       ? { region: g.region, value: Math.max(1, Math.round(kpiRaw * (g.value / geoSum))) }
-      : { region: g.region, value: clampUnit(unit, k.raw * (0.6 + (g.value / geoMax) * 0.4)) },
+      : { region: g.region, value: clampUnit(unit, kpiRaw * (0.6 + (g.value / geoMax) * 0.4)) },
   )
 
   // Matrix / scatter: index-scaled so they track the metric's magnitude.
@@ -311,7 +334,7 @@ export function previewData(metric, opts) {
   const rangeMult = (opts && RANGE_MULT[opts.range]) || 1
   const filterScale = 1 - Math.min(0.4, (opts?.filterCount || 0) * 0.15)
   const m = additive ? rangeMult * filterScale : 1
-  return { ...SAMPLE, ...metricBundle(name, { h: hashId(name), m, dimensionId: opts?.dimension?.id, transform: opts?.transform }) }
+  return { ...SAMPLE, ...metricBundle(name, { h: hashId(name), m, filterCount: opts?.filterCount || 0, dimensionId: opts?.dimension?.id, transform: opts?.transform }) }
 }
 
 // Dashboard/library render: the SAME metricBundle as the builder preview (so a
@@ -331,7 +354,7 @@ export function widgetSample(widget, scope) {
   const rollupMult = scope?.rollup ? scopeMult(scope.rollup) : 1 // broader PBAC scope → larger aggregates
   const m = rangeMult * filterScale * rollupMult
 
-  const bundle = metricBundle(name, { h: hStable, m, dimensionId: widget?.dimension, transform: widget?.transform })
+  const bundle = metricBundle(name, { h: hStable, m, filterCount: filterVals.length, dimensionId: widget?.dimension, transform: widget?.transform })
 
   // Live tiles wobble the headline each tick (count/currency only; the salt folds
   // in the tick so the jitter actually changes between intervals). Build the
