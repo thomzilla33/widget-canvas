@@ -209,6 +209,11 @@ function dimLabelOf(name = '') {
   return 'Segment'
 }
 
+// Consumption controls: a date range scales magnitude (longer = bigger cumulative
+// numbers) and active filters narrow the data. Shared by the builder preview and
+// the consumption surfaces; declared here so previewData (below) can read it safely.
+const RANGE_MULT = { '7d': 0.45, '30d': 0.78, '90d': 1, qtd: 0.9, '12m': 1.7 }
+
 // Builds a FULLY metric-derived sample bundle, so EVERY widget type (KPI, bar, table,
 // heatmap, scatter, map, summary…) shows the SAME selected metric — switching the type
 // only re-visualizes it, never swaps in unrelated canned data.
@@ -241,8 +246,10 @@ export function previewData(metric, opts) {
       ? { label, value: Math.max(1, Math.round(kpiRaw * (weights[i] / wsum))) }
       : { label, value: clampUnit(unit, k.raw * (0.55 + (weights[i] / maxw) * 0.5)) },
   )
-  const total = rawBreakdown.reduce((a, b) => a + b.value, 0) || 1
   const breakdown = opts ? shapeBreakdown(rawBreakdown, { dimensionId: opts.dimension?.id, transform: opts.transform }) : rawBreakdown
+  // Share is computed from the SHAPED breakdown (a dimension can re-slice the set),
+  // so per-row shares always add up to 100%.
+  const total = breakdown.reduce((a, b) => a + b.value, 0) || 1
 
   // Series: the metric over time, scaled to its magnitude.
   const seriesBase = additive ? kpiRaw / cats.length : k.raw
@@ -303,11 +310,6 @@ export function previewData(metric, opts) {
     gauge: { value: gaugeVal, label: 'of target' },
   }
 }
-
-// Consumption controls: a date range scales magnitude (longer = bigger cumulative
-// numbers) and active filters narrow the data. `scope` is optional — when absent
-// the output is identical to the un-scoped baseline (canvas/library/builder).
-const RANGE_MULT = { '7d': 0.45, '30d': 0.78, '90d': 1, qtd: 0.9, '12m': 1.7 }
 
 export function widgetSample(widget, scope) {
   const base = widget?.id || widget?.name || ''

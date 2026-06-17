@@ -406,14 +406,14 @@ function TableGridView({ grid }) {
 }
 
 function ListView({ data }) {
-  const max = Math.max(...data.breakdown.map((b) => b.value))
+  const max = Math.max(0, ...data.breakdown.map((b) => b.value))
   return (
     <ul className="space-y-2">
       {data.breakdown.map((b, i) => (
         <li key={b.label} className="flex items-center gap-2 text-xs">
           <span className="w-24 shrink-0 truncate text-gray-700 dark:text-slate-200">{b.label}</span>
           <span className="h-2 flex-1 overflow-hidden rounded-full bg-gray-100 dark:bg-white/10">
-            <span className="block h-full rounded-full" style={{ width: `${(b.value / max) * 100}%`, background: SERIES[i % SERIES.length] }} />
+            <span className="block h-full rounded-full" style={{ width: `${max > 0 ? (b.value / max) * 100 : 0}%`, background: SERIES[i % SERIES.length] }} />
           </span>
           <span className="w-8 shrink-0 text-right font-semibold text-gray-900 dark:text-slate-100">{b.value}</span>
         </li>
