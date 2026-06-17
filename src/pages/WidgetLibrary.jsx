@@ -8,6 +8,7 @@ import WidgetRender from '../components/widgets/WidgetRender.jsx'
 import RepinModal from '../components/widgets/RepinModal.jsx'
 import FlagDetailModal from '../components/widgets/FlagDetailModal.jsx'
 import WidgetMarketplace from '../components/widgets/WidgetMarketplace.jsx'
+import SourceTemplatesBanner from '../components/widgets/SourceTemplatesBanner.jsx'
 import { useWidgets } from '../state/WidgetsContext.jsx'
 import { useFeedback } from '../state/FeedbackContext.jsx'
 import { entities, SCHEMA_DRIFT } from '../data/mock.js'
@@ -90,6 +91,8 @@ export default function WidgetLibrary() {
       </div>
 
       <div className="flex-1 overflow-auto px-6 py-4">
+        {/* U4 — per-source templates from connected integrations */}
+        <SourceTemplatesBanner />
         {/* S121 — Needs Attention (flags from end users) */}
         {openFlags.length > 0 && (
           <div className="mb-5 rounded-xl border border-aims-stale/30 bg-red-50/60 p-4 dark:bg-red-500/5">

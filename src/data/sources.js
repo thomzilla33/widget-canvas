@@ -625,3 +625,44 @@ export function sourceFields(source) {
   if (!source) return []
   return [...source.metrics, ...source.recordSets]
 }
+
+// U4 — per-source dashboard/widget templates. Connecting a source surfaces a
+// ready-made bundle to install in one click (deduped by templateId). Mock.
+export const SOURCE_TEMPLATES = {
+  'src-salesforce': [
+    { id: 'tpl-sf-pipeline', name: 'Pipeline by Stage', skeleton: 'Chart' },
+    { id: 'tpl-sf-winrate', name: 'Win Rate', skeleton: 'Gauge' },
+    { id: 'tpl-sf-dealsize', name: 'Avg Deal Size', skeleton: 'KPI' },
+    { id: 'tpl-sf-reps', name: 'Top Reps by Bookings', skeleton: 'List' },
+  ],
+  'src-zendesk': [
+    { id: 'tpl-zd-sla', name: 'SLA Breach Risk', skeleton: 'Gauge' },
+    { id: 'tpl-zd-csat', name: 'CSAT', skeleton: 'Gauge' },
+    { id: 'tpl-zd-volume', name: 'Ticket Volume', skeleton: 'Chart' },
+    { id: 'tpl-zd-queue', name: 'Open Tickets', skeleton: 'List' },
+  ],
+  'src-stripe': [
+    { id: 'tpl-st-mrr', name: 'MRR Trend', skeleton: 'Chart' },
+    { id: 'tpl-st-churn', name: 'Churn Rate', skeleton: 'Gauge' },
+    { id: 'tpl-st-failed', name: 'Failed Payments', skeleton: 'KPI' },
+  ],
+  'src-hubspot': [
+    { id: 'tpl-hs-leadvel', name: 'Lead Velocity', skeleton: 'Chart' },
+    { id: 'tpl-hs-mql', name: 'MQLs This Month', skeleton: 'KPI' },
+    { id: 'tpl-hs-funnel', name: 'Lifecycle Funnel', skeleton: 'Funnel' },
+  ],
+  'src-aims-agentic': [
+    { id: 'tpl-aims-runs', name: 'Workflow Runs', skeleton: 'Chart' },
+    { id: 'tpl-aims-hitl', name: 'Human-in-the-Loops', skeleton: 'KPI' },
+    { id: 'tpl-aims-actions', name: 'Actions by Type', skeleton: 'Chart' },
+  ],
+}
+
+export function templatesForSource(sourceId) {
+  return SOURCE_TEMPLATES[sourceId] || []
+}
+
+// Connected sources that ship a template bundle (drives the "Templates" surface).
+export function sourcesWithTemplates() {
+  return EXTERNAL_SOURCES.filter((s) => s.connected && (SOURCE_TEMPLATES[s.id] || []).length)
+}
