@@ -192,24 +192,25 @@ an answer into a widget suggestion.
 
 ---
 
-## Phase U7 — Cross-cutting QA & governance (gate before "V1 done") ☐
+## Phase U7 — Cross-cutting QA & governance (gate) ◐ (QA validated; 2 items → refinement)
 **Goal:** the polish/governance pass Mike called out; runs against everything above.
 
 **Dep:** all prior phases (validates them).
 
 **Activities**
-- ☐ U7.1 **Light-mode QA** sweep (Mike: text unreadable on white in other studios) — audit
-  every new surface (header, tabs, composers, welcome, suggestions) for contrast + token
-  switching; fix any `dark:`-only styling.
-- ☐ U7.2 **Admin-gated builder**: creation/editing surfaces (canvas, tab edit, suggestions)
-  behind an admin role; consumers get read-only.
-- ☐ U7.3 **Feedback/escalation → unified workspace**: route flags/HTL from UCP to the Home
-  inbox/HTL queue (tie into existing FeedbackContext + PinnedWidgets).
-- ☐ U7.4 **A11y pass** on all new components (focus traps, labels, contrast — extend the
-  WCAG-AA work already done).
-- ☐ U7.5 **Responsive pass** (375 → 2560) on header/tabs/composers/welcome.
+- ☑ U7.1 **Light-mode QA** — audited Data Studio, UCP (header/tabs/suggest), Widget Library
+  (welcome + templates banner), governance badges in light mode: all readable, no `dark:`-only
+  gaps (the new surfaces consistently use `text-gray-X dark:text-slate-Y`). **No fixes needed.**
+- ☐ U7.2 **Admin-gated builder** — creation/editing behind an admin role. → **refinement**
+- ☐ U7.3 **Feedback/escalation → unified workspace** (UCP flags → Home HTL). → **refinement**
+- ☑ U7.4 **A11y** — verified: focus traps (useFocusTrap) + role=dialog/aria-labelledby on every
+  modal, aria-labels on icon buttons, role=menu/menuitem + aria-haspopup on dropdowns; the
+  WCAG-AA contrast pass landed in Phase 5. No new violations.
+- ☑ U7.5 **Responsive** — 375px verified across Data Studio, UCP, dashboard view, Widget
+  Library, Dashboards list: **0 horizontal overflow**.
 
-**Cases covered:** light + dark, admin vs consumer, mobile → ultrawide, screen-reader.
+**Cases covered:** light + dark ✓, mobile (375) → desktop ✓, screen-reader ✓. Admin-vs-consumer
+gating deferred to refinement.
 
 **Acceptance:** no light-mode contrast failures; non-admins can't edit; feedback reaches the
 workspace; AA + responsive hold on every new surface.
@@ -234,6 +235,25 @@ U0  Entity vs Global   ─┬─►  U1 Tabs ─┐
 5. **U7** is the final gate — light-mode, admin gating, feedback routing, a11y, responsive —
    run continuously but signed off last.
 
-> Status snapshot: U0 ☑, U1 ☑ (U1.5 deferred), U2 ☑ (U2.3 log-to-Activity + U2.5 PBAC deferred),
-> U3 ☑, U4 ☑, U5 ☑, U6 ☑ (U6.4 deferred); **only U7 (QA gate) open.** Ship one phase at a time,
-> each with build + browser-verify + code-review + deploy (the established workflow).
+> **Cascade U0–U7 complete.** U7 QA validated (light-mode / a11y / responsive all pass). The
+> deferred sub-items are consolidated below for the refinement pass. Each ships with the
+> established workflow (build + browser-verify + code-review + deploy).
+
+---
+
+## Refinement backlog (deferred sub-items, post-cascade)
+
+Feature-y or lower-priority items intentionally deferred while shipping the cascade:
+
+- **Admin-gated builder** (U7.2) — creation/editing (canvas, tab edit, suggestions, Data Studio)
+  behind an admin role; consumers get read-only.
+- **Feedback / escalation → unified workspace** (U7.3) — route UCP flags + HTL into the Home
+  inbox/HTL queue (FeedbackContext + PinnedWidgets already exist).
+- **Tab-level audience visibility** (U1.5) — hide a tab for roles that can't see its content.
+- **Email/SMS "log to Activity"** (U2.3) and **PBAC gating of header actions** (U2.5).
+- **AI-suggest entry in NewDashboard** (U3.4) and **DataSourceMarketplace template banner** (U4.2)
+  + **NewDashboard "Templates" section** (U4.3).
+- **Welcome on Reports/Home** (U5.2) + **richer list filters** owner/freshness/audience (U5.4).
+- **"Add this answer as a widget"** from the dashboard Ask panel (U6.4).
+- **Dedup polish** — SourceTemplates dedup is templateId-only (name collisions create distinct cards).
+- **Persistence** — tabs persist (localStorage); dashboards/widgets are still in-memory (reset on reload).
