@@ -7,6 +7,7 @@ import WidgetLibraryModal from '../components/widgets/WidgetLibraryModal.jsx'
 import PublishModal from '../components/dashboard/PublishModal.jsx'
 import ShareModal from '../components/dashboard/ShareModal.jsx'
 import EntityContextHeader, { entityHeaderApplies } from '../components/dashboard/EntityContextHeader.jsx'
+import SuggestWidgetsModal from '../components/dashboard/SuggestWidgetsModal.jsx'
 import { useWidgets } from '../state/WidgetsContext.jsx'
 import { useDashboards } from '../state/DashboardsContext.jsx'
 import { WIDGET_SIZES, dashboardKindLabel } from '../data/mock.js'
@@ -44,6 +45,7 @@ export default function DashboardCanvas() {
   const [selectedPid, setSelectedPid] = useState(null)
   const [publishOpen, setPublishOpen] = useState(false)
   const [shareOpen, setShareOpen] = useState(false)
+  const [suggestOpen, setSuggestOpen] = useState(false)
   const [dragOverZone, setDragOverZone] = useState(null)
 
   // Layout is persisted on the dashboard (so edits show on the view/profile).
@@ -168,6 +170,9 @@ export default function DashboardCanvas() {
                 )}
               </button>
             )}
+            <button className="btn-secondary" onClick={() => setSuggestOpen(true)} title="Suggest widgets for this profile">
+              <Sparkles size={15} /> Suggest
+            </button>
             <button className="btn-secondary" onClick={() => setShareOpen(true)}>
               Share
             </button>
@@ -188,15 +193,20 @@ export default function DashboardCanvas() {
                 title="No widgets placed yet"
                 description="Select a zone and add widgets to get started."
                 action={
-                  <button
-                    className="btn-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aims-blue/50"
-                    onClick={() => {
-                      setSelectedPid(null)
-                      setDrawerZone(ZONES[0].key)
-                    }}
-                  >
-                    <Plus size={15} aria-hidden="true" /> Add widget
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      className="btn-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aims-blue/50"
+                      onClick={() => {
+                        setSelectedPid(null)
+                        setDrawerZone(ZONES[0].key)
+                      }}
+                    >
+                      <Plus size={15} aria-hidden="true" /> Add widget
+                    </button>
+                    <button className="btn-secondary" onClick={() => setSuggestOpen(true)}>
+                      <Sparkles size={15} aria-hidden="true" /> Suggest widgets
+                    </button>
+                  </div>
                 }
               />
             </div>
@@ -282,6 +292,15 @@ export default function DashboardCanvas() {
       )}
 
       {shareOpen && dashboard && <ShareModal dashboard={dashboard} onClose={() => setShareOpen(false)} />}
+
+      {suggestOpen && (
+        <SuggestWidgetsModal
+          profileType={dashboard?.placement?.profileType || 'Company'}
+          placedIds={allPlacements.map((p) => p.widgetId)}
+          onAdd={(w) => placeWidget('main', w)}
+          onClose={() => setSuggestOpen(false)}
+        />
+      )}
     </div>
   )
 }

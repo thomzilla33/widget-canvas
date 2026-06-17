@@ -30,6 +30,7 @@ import { useFeedback } from '../state/FeedbackContext.jsx'
 import { useDashboards } from '../state/DashboardsContext.jsx'
 import { useProfileConfig } from '../state/ProfileConfigContext.jsx'
 import { entities, MANDATORY_TABS } from '../data/mock.js'
+import { suggestTabs } from '../data/suggestions.js'
 
 // Map an entity's type to the placement profile type used by dashboards.
 const PROFILE_OF = { Account: 'Company', Contact: 'Contact', Employee: 'Employee', Deal: 'Deal', Case: 'Case' }
@@ -77,6 +78,7 @@ export default function UCPView() {
   const [renaming, setRenaming] = useState(null) // tab name being renamed
   const [renameValue, setRenameValue] = useState('')
   const [dragTab, setDragTab] = useState(null) // tab name being dragged
+  const [suggestTabsOpen, setSuggestTabsOpen] = useState(false) // U3 suggested-tabs popover
   const tabDashboards = profileDashboards.filter((d) => (d.placement.tab || 'Overview') === activeTab)
 
   // All tab mutations persist the placement-FREE list: placement tabs are derived
@@ -211,7 +213,8 @@ export default function UCPView() {
       />
 
       <div className="border-b border-gray-200 bg-white px-6 dark:border-white/10 dark:bg-[#0f1629]">
-        <div className="flex items-center gap-0.5 overflow-x-auto">
+        <div className="flex items-center">
+          <div className="flex min-w-0 items-center gap-0.5 overflow-x-auto">
           {tabs.map((t) => {
             const mandatory = MANDATORY_TABS.includes(t)
             if (renaming === t) {
@@ -295,6 +298,46 @@ export default function UCPView() {
             >
               <Plus size={14} aria-hidden="true" /> Add tab
             </button>
+          )}
+          </div>
+
+          {/* U3 — suggested tabs (outside the scroll container so the popover isn't clipped) */}
+          {suggestTabs(profileType, tabs).length > 0 && (
+            <div className="relative shrink-0">
+              <button
+                onClick={() => setSuggestTabsOpen((o) => !o)}
+                aria-expanded={suggestTabsOpen}
+                aria-haspopup="menu"
+                className="inline-flex items-center gap-1 rounded-md px-2 py-1.5 text-sm font-medium text-aims-blue hover:bg-aims-blue/10"
+              >
+                <Sparkles size={14} aria-hidden="true" /> Suggest tabs
+              </button>
+              {suggestTabsOpen && (
+                <>
+                  <div className="fixed inset-0 z-10" onClick={() => setSuggestTabsOpen(false)} aria-hidden="true" />
+                  <div role="menu" className="absolute left-0 top-full z-20 mt-1 w-64 overflow-hidden rounded-lg border border-gray-200 bg-white py-1 shadow-lg dark:border-white/10 dark:bg-[#131a2c]">
+                    <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-500">Suggested for {profileType}</div>
+                    {suggestTabs(profileType, tabs).map((s) => (
+                      <button
+                        key={s.tab}
+                        role="menuitem"
+                        onClick={() => {
+                          persistFrom([...tabs, s.tab])
+                          setSuggestTabsOpen(false)
+                        }}
+                        className="flex w-full items-start gap-2 px-3 py-2 text-left hover:bg-gray-50 dark:hover:bg-white/5"
+                      >
+                        <Plus size={13} className="mt-0.5 shrink-0 text-aims-blue" aria-hidden="true" />
+                        <span className="min-w-0">
+                          <span className="block text-sm font-medium text-gray-900 dark:text-slate-100">{s.tab}</span>
+                          <span className="block text-[11px] text-gray-500 dark:text-slate-400">{s.why}</span>
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
           )}
         </div>
       </div>
