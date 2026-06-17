@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { LayoutDashboard, Search, MapPin, UserX, RotateCcw } from 'lucide-react'
 import { PageHeader, Badge, EmptyState } from '../components/common/index.jsx'
+import StudioWelcome from '../components/common/StudioWelcome.jsx'
 import { useDashboards } from '../state/DashboardsContext.jsx'
 import { placementLabel, DEACTIVATED_OWNERS, dashboardKind } from '../data/mock.js'
 import { widgetCount } from '../data/layout.js'
@@ -86,6 +87,12 @@ export default function DashboardList() {
       </div>
 
       <div className="flex-1 overflow-auto px-6 py-4">
+        <StudioWelcome
+          studioId="dashboards"
+          built={{ count: dashboards.length, label: 'dashboards' }}
+          ctaLabel="New dashboard"
+          onCta={() => navigate('/dashboard/new')}
+        />
         {orphaned.length > 0 && (
           <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-3 dark:border-amber-500/25 dark:bg-amber-500/10">
             <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-slate-100">

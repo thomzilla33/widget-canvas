@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { X, FunctionSquare, Table2 } from 'lucide-react'
 import { PageHeader, FreshnessBadge } from '../components/common/index.jsx'
+import StudioWelcome from '../components/common/StudioWelcome.jsx'
 import { useFocusTrap } from '../hooks/useFocusTrap.js'
 import { SERIES } from '../components/playground/WidgetPreview.jsx'
 import { TABLE_DEFINITIONS, computeTable, formatCell, tableStats, columnAvg } from '../data/tables.js'
@@ -18,6 +19,7 @@ export default function TablesPage() {
       />
       <div className="flex-1 overflow-auto">
         <div className="mx-auto w-full max-w-[1400px] px-6 py-5 lg:px-8">
+          <StudioWelcome studioId="tables" built={{ count: TABLE_DEFINITIONS.length, label: 'tables' }} />
           <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill,minmax(min(300px,100%),1fr))' }}>
             {TABLE_DEFINITIONS.map((t) => {
               const s = tableStats(t)
