@@ -99,8 +99,12 @@ function deriveName(text, fallback) {
 
 // Map a description to a whole-dashboard config: where it lives + audience + a
 // starting template (the "first preview" layout).
+// Any word we know how to act on — if none appear, we can't map the description.
+const DASH_RECOGNIZED = /report|exec|finance|leadership|rollup|\bhome\b|workspace|landing|contact|\bucp\b|person|\blead\b|account|compan|employee|\buep\b|staff|\bhr\b|\bdeal\b|opportunit|\bcase\b|ticket|sales|support|service|\bcs\b|success|manager|executive|revenue|operation|health|\bsla\b|\bcsat\b|\bteam\b|overview|activit|financ/
+
 export function describeDashboard(text) {
-  const t = (text || '').toLowerCase()
+  const t = (text || '').toLowerCase().trim()
+  if (!t || !DASH_RECOGNIZED.test(t)) return null
 
   // Surface + (for profiles) the profile type.
   let surface = 'profile'
