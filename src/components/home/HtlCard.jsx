@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Hand, Sparkles, Workflow, RefreshCw, ArrowUpRight, CheckCircle2, X } from 'lucide-react'
 import { HTL_ITEMS } from '../../data/mock.js'
 import { useWidgets } from '../../state/WidgetsContext.jsx'
+import { useFeedback } from '../../state/FeedbackContext.jsx'
 import { useFocusTrap } from '../../hooks/useFocusTrap.js'
 import RepinModal from '../widgets/RepinModal.jsx'
 import CardHeader from './CardHeader.jsx'
@@ -28,10 +29,26 @@ const ACTION_BLURB = {
 // schema-drift opens RepinModal, everything else opens a generic decision modal.
 export default function HtlCard() {
   const { widgets } = useWidgets()
+  const { flags, resolveFlag } = useFeedback()
   const [resolved, setResolved] = useState(new Set())
   const [active, setActive] = useState(null) // item being acted on (opens a flow)
-  const pending = HTL_ITEMS.filter((i) => !resolved.has(i.id))
-  const resolve = (id) => setResolved((s) => new Set(s).add(id))
+
+  // U7.3 — feedback/escalations raised on the UCP route into this unified queue.
+  const flagItems = flags
+    .filter((f) => f.status === 'open')
+    .map((f) => ({
+      id: f.id,
+      _flag: true,
+      source: 'Escalation',
+      title: `Flag: ${widgets.find((w) => w.id === f.widgetId)?.name || f.widgetName || 'a widget'}`,
+      detail: f.details || f.reason || 'A user flagged this widget for review.',
+      priority: 'med',
+      when: f.when || 'just now',
+      action: 'Review',
+    }))
+  const pending = [...flagItems, ...HTL_ITEMS.filter((i) => !resolved.has(i.id))]
+  // Resolve through the right store: context-backed flags vs local HTL items.
+  const resolve = (item) => (item._flag ? resolveFlag(item.id) : setResolved((s) => new Set(s).add(item.id)))
   return (
     <div className="card p-4">
       <CardHeader icon={Hand} title="Human Touch Layer" count={pending.length} sub="Agents, workflows & escalations waiting on you" />
@@ -62,7 +79,7 @@ export default function HtlCard() {
                 <div className="flex shrink-0 items-center gap-1.5">
                   <button className="btn-primary !px-3 !py-1.5 text-xs" onClick={() => setActive(item)}>{item.action}</button>
                   <button
-                    onClick={() => resolve(item.id)}
+                    onClick={() => resolve(item)}
                     title="Dismiss"
                     aria-label="Dismiss"
                     className="grid h-7 w-7 place-items-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:text-slate-500 dark:hover:bg-white/10"
@@ -80,14 +97,14 @@ export default function HtlCard() {
         <RepinModal
           widget={widgets.find((w) => w.id === active.widgetId) || { id: active.widgetId, name: active.title }}
           onClose={() => setActive(null)}
-          onComplete={() => resolve(active.id)}
+          onComplete={() => resolve(active)}
         />
       )}
       {active && active.flow !== 'repin' && (
         <HtlActionModal
           item={active}
           onAct={() => {
-            resolve(active.id)
+            resolve(active)
             setActive(null)
           }}
           onClose={() => setActive(null)}
