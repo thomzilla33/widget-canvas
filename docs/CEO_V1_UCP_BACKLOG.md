@@ -97,22 +97,21 @@ Activity; restricted viewers don't see disallowed actions.
 
 ---
 
-## Phase U3 — AI-suggested widgets & tabs ☐
+## Phase U3 — AI-suggested widgets & tabs ☑ (commit `3804dd2`)
 **Goal:** "here's a source / a UCP — what should I show?" → the system proposes widgets and
 tabs the admin can accept.
 
 **Dep:** U0, U1 (tabs), AIMS widget builder (done).
 
 **Activities**
-- ☐ U3.1 `suggestWidgets({ source | profileType })` heuristic (deterministic, mock): map a
-  source's measures/dimensions + the profile type to a ranked set of recommended widgets
-  (reuse `fields.js` `recommendTile`, `dimensionsFor`).
-- ☐ U3.2 **"Suggested widgets" panel** in the canvas / WidgetLibrary: cards with "Add" + "Add
-  all"; explains *why* each was suggested.
-- ☐ U3.3 **AI-suggested tabs**: propose tab sets per profile type (e.g. a dealer Contact →
-  Garage/Repair Orders/Appointments) with one-click apply into the tab bar.
-- ☐ U3.4 Entry points: a "✨ Suggest" button on the empty canvas, on an empty tab, and in
-  NewDashboard after picking a profile type.
+- ☑ U3.1 `src/data/suggestions.js`: `suggestWidgetsForProfile` (ranks the catalog by a
+  per-profile keyword/category heuristic), `suggestWidgetsForSource` (metrics→specs via
+  recommendTile), `suggestTabs` (curated per-type pool minus current). Deterministic.
+- ☑ U3.2 **SuggestWidgetsModal** — ranked cards w/ live preview + "why" + Add / Add all,
+  on the canvas header + empty state → places into the main zone.
+- ☑ U3.3 **Suggest tabs** popover on the UCP tab bar → one-click apply.
+- ◐ U3.4 Entry points: canvas header + empty-state + UCP tab bar shipped; NewDashboard
+  entry + empty-tab "suggest" deferred (canvas covers the main flow).
 
 **Cases covered:** source with only measures vs only record sets, profile with no connected
 source, already-added widgets (dedupe), low-signal sources (graceful "no strong suggestions").
@@ -230,6 +229,6 @@ U0  Entity vs Global   ─┬─►  U1 Tabs ─┐
 5. **U7** is the final gate — light-mode, admin gating, feedback routing, a11y, responsive —
    run continuously but signed off last.
 
-> Status snapshot: U0 ☑, U1 ☑ (U1.5 deferred), U2 ☑ (U2.3 log-to-Activity + U2.5 PBAC deferred);
-> U3–U7 open. Ship one phase at a time,
+> Status snapshot: U0 ☑, U1 ☑ (U1.5 deferred), U2 ☑ (U2.3 log-to-Activity + U2.5 PBAC deferred),
+> U3 ☑ (U3.4 NewDashboard entry deferred); U4–U7 open. Ship one phase at a time,
 > each with build + browser-verify + code-review + deploy (the established workflow).
