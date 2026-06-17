@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useParams, Navigate } from 'react-router-dom'
 import { Plus, X, Lock, Unlock, Trash2, Sparkles, RotateCcw, SlidersHorizontal, GripVertical } from 'lucide-react'
 import { PageHeader, GovernedBadge, FreshnessBadge, Badge, EmptyState } from '../components/common/index.jsx'
@@ -19,6 +19,11 @@ import { AUDIENCE_ROLES, placementAudiences, audienceSummary } from '../data/aud
 
 // A widget's size IS its width — free grid, 1/2/3 columns by size (capped per breakpoint).
 const SIZE_SPAN_CLASS = { sm: '', md: 'sm:col-span-2', lg: 'sm:col-span-2 lg:col-span-3' }
+// Drag-resize maps a target column span (1/2/3) to a size, and back.
+const SIZE_FOR_SPAN = { 1: 'sm', 2: 'md', 3: 'lg' }
+const GRID_GAP = 12 // gap-3
+// Columns the grid actually renders at the current viewport (Tailwind sm=640, lg=1024).
+const gridColsAtViewport = () => (window.innerWidth >= 1024 ? 3 : window.innerWidth >= 640 ? 2 : 1)
 const QUICK_ACTIONS = ['Create Task', 'Escalate / Handoff', 'Notify']
 
 // Collision-proof placement id, namespaced to the dashboard. Event-handler path,
@@ -253,12 +258,50 @@ function CanvasTile({ placement: p, widget: w, selected, dragging, onSelect, onU
   const rec = w ? vizRecommendation(w) : null
   const suggest = rec && rec.best && rec.best !== current && !vizInterchangeable(rec.best, current) ? rec.best : null
   const stop = (e) => e.stopPropagation()
+  const tileRef = useRef(null)
+  const resizingRef = useRef(false) // synchronous guard so the native drag never starts mid-resize
+  const [resizing, setResizing] = useState(false)
+
+  // Hover → press the corner handle → drag right/left to grow/shrink. Snaps to the grid
+  // column the pointer is over (1/2/3 → sm/md/lg) so the placed widget matches consume view.
+  function startResize(e) {
+    if (p.fixed) return
+    e.preventDefault(); e.stopPropagation()
+    resizingRef.current = true
+    setResizing(true)
+    const tile = tileRef.current
+    const grid = tile.parentElement
+    const cols = gridColsAtViewport()
+    const gridWidth = grid.getBoundingClientRect().width
+    const colWidth = (gridWidth - GRID_GAP * (cols - 1)) / cols
+    const left = tile.getBoundingClientRect().left
+    let lastSize = p.size
+    const onMove = (ev) => {
+      const desired = ev.clientX - left
+      const rawSpan = Math.round((desired + GRID_GAP) / (colWidth + GRID_GAP))
+      const targetSpan = Math.max(1, Math.min(cols, rawSpan))
+      const size = SIZE_FOR_SPAN[targetSpan]
+      if (size && size !== lastSize) { lastSize = size; onUpdate(p.pid, { size }) }
+    }
+    const onUp = () => {
+      resizingRef.current = false
+      setResizing(false)
+      window.removeEventListener('pointermove', onMove)
+      window.removeEventListener('pointerup', onUp)
+      document.body.style.cursor = ''
+    }
+    window.addEventListener('pointermove', onMove)
+    window.addEventListener('pointerup', onUp)
+    document.body.style.cursor = 'nwse-resize'
+  }
+
   return (
     <div
+      ref={tileRef}
       role="button"
       tabIndex={0}
-      draggable
-      onDragStart={onDragStart}
+      draggable={!resizing}
+      onDragStart={(e) => { if (resizingRef.current) { e.preventDefault(); return } onDragStart() }}
       onDragEnd={onDragEnd}
       onDragOver={(e) => e.preventDefault()}
       onDrop={(e) => { e.preventDefault(); onDropOn() }}
@@ -266,31 +309,31 @@ function CanvasTile({ placement: p, widget: w, selected, dragging, onSelect, onU
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect() } }}
       aria-label={`Configure ${w?.name || 'widget'}`}
       className={`group relative rounded-lg border bg-white p-2.5 text-left transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aims-blue/50 dark:bg-[#131a2c] ${span} ${dragging ? 'opacity-50' : ''} ${
-        selected ? 'border-aims-blue ring-2 ring-aims-blue/30' : 'border-gray-200 dark:border-white/10'
+        resizing ? 'border-aims-blue ring-2 ring-aims-blue/40' : selected ? 'border-aims-blue ring-2 ring-aims-blue/30' : 'border-gray-200 dark:border-white/10'
       }`}
     >
-      {/* Resize control (hover/focus) — resize the tile to Small/Medium/Large */}
-      <div
-        className="pointer-events-none absolute right-2 top-2 z-10 flex overflow-hidden rounded-md border border-gray-200 bg-white text-[10px] opacity-0 shadow-sm transition-opacity group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100 dark:border-white/15 dark:bg-[#1a2236]"
-        onMouseDown={stop}
-        onDragStart={(e) => { e.preventDefault(); e.stopPropagation() }}
-      >
-        {WIDGET_SIZES.map((s) => (
-          <button
-            key={s.id}
-            type="button"
-            draggable={false}
-            title={`Resize to ${s.label}`}
-            aria-label={`Resize ${w?.name || 'widget'} to ${s.label}`}
-            onClick={(e) => { e.stopPropagation(); e.preventDefault(); onUpdate(p.pid, { size: s.id }) }}
-            className={`px-1.5 py-0.5 font-bold ${p.size === s.id ? 'bg-aims-blue text-white' : 'text-gray-500 hover:bg-gray-100 dark:text-slate-400 dark:hover:bg-white/10'}`}
-          >
-            {s.label[0]}
-          </button>
-        ))}
-      </div>
+      {/* Drag-resize handle (bottom-right corner) — hover/focus to reveal; hidden when locked */}
+      {!p.fixed && (
+        <div
+          role="slider"
+          aria-label={`Resize ${w?.name || 'widget'} — drag to change width`}
+          aria-valuetext={WIDGET_SIZES.find((s) => s.id === p.size)?.label || p.size}
+          title="Drag to resize"
+          draggable={false}
+          onPointerDown={startResize}
+          onClick={stop}
+          onDragStart={(e) => { e.preventDefault(); e.stopPropagation() }}
+          className={`absolute bottom-0 right-0 z-10 grid h-6 w-6 cursor-nwse-resize place-items-center rounded-tl-md rounded-br-lg text-gray-400 transition-opacity hover:text-aims-blue dark:text-slate-500 ${
+            resizing ? 'opacity-100 text-aims-blue' : 'opacity-0 group-hover:opacity-100 group-focus-within:opacity-100'
+          }`}
+        >
+          <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true">
+            <path d="M10 2 L2 10 M10 6 L6 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+          </svg>
+        </div>
+      )}
 
-      <div className="flex items-center gap-1 pr-16">
+      <div className="flex items-center gap-1 pr-10">
         <GripVertical size={13} aria-hidden="true" className="shrink-0 cursor-grab text-gray-300 group-hover:text-gray-400 dark:text-slate-600" />
         <span className="min-w-0 flex-1 truncate text-xs font-semibold text-gray-900 dark:text-slate-100">{w?.name || 'Widget'}</span>
         {p.fixed ? (
