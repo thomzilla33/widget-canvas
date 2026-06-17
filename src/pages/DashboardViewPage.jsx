@@ -1,15 +1,16 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { Pencil, ChevronLeft, MapPin, PauseCircle } from 'lucide-react'
+import { Pencil, ChevronLeft, MapPin, PauseCircle, Sparkles } from 'lucide-react'
 import { PageHeader, Badge } from '../components/common/index.jsx'
 import DashboardZones from '../components/dashboard/DashboardZones.jsx'
-import DashboardControls, { DEFAULT_SCOPE } from '../components/dashboard/DashboardControls.jsx'
+import DashboardControls, { DEFAULT_SCOPE, scopeLabel } from '../components/dashboard/DashboardControls.jsx'
 import WidgetDrilldownModal from '../components/dashboard/WidgetDrilldownModal.jsx'
 import EntityContextHeader, { entityHeaderApplies } from '../components/dashboard/EntityContextHeader.jsx'
+import AskDashboardModal from '../components/dashboard/AskDashboardModal.jsx'
 import { useDashboards } from '../state/DashboardsContext.jsx'
 import { useWidgets } from '../state/WidgetsContext.jsx'
 import { useLive } from '../state/LiveContext.jsx'
-import { placementLabel, dashboardKindLabel } from '../data/mock.js'
+import { placementLabel, dashboardKindLabel, dashboardKind } from '../data/mock.js'
 import { dashboardLayout } from '../data/layout.js'
 import { isStale } from '../data/governance.js'
 import { AUDIENCE_OPTIONS, ALL_AUDIENCES, audienceVisibleTo } from '../data/audiences.js'
@@ -27,6 +28,7 @@ export default function DashboardViewPage() {
   const liveScope = { ...scope, tick, paused }
   const [drill, setDrill] = useState(null) // widget opened in the drill-down
   const [viewAs, setViewAs] = useState(ALL_AUDIENCES) // "view as role" audience preview
+  const [askOpen, setAskOpen] = useState(false) // U6 — talk to your dashboard
 
   const placements = dashboard ? Object.values(dashboardLayout(dashboard)).flat() : []
   const hiddenForRole = viewAs !== ALL_AUDIENCES ? placements.filter((p) => !audienceVisibleTo(p, viewAs)).length : 0
@@ -108,7 +110,26 @@ export default function DashboardViewPage() {
         </div>
       </div>
 
+      {/* U6 — Talk to your dashboard: floating Ask button */}
+      <button
+        onClick={() => setAskOpen(true)}
+        className="fixed bottom-5 right-5 z-20 inline-flex items-center gap-1.5 rounded-full px-4 py-2.5 text-sm font-semibold text-white shadow-lg transition-transform hover:scale-105"
+        style={{ background: 'var(--grad)' }}
+        title="Ask this dashboard"
+      >
+        <Sparkles size={16} aria-hidden="true" /> Ask
+      </button>
+
       {drill && <WidgetDrilldownModal widget={drill} scope={liveScope} onClose={() => setDrill(null)} />}
+      {askOpen && (
+        <AskDashboardModal
+          name={dashboard.name}
+          kind={dashboardKind(dashboard)}
+          widgetNames={placements.map((p) => widgets.find((w) => w.id === p.widgetId)?.name).filter(Boolean)}
+          scopeLabel={scopeLabel(scope)}
+          onClose={() => setAskOpen(false)}
+        />
+      )}
     </div>
   )
 }
