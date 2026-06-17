@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Flag, Store } from 'lucide-react'
 import { PageHeader, HealthBadge, FreshnessBadge, EmptyState, DataPlaneBadge } from '../components/common/index.jsx'
@@ -13,8 +13,10 @@ import SourceTemplatesBanner from '../components/widgets/SourceTemplatesBanner.j
 import StudioWelcome from '../components/common/StudioWelcome.jsx'
 import FilterToolbar from '../components/common/FilterToolbar.jsx'
 import { useWidgets } from '../state/WidgetsContext.jsx'
+import { useDashboards } from '../state/DashboardsContext.jsx'
 import { useRole } from '../state/RoleContext.jsx'
 import { useFeedback } from '../state/FeedbackContext.jsx'
+import { dashboardLayout } from '../data/layout.js'
 import { entities, SCHEMA_DRIFT, CATALOG_CATEGORIES } from '../data/mock.js'
 
 // Action-oriented hint per flag reason, shown when there's no concrete
@@ -31,8 +33,20 @@ const FIX_HINT = {
 export default function WidgetLibrary() {
   const navigate = useNavigate()
   const { widgets, updateWidget } = useWidgets()
+  const { dashboards } = useDashboards()
   const { isAdmin } = useRole()
   const { flags, resolveFlag } = useFeedback()
+
+  // Live "used on N dashboards" tally from resolved layouts (template seed OR
+  // persisted edits) — the single source of truth shared with the detail modal.
+  const usageById = useMemo(() => {
+    const m = {}
+    dashboards.forEach((d) => {
+      const ids = new Set(Object.values(dashboardLayout(d)).flat().map((p) => p.widgetId))
+      ids.forEach((wid) => { m[wid] = (m[wid] || 0) + 1 })
+    })
+    return m
+  }, [dashboards])
   const [cat, setCat] = useState('All') // category
   const [type, setType] = useState('All') // tile type
   const [search, setSearch] = useState('')
@@ -207,7 +221,7 @@ export default function WidgetLibrary() {
                 >
                   {w.health === 'review'
                     ? 'Remap needed →'
-                    : `Used in ${w.usedIn} dashboard${w.usedIn === 1 ? '' : 's'}`}
+                    : `Used on ${usageById[w.id] || 0} dashboard${(usageById[w.id] || 0) === 1 ? '' : 's'}`}
                 </span>
                 <FreshnessBadge status={w.freshness} label={w.freshness} />
               </div>
@@ -241,7 +255,6 @@ export default function WidgetLibrary() {
           widget={detailWidget}
           isAdmin={isAdmin}
           onClose={() => setDetailWidget(null)}
-          onEdit={() => { setDetailWidget(null); navigate('/widgets/new') }}
           onPlace={() => { setDetailWidget(null); navigate('/dashboards') }}
           onRemap={() => { const w = detailWidget; setDetailWidget(null); setRepinWidget(w) }}
         />

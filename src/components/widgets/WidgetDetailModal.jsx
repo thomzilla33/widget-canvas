@@ -1,19 +1,20 @@
 import { useState } from 'react'
-import { X, Pencil, LayoutGrid, RefreshCw, Plus, LayoutDashboard } from 'lucide-react'
+import { X, LayoutGrid, RefreshCw, Plus, LayoutDashboard } from 'lucide-react'
 import { useFocusTrap } from '../../hooks/useFocusTrap.js'
 import { HealthBadge, FreshnessBadge, DataPlaneBadge } from '../common/index.jsx'
 import { dataPlaneOf } from '../../data/governance.js'
 import { WidgetGlyph } from './glyph.jsx'
 import WidgetRender from './WidgetRender.jsx'
 import { useDashboards } from '../../state/DashboardsContext.jsx'
+import { dashboardLayout } from '../../data/layout.js'
 import { WIDGET_SIZES, SKELETON_ABOUT, SKELETON_BESTFOR } from '../../data/mock.js'
 
 const PREVIEW_WIDTH = { sm: 'max-w-[240px]', md: 'max-w-md', lg: 'max-w-2xl' }
 
 // Tier 2 — the consume seam for an existing widget. Clicking a Library card opens
-// THIS (preview + meta + where-it's-used + actions), not the builder. Editing or
-// placing are explicit choices from here.
-export default function WidgetDetailModal({ widget, isAdmin, onClose, onEdit, onPlace, onRemap }) {
+// THIS (preview + meta + where-it's-used + actions), not the builder. The builder
+// only creates net-new widgets, so there's no "edit" here — place or remap instead.
+export default function WidgetDetailModal({ widget, isAdmin, onClose, onPlace, onRemap }) {
   const ref = useFocusTrap()
   const { dashboards } = useDashboards()
   const [size, setSize] = useState('md')
@@ -21,21 +22,26 @@ export default function WidgetDetailModal({ widget, isAdmin, onClose, onEdit, on
 
   const sizeMeta = WIDGET_SIZES.find((s) => s.id === size)
   const needsRemap = widget.health === 'review'
-  // Dashboards already hosting this widget (real layout, not the seed count).
+  // Dashboards hosting this widget — from the resolved layout (template seed OR
+  // persisted edits), so this matches the live count shown on the Library card.
   const usedOn = dashboards.filter((d) =>
-    Object.values(d.layout || {}).flat().some((p) => p.widgetId === widget.id),
+    Object.values(dashboardLayout(d)).flat().some((p) => p.widgetId === widget.id),
   )
 
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="wdetail-title"
-      onKeyDown={(e) => e.key === 'Escape' && onClose()}
     >
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} aria-hidden="true" />
-      <div ref={ref} tabIndex={-1} className="card relative z-10 flex max-h-[88vh] w-[92vw] max-w-[560px] flex-col p-0 outline-none">
+      <div
+        ref={ref}
+        tabIndex={-1}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="wdetail-title"
+        onKeyDown={(e) => e.key === 'Escape' && onClose()}
+        className="card relative z-10 flex max-h-[88vh] w-[92vw] max-w-[560px] flex-col p-0 outline-none"
+      >
         {/* Header */}
         <div className="flex items-start gap-3 border-b border-gray-200 p-4 dark:border-white/10">
           <WidgetGlyph skeleton={widget.skeleton} />
@@ -110,20 +116,17 @@ export default function WidgetDetailModal({ widget, isAdmin, onClose, onEdit, on
 
         {/* Actions */}
         <div className="flex items-center justify-end gap-2 border-t border-gray-200 p-3 dark:border-white/10">
-          {needsRemap && (
+          <button className="btn-secondary !py-1.5 text-xs" onClick={onClose}>Close</button>
+          {needsRemap ? (
             <button className="btn-primary !py-1.5 text-xs" onClick={onRemap}>
               <RefreshCw size={14} aria-hidden="true" /> Remap widget
             </button>
-          )}
-          {isAdmin && !needsRemap && (
-            <button className="btn-secondary !py-1.5 text-xs" onClick={onEdit}>
-              <Pencil size={14} aria-hidden="true" /> Edit widget
-            </button>
-          )}
-          {!needsRemap && (
-            <button className="btn-primary !py-1.5 text-xs" onClick={onPlace}>
-              <Plus size={14} aria-hidden="true" /> Add to a dashboard
-            </button>
+          ) : (
+            isAdmin && (
+              <button className="btn-primary !py-1.5 text-xs" onClick={onPlace}>
+                <Plus size={14} aria-hidden="true" /> Add to a dashboard
+              </button>
+            )
           )}
         </div>
       </div>
