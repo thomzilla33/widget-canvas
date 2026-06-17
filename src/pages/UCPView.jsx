@@ -34,6 +34,7 @@ import { useRole } from '../state/RoleContext.jsx'
 import { entities, MANDATORY_TABS } from '../data/mock.js'
 import { suggestTabs } from '../data/suggestions.js'
 import { ALL_AUDIENCES, AUDIENCE_OPTIONS, audienceVisibleTo } from '../data/audiences.js'
+import { useActivity, ACTIVITY_TYPE_LABEL } from '../state/ActivityContext.jsx'
 
 // Map an entity's type to the placement profile type used by dashboards.
 const PROFILE_OF = { Account: 'Company', Contact: 'Contact', Employee: 'Employee', Deal: 'Deal', Case: 'Case' }
@@ -60,6 +61,7 @@ export default function UCPView() {
   const { dashboards } = useDashboards()
   const { getTabs, setTabs: persistTabs } = useProfileConfig()
   const { isAdmin } = useRole()
+  const { getActivity } = useActivity()
   const entity = entities.find((e) => e.id === entityId)
   const widgetById = (id) => widgets.find((w) => w.id === id)
 
@@ -395,7 +397,10 @@ export default function UCPView() {
         )}
         {activeTab !== 'Overview' ? (
           <div className="mx-auto w-full max-w-[1800px] space-y-6 px-6 py-5 lg:px-8 2xl:px-12">
+            {/* U2.3 — logged communications (Email/SMS/notes) for this entity */}
+            {activeTab === 'Activity' && <ActivityFeed entries={getActivity(entityId)} />}
             {tabDashboards.length === 0 ? (
+              activeTab === 'Activity' ? null : (
               <div className="rounded-xl border-2 border-dashed border-gray-200 dark:border-white/10">
                 <EmptyState
                   icon="🗂️"
@@ -408,6 +413,7 @@ export default function UCPView() {
                   }
                 />
               </div>
+              )
             ) : (
               tabDashboards.map((d) => (
                 <section key={d.id}>
@@ -734,6 +740,40 @@ function UCPWidget({
 }
 
 /* Profile tab (Overview + hosted dashboards) */
+// U2.3 — communications/activity feed for a profile (Email/SMS/notes logged from
+// the entity header land here, newest first).
+const ACTIVITY_TONE = {
+  email: 'bg-aims-blue/10 text-aims-blue',
+  sms: 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-300',
+  note: 'bg-gray-500/10 text-gray-500 dark:text-slate-400',
+  chat: 'bg-purple-500/10 text-purple-600 dark:text-purple-300',
+}
+function ActivityFeed({ entries = [] }) {
+  return (
+    <section className="card p-4">
+      <div className="mb-3 text-[11px] font-bold uppercase tracking-wide text-gray-500 dark:text-slate-400">Activity</div>
+      {entries.length === 0 ? (
+        <p className="text-sm text-gray-500 dark:text-slate-400">No activity yet. Email or text this profile from the header and it’ll show up here.</p>
+      ) : (
+        <ul className="space-y-3">
+          {entries.map((e) => (
+            <li key={e.id} className="flex items-start gap-3">
+              <span className={`mt-0.5 shrink-0 rounded-md px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide ${ACTIVITY_TONE[e.type] || ACTIVITY_TONE.note}`}>
+                {ACTIVITY_TYPE_LABEL[e.type] || e.type}
+              </span>
+              <div className="min-w-0 flex-1">
+                <div className="truncate text-sm font-medium text-gray-900 dark:text-slate-100">{e.title}</div>
+                {e.detail && <div className="truncate text-xs text-gray-500 dark:text-slate-400">{e.detail}</div>}
+                <div className="mt-0.5 text-[11px] text-gray-400 dark:text-slate-500">{e.by} · {e.when}</div>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  )
+}
+
 function TabBtn({ active, onClick, onDoubleClick, children }) {
   return (
     <button

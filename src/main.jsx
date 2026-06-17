@@ -10,6 +10,7 @@ import { NotificationsProvider } from './state/NotificationsContext.jsx'
 import { LiveProvider } from './state/LiveContext.jsx'
 import { ProfileConfigProvider } from './state/ProfileConfigContext.jsx'
 import { RoleProvider } from './state/RoleContext.jsx'
+import { ActivityProvider } from './state/ActivityContext.jsx'
 import './index.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
@@ -23,7 +24,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                 <LiveProvider>
                   <ProfileConfigProvider>
                     <RoleProvider>
-                      <App />
+                      <ActivityProvider>
+                        <App />
+                      </ActivityProvider>
                     </RoleProvider>
                   </ProfileConfigProvider>
                 </LiveProvider>

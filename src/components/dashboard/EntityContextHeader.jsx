@@ -7,6 +7,7 @@ import {
 import { useFocusTrap } from '../../hooks/useFocusTrap.js'
 import { PopoverPanel } from '../common/Popover.jsx'
 import { actionAllowedFor } from '../../data/audiences.js'
+import { useActivity } from '../../state/ActivityContext.jsx'
 
 // CEO V1 (P1a/P1b) — the fixed/locked entity "top line" on profile surfaces
 // (Company/Account, Contact/UCP, Employee/UEP). Part of the template, not a widget.
@@ -87,6 +88,7 @@ const CHAT_PROMPTS = ['Summarize recent activity', 'Any open items?', 'Draft a f
 
 export default function EntityContextHeader({ placement, entity, viewerRole }) {
   const navigate = useNavigate()
+  const { logActivity } = useActivity()
   const [open, setOpen] = useState(false)
   const [panel, setPanel] = useState(null) // 'email' | 'sms' | 'chat'
   const [menuOpen, setMenuOpen] = useState(false)
@@ -174,7 +176,13 @@ export default function EntityContextHeader({ placement, entity, viewerRole }) {
       )}
 
       {(panel === 'email' || panel === 'sms') && (
-        <ActionComposer kind={panel} name={name} info={info} onClose={() => setPanel(null)} />
+        <ActionComposer
+          kind={panel}
+          name={name}
+          info={info}
+          onClose={() => setPanel(null)}
+          onSent={(payload) => entity?.id && logActivity(entity.id, payload)}
+        />
       )}
       {panel === 'chat' && <AgentChatPanel name={name} kindLabel={base.kind} onClose={() => setPanel(null)} />}
     </div>
@@ -245,7 +253,7 @@ function MenuItem({ icon: Icon, onClick, children }) {
 }
 
 // Email / SMS composer — prefilled, mock send (nothing leaves the prototype).
-function ActionComposer({ kind, name, info, onClose }) {
+function ActionComposer({ kind, name, info, onClose, onSent }) {
   const ref = useFocusTrap()
   const titleId = useId()
   const tplId = useId()
@@ -256,6 +264,16 @@ function ActionComposer({ kind, name, info, onClose }) {
   const isEmail = kind === 'email'
   const to = isEmail ? info.email : info.phone
   const templates = isEmail ? EMAIL_TEMPLATES : SMS_TEMPLATES
+
+  // Mock send — also logs the action to the entity's Activity feed (U2.3).
+  const handleSend = () => {
+    onSent?.({
+      type: kind,
+      title: isEmail ? subject.trim() || 'Email' : 'Text message',
+      detail: `Sent to ${to}`,
+    })
+    setSent(true)
+  }
 
   const applyTemplate = (id) => {
     setTpl(id)
@@ -307,7 +325,7 @@ function ActionComposer({ kind, name, info, onClose }) {
             </Labeled>
             <div className="flex justify-end gap-2">
               <button onClick={onClose} className="btn-secondary">Cancel</button>
-              <button onClick={() => setSent(true)} disabled={!body.trim()} className="btn-primary">
+              <button onClick={handleSend} disabled={!body.trim()} className="btn-primary">
                 <Send size={14} /> Send
               </button>
             </div>
