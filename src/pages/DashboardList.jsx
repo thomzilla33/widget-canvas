@@ -4,6 +4,7 @@ import { LayoutDashboard, Search, MapPin, UserX, RotateCcw } from 'lucide-react'
 import { PageHeader, Badge, EmptyState } from '../components/common/index.jsx'
 import StudioWelcome from '../components/common/StudioWelcome.jsx'
 import { useDashboards } from '../state/DashboardsContext.jsx'
+import { useRole } from '../state/RoleContext.jsx'
 import { placementLabel, DEACTIVATED_OWNERS, dashboardKind } from '../data/mock.js'
 import { widgetCount } from '../data/layout.js'
 
@@ -14,6 +15,7 @@ const KIND_FILTERS = ['All', 'Entity', 'Global']
 export default function DashboardList() {
   const navigate = useNavigate()
   const { dashboards, updateDashboard } = useDashboards()
+  const { isAdmin } = useRole()
   const [search, setSearch] = useState('')
   const [status, setStatus] = useState('All')
   const [kind, setKind] = useState('All')
@@ -36,9 +38,11 @@ export default function DashboardList() {
         title="Dashboards"
         description={`${dashboards.length} dashboards · ${publishedCount} published`}
         actions={
-          <button className="btn-primary" onClick={() => navigate('/dashboard/new')}>
-            + New dashboard
-          </button>
+          isAdmin ? (
+            <button className="btn-primary" onClick={() => navigate('/dashboard/new')}>
+              + New dashboard
+            </button>
+          ) : null
         }
       />
 
@@ -90,8 +94,8 @@ export default function DashboardList() {
         <StudioWelcome
           studioId="dashboards"
           built={{ count: dashboards.length, label: 'dashboards' }}
-          ctaLabel="New dashboard"
-          onCta={() => navigate('/dashboard/new')}
+          ctaLabel={isAdmin ? 'New dashboard' : undefined}
+          onCta={isAdmin ? () => navigate('/dashboard/new') : undefined}
         />
         {orphaned.length > 0 && (
           <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-3 dark:border-amber-500/25 dark:bg-amber-500/10">

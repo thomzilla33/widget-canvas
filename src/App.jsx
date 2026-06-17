@@ -1,4 +1,5 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
+import { useRole } from './state/RoleContext.jsx'
 import AppShell from './components/shell/AppShell.jsx'
 import DashboardList from './pages/DashboardList.jsx'
 import NewDashboard from './pages/NewDashboard.jsx'
@@ -12,6 +13,12 @@ import TablesPage from './pages/TablesPage.jsx'
 import DataStudio from './pages/DataStudio.jsx'
 import UCPView from './pages/UCPView.jsx'
 
+// U7.2 — builder routes are admin-only; viewers are redirected to the read-only list.
+function AdminRoute({ children }) {
+  const { isAdmin } = useRole()
+  return isAdmin ? children : <Navigate to="/dashboards" replace />
+}
+
 export default function App() {
   return (
     <Routes>
@@ -20,11 +27,11 @@ export default function App() {
         <Route path="/dashboards" element={<DashboardList />} />
         <Route path="/reports" element={<ReportsPage />} />
         <Route path="/home" element={<HomePage />} />
-        <Route path="/dashboard/new" element={<NewDashboard />} />
+        <Route path="/dashboard/new" element={<AdminRoute><NewDashboard /></AdminRoute>} />
         <Route path="/dashboard/:id/canvas" element={<DashboardCanvas />} />
         <Route path="/dashboard/:id" element={<DashboardViewPage />} />
         <Route path="/widgets" element={<WidgetLibrary />} />
-        <Route path="/widgets/new" element={<WidgetBuilder />} />
+        <Route path="/widgets/new" element={<AdminRoute><WidgetBuilder /></AdminRoute>} />
         <Route path="/tables" element={<TablesPage />} />
         <Route path="/data-studio" element={<DataStudio />} />
         <Route path="/ucp/:entityId" element={<UCPView />} />

@@ -11,6 +11,7 @@ import WidgetMarketplace from '../components/widgets/WidgetMarketplace.jsx'
 import SourceTemplatesBanner from '../components/widgets/SourceTemplatesBanner.jsx'
 import StudioWelcome from '../components/common/StudioWelcome.jsx'
 import { useWidgets } from '../state/WidgetsContext.jsx'
+import { useRole } from '../state/RoleContext.jsx'
 import { useFeedback } from '../state/FeedbackContext.jsx'
 import { entities, SCHEMA_DRIFT } from '../data/mock.js'
 
@@ -28,6 +29,7 @@ const FIX_HINT = {
 export default function WidgetLibrary() {
   const navigate = useNavigate()
   const { widgets, updateWidget } = useWidgets()
+  const { isAdmin } = useRole()
   const { flags, resolveFlag } = useFeedback()
   const [cat, setCat] = useState('All')
   const [search, setSearch] = useState('')
@@ -52,14 +54,16 @@ export default function WidgetLibrary() {
         title="Widget Library"
         description={`${widgets.length} widgets · ${governedCount} governed`}
         actions={
-          <>
-            <button className="btn-secondary" onClick={() => setMarketplace(true)}>
-              <Store size={15} /> Browse marketplace
-            </button>
-            <button className="btn-primary" onClick={() => navigate('/widgets/new')}>
-              + New widget
-            </button>
-          </>
+          isAdmin ? (
+            <>
+              <button className="btn-secondary" onClick={() => setMarketplace(true)}>
+                <Store size={15} /> Browse marketplace
+              </button>
+              <button className="btn-primary" onClick={() => navigate('/widgets/new')}>
+                + New widget
+              </button>
+            </>
+          ) : null
         }
       />
 
@@ -95,11 +99,11 @@ export default function WidgetLibrary() {
         <StudioWelcome
           studioId="widgets"
           built={{ count: widgets.length, label: 'widgets' }}
-          ctaLabel="New widget"
-          onCta={() => navigate('/widgets/new')}
+          ctaLabel={isAdmin ? 'New widget' : undefined}
+          onCta={isAdmin ? () => navigate('/widgets/new') : undefined}
         />
-        {/* U4 — per-source templates from connected integrations */}
-        <SourceTemplatesBanner />
+        {/* U4 — per-source templates from connected integrations (admin installs) */}
+        {isAdmin && <SourceTemplatesBanner />}
         {/* S121 — Needs Attention (flags from end users) */}
         {openFlags.length > 0 && (
           <div className="mb-5 rounded-xl border border-aims-stale/30 bg-red-50/60 p-4 dark:bg-red-500/5">

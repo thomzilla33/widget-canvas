@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
-import { LayoutDashboard, Boxes, UserRound, Sun, Moon, Palette, Settings, LogOut, Home, FileBarChart, Table2, Database } from 'lucide-react'
+import { LayoutDashboard, Boxes, UserRound, Sun, Moon, Palette, Settings, LogOut, Home, FileBarChart, Table2, Database, ShieldCheck, Eye } from 'lucide-react'
 import { useTheme } from '../../state/ThemeContext.jsx'
+import { useRole } from '../../state/RoleContext.jsx'
 import { useNotifications } from '../../state/NotificationsContext.jsx'
 import NotificationsMenu from './NotificationsMenu.jsx'
 import CommandPalette from './CommandPalette.jsx'
@@ -48,6 +49,7 @@ export default function AppShell() {
   const [notifOpen, setNotifOpen] = useState(false)
   const [cmdOpen, setCmdOpen] = useState(false)
   const { theme, setTheme } = useTheme()
+  const { isAdmin, setAdmin } = useRole()
   const { unreadCount } = useNotifications()
 
   // Global ⌘K / Ctrl+K opens the command palette.
@@ -130,6 +132,21 @@ export default function AppShell() {
         </button>
 
         <div className="tb-right">
+          {/* U7.2 — role toggle: Admin can build/edit; Viewer is read-only */}
+          <button
+            type="button"
+            onClick={() => setAdmin((a) => !a)}
+            aria-pressed={isAdmin}
+            title={isAdmin ? 'You are an Admin — click to preview as a Viewer (read-only)' : 'You are a Viewer (read-only) — click to switch to Admin'}
+            className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold ${
+              isAdmin
+                ? 'border-aims-blue/30 bg-aims-blue/10 text-aims-blue'
+                : 'border-gray-300 text-gray-500 dark:border-white/15 dark:text-slate-400'
+            }`}
+          >
+            {isAdmin ? <ShieldCheck size={13} /> : <Eye size={13} />}
+            {isAdmin ? 'Admin' : 'Viewer'}
+          </button>
           <button className="icon-btn" aria-label="AI Assistant">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path

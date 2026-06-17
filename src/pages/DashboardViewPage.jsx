@@ -10,6 +10,7 @@ import AskDashboardModal from '../components/dashboard/AskDashboardModal.jsx'
 import { useDashboards } from '../state/DashboardsContext.jsx'
 import { useWidgets } from '../state/WidgetsContext.jsx'
 import { useLive } from '../state/LiveContext.jsx'
+import { useRole } from '../state/RoleContext.jsx'
 import { placementLabel, dashboardKindLabel, dashboardKind } from '../data/mock.js'
 import { dashboardLayout } from '../data/layout.js'
 import { isStale } from '../data/governance.js'
@@ -22,6 +23,7 @@ export default function DashboardViewPage() {
   const { dashboards } = useDashboards()
   const { widgets } = useWidgets()
   const { tick, paused } = useLive()
+  const { isAdmin } = useRole()
   const dashboard = dashboards.find((d) => d.id === id)
   const [scope, setScope] = useState(DEFAULT_SCOPE)
   // Live tick + pause flag ride along the scope into every tile (Phase 7).
@@ -58,9 +60,11 @@ export default function DashboardViewPage() {
         actions={
           <>
             <Badge variant={dashboard.status} />
-            <button className="btn-primary" onClick={() => navigate(`/dashboard/${dashboard.id}/canvas`)}>
-              <Pencil size={15} /> Edit
-            </button>
+            {isAdmin && (
+              <button className="btn-primary" onClick={() => navigate(`/dashboard/${dashboard.id}/canvas`)}>
+                <Pencil size={15} /> Edit
+              </button>
+            )}
           </>
         }
       />

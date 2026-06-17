@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, Navigate } from 'react-router-dom'
 import { Plus, X, Lock, Unlock, Trash2, Sparkles, RotateCcw } from 'lucide-react'
 import { PageHeader, GovernedBadge, FreshnessBadge, Badge, EmptyState } from '../components/common/index.jsx'
 import WidgetRender from '../components/widgets/WidgetRender.jsx'
@@ -10,6 +10,7 @@ import EntityContextHeader, { entityHeaderApplies } from '../components/dashboar
 import SuggestWidgetsModal from '../components/dashboard/SuggestWidgetsModal.jsx'
 import { useWidgets } from '../state/WidgetsContext.jsx'
 import { useDashboards } from '../state/DashboardsContext.jsx'
+import { useRole } from '../state/RoleContext.jsx'
 import { WIDGET_SIZES, dashboardKindLabel } from '../data/mock.js'
 import { dashboardLayout } from '../data/layout.js'
 import { vizRecommendation, vizInterchangeable, VIZ_OPTIONS } from '../data/preview.js'
@@ -38,6 +39,7 @@ let pidSeq = 0
 // S84–S94 — dashboard canvas: zones, placement, config, density
 export default function DashboardCanvas() {
   const { id } = useParams()
+  const { isAdmin } = useRole()
   const { widgets } = useWidgets()
   const { dashboards, updateDashboard } = useDashboards()
   const dashboard = dashboards.find((d) => d.id === id)
@@ -140,6 +142,9 @@ export default function DashboardCanvas() {
       movePlacement(data.pid, zoneKey)
     }
   }
+
+  // U7.2 — the canvas is an editing surface: viewers are redirected to the read-only view.
+  if (!isAdmin) return <Navigate to={`/dashboard/${id}`} replace />
 
   return (
     <div className="h-full flex flex-col">

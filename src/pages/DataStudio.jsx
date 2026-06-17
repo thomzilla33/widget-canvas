@@ -4,12 +4,14 @@ import { Circle } from 'lucide-react'
 import StudioWelcome from '../components/common/StudioWelcome.jsx'
 import DataSourceMarketplace from '../components/datasources/DataSourceMarketplace.jsx'
 import { EXTERNAL_SOURCES } from '../data/sources.js'
+import { useRole } from '../state/RoleContext.jsx'
 
 // U5 / CEO V1 — Data Studio landing: the rich welcome walkthrough + a preview of
 // the connector catalog ("Data Sync candidates") you can activate. Mirrors the
 // production "Welcome to Data Studio" screen.
 export default function DataStudio() {
   const navigate = useNavigate()
+  const { isAdmin } = useRole()
   const [browsing, setBrowsing] = useState(false)
 
   // Not-yet-connected connectors — the catalog the wizard pulls from.
@@ -22,8 +24,8 @@ export default function DataStudio() {
           <StudioWelcome
             studioId="datastudio"
             dismissible={false}
-            ctaLabel="Connect your first source"
-            onCta={() => setBrowsing(true)}
+            ctaLabel={isAdmin ? 'Connect your first source' : undefined}
+            onCta={isAdmin ? () => setBrowsing(true) : undefined}
             secondaryLabel="Skip for now"
             onSecondary={() => navigate('/dashboards')}
             links={[
@@ -49,7 +51,7 @@ export default function DataStudio() {
             {candidates.map((s) => (
               <button
                 key={s.id}
-                onClick={() => setBrowsing(true)}
+                onClick={() => isAdmin && setBrowsing(true)}
                 className="card p-4 text-left transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aims-blue/40"
               >
                 <div className="flex items-start justify-between gap-2">

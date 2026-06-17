@@ -29,6 +29,7 @@ import { useWidgets } from '../state/WidgetsContext.jsx'
 import { useFeedback } from '../state/FeedbackContext.jsx'
 import { useDashboards } from '../state/DashboardsContext.jsx'
 import { useProfileConfig } from '../state/ProfileConfigContext.jsx'
+import { useRole } from '../state/RoleContext.jsx'
 import { entities, MANDATORY_TABS } from '../data/mock.js'
 import { suggestTabs } from '../data/suggestions.js'
 
@@ -56,6 +57,7 @@ export default function UCPView() {
   const { widgets } = useWidgets()
   const { dashboards } = useDashboards()
   const { getTabs, setTabs: persistTabs } = useProfileConfig()
+  const { isAdmin } = useRole()
   const entity = entities.find((e) => e.id === entityId)
   const widgetById = (id) => widgets.find((w) => w.id === id)
 
@@ -252,11 +254,11 @@ export default function UCPView() {
                 <TabBtn
                   active={activeTab === t}
                   onClick={() => setActiveTab(t)}
-                  onDoubleClick={mandatory ? undefined : () => startRename(t)}
+                  onDoubleClick={mandatory || !isAdmin ? undefined : () => startRename(t)}
                 >
                   {t}
                 </TabBtn>
-                {!mandatory && (
+                {!mandatory && isAdmin && (
                   <button
                     type="button"
                     onClick={(e) => {
@@ -274,7 +276,7 @@ export default function UCPView() {
             )
           })}
 
-          {addingTab ? (
+          {isAdmin && (addingTab ? (
             <input
               autoFocus
               value={newTab}
@@ -298,11 +300,11 @@ export default function UCPView() {
             >
               <Plus size={14} aria-hidden="true" /> Add tab
             </button>
-          )}
+          ))}
           </div>
 
           {/* U3 — suggested tabs (outside the scroll container so the popover isn't clipped) */}
-          {suggestTabs(profileType, tabs).length > 0 && (
+          {isAdmin && suggestTabs(profileType, tabs).length > 0 && (
             <div className="relative shrink-0">
               <button
                 onClick={() => setSuggestTabsOpen((o) => !o)}
