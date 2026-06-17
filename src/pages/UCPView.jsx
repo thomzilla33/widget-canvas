@@ -28,7 +28,8 @@ import EntityContextHeader, { profileSupportsHeader } from '../components/dashbo
 import { useWidgets } from '../state/WidgetsContext.jsx'
 import { useFeedback } from '../state/FeedbackContext.jsx'
 import { useDashboards } from '../state/DashboardsContext.jsx'
-import { entities, PROFILE_TYPES, MANDATORY_TABS } from '../data/mock.js'
+import { useProfileConfig } from '../state/ProfileConfigContext.jsx'
+import { entities, MANDATORY_TABS } from '../data/mock.js'
 
 // Map an entity's type to the placement profile type used by dashboards.
 const PROFILE_OF = { Account: 'Company', Contact: 'Contact', Employee: 'Employee', Deal: 'Deal', Case: 'Case' }
@@ -53,6 +54,7 @@ export default function UCPView() {
   const navigate = useNavigate()
   const { widgets } = useWidgets()
   const { dashboards } = useDashboards()
+  const { getTabs, setTabs: persistTabs } = useProfileConfig()
   const entity = entities.find((e) => e.id === entityId)
   const widgetById = (id) => widgets.find((w) => w.id === id)
 
@@ -61,31 +63,78 @@ export default function UCPView() {
   const profileDashboards = dashboards.filter(
     (d) => d.placement?.surface === 'profile' && d.placement.profileType === profileType && (d.placement.scope === 'all' || d.placement.entityId === entityId),
   )
-  // Tabs are first-class on a profile: the type's canonical set + any tab that a
-  // placed dashboard targets. Overview/Activity/Snapshot are mandatory; the rest can
-  // be removed and custom tabs added (admin can edit, in-memory for the prototype).
-  const seedTabs = [
-    ...new Set([
-      ...(PROFILE_TYPES.find((t) => t.id === profileType)?.tabs || MANDATORY_TABS),
-      ...profileDashboards.map((d) => d.placement.tab || 'Overview'),
-    ]),
-  ]
-  const [tabs, setTabs] = useState(seedTabs)
+  // Tabs are first-class on a profile and now DURABLE per profile type (U1):
+  // the stored set for this type (seeded from PROFILE_TYPES) merged — order-preserving,
+  // unique — with any tab a placed dashboard targets, so a placed dashboard's tab
+  // always shows even if it isn't in the saved config. Edits persist via the context.
+  const configuredTabs = getTabs(profileType)
+  const placementTabs = profileDashboards.map((d) => d.placement.tab || 'Overview')
+  const tabs = [...new Set([...configuredTabs, ...placementTabs])]
+
   const [activeTab, setActiveTab] = useState('Overview')
   const [addingTab, setAddingTab] = useState(false)
   const [newTab, setNewTab] = useState('')
+  const [renaming, setRenaming] = useState(null) // tab name being renamed
+  const [renameValue, setRenameValue] = useState('')
+  const [dragTab, setDragTab] = useState(null) // tab name being dragged
   const tabDashboards = profileDashboards.filter((d) => (d.placement.tab || 'Overview') === activeTab)
+
+  // All tab mutations persist the placement-FREE list: placement tabs are derived
+  // (recomputed each render), so a tab that exists only because a dashboard targets
+  // it is dropped before storing — otherwise it would bake into the type config and
+  // never clear when the dashboard moves/leaves.
+  function persistFrom(nextTabs) {
+    const placementOnly = new Set(placementTabs.filter((t) => !configuredTabs.includes(t)))
+    persistTabs(profileType, nextTabs.filter((t) => !placementOnly.has(t)))
+  }
 
   function addTab() {
     const name = newTab.trim()
-    if (name && !tabs.some((t) => t.toLowerCase() === name.toLowerCase())) setTabs([...tabs, name])
+    if (name && !tabs.some((t) => t.toLowerCase() === name.toLowerCase())) {
+      persistFrom([...tabs, name])
+    }
     setNewTab('')
     setAddingTab(false)
   }
+
   function removeTab(name) {
     if (MANDATORY_TABS.includes(name)) return // Overview/Activity/Snapshot can't be removed
-    setTabs((prev) => prev.filter((t) => t !== name))
+    persistFrom(tabs.filter((t) => t !== name))
     if (activeTab === name) setActiveTab('Overview')
+  }
+
+  // HTML5 drag-and-drop reorder: drop `from` onto `to`, then persist new order.
+  function reorderTabs(from, to) {
+    if (from === to) return
+    const arr = [...tabs]
+    const fi = arr.indexOf(from)
+    const ti = arr.indexOf(to)
+    if (fi < 0 || ti < 0) return
+    arr.splice(fi, 1)
+    arr.splice(ti, 0, from)
+    persistFrom(arr)
+  }
+
+  // Inline rename (non-mandatory tabs only). Commit on Enter/blur, cancel on Escape.
+  function startRename(name) {
+    if (MANDATORY_TABS.includes(name)) return
+    setRenaming(name)
+    setRenameValue(name)
+  }
+  function commitRename() {
+    if (!renaming) return
+    const next = renameValue.trim()
+    const original = renaming
+    setRenaming(null)
+    setRenameValue('')
+    if (!next || next === original) return
+    if (tabs.some((t) => t !== original && t.toLowerCase() === next.toLowerCase())) return // no dup
+    persistFrom(tabs.map((t) => (t === original ? next : t)))
+    if (activeTab === original) setActiveTab(next)
+  }
+  function cancelRename() {
+    setRenaming(null)
+    setRenameValue('')
   }
 
   // Brief initial load so widgets stream in with a skeleton instead of popping.
@@ -93,8 +142,13 @@ export default function UCPView() {
   useEffect(() => {
     setLoaded(false)
     setActiveTab('Overview')
-    setTabs(seedTabs)
+    // Tabs are durable per profile type now (context-backed) — don't reset them on
+    // entity change. Only clear any transient add/rename/drag UI.
     setAddingTab(false)
+    setNewTab('')
+    setRenaming(null)
+    setRenameValue('')
+    setDragTab(null)
     const t = setTimeout(() => setLoaded(true), 700)
     return () => clearTimeout(t)
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -160,13 +214,48 @@ export default function UCPView() {
         <div className="flex items-center gap-0.5 overflow-x-auto">
           {tabs.map((t) => {
             const mandatory = MANDATORY_TABS.includes(t)
+            if (renaming === t) {
+              return (
+                <input
+                  key={t}
+                  autoFocus
+                  value={renameValue}
+                  onChange={(e) => setRenameValue(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') commitRename()
+                    if (e.key === 'Escape') cancelRename()
+                  }}
+                  onBlur={commitRename}
+                  aria-label={`Rename ${t} tab`}
+                  className="my-1 ml-1 w-32 rounded-md border border-aims-blue/40 bg-white px-2 py-1 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-aims-blue/30 dark:bg-white/5 dark:text-slate-100"
+                />
+              )
+            }
             return (
-              <div key={t} className="group relative flex shrink-0 items-center">
-                <TabBtn active={activeTab === t} onClick={() => setActiveTab(t)}>
+              <div
+                key={t}
+                draggable
+                onDragStart={() => setDragTab(t)}
+                onDragEnd={() => setDragTab(null)}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={(e) => {
+                  e.preventDefault()
+                  if (dragTab) reorderTabs(dragTab, t)
+                  setDragTab(null)
+                }}
+                title={mandatory ? t : `${t} — double-click to rename, drag to reorder`}
+                className={`group relative flex shrink-0 items-center ${dragTab === t ? 'opacity-50' : ''}`}
+              >
+                <TabBtn
+                  active={activeTab === t}
+                  onClick={() => setActiveTab(t)}
+                  onDoubleClick={mandatory ? undefined : () => startRename(t)}
+                >
                   {t}
                 </TabBtn>
                 {!mandatory && (
                   <button
+                    type="button"
                     onClick={(e) => {
                       e.stopPropagation()
                       removeTab(t)
@@ -224,6 +313,11 @@ export default function UCPView() {
                   icon="🗂️"
                   title={`No dashboard on “${activeTab}” yet`}
                   description="Place a dashboard on this tab to fill it, or remove the tab if it’s not needed."
+                  action={
+                    <button className="btn-primary" onClick={() => navigate('/dashboard/new')}>
+                      <Plus size={15} /> Add a dashboard to this tab
+                    </button>
+                  }
                 />
               </div>
             ) : (
@@ -552,10 +646,11 @@ function UCPWidget({
 }
 
 /* Profile tab (Overview + hosted dashboards) */
-function TabBtn({ active, onClick, children }) {
+function TabBtn({ active, onClick, onDoubleClick, children }) {
   return (
     <button
       onClick={onClick}
+      onDoubleClick={onDoubleClick}
       className={`shrink-0 whitespace-nowrap border-b-2 px-3 py-2.5 text-sm font-medium transition-colors ${
         active
           ? 'border-aims-blue text-aims-blue'

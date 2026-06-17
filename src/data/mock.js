@@ -2,19 +2,19 @@
 
 export const entities = [
   // Companies / Accounts
-  { id: 'acme-001', name: 'Acme Corporation', type: 'Account', owner: 'Sales', health: 'active' },
-  { id: 'globex-002', name: 'Globex Inc.', type: 'Account', owner: 'Sales', health: 'inactive' },
-  { id: 'initech-003', name: 'Initech LLC', type: 'Account', owner: 'Support', health: 'active' },
+  { id: 'acme-001', name: 'Acme Corporation', type: 'Account', owner: 'Priya Nair', health: 'active', email: 'billing@acme.com', phone: '+1 (415) 555-0110', address: '500 Market St, San Francisco, CA', company: 'Enterprise · SaaS', status: 'Renewal in Q3' },
+  { id: 'globex-002', name: 'Globex Inc.', type: 'Account', owner: 'Dana Lee', health: 'inactive', email: 'ap@globex.com', phone: '+1 (212) 555-0144', address: '1 Globex Plaza, New York, NY', company: 'Mid-Market · Manufacturing', status: 'At risk' },
+  { id: 'initech-003', name: 'Initech LLC', type: 'Account', owner: 'Sam Ortiz', health: 'active', email: 'accounts@initech.com', phone: '+1 (512) 555-0188', address: '88 Office Park, Austin, TX', company: 'SMB · Software', status: 'Active' },
   // Contacts (UCP)
-  { id: 'c-dana', name: 'Dana Lee', type: 'Contact', owner: 'Sales', health: 'active' },
-  { id: 'c-sam', name: 'Sam Ortiz', type: 'Contact', owner: 'Support', health: 'active' },
+  { id: 'c-dana', name: 'Dana Lee', type: 'Contact', owner: 'David Kim', health: 'active', email: 'dana.lee@acme.com', phone: '+1 (415) 555-0192', address: 'San Francisco, CA', company: 'Acme Corp', title: 'VP Operations', status: 'Appointment Today' },
+  { id: 'c-sam', name: 'Sam Ortiz', type: 'Contact', owner: 'David Kim', health: 'active', email: 'sam.ortiz@globex.com', phone: '+1 (212) 555-0177', address: 'New York, NY', company: 'Globex Inc.', title: 'Procurement Lead', status: 'Follow-up due' },
   // Employees (UEP)
-  { id: 'e-maria', name: 'María González', type: 'Employee', owner: 'People Ops', health: 'active' },
-  { id: 'e-tom', name: 'Tom Becker', type: 'Employee', owner: 'People Ops', health: 'active' },
+  { id: 'e-maria', name: 'María González', type: 'Employee', owner: 'David Kim', health: 'active', email: 'maria.gonzalez@aims.com', phone: '+1 (415) 555-0144', address: 'Austin, TX', company: 'People Ops · AIMS', title: 'Senior CSM', status: 'Active' },
+  { id: 'e-tom', name: 'Tom Becker', type: 'Employee', owner: 'Priya Nair', health: 'active', email: 'tom.becker@aims.com', phone: '+1 (206) 555-0123', address: 'Seattle, WA', company: 'Sales · AIMS', title: 'Account Executive', status: 'Active' },
   // Deals
-  { id: 'deal-acme-q3', name: 'Acme Renewal — Q3', type: 'Deal', owner: 'Sales', health: 'active' },
+  { id: 'deal-acme-q3', name: 'Acme Renewal — Q3', type: 'Deal', owner: 'Priya Nair', health: 'active', email: 'billing@acme.com', phone: '+1 (415) 555-0110', address: 'San Francisco, CA', company: 'Acme Corp', status: 'Negotiation' },
   // Cases
-  { id: 'case-4821', name: 'Case #4821 — Outage', type: 'Case', owner: 'Support', health: 'active' },
+  { id: 'case-4821', name: 'Case #4821 — Outage', type: 'Case', owner: 'Sam Ortiz', health: 'active', email: 'support@initech.com', phone: '+1 (512) 555-0188', address: 'Austin, TX', company: 'Initech LLC', status: 'Escalated' },
 ]
 
 // Widget catalog — realistic for an enterprise BI workspace (dozens of widgets
