@@ -24,12 +24,14 @@ function FilterSelect({ label, value, onChange, options }) {
   )
 }
 
-export default function FilterToolbar({ searchValue, onSearch, searchPlaceholder = 'Search…', filters = [], sort, inlineCount = 2 }) {
+// `bare` drops the full-bleed sub-header chrome (border-b + page padding) so the toolbar
+// can sit inline as a section header (e.g. above a sub-list on a workspace page).
+export default function FilterToolbar({ searchValue, onSearch, searchPlaceholder = 'Search…', filters = [], sort, inlineCount = 2, bare = false }) {
   const [allOpen, setAllOpen] = useState(false)
   const inline = filters.slice(0, inlineCount)
 
   return (
-    <div className="flex items-center gap-2 flex-wrap px-6 py-3 border-b border-gray-200 dark:border-white/10">
+    <div className={`flex items-center gap-2 flex-wrap ${bare ? '' : 'px-6 py-3 border-b border-gray-200 dark:border-white/10'}`}>
       <div className="relative w-full sm:w-auto">
         <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-500 dark:text-slate-400" aria-hidden="true" />
         <input className="input h-9 w-full sm:w-52 pl-8" placeholder={searchPlaceholder} value={searchValue} onChange={(e) => onSearch(e.target.value)} />
