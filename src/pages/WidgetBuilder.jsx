@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect, useRef } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { Check } from 'lucide-react'
 import { PageHeader } from '../components/common/index.jsx'
 import { useWidgets } from '../state/WidgetsContext.jsx'
@@ -46,6 +46,7 @@ const TYPE_INFO = {
 // S50–S65 — Widget Playground: split-screen build (left) + live preview (right)
 export default function WidgetBuilder() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { addWidget } = useWidgets()
 
   const [sourceMode, setSourceMode] = useState('connected') // 'connected' | 'table'
@@ -162,6 +163,14 @@ export default function WidgetBuilder() {
     setName(r.name)
     return true
   }
+
+  // Seed from a description handed off by the AI chat ("Fine-tune in builder"), once.
+  const seededRef = useRef(false)
+  useEffect(() => {
+    if (seededRef.current) return
+    const seed = location.state?.describe
+    if (seed) { seededRef.current = true; applyDescription(seed) }
+  }, [location.state]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const canSave =
     !!source &&

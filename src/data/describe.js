@@ -17,21 +17,34 @@ function tokens(s = '') {
     .map((w) => (w.length > 3 && w.endsWith('s') ? w.slice(0, -1) : w))
 }
 
-// Explicit visualization words → tile typeId (first match wins).
+// EXPLICIT visualization words → tile typeId (an unambiguous chart-type request).
+// Checked first so a refinement like "make it a bar chart" wins over an implied type.
 const TYPE_KEYWORDS = [
-  ['map', /\bmap\b|geograph|by region|by country|by geo/],
-  ['line', /\btrend\b|over time|line chart|\bline\b|monthly|by month|by quarter|time series|timeline/],
-  ['pie', /\bpie\b|donut|proportion|share of|\bmix\b/],
-  ['funnel', /funnel|conversion/],
-  ['gauge', /gauge|progress|vs target|to target|attainment|% to/],
-  ['table', /\btable\b|\brows?\b|records?|list of|grid/],
+  ['map', /\bmap\b|geograph/],
+  ['line', /line chart|\bline\b|time series|timeline/],
+  ['pie', /\bpie\b|donut/],
+  ['funnel', /funnel/],
+  ['gauge', /gauge|vs target|to target|attainment|% to/],
+  ['table', /\btable\b|\brows?\b|records?|grid/],
   ['scatter', /scatter|correlat/],
   ['list', /\blist\b|ranked|leaderboard|top \d/],
-  ['bar', /\bbar\b|breakdown|compare|by (stage|team|type|category|channel|priority|tier|segment|department|status|outcome)/],
-  ['kpi', /\bkpi\b|single number|headline|\btotal\b|count of|number of/],
+  ['bar', /\bbar\b|bar chart/],
+  ['kpi', /\bkpi\b|single number|headline/],
+]
+// WEAK/inferred signals (a breakdown or timeframe implies a type) — only if no explicit
+// chart-type word appeared, so "win rate by region" still defaults to a map.
+const TYPE_KEYWORDS_WEAK = [
+  ['map', /by region|by country|by geo/],
+  ['line', /\btrend\b|over time|monthly|by month|by quarter/],
+  ['pie', /proportion|share of|\bmix\b/],
+  ['funnel', /conversion/],
+  ['gauge', /\bprogress\b/],
+  ['bar', /breakdown|compare|by (stage|team|type|category|channel|priority|tier|segment|department|status|outcome)/],
+  ['kpi', /\btotal\b|count of|number of/],
 ]
 function detectType(t) {
   for (const [id, re] of TYPE_KEYWORDS) if (re.test(t)) return id
+  for (const [id, re] of TYPE_KEYWORDS_WEAK) if (re.test(t)) return id
   return null
 }
 

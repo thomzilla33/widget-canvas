@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { LayoutDashboard, MapPin, UserX, RotateCcw, FileBarChart, ArrowRight } from 'lucide-react'
+import { LayoutDashboard, MapPin, UserX, RotateCcw, FileBarChart, ArrowRight, Sparkles } from 'lucide-react'
 import { PageHeader, Badge, EmptyState } from '../components/common/index.jsx'
 import StudioWelcome from '../components/common/StudioWelcome.jsx'
 import FilterToolbar from '../components/common/FilterToolbar.jsx'
+import AIGenerateModal from '../components/ai/AIGenerateModal.jsx'
 import { useDashboards } from '../state/DashboardsContext.jsx'
 import { useRole } from '../state/RoleContext.jsx'
 import { placementLabel, DEACTIVATED_OWNERS, dashboardKind, SHARE_PEOPLE } from '../data/mock.js'
@@ -43,6 +44,7 @@ export default function DashboardList() {
   // Who you can reassign TO: yourself, or any active teammate.
   const reassignTargets = ['You (admin)', ...SHARE_PEOPLE.filter((p) => p.status === 'active').map((p) => p.name)]
   const [reassignTo, setReassignTo] = useState({}) // per departed-owner → chosen new owner
+  const [aiOpen, setAiOpen] = useState(false)
   const targetFor = (owner) => reassignTo[owner] || 'You (admin)'
   const reassignOne = (id, owner) => updateDashboard(id, { owner: targetFor(owner) })
   const reassignAll = (group) => {
@@ -91,9 +93,14 @@ export default function DashboardList() {
         description={`${dashboards.length} dashboards · ${publishedCount} published`}
         actions={
           isAdmin ? (
-            <button className="btn-primary" onClick={() => navigate('/dashboard/new')}>
-              + New dashboard
-            </button>
+            <>
+              <button className="btn-secondary" onClick={() => setAiOpen(true)}>
+                <Sparkles size={15} /> Generate with AI
+              </button>
+              <button className="btn-primary" onClick={() => navigate('/dashboard/new')}>
+                + New dashboard
+              </button>
+            </>
           ) : null
         }
       />
@@ -248,6 +255,8 @@ export default function DashboardList() {
         )}
         <p className="mt-4 text-xs text-gray-500 dark:text-slate-400">Screens hosted here: S76–S79</p>
       </div>
+
+      {aiOpen && <AIGenerateModal initialMode="dashboard" onClose={() => setAiOpen(false)} />}
     </div>
   )
 }

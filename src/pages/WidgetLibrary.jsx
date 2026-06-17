@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Flag, Store } from 'lucide-react'
+import { Flag, Store, Sparkles } from 'lucide-react'
 import { PageHeader, HealthBadge, FreshnessBadge, EmptyState, DataPlaneBadge } from '../components/common/index.jsx'
 import { dataPlaneOf } from '../data/governance.js'
 import { WidgetGlyph } from '../components/widgets/glyph.jsx'
@@ -9,6 +9,7 @@ import RepinModal from '../components/widgets/RepinModal.jsx'
 import FlagDetailModal from '../components/widgets/FlagDetailModal.jsx'
 import WidgetDetailModal from '../components/widgets/WidgetDetailModal.jsx'
 import WidgetMarketplace from '../components/widgets/WidgetMarketplace.jsx'
+import AIGenerateModal from '../components/ai/AIGenerateModal.jsx'
 import SourceTemplatesBanner from '../components/widgets/SourceTemplatesBanner.jsx'
 import StudioWelcome from '../components/common/StudioWelcome.jsx'
 import FilterToolbar from '../components/common/FilterToolbar.jsx'
@@ -57,6 +58,7 @@ export default function WidgetLibrary() {
   const [detailFlag, setDetailFlag] = useState(null)
   const [detailWidget, setDetailWidget] = useState(null) // Tier 2 — widget detail (not the builder)
   const [marketplace, setMarketplace] = useState(false)
+  const [aiOpen, setAiOpen] = useState(false)
 
   const catOptions = [{ value: 'All', label: 'All categories' }, ...CATALOG_CATEGORIES.map((c) => ({ value: c, label: c }))]
   const typeOptions = [{ value: 'All', label: 'All types' }, ...Array.from(new Set(widgets.map((w) => w.skeleton))).map((t) => ({ value: t, label: t }))]
@@ -99,6 +101,9 @@ export default function WidgetLibrary() {
             <>
               <button className="btn-secondary" onClick={() => setMarketplace(true)}>
                 <Store size={15} /> Browse marketplace
+              </button>
+              <button className="btn-secondary" onClick={() => setAiOpen(true)}>
+                <Sparkles size={15} /> Generate with AI
               </button>
               <button className="btn-primary" onClick={() => navigate('/widgets/new')}>
                 + New widget
@@ -270,6 +275,8 @@ export default function WidgetLibrary() {
       )}
 
       {marketplace && <WidgetMarketplace onClose={() => setMarketplace(false)} />}
+
+      {aiOpen && <AIGenerateModal initialMode="widget" onClose={() => setAiOpen(false)} />}
     </div>
   )
 }
