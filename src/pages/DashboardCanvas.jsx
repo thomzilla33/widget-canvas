@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import { useParams, Navigate } from 'react-router-dom'
-import { Plus, X, Lock, Unlock, Trash2, Sparkles, RotateCcw } from 'lucide-react'
+import { Plus, X, Lock, Unlock, Trash2, Sparkles, RotateCcw, SlidersHorizontal } from 'lucide-react'
 import { PageHeader, GovernedBadge, FreshnessBadge, Badge, EmptyState } from '../components/common/index.jsx'
 import WidgetRender from '../components/widgets/WidgetRender.jsx'
 import WidgetLibraryModal from '../components/widgets/WidgetLibraryModal.jsx'
 import PublishModal from '../components/dashboard/PublishModal.jsx'
 import ShareModal from '../components/dashboard/ShareModal.jsx'
+import EditSetupModal from '../components/dashboard/EditSetupModal.jsx'
 import EntityContextHeader, { entityHeaderApplies } from '../components/dashboard/EntityContextHeader.jsx'
 import SuggestWidgetsModal from '../components/dashboard/SuggestWidgetsModal.jsx'
 import { useWidgets } from '../state/WidgetsContext.jsx'
@@ -48,6 +49,7 @@ export default function DashboardCanvas() {
   const [publishOpen, setPublishOpen] = useState(false)
   const [shareOpen, setShareOpen] = useState(false)
   const [suggestOpen, setSuggestOpen] = useState(false)
+  const [editSetupOpen, setEditSetupOpen] = useState(false)
   const [dragOverZone, setDragOverZone] = useState(null)
 
   // Layout is persisted on the dashboard (so edits show on the view/profile).
@@ -151,13 +153,29 @@ export default function DashboardCanvas() {
       <PageHeader
         title={dashboard?.name || 'Dashboard canvas'}
         description={
-          dashboard
-            ? `${dashboardKindLabel(dashboard)} · ${dashboard.audience}${allPlacements.length ? ` · ${lockedCount}/${allPlacements.length} widgets locked` : ' — drop widgets into zones'}`
-            : 'Drop widgets into zones; permissions are set per widget here.'
+          dashboard ? (
+            <span>
+              <button
+                onClick={() => setEditSetupOpen(true)}
+                className="font-medium text-gray-600 underline-offset-2 hover:text-aims-blue hover:underline dark:text-slate-300"
+                title="Edit setup — change where this dashboard lives"
+              >
+                {dashboardKindLabel(dashboard)}
+              </button>
+              {` · ${dashboard.audience}${allPlacements.length ? ` · ${lockedCount}/${allPlacements.length} widgets locked` : ' — drop widgets into zones'}`}
+            </span>
+          ) : (
+            'Drop widgets into zones; permissions are set per widget here.'
+          )
         }
         actions={
           <>
             {dashboard && <Badge variant={dashboard.status} />}
+            {dashboard && (
+              <button className="btn-secondary" onClick={() => setEditSetupOpen(true)} title="Change where this dashboard lives, or rename it">
+                <SlidersHorizontal size={15} /> Edit setup
+              </button>
+            )}
             {allPlacements.length > 0 && (
               <button
                 className="btn-secondary"
@@ -304,6 +322,17 @@ export default function DashboardCanvas() {
           placedIds={allPlacements.map((p) => p.widgetId)}
           onAdd={(w) => placeWidget('main', w)}
           onClose={() => setSuggestOpen(false)}
+        />
+      )}
+
+      {editSetupOpen && dashboard && (
+        <EditSetupModal
+          dashboard={dashboard}
+          onClose={() => setEditSetupOpen(false)}
+          onSave={(patch) => {
+            updateDashboard(dashboard.id, patch)
+            setEditSetupOpen(false)
+          }}
         />
       )}
     </div>
