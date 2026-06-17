@@ -201,8 +201,12 @@ an answer into a widget suggestion.
 - ☑ U7.1 **Light-mode QA** — audited Data Studio, UCP (header/tabs/suggest), Widget Library
   (welcome + templates banner), governance badges in light mode: all readable, no `dark:`-only
   gaps (the new surfaces consistently use `text-gray-X dark:text-slate-Y`). **No fixes needed.**
-- ☐ U7.2 **Admin-gated builder** — creation/editing behind an admin role. → **refinement**
-- ☐ U7.3 **Feedback/escalation → unified workspace** (UCP flags → Home HTL). → **refinement**
+- ☑ U7.2 **Admin-gated builder** (commit `22be1ac`) — `RoleContext` + topbar Admin/Viewer toggle;
+  builder routes behind `<AdminRoute>` + canvas redirects viewers; create/edit CTAs (New
+  dashboard/widget, marketplace, template installs, welcome CTAs, UCP tab editing, Edit, Data
+  Studio Connect) hidden for viewers; consumer bits (Ask, header actions) stay.
+- ☑ U7.3 **Feedback/escalation → unified workspace** (commit `60f9918`) — open FeedbackContext
+  flags route into the Home HTL queue as Escalation items; resolving there clears them via context.
 - ☑ U7.4 **A11y** — verified: focus traps (useFocusTrap) + role=dialog/aria-labelledby on every
   modal, aria-labels on icon buttons, role=menu/menuitem + aria-haspopup on dropdowns; the
   WCAG-AA contrast pass landed in Phase 5. No new violations.
@@ -245,10 +249,8 @@ U0  Entity vs Global   ─┬─►  U1 Tabs ─┐
 
 Feature-y or lower-priority items intentionally deferred while shipping the cascade:
 
-- **Admin-gated builder** (U7.2) — creation/editing (canvas, tab edit, suggestions, Data Studio)
-  behind an admin role; consumers get read-only.
-- **Feedback / escalation → unified workspace** (U7.3) — route UCP flags + HTL into the Home
-  inbox/HTL queue (FeedbackContext + PinnedWidgets already exist).
+- ~~Admin-gated builder (U7.2)~~ ✅ shipped `22be1ac`.
+- ~~Feedback / escalation → unified workspace (U7.3)~~ ✅ shipped `60f9918`.
 - **Tab-level audience visibility** (U1.5) — hide a tab for roles that can't see its content.
 - **Email/SMS "log to Activity"** (U2.3) and **PBAC gating of header actions** (U2.5).
 - **AI-suggest entry in NewDashboard** (U3.4) and **DataSourceMarketplace template banner** (U4.2)
