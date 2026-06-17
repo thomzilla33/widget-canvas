@@ -20,8 +20,8 @@ import { AUDIENCE_OPTIONS, ALL_AUDIENCES, audienceVisibleTo } from '../data/audi
 export default function DashboardViewPage() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const { dashboards } = useDashboards()
-  const { widgets } = useWidgets()
+  const { dashboards, updateDashboard } = useDashboards()
+  const { widgets, addWidget } = useWidgets()
   const { tick, paused } = useLive()
   const { isAdmin } = useRole()
   const dashboard = dashboards.find((d) => d.id === id)
@@ -44,6 +44,31 @@ export default function DashboardViewPage() {
   const stalePaused = placements
     .map((p) => widgets.find((w) => w.id === p.widgetId))
     .filter((w) => w && isStale(w)).length
+
+  // U6.4 — turn an Ask answer into a governed AI-summary widget pinned to this
+  // dashboard (admin only). The free text rides on `note` (widgetSample renders it).
+  function saveAnswerAsWidget(answer, question) {
+    if (!dashboard) return
+    const stamp = `${placements.length}-${(question || answer).length}` // deterministic, no Date in render path
+    const title = (question || 'Saved answer').replace(/\s+/g, ' ').trim().slice(0, 48) || 'Saved answer'
+    const wid = `w-answer-${dashboard.id}-${stamp}`
+    addWidget({
+      id: wid,
+      name: title,
+      skeleton: 'AI Summary',
+      source: 'AIMS OS — Ask',
+      governed: true,
+      freshness: 'fresh',
+      health: 'active',
+      usedIn: 1,
+      category: 'Intelligence',
+      note: answer,
+    })
+    const layout = dashboardLayout(dashboard)
+    const next = { ...layout, main: [...(layout.main || []), { pid: `p-ans-${stamp}`, widgetId: wid, fixed: false, size: 'md', audiences: [], quickActions: [] }] }
+    const count = Object.values(next).reduce((n, arr) => n + arr.length, 0)
+    updateDashboard(dashboard.id, { layout: next, widgets: count })
+  }
 
   if (!dashboard) {
     return (
@@ -143,6 +168,7 @@ export default function DashboardViewPage() {
           widgetNames={placements.map((p) => widgets.find((w) => w.id === p.widgetId)?.name).filter(Boolean)}
           scopeLabel={scopeLabel(scope)}
           onClose={() => setAskOpen(false)}
+          onSaveAsWidget={isAdmin ? saveAnswerAsWidget : undefined}
         />
       )}
     </div>

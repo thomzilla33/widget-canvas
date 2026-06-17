@@ -376,7 +376,10 @@ export function widgetSample(widget, scope) {
       kpiOverride = { kpiRaw: raw, kpi: { ...bundle.kpi, value } }
     }
   }
-  return { ...SAMPLE, ...bundle, ...(kpiOverride || {}) }
+  // A "saved answer" widget (U6.4) carries free text in `note` — show it verbatim as
+  // the AI-summary narrative instead of generated copy.
+  const noteOverride = widget?.note ? { narrative: { text: widget.note, bullets: [] } } : null
+  return { ...SAMPLE, ...bundle, ...(kpiOverride || {}), ...(noteOverride || {}) }
 }
 
 // ── Table-backed widgets: REAL computed table data in the preview/render contract ──

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Bot, X, Send, Sparkles } from 'lucide-react'
+import { Bot, X, Send, Sparkles, Plus, Check } from 'lucide-react'
 import { useFocusTrap } from '../../hooks/useFocusTrap.js'
 
 // U6 — "Talk to your dashboard": an Ask panel scoped to THIS dashboard's widgets +
@@ -33,13 +33,21 @@ function answerFor(q, ctx) {
   return `From this dashboard's ${names.length} widget${names.length === 1 ? '' : 's'} for “${q}”: everything is within range for ${range}. Try asking about a specific widget — e.g. “${first}”.${tail}`
 }
 
-export default function AskDashboardModal({ name, kind, widgetNames = [], scopeLabel = 'the current range', onClose }) {
+export default function AskDashboardModal({ name, kind, widgetNames = [], scopeLabel = 'the current range', onClose, onSaveAsWidget }) {
   const ref = useFocusTrap()
   const ctx = { name, kind, widgetNames, scopeLabel }
   const [msgs, setMsgs] = useState([
     { from: 'agent', text: `Hi — ask me anything about “${name}”. I can see its ${widgetNames.length} widget${widgetNames.length === 1 ? '' : 's'} and the current scope (${scopeLabel}).` },
   ])
   const [draft, setDraft] = useState('')
+  const [added, setAdded] = useState(() => new Set()) // U6.4 — answers turned into widgets
+
+  // Turn an agent answer into a saved AI-summary widget on this dashboard.
+  const saveAsWidget = (i, answer) => {
+    const question = msgs[i - 1]?.from === 'user' ? msgs[i - 1].text : ''
+    onSaveAsWidget?.(answer, question)
+    setAdded((s) => new Set(s).add(i))
+  }
 
   const prompts = [
     'Summarize this dashboard',
@@ -68,13 +76,30 @@ export default function AskDashboardModal({ name, kind, widgetNames = [], scopeL
         </div>
 
         <div className="min-h-0 flex-1 space-y-2 overflow-auto p-4">
-          {msgs.map((m, i) => (
-            <div key={i} className={`flex ${m.from === 'user' ? 'justify-end' : 'justify-start'}`}>
-              <span className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm ${m.from === 'user' ? 'bg-aims-blue text-white' : 'bg-gray-100 text-gray-700 dark:bg-white/10 dark:text-slate-200'}`}>
-                {m.text}
-              </span>
-            </div>
-          ))}
+          {msgs.map((m, i) => {
+            const isAnswer = m.from === 'agent' && i > 0 // not the greeting
+            return (
+              <div key={i} className={`flex flex-col ${m.from === 'user' ? 'items-end' : 'items-start'}`}>
+                <span className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm ${m.from === 'user' ? 'bg-aims-blue text-white' : 'bg-gray-100 text-gray-700 dark:bg-white/10 dark:text-slate-200'}`}>
+                  {m.text}
+                </span>
+                {isAnswer && onSaveAsWidget && (
+                  added.has(i) ? (
+                    <span className="mt-1 inline-flex items-center gap-1 text-[11px] font-medium text-aims-governed">
+                      <Check size={12} aria-hidden="true" /> Added to this dashboard
+                    </span>
+                  ) : (
+                    <button
+                      onClick={() => saveAsWidget(i, m.text)}
+                      className="mt-1 inline-flex items-center gap-1 rounded-full border border-aims-blue/30 bg-aims-blue/5 px-2 py-0.5 text-[11px] font-medium text-aims-blue hover:bg-aims-blue/10"
+                    >
+                      <Plus size={11} aria-hidden="true" /> Add as widget
+                    </button>
+                  )
+                )}
+              </div>
+            )
+          })}
         </div>
 
         <div className="border-t border-gray-200 p-3 dark:border-white/10">
