@@ -28,7 +28,9 @@ export function ActivityProvider({ children }) {
   function logActivity(entityId, entry) {
     if (!entityId) return
     seqRef.current += 1
-    const item = { id: `a-${seqRef.current}`, when: 'just now', by: 'You', ...entry }
+    // Defaults first so the caller may set when/by; `id` is last so it can never be
+    // clobbered (guarantees unique React keys).
+    const item = { when: 'just now', by: 'You', ...entry, id: `a-${seqRef.current}` }
     setByEntity((prev) => ({ ...prev, [entityId]: [item, ...(prev[entityId] || [])] }))
   }
 
