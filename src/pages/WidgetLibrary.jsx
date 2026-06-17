@@ -82,7 +82,15 @@ export default function WidgetLibrary() {
   const entityById = (id) => entities.find((e) => e.id === id)
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full overflow-auto">
+      <div className="px-6 pt-4">
+        <StudioWelcome
+          studioId="widgets"
+          built={{ count: widgets.length, label: 'widgets' }}
+          ctaLabel={isAdmin ? 'New widget' : undefined}
+          onCta={isAdmin ? () => navigate('/widgets/new') : undefined}
+        />
+      </div>
       <PageHeader
         title="Widget Library"
         description={`${widgets.length} widgets · ${governedCount} governed`}
@@ -118,13 +126,7 @@ export default function WidgetLibrary() {
         }}
       />
 
-      <div className="flex-1 overflow-auto px-6 py-4">
-        <StudioWelcome
-          studioId="widgets"
-          built={{ count: widgets.length, label: 'widgets' }}
-          ctaLabel={isAdmin ? 'New widget' : undefined}
-          onCta={isAdmin ? () => navigate('/widgets/new') : undefined}
-        />
+      <div className="px-6 py-4">
         {/* U4 — per-source templates from connected integrations (admin installs) */}
         {isAdmin && <SourceTemplatesBanner />}
         {/* S121 — Needs Attention (flags from end users) */}

@@ -33,7 +33,16 @@ export default function ReportsPage() {
   const collectionOptions = [{ value: 'All', label: 'All collections' }, ...REPORT_COLLECTIONS.map((c) => ({ value: c, label: c }))]
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="h-full overflow-auto">
+      <div className="px-6 pt-4">
+        <StudioWelcome
+          studioId="reports"
+          built={{ count: reports.length, label: 'reports' }}
+          ctaLabel={isAdmin ? 'New dashboard' : undefined}
+          onCta={isAdmin ? () => navigate('/dashboard/new') : undefined}
+          links={[{ label: 'Browse all dashboards', onClick: () => navigate('/dashboards') }]}
+        />
+      </div>
       <PageHeader title="Reports" description={`${reportLabel} across your collections`} />
       <FilterToolbar
         searchValue={search}
@@ -48,15 +57,8 @@ export default function ReportsPage() {
           onToggleDir: () => setSortDir((d) => (d === 'asc' ? 'desc' : 'asc')),
         }}
       />
-      <div className="flex-1 overflow-auto">
+      <div>
         <div className="mx-auto w-full max-w-[1800px] space-y-6 px-6 py-5 lg:px-8 2xl:px-12">
-          <StudioWelcome
-            studioId="reports"
-            built={{ count: reports.length, label: 'reports' }}
-            ctaLabel={isAdmin ? 'New dashboard' : undefined}
-            onCta={isAdmin ? () => navigate('/dashboard/new') : undefined}
-            links={[{ label: 'Browse all dashboards', onClick: () => navigate('/dashboards') }]}
-          />
           {reports.length === 0 ? (
             <EmptyState
               icon="📊"

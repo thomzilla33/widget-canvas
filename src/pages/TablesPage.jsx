@@ -21,7 +21,10 @@ export default function TablesPage() {
   })
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="h-full overflow-auto">
+      <div className="px-6 pt-4">
+        <StudioWelcome studioId="tables" built={{ count: TABLE_DEFINITIONS.length, label: 'tables' }} />
+      </div>
       <PageHeader
         title="Tables"
         description="Governed tables you build from normalized data — literal, measure, and formula (ƒ) columns you can chart."
@@ -38,9 +41,8 @@ export default function TablesPage() {
           onToggleDir: () => setSortDir((d) => (d === 'asc' ? 'desc' : 'asc')),
         }}
       />
-      <div className="flex-1 overflow-auto">
+      <div>
         <div className="mx-auto w-full max-w-[1400px] px-6 py-5 lg:px-8">
-          <StudioWelcome studioId="tables" built={{ count: TABLE_DEFINITIONS.length, label: 'tables' }} />
           <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill,minmax(min(300px,100%),1fr))' }}>
             {tables.map((t) => {
               const s = tableStats(t)

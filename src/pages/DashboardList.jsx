@@ -76,7 +76,16 @@ export default function DashboardList() {
   })()
 
   return (
-    <div className="h-full flex flex-col">
+    // The studio welcome leads the page; the title + filters + list scroll below it.
+    <div className="h-full overflow-auto">
+      <div className="px-6 pt-4">
+        <StudioWelcome
+          studioId="dashboards"
+          built={{ count: dashboards.length, label: 'dashboards' }}
+          ctaLabel={isAdmin ? 'New dashboard' : undefined}
+          onCta={isAdmin ? () => navigate('/dashboard/new') : undefined}
+        />
+      </div>
       <PageHeader
         title="Dashboards"
         description={`${dashboards.length} dashboards · ${publishedCount} published`}
@@ -107,13 +116,7 @@ export default function DashboardList() {
         }}
       />
 
-      <div className="flex-1 overflow-auto px-6 py-4">
-        <StudioWelcome
-          studioId="dashboards"
-          built={{ count: dashboards.length, label: 'dashboards' }}
-          ctaLabel={isAdmin ? 'New dashboard' : undefined}
-          onCta={isAdmin ? () => navigate('/dashboard/new') : undefined}
-        />
+      <div className="px-6 py-4">
         {/* IA: Dashboards is the full catalog; Reports is the same Standalone dashboards
             grouped by collection. Cross-link when the user filters to Standalone. */}
         {kind === 'Global' && (
