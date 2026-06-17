@@ -144,19 +144,18 @@ deduped widgets/dashboards.
 
 ---
 
-## Phase U5 — Welcome / landing pages per studio ☐
+## Phase U5 — Welcome / landing pages per studio ☑ (commit `82d2c61`)
 **Goal:** every studio opens with an intro (what you can do + what you've built), like Data
 Studio.
 
 **Dep:** U0 (kinds), U1 (tabs) for accurate "what you've built" counts.
 
 **Activities**
-- ☐ U5.1 A reusable `<StudioWelcome>` (hero + "what you can do" cards + "what you've built"
-  recents + primary CTA).
-- ☐ U5.2 Show it as the empty/zero-state of DashboardList, WidgetLibrary, TablesPage, Reports,
-  Home — and as a dismissible intro for returning users.
-- ☐ U5.3 Per-studio copy + CTAs (Dashboard builder, Widget library, Tables, Reports).
-- ☐ U5.4 Richer dashboard cards + filters on the list (kind, owner, freshness, audience).
+- ☑ U5.1 `src/components/common/StudioWelcome.jsx` — hero + "what you can do" cards + "what
+  you've built" count + primary CTA; dismissible per studio (localStorage).
+- ◐ U5.2 Wired on DashboardList, WidgetLibrary, TablesPage (dismissible intro). Reports/Home deferred.
+- ☑ U5.3 Per-studio copy + CTAs (dashboards → New dashboard, widgets → New widget, tables → none).
+- ◐ U5.4 Kind chip + Entity/Global filter shipped in U0; owner/freshness/audience filters deferred.
 
 **Cases covered:** first-run (nothing built) vs returning (recents), each studio's distinct
 copy, dismiss/again.
@@ -231,5 +230,5 @@ U0  Entity vs Global   ─┬─►  U1 Tabs ─┐
    run continuously but signed off last.
 
 > Status snapshot: U0 ☑, U1 ☑ (U1.5 deferred), U2 ☑ (U2.3 log-to-Activity + U2.5 PBAC deferred),
-> U3 ☑ (U3.4 deferred), U4 ☑ (U4.3 deferred); U5–U7 open. Ship one phase at a time,
+> U3 ☑, U4 ☑, U5 ☑ (Reports/Home welcome deferred); U6–U7 open. Ship one phase at a time,
 > each with build + browser-verify + code-review + deploy (the established workflow).
