@@ -231,12 +231,24 @@ export default function UCPView() {
     )
   }
 
+  const hasEntityHeader = profileSupportsHeader(profileType)
+
   return (
     <div className="h-full flex flex-col">
-      <PageHeader
-        title={entity.name}
-        description="Unified Contact Profile — every widget shows its freshness and data origin."
-      />
+      {/* The entity (Company/Contact/Employee) leads; its tabs sit BELOW it. For
+          profile types without a header (Deal/Case) we keep the plain page title. */}
+      {hasEntityHeader ? (
+        <div className="border-b border-gray-200 bg-white px-6 pt-4 dark:border-white/10 dark:bg-[#0f1629] lg:px-8 2xl:px-12">
+          <div className="mx-auto w-full max-w-[1800px]">
+            <EntityContextHeader entity={entity} viewerRole={viewAs} />
+          </div>
+        </div>
+      ) : (
+        <PageHeader
+          title={entity.name}
+          description="Unified Profile — every widget shows its freshness and data origin."
+        />
+      )}
 
       <div className="border-b border-gray-200 bg-white px-6 dark:border-white/10 dark:bg-[#0f1629]">
         <div className="flex items-center">
@@ -390,11 +402,6 @@ export default function UCPView() {
       </div>
 
       <div className="flex-1 overflow-auto relative">
-        {profileSupportsHeader(profileType) && (
-          <div className="mx-auto w-full max-w-[1800px] px-6 pt-5 lg:px-8 2xl:px-12">
-            <EntityContextHeader entity={entity} viewerRole={viewAs} />
-          </div>
-        )}
         {activeTab !== 'Overview' ? (
           <div className="mx-auto w-full max-w-[1800px] space-y-6 px-6 py-5 lg:px-8 2xl:px-12">
             {/* U2.3 — logged communications (Email/SMS/notes) for this entity */}
