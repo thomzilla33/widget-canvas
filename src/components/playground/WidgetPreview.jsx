@@ -1,4 +1,4 @@
-import { useState, Component } from 'react'
+import { useState, useEffect, Component } from 'react'
 import {
   ResponsiveContainer,
   LineChart,
@@ -18,13 +18,23 @@ import {
   RadialBar,
   PolarAngleAxis,
 } from 'recharts'
-import { ChevronLeft, ChevronRight, Lock, Sparkles } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Lock, Sparkles, Filter } from 'lucide-react'
 import { GovernedBadge, FreshnessBadge, DataPlaneBadge } from '../common/index.jsx'
 import { dataPlaneOf } from '../../data/governance.js'
+import { dimensionsFor } from '../../data/fields.js'
 import { useTheme } from '../../state/ThemeContext.jsx'
 import { previewData, formatValue, tableData } from '../../data/preview.js'
 import { formatCell } from '../../data/tables.js'
 import { TYPE_LABEL } from '../../data/mock.js'
+
+// The date ranges a metric can be filtered to (time is always an applicable filter).
+const PREVIEW_RANGES = [
+  ['7d', 'Last 7 days'],
+  ['30d', 'Last 30 days'],
+  ['90d', 'Last 90 days'],
+  ['qtd', 'Quarter to date'],
+  ['12m', 'Last 12 months'],
+]
 
 // Is a raw value meeting its goal, given direction? null when no goal set.
 function goalMet(raw, goal) {
@@ -56,6 +66,29 @@ const H = 220
 // ── Trust header + type switcher ─────────────────────────────
 export default function WidgetPreview({ typeId, metric, source, name, freshness, display, shape }) {
   const ready = source && metric && typeId
+  // Applicable filters for THIS metric (Issue A): the date range (time is always
+  // filterable) + the categorical dimensions dimensionsFor() says apply to this
+  // source × measure. Toggling them narrows the live preview, demonstrating the
+  // filters end users would get. Table-backed widgets keep their own column flow.
+  const showFilters = ready && !metric._table
+  const filterDims = showFilters ? dimensionsFor(source, metric).filter((d) => d.id !== 'none' && d.id !== 'time') : []
+  const [range, setRange] = useState('90d')
+  const [activeDims, setActiveDims] = useState(() => new Set())
+  // Reset filters when the metric changes so stale narrowing doesn't carry over.
+  const metricKey = metric?._table ? `${metric._table.def?.id}:${metric._table.valueKey}` : metric?.id
+  useEffect(() => {
+    setRange('90d')
+    setActiveDims(new Set())
+  }, [metricKey])
+  const toggleDim = (id) =>
+    setActiveDims((prev) => {
+      const next = new Set(prev)
+      next.has(id) ? next.delete(id) : next.add(id)
+      return next
+    })
+  // Merge the interactive filters into the preview opts (alongside dimension/transform).
+  const previewOpts = { ...(shape || {}), range, filterCount: activeDims.size }
+
   return (
     <div className="card flex flex-col p-4">
       <div className="flex items-start justify-between gap-2">
@@ -76,11 +109,52 @@ export default function WidgetPreview({ typeId, metric, source, name, freshness,
         )}
       </div>
 
+      {/* Applicable filters for this metric (Issue A) */}
+      {showFilters && (
+        <div className="surface-sunken mt-3 flex flex-wrap items-center gap-1.5 rounded-lg px-2.5 py-2">
+          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-gray-500 dark:text-slate-400">
+            <Filter size={12} aria-hidden="true" /> Filters
+          </span>
+          <select
+            value={range}
+            onChange={(e) => setRange(e.target.value)}
+            aria-label="Date range filter"
+            className="input !h-7 !w-auto !py-0.5 !pl-2 !pr-6 text-[11px]"
+          >
+            {PREVIEW_RANGES.map(([v, label]) => (
+              <option key={v} value={v}>{label}</option>
+            ))}
+          </select>
+          {filterDims.map((d) => {
+            const on = activeDims.has(d.id)
+            return (
+              <button
+                key={d.id}
+                onClick={() => toggleDim(d.id)}
+                aria-pressed={on}
+                className={`rounded-full border px-2 py-0.5 text-[11px] font-medium transition-colors ${
+                  on
+                    ? 'border-aims-blue bg-aims-blue/10 text-aims-blue'
+                    : 'border-gray-200 text-gray-500 hover:border-aims-blue/40 dark:border-white/15 dark:text-slate-400'
+                }`}
+              >
+                {d.name}
+              </button>
+            )
+          })}
+          {activeDims.size > 0 && (
+            <button onClick={() => setActiveDims(new Set())} className="ml-auto text-[11px] font-medium text-aims-blue hover:underline">
+              Clear
+            </button>
+          )}
+        </div>
+      )}
+
       <div className="mt-3 flex-1">
         {ready ? (
           // Key on type AND data identity so a prior render error clears when the table/column changes.
-          <ChartBoundary key={`${typeId}|${metric._table ? `${metric._table.def?.id}:${metric._table.valueKey}` : metric.id}|${shape?.dimension?.id || ''}|${shape?.transform || ''}`}>
-            <Renderer typeId={typeId} metric={metric} pii={!!source.hasPII} display={display} shape={shape} />
+          <ChartBoundary key={`${typeId}|${metric._table ? `${metric._table.def?.id}:${metric._table.valueKey}` : metric.id}|${previewOpts.dimension?.id || ''}|${previewOpts.transform || ''}|${previewOpts.range || ''}|${previewOpts.filterCount || 0}`}>
+            <Renderer typeId={typeId} metric={metric} display={display} shape={previewOpts} />
           </ChartBoundary>
         ) : (
           <div className="grid h-full min-h-[220px] place-items-center rounded-lg border-2 border-dashed border-gray-200 text-center text-sm text-gray-400 dark:border-white/10 dark:text-slate-500">
@@ -104,7 +178,7 @@ export default function WidgetPreview({ typeId, metric, source, name, freshness,
 }
 
 // Renders only the selected view, so an unused view can't throw or do work.
-function Renderer({ typeId, metric, pii, display, shape }) {
+function Renderer({ typeId, metric, display, shape }) {
   // Table-backed widgets render REAL computed table data; everything else uses the canned sample
   // (sliced by the chosen dimension + transform when set — Phase 1).
   const data = metric?._table ? tableData(metric._table.def, metric._table.valueKey) : previewData(metric, shape)
@@ -112,10 +186,10 @@ function Renderer({ typeId, metric, pii, display, shape }) {
     case 'line': return <LineView data={data} />
     case 'bar': return <BarView data={data} />
     case 'pie': return <PieView data={data} />
-    case 'table': return <TableView data={data} pii={pii} />
+    case 'table': return <TableView data={data} />
     case 'heatmap': return <HeatmapView data={data} />
     case 'scatter': return <ScatterView data={data} />
-    case 'carousel': return <CarouselView data={data} pii={pii} />
+    case 'carousel': return <CarouselView data={data} />
     case 'gauge': return <GaugeView data={data} display={display} />
     case 'list': return <ListView data={data} />
     case 'summary': return <SummaryView data={data} />
@@ -265,40 +339,36 @@ function KpiView({ data, display }) {
   )
 }
 
-function maskName(s) {
-  return s
-    .split(' ')
-    .map((w) => (w[0] || '') + '•••')
-    .join(' ')
-}
-
-function TableView({ data, pii }) {
+function TableView({ data }) {
   // Table-backed widget → render the real computed grid (literal/measure/formula columns).
   if (data.tableGrid) return <TableGridView grid={data.tableGrid} />
+  // Metric preview → the breakdown as a table (Dimension | Metric | Share), tied to
+  // the SAME data the bar/pie/list show.
+  const headers = data.recordHeaders || ['Segment', 'Value']
+  const withShare = headers.length >= 3
   return (
     <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-white/10">
       <table className="w-full text-left text-xs">
         <thead className="bg-gray-50 text-gray-500 dark:bg-white/5 dark:text-slate-400">
           <tr>
-            {['Account', 'Owner', 'Value', 'Status'].map((h) => (
-              <th key={h} className="px-3 py-2 font-semibold">{h}</th>
+            {headers.map((h, i) => (
+              <th key={h} className={`px-3 py-2 font-semibold ${i > 0 ? 'text-right' : ''}`}>{h}</th>
             ))}
           </tr>
         </thead>
         <tbody>
-          {data.records.slice(0, 5).map((r) => (
+          {data.records.slice(0, 7).map((r) => (
             <tr key={r.name} className="border-t border-gray-100 dark:border-white/5">
               <td className="px-3 py-2 font-medium text-gray-900 dark:text-slate-100">{r.name}</td>
-              <td className="px-3 py-2 text-gray-500 dark:text-slate-400">{pii ? maskName(r.owner) : r.owner}</td>
-              <td className="px-3 py-2 text-gray-700 dark:text-slate-200">{r.value}</td>
-              <td className="px-3 py-2 text-gray-500 dark:text-slate-400">{r.status}</td>
+              <td className="num px-3 py-2 text-right text-gray-700 dark:text-slate-200">{r.value}</td>
+              {withShare && <td className="num px-3 py-2 text-right text-gray-500 dark:text-slate-400">{r.share}</td>}
             </tr>
           ))}
         </tbody>
       </table>
-      {data.recordTotal > 5 && (
+      {data.recordTotal > 7 && (
         <div className="border-t border-gray-100 px-3 py-1.5 text-[11px] text-gray-400 dark:border-white/5 dark:text-slate-500">
-          Showing 5 of {data.recordTotal.toLocaleString()} records
+          Showing 7 of {data.recordTotal.toLocaleString()} rows
         </div>
       )}
     </div>
@@ -385,20 +455,21 @@ function Row({ label, values }) {
   )
 }
 
-function CarouselView({ data, pii }) {
+function CarouselView({ data }) {
   const [i, setI] = useState(0)
   const items = data.records
-  const r = items[i]
+  const r = items[i % items.length]
+  const dimLabel = data.recordHeaders?.[0] || 'Segment'
   return (
     <div className="flex items-center gap-2">
       <button onClick={() => setI((x) => (x - 1 + items.length) % items.length)} className="grid h-7 w-7 shrink-0 place-items-center rounded-md border border-gray-200 text-gray-500 hover:text-aims-blue dark:border-white/15 dark:text-slate-400" aria-label="Previous">
         <ChevronLeft size={15} />
       </button>
       <div className="flex-1 rounded-lg border border-gray-200 p-4 dark:border-white/10">
+        <div className="text-[10px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-500">{dimLabel}</div>
         <div className="text-sm font-semibold text-gray-900 dark:text-slate-100">{r.name}</div>
-        <div className="mt-0.5 text-[11px] text-gray-500 dark:text-slate-400">{pii ? maskName(r.owner) : r.owner}</div>
-        <div className="mt-3 text-2xl font-bold text-gray-900 dark:text-slate-100">{r.value}</div>
-        <div className="mt-1 text-xs text-gray-500 dark:text-slate-400">{r.status}</div>
+        <div className="num mt-3 text-2xl font-bold text-gray-900 dark:text-slate-100">{r.value}</div>
+        {r.share && r.share !== '—' && <div className="mt-1 text-xs text-gray-500 dark:text-slate-400">{r.share} of total</div>}
         <div className="mt-3 flex justify-center gap-1">
           {items.map((_, d) => (
             <span key={d} className={`h-1.5 w-1.5 rounded-full ${d === i ? 'bg-aims-blue' : 'bg-gray-300 dark:bg-white/20'}`} />

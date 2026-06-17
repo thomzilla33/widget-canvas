@@ -178,16 +178,130 @@ function shapeBreakdown(breakdown, opts) {
   return applyTransform(bd, opts.transform)
 }
 
-// Returns the sample bundle with KPI value + breakdown labels that fit the metric.
-// `opts` (builder) = { dimension, transform } — slices the breakdown by a dimension.
+// Format a raw value in the metric's natural unit (the breakdown column header
+// carries the unit for duration, so a bare number there is fine).
+function formatMetric(raw, unit) {
+  switch (unit) {
+    case 'currency': return formatValue(raw, { style: 'currency', abbreviate: Math.abs(raw) >= 1000, decimals: Math.abs(raw) >= 1000 ? 1 : 0 })
+    case 'percent': return `${Math.round(raw * 10) / 10}%`
+    case 'score': return `${Math.round(raw * 10) / 10} / 5`
+    case 'duration': return `${Math.round(raw * 10) / 10}`
+    default: return raw >= 10000 ? formatValue(raw, { abbreviate: true, decimals: 1 }) : Math.round(raw).toLocaleString('en-US')
+  }
+}
+// Keep a per-category value plausible for its unit (percent ≤100, score ≤5, …).
+function clampUnit(unit, v) {
+  if (unit === 'percent') return Math.min(100, Math.max(1, Math.round(v * 10) / 10))
+  if (unit === 'score') return Math.min(5, Math.max(1, Math.round(v * 10) / 10))
+  return Math.max(1, Math.round(v))
+}
+// The first-column label for a metric's breakdown (mirrors breakdownCats' branches).
+function dimLabelOf(name = '') {
+  if (/stage|pipeline|funnel|\bmql\b|\bsql\b/i.test(name)) return 'Stage'
+  if (/channel/i.test(name)) return 'Channel'
+  if (/region/i.test(name)) return 'Region'
+  if (/plan|tier|subscription/i.test(name)) return 'Tier'
+  if (/action|type/i.test(name)) return 'Type'
+  if (/\bdept\b|department|\bteam\b/i.test(name)) return 'Team'
+  if (/priority/i.test(name)) return 'Priority'
+  if (/category|expense/i.test(name)) return 'Category'
+  if (/business unit/i.test(name)) return 'Unit'
+  return 'Segment'
+}
+
+// Builds a FULLY metric-derived sample bundle, so EVERY widget type (KPI, bar, table,
+// heatmap, scatter, map, summary…) shows the SAME selected metric — switching the type
+// only re-visualizes it, never swaps in unrelated canned data.
+// `opts` = { dimension, transform, range, filterCount } — slice + reshape + narrow.
 export function previewData(metric, opts) {
   const name = metric?.name || 'Value'
   const h = hashId(name)
+  const unit = metricUnit(name)
+  const additive = unit === 'currency' || unit === 'count'
   const k = semanticKpi(name, h)
+  const transformed = !!(opts?.transform && opts.transform !== 'none')
+
+  // Interactive filters (Issue A) narrow magnitude; date range scales it. Ratio
+  // units (rates/scores/durations) keep their headline — a date range doesn't
+  // multiply a win rate — so only additive metrics scale.
+  const rangeMult = (opts && RANGE_MULT[opts.range]) || 1
+  const filterScale = 1 - Math.min(0.4, (opts?.filterCount || 0) * 0.15)
+  const m = additive ? rangeMult * filterScale : 1
+  const kpiRaw = additive ? Math.max(1, Math.round(k.raw * m)) : k.raw
+  const kpiValue = additive ? formatMetric(kpiRaw, unit) : k.value
+
+  // Breakdown by the metric's natural categories. Additive units distribute the
+  // KPI across categories (Σ ≈ KPI); ratio units carry a per-category rate/score.
   const cats = breakdownCats(name)
-  const breakdown = cats.map((label, i) => ({ label, value: SAMPLE.breakdown[i % SAMPLE.breakdown.length].value }))
-  const shaped = opts ? shapeBreakdown(breakdown, { dimensionId: opts.dimension?.id, transform: opts.transform }) : breakdown
-  return { ...SAMPLE, label: name, kpi: { ...SAMPLE.kpi, value: k.value }, kpiRaw: k.raw, breakdown: shaped }
+  const weights = cats.map((_, i) => SAMPLE.breakdown[i % SAMPLE.breakdown.length].value)
+  const wsum = weights.reduce((a, b) => a + b, 0) || 1
+  const maxw = Math.max(...weights)
+  const rawBreakdown = cats.map((label, i) =>
+    additive
+      ? { label, value: Math.max(1, Math.round(kpiRaw * (weights[i] / wsum))) }
+      : { label, value: clampUnit(unit, k.raw * (0.55 + (weights[i] / maxw) * 0.5)) },
+  )
+  const total = rawBreakdown.reduce((a, b) => a + b.value, 0) || 1
+  const breakdown = opts ? shapeBreakdown(rawBreakdown, { dimensionId: opts.dimension?.id, transform: opts.transform }) : rawBreakdown
+
+  // Series: the metric over time, scaled to its magnitude.
+  const seriesBase = additive ? kpiRaw / cats.length : k.raw
+  const series = MONTHS.map((mo, i) => ({
+    x: mo,
+    y: Math.max(0, Math.round(seriesBase * (0.7 + 0.45 * Math.sin(i / 1.6) + i * 0.05) + ((h >> i) % 7) - 3)),
+  }))
+
+  // Records: the breakdown AS a table — Dimension | Metric | Share (no fake owners).
+  const dimLabel = opts?.dimension && opts.dimension.id !== 'none' ? opts.dimension.name : dimLabelOf(name)
+  const records = breakdown.map((b) => ({
+    name: b.label,
+    value: transformed ? `${b.value}` : formatMetric(b.value, unit),
+    share: additive && !transformed ? `${Math.round((b.value / total) * 100)}%` : '—',
+  }))
+  const recordHeaders = additive && !transformed ? [dimLabel, name, 'Share'] : [dimLabel, name]
+
+  // Geo: the metric by region, scaled the same way.
+  const geoMax = Math.max(...SAMPLE.geo.map((g) => g.value))
+  const geoSum = SAMPLE.geo.reduce((a, g) => a + g.value, 0) || 1
+  const geo = SAMPLE.geo.map((g) =>
+    additive
+      ? { region: g.region, value: Math.max(1, Math.round(kpiRaw * (g.value / geoSum))) }
+      : { region: g.region, value: clampUnit(unit, k.raw * (0.6 + (g.value / geoMax) * 0.4)) },
+  )
+
+  // Matrix / scatter: index-scaled so they track the metric's magnitude.
+  const cells = SAMPLE.matrix.cells.map((row) => row.map((v) => Math.min(100, Math.max(5, Math.round(v * (0.8 + 0.2 * m))))))
+  const twoVar = SAMPLE.twoVar.map((p, i) => ({ x: Math.max(2, Math.round(p.x * (0.7 + 0.3 * m) + ((h >> i) % 5))), y: Math.max(2, Math.round(p.y * (0.7 + 0.3 * m) + ((h >> (i + 1)) % 6))) }))
+
+  // Narrative referencing the metric's real headline + top category.
+  const top = [...breakdown].sort((a, b) => b.value - a.value)[0]
+  const narrative = {
+    text: `${name} is ${kpiValue} overall${top ? `, led by ${top.label}` : ''}. ${additive && top && !transformed ? `${top.label} accounts for ${Math.round((top.value / total) * 100)}% of the total.` : 'Values are within the expected range for the period.'}`,
+    bullets: breakdown.slice(0, 3).map((b) => `${b.label}: ${transformed ? b.value : formatMetric(b.value, unit)}`),
+  }
+
+  // Gauge: progress vs an implied target (rate/score map directly; additive → % to goal).
+  const gaugeVal =
+    unit === 'percent' ? Math.min(99, Math.max(5, Math.round(kpiRaw)))
+      : unit === 'score' ? Math.min(99, Math.round((kpiRaw / 5) * 100))
+        : Math.min(99, Math.max(5, Math.round((58 + (h % 34)) * (0.85 + 0.15 * m))))
+
+  return {
+    ...SAMPLE,
+    label: name,
+    kpi: { value: kpiValue, delta: SAMPLE.kpi.delta, deltaDir: SAMPLE.kpi.deltaDir },
+    kpiRaw,
+    breakdown,
+    series,
+    geo,
+    twoVar,
+    matrix: { ...SAMPLE.matrix, cells },
+    records,
+    recordHeaders,
+    recordTotal: records.length,
+    narrative,
+    gauge: { value: gaugeVal, label: 'of target' },
+  }
 }
 
 // Consumption controls: a date range scales magnitude (longer = bigger cumulative
