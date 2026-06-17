@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { Pencil, ChevronLeft, MapPin, PauseCircle, Sparkles } from 'lucide-react'
+import { Pencil, ChevronLeft, MapPin, PauseCircle, Sparkles, UserRound } from 'lucide-react'
 import { PageHeader, Badge } from '../components/common/index.jsx'
 import DashboardZones from '../components/dashboard/DashboardZones.jsx'
 import DashboardControls, { DEFAULT_SCOPE, scopeLabel } from '../components/dashboard/DashboardControls.jsx'
@@ -11,7 +11,7 @@ import { useDashboards } from '../state/DashboardsContext.jsx'
 import { useWidgets } from '../state/WidgetsContext.jsx'
 import { useLive } from '../state/LiveContext.jsx'
 import { useRole } from '../state/RoleContext.jsx'
-import { placementLabel, dashboardKindLabel, dashboardKind } from '../data/mock.js'
+import { placementLabel, dashboardKindLabel, dashboardKind, entities } from '../data/mock.js'
 import { dashboardLayout } from '../data/layout.js'
 import { isStale } from '../data/governance.js'
 import { AUDIENCE_OPTIONS, ALL_AUDIENCES, audienceVisibleTo } from '../data/audiences.js'
@@ -32,6 +32,12 @@ export default function DashboardViewPage() {
   const [viewAs, setViewAs] = useState(ALL_AUDIENCES) // "view as role" audience preview
   const [askOpen, setAskOpen] = useState(false) // U6 — talk to your dashboard
 
+  // Tier 2 — an entity-scoped Profile dashboard surfaces on one specific record;
+  // resolve it so the header links back to that Unified Profile (the consume seam).
+  const profileEntity =
+    dashboard?.placement?.scope === 'entity' && dashboard.placement.entityId
+      ? entities.find((e) => e.id === dashboard.placement.entityId)
+      : null
   const placements = dashboard ? Object.values(dashboardLayout(dashboard)).flat() : []
   const hiddenForRole = viewAs !== ALL_AUDIENCES ? placements.filter((p) => !audienceVisibleTo(p, viewAs)).length : 0
   // Stale tiles pause the workflows that depend on them (5.6).
@@ -60,6 +66,11 @@ export default function DashboardViewPage() {
         actions={
           <>
             <Badge variant={dashboard.status} />
+            {profileEntity && (
+              <button className="btn-secondary" onClick={() => navigate(`/ucp/${profileEntity.id}`)} title={`Open ${profileEntity.name}'s profile`}>
+                <UserRound size={15} /> View on profile
+              </button>
+            )}
             {isAdmin && (
               <button className="btn-primary" onClick={() => navigate(`/dashboard/${dashboard.id}/canvas`)}>
                 <Pencil size={15} /> Edit
@@ -108,7 +119,7 @@ export default function DashboardViewPage() {
               </span>
             </div>
           )}
-          {entityHeaderApplies(dashboard.placement) && <EntityContextHeader placement={dashboard.placement} />}
+          {entityHeaderApplies(dashboard.placement) && <EntityContextHeader placement={dashboard.placement} entity={profileEntity} />}
           <DashboardControls scope={scope} onChange={setScope} />
           <DashboardZones dashboard={dashboard} scope={liveScope} onDrill={setDrill} viewerRole={viewAs} />
         </div>

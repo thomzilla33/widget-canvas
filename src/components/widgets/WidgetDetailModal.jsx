@@ -1,0 +1,143 @@
+import { useState } from 'react'
+import { X, Pencil, LayoutGrid, RefreshCw, Plus, LayoutDashboard } from 'lucide-react'
+import { useFocusTrap } from '../../hooks/useFocusTrap.js'
+import { HealthBadge, FreshnessBadge, DataPlaneBadge } from '../common/index.jsx'
+import { dataPlaneOf } from '../../data/governance.js'
+import { WidgetGlyph } from './glyph.jsx'
+import WidgetRender from './WidgetRender.jsx'
+import { useDashboards } from '../../state/DashboardsContext.jsx'
+import { WIDGET_SIZES, SKELETON_ABOUT, SKELETON_BESTFOR } from '../../data/mock.js'
+
+const PREVIEW_WIDTH = { sm: 'max-w-[240px]', md: 'max-w-md', lg: 'max-w-2xl' }
+
+// Tier 2 — the consume seam for an existing widget. Clicking a Library card opens
+// THIS (preview + meta + where-it's-used + actions), not the builder. Editing or
+// placing are explicit choices from here.
+export default function WidgetDetailModal({ widget, isAdmin, onClose, onEdit, onPlace, onRemap }) {
+  const ref = useFocusTrap()
+  const { dashboards } = useDashboards()
+  const [size, setSize] = useState('md')
+  if (!widget) return null
+
+  const sizeMeta = WIDGET_SIZES.find((s) => s.id === size)
+  const needsRemap = widget.health === 'review'
+  // Dashboards already hosting this widget (real layout, not the seed count).
+  const usedOn = dashboards.filter((d) =>
+    Object.values(d.layout || {}).flat().some((p) => p.widgetId === widget.id),
+  )
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="wdetail-title"
+      onKeyDown={(e) => e.key === 'Escape' && onClose()}
+    >
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} aria-hidden="true" />
+      <div ref={ref} tabIndex={-1} className="card relative z-10 flex max-h-[88vh] w-[92vw] max-w-[560px] flex-col p-0 outline-none">
+        {/* Header */}
+        <div className="flex items-start gap-3 border-b border-gray-200 p-4 dark:border-white/10">
+          <WidgetGlyph skeleton={widget.skeleton} />
+          <div className="min-w-0 flex-1">
+            <h2 id="wdetail-title" className="truncate text-base font-semibold text-gray-900 dark:text-slate-100">{widget.name}</h2>
+            <div className="truncate text-xs text-gray-500 dark:text-slate-400">{widget.source}</div>
+          </div>
+          <HealthBadge health={widget.health} />
+          <button onClick={onClose} aria-label="Close" className="grid h-7 w-7 place-items-center rounded-md text-gray-400 hover:bg-gray-100 dark:hover:bg-white/10">
+            <X size={16} aria-hidden="true" />
+          </button>
+        </div>
+
+        <div className="min-h-0 flex-1 space-y-4 overflow-auto p-4">
+          {/* Chips (deviation-only, matches the card) */}
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="cap-chip cap-chip-neutral">{widget.skeleton}</span>
+            {!widget.governed && <span className="cap-chip cap-chip-tool">Ungoverned</span>}
+            <DataPlaneBadge plane={dataPlaneOf(widget)} />
+            <FreshnessBadge status={widget.freshness} label={widget.freshness} />
+          </div>
+
+          {/* Preview with size selector */}
+          <div>
+            <div className="mb-2 flex items-center justify-between gap-2">
+              <span className="text-[11px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-500">Preview</span>
+              <div className="inline-flex rounded-lg border border-gray-200 p-0.5 dark:border-white/10">
+                {WIDGET_SIZES.map((s) => (
+                  <button
+                    key={s.id}
+                    onClick={() => setSize(s.id)}
+                    className={`rounded-md px-2.5 py-1 text-[11px] font-medium ${
+                      size === s.id ? 'bg-aims-blue text-white' : 'text-gray-500 hover:bg-gray-100 dark:text-slate-400 dark:hover:bg-white/5'
+                    }`}
+                  >
+                    {s.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className={`mx-auto rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition-all dark:border-white/10 dark:bg-[#131a2c] ${PREVIEW_WIDTH[size]}`}>
+              <WidgetRender widget={widget} size={size} />
+            </div>
+            {sizeMeta && <p className="mt-2 text-center text-[11px] text-gray-400 dark:text-slate-500">{sizeMeta.width} · {sizeMeta.detail}</p>}
+          </div>
+
+          {/* About / Best for */}
+          <div className="grid gap-3 sm:grid-cols-2">
+            <InfoBox icon={LayoutGrid} label="About">{SKELETON_ABOUT[widget.skeleton] || `A ${widget.skeleton} tile.`}</InfoBox>
+            <InfoBox icon={LayoutDashboard} label="Best for">{SKELETON_BESTFOR[widget.skeleton] || 'General-purpose dashboards.'}</InfoBox>
+          </div>
+
+          {/* Where it's used */}
+          <div>
+            <div className="mb-1.5 text-[11px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-500">
+              Used on {usedOn.length} dashboard{usedOn.length === 1 ? '' : 's'}
+            </div>
+            {usedOn.length === 0 ? (
+              <p className="text-xs text-gray-500 dark:text-slate-400">Not placed yet — add it to a dashboard to put it to work.</p>
+            ) : (
+              <div className="flex flex-wrap gap-1.5">
+                {usedOn.slice(0, 6).map((d) => (
+                  <span key={d.id} className="inline-flex items-center gap-1 rounded-full border border-gray-200 px-2 py-0.5 text-[11px] text-gray-600 dark:border-white/10 dark:text-slate-300">
+                    <LayoutDashboard size={11} aria-hidden="true" /> {d.name}
+                  </span>
+                ))}
+                {usedOn.length > 6 && <span className="text-[11px] text-gray-400 dark:text-slate-500">+{usedOn.length - 6} more</span>}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Actions */}
+        <div className="flex items-center justify-end gap-2 border-t border-gray-200 p-3 dark:border-white/10">
+          {needsRemap && (
+            <button className="btn-primary !py-1.5 text-xs" onClick={onRemap}>
+              <RefreshCw size={14} aria-hidden="true" /> Remap widget
+            </button>
+          )}
+          {isAdmin && !needsRemap && (
+            <button className="btn-secondary !py-1.5 text-xs" onClick={onEdit}>
+              <Pencil size={14} aria-hidden="true" /> Edit widget
+            </button>
+          )}
+          {!needsRemap && (
+            <button className="btn-primary !py-1.5 text-xs" onClick={onPlace}>
+              <Plus size={14} aria-hidden="true" /> Add to a dashboard
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function InfoBox({ icon: Icon, label, children }) {
+  return (
+    <div className="rounded-lg border border-gray-200 bg-gray-50/60 p-3 dark:border-white/10 dark:bg-white/[0.02]">
+      <div className="mb-1 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-500">
+        <Icon size={12} aria-hidden="true" /> {label}
+      </div>
+      <p className="text-xs leading-relaxed text-gray-600 dark:text-slate-300">{children}</p>
+    </div>
+  )
+}

@@ -7,6 +7,7 @@ import { WidgetGlyph } from '../components/widgets/glyph.jsx'
 import WidgetRender from '../components/widgets/WidgetRender.jsx'
 import RepinModal from '../components/widgets/RepinModal.jsx'
 import FlagDetailModal from '../components/widgets/FlagDetailModal.jsx'
+import WidgetDetailModal from '../components/widgets/WidgetDetailModal.jsx'
 import WidgetMarketplace from '../components/widgets/WidgetMarketplace.jsx'
 import SourceTemplatesBanner from '../components/widgets/SourceTemplatesBanner.jsx'
 import StudioWelcome from '../components/common/StudioWelcome.jsx'
@@ -39,6 +40,7 @@ export default function WidgetLibrary() {
   const [sortDir, setSortDir] = useState('asc')
   const [repinWidget, setRepinWidget] = useState(null)
   const [detailFlag, setDetailFlag] = useState(null)
+  const [detailWidget, setDetailWidget] = useState(null) // Tier 2 — widget detail (not the builder)
   const [marketplace, setMarketplace] = useState(false)
 
   const catOptions = [{ value: 'All', label: 'All categories' }, ...CATALOG_CATEGORIES.map((c) => ({ value: c, label: c }))]
@@ -166,7 +168,7 @@ export default function WidgetLibrary() {
           {shown.map((w) => (
             <button
               key={w.id}
-              onClick={() => (w.health === 'review' ? setRepinWidget(w) : navigate('/widgets/new'))}
+              onClick={() => (w.health === 'review' ? setRepinWidget(w) : setDetailWidget(w))}
               className="catalog-card min-h-[240px]"
             >
               <div className="absolute top-3 right-3">
@@ -231,6 +233,17 @@ export default function WidgetLibrary() {
           entity={entityById(detailFlag.entityId)}
           onClose={() => setDetailFlag(null)}
           onResolve={() => resolveFlag(detailFlag.id)}
+        />
+      )}
+
+      {detailWidget && (
+        <WidgetDetailModal
+          widget={detailWidget}
+          isAdmin={isAdmin}
+          onClose={() => setDetailWidget(null)}
+          onEdit={() => { setDetailWidget(null); navigate('/widgets/new') }}
+          onPlace={() => { setDetailWidget(null); navigate('/dashboards') }}
+          onRemap={() => { const w = detailWidget; setDetailWidget(null); setRepinWidget(w) }}
         />
       )}
 

@@ -11,6 +11,7 @@ import WidgetLibrary from './pages/WidgetLibrary.jsx'
 import WidgetBuilder from './pages/WidgetBuilder.jsx'
 import TablesPage from './pages/TablesPage.jsx'
 import DataStudio from './pages/DataStudio.jsx'
+import ProfilesPage from './pages/ProfilesPage.jsx'
 import UCPView from './pages/UCPView.jsx'
 
 // U7.2 — builder routes are admin-only; viewers are redirected to the read-only list.
@@ -34,6 +35,7 @@ export default function App() {
         <Route path="/widgets/new" element={<AdminRoute><WidgetBuilder /></AdminRoute>} />
         <Route path="/tables" element={<TablesPage />} />
         <Route path="/data-studio" element={<DataStudio />} />
+        <Route path="/profiles" element={<ProfilesPage />} />
         <Route path="/ucp/:entityId" element={<UCPView />} />
         <Route path="*" element={<Navigate to="/dashboards" replace />} />
       </Route>

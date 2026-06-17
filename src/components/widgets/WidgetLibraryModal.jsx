@@ -3,29 +3,8 @@ import { LayoutGrid, X, Search, ChevronLeft, Info, Plus } from 'lucide-react'
 import { WidgetGlyph } from './glyph.jsx'
 import WidgetRender from './WidgetRender.jsx'
 import { EmptyState, FreshnessBadge, GovernedBadge } from '../common/index.jsx'
-import { widgets, CATALOG_CATEGORIES, WIDGET_SIZES } from '../../data/mock.js'
+import { widgets, CATALOG_CATEGORIES, WIDGET_SIZES, SKELETON_ABOUT, SKELETON_BESTFOR } from '../../data/mock.js'
 
-// About / Best-for text derived from the widget's skeleton (no per-widget copy).
-const SKELETON_ABOUT = {
-  KPI: 'A single headline metric with its trend.',
-  Chart: 'A trend or category breakdown chart.',
-  Gauge: 'Progress toward a target or threshold.',
-  Table: 'Row-level records in a structured table.',
-  List: 'A ranked or chronological list of items.',
-  Map: 'A geographic distribution of values.',
-  'Heat Map': 'A matrix of values across two dimensions.',
-  'AI Summary': 'An AI-written narrative of the data.',
-}
-const SKELETON_BESTFOR = {
-  KPI: 'Headline numbers and at-a-glance status.',
-  Chart: 'Spotting trends and comparing categories.',
-  Gauge: 'Monitoring a value against a target in real time.',
-  Table: 'Detailed, row-by-row review.',
-  List: 'Tracking recent items and activity feeds.',
-  Map: 'Comparing performance across regions.',
-  'Heat Map': 'Finding hotspots across two dimensions.',
-  'AI Summary': 'Executive summaries and quick context.',
-}
 const PREVIEW_WIDTH = { sm: 'max-w-[240px]', md: 'max-w-md', lg: 'max-w-2xl' }
 
 // Marketplace-style browser over the widget library — used on the canvas to add

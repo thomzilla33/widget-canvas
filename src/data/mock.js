@@ -153,6 +153,29 @@ export const HOME_SCOPES = [
   { id: 'team', label: 'My team' },
 ]
 
+// About / Best-for text derived from a widget's skeleton (no per-widget copy).
+// Shared by the widget detail modal and the canvas add-widget browser.
+export const SKELETON_ABOUT = {
+  KPI: 'A single headline metric with its trend.',
+  Chart: 'A trend or category breakdown chart.',
+  Gauge: 'Progress toward a target or threshold.',
+  Table: 'Row-level records in a structured table.',
+  List: 'A ranked or chronological list of items.',
+  Map: 'A geographic distribution of values.',
+  'Heat Map': 'A matrix of values across two dimensions.',
+  'AI Summary': 'An AI-written narrative of the data.',
+}
+export const SKELETON_BESTFOR = {
+  KPI: 'Headline numbers and at-a-glance status.',
+  Chart: 'Spotting trends and comparing categories.',
+  Gauge: 'Monitoring a value against a target in real time.',
+  Table: 'Detailed, row-by-row review.',
+  List: 'Tracking recent items and activity feeds.',
+  Map: 'Comparing performance across regions.',
+  'Heat Map': 'Finding hotspots across two dimensions.',
+  'AI Summary': 'Executive summaries and quick context.',
+}
+
 // ── Home pinned widgets: Inbox, Tasks, and the Human Touch Layer (HITL) ──
 // Each item carries full origin context for the detail modal:
 //   origin: 'contact' | 'agent' | 'workflow' | 'system' | 'escalation'

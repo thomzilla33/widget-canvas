@@ -17,7 +17,7 @@ const adminNav = [
   { to: '/tables', label: 'Tables', icon: Table2 },
   { to: '/data-studio', label: 'Data Studio', icon: Database },
 ]
-const userNav = [{ to: '/ucp/acme-001', label: 'Unified Profile', icon: UserRound }]
+const userNav = [{ to: '/profiles', label: 'Profiles', icon: UserRound }]
 
 // App switcher entries (the other AIMS OS prototypes are separate apps).
 const ctxApps = [

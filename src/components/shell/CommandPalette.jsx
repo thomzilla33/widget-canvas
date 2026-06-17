@@ -29,6 +29,7 @@ export default function CommandPalette({ onClose }) {
       { id: 'nav-reports', group: 'Go to', label: 'Reports', icon: FileBarChart, run: () => go('/reports') },
       { id: 'nav-widgets', group: 'Go to', label: 'Widget Library', icon: Boxes, run: () => go('/widgets') },
       { id: 'nav-tables', group: 'Go to', label: 'Tables', icon: Table2, run: () => go('/tables') },
+      { id: 'nav-profiles', group: 'Go to', label: 'Profiles', icon: UserRound, run: () => go('/profiles') },
       { id: 'act-newdash', group: 'Actions', label: 'New dashboard', icon: Plus, run: () => go('/dashboard/new') },
       { id: 'act-newwidget', group: 'Actions', label: 'New widget', icon: Plus, run: () => go('/widgets/new') },
     ]
