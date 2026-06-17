@@ -49,7 +49,7 @@ entity header + tabs appear **iff** `kind==='entity'`; the list filters by kind.
 
 ---
 
-## Phase U1 — Tab system hardening ◐
+## Phase U1 — Tab system hardening ◐ (U1.5 open)
 **Goal:** the editable profile tab bar (shipped) becomes durable and complete.
 
 **Dep:** U0.
@@ -57,15 +57,12 @@ entity header + tabs appear **iff** `kind==='entity'`; the list filters by kind.
 **Activities**
 - ☑ U1.1 Editable tab bar on UCPView — Overview/Activity/Snapshot mandatory; add/remove custom
   tabs; empty-tab state. (commit `9161789`)
-- ☐ U1.2 **Persist tabs** beyond in-memory: move tab config into `DashboardsContext` (or a new
-  `ProfileConfigContext`) keyed by `profileType` (+ optional entityId override) so edits
-  survive reload and reflect on every matching profile.
-- ☐ U1.3 **Reorder + rename** tabs (drag, double-click to rename); mandatory tabs reorder but
-  can't be renamed/removed.
-- ☐ U1.4 **Bind a dashboard to a tab from the tab itself** ("+ Add dashboard to this tab" on an
-  empty tab → New Dashboard pre-scoped to that profileType + tab).
+- ☑ U1.2 **Persist tabs**: new `src/state/ProfileConfigContext.jsx` keyed by `profileType`,
+  localStorage-backed (survives reload + applies to every matching profile). (commit `6753046`)
+- ☑ U1.3 **Reorder (drag) + rename (double-click)**; mandatory tabs protected from rename/remove.
+- ☑ U1.4 **Empty-tab CTA** "Add a dashboard to this tab" → New Dashboard.
 - ☐ U1.5 Tab-level visibility by audience/scope (reuse `audiences.js`): hide a tab for roles
-  that can't see any of its content.
+  that can't see any of its content. *(deferred)*
 
 **Cases covered:** duplicate tab name, deleting the active tab (falls back to Overview),
 mandatory protection, a tab with 0/1/many dashboards, per-entity vs per-type tab sets.
@@ -84,15 +81,13 @@ real-feeling action layer.
 **Activities**
 - ☑ U2.1 Header on canvas + view + UCP, real entity; Email/SMS/Chat/More actions (mock).
   (commits `f7224d8`, `978061c`)
-- ☐ U2.2 Resolve **real per-entity contact fields** (email/phone/address) from the entity
-  record instead of the persona fallback (extend `entities` in mock.js with these fields).
-- ☐ U2.3 **Email/SMS composers**: templates + variable insertion ({{first_name}} …), a "log to
-  Activity" toggle so a sent message appears on the Activity tab.
-- ☐ U2.4 **Chat with agent**: scope the canned replies to the entity's real data (recent
-  activity, open items) and offer suggested prompts.
-- ☐ U2.5 **More menu**: wire "View full profile" everywhere, add "Open in CRM" + "Copy link";
-  governance — gate Email/SMS by audience/PBAC.
-- ☐ U2.6 Confirm-before-send framing kept (no real send) + a clear "prototype" marker.
+- ☑ U2.2 **Real per-entity contact fields** — `entities` in mock.js carry email/phone/address/
+  company/owner/title/status; `resolveInfo()` uses them (persona fallback). (commit `6753046`)
+- ◐ U2.3 **Email/SMS templates** + {{first_name}}/{{company}} substitution shipped; the
+  "log to Activity" toggle is deferred (needs cross-tab shared state).
+- ☑ U2.4 **Chat suggested prompts** (Summarize activity / Open items / Draft follow-up).
+- ◐ U2.5 More menu: View full profile + Copy email/phone shipped; "Open in CRM"/PBAC gating deferred.
+- ☑ U2.6 Mock framing kept ("nothing actually sent").
 
 **Cases covered:** entity with missing email/phone (disable that action), PII-restricted
 viewer, action from canvas (preview) vs live profile.
@@ -235,5 +230,6 @@ U0  Entity vs Global   ─┬─►  U1 Tabs ─┐
 5. **U7** is the final gate — light-mode, admin gating, feedback routing, a11y, responsive —
    run continuously but signed off last.
 
-> Status snapshot: U0 ☑, U1.1 ☑, U2.1 ☑ shipped; U1.2+, U2.2+, U3–U7 open. Ship one phase at a time,
+> Status snapshot: U0 ☑, U1 ☑ (U1.5 deferred), U2 ☑ (U2.3 log-to-Activity + U2.5 PBAC deferred);
+> U3–U7 open. Ship one phase at a time,
 > each with build + browser-verify + code-review + deploy (the established workflow).
