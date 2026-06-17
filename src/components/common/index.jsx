@@ -23,6 +23,28 @@ export function Badge({ variant = 'draft', children }) {
   )
 }
 
+// Shared STATUS pill — one shape/size for every state chip (freshness, plane, env,
+// scope, governance). Tone drives color; pass a dot OR an icon. Keep classification
+// labels on `cap-chip` (Tag), and only render a status pill when it DEVIATES from the
+// safe default (governed/prod/fresh render nothing — those are expected).
+const PILL_TONE = {
+  positive: 'border-green-200 bg-green-50 text-aims-governed dark:border-green-500/25 dark:bg-green-500/10',
+  truth: 'border-sky-200 bg-sky-50 text-sky-600 dark:border-sky-500/25 dark:bg-sky-500/10 dark:text-sky-300',
+  warning: 'border-amber-200 bg-amber-50 text-aims-ungoverned dark:border-amber-500/25 dark:bg-amber-500/10',
+  danger: 'border-red-200 bg-red-50 text-aims-stale dark:border-red-500/25 dark:bg-red-500/10',
+  info: 'border-purple-200 bg-purple-50 text-purple-600 dark:border-purple-500/25 dark:bg-purple-500/10 dark:text-purple-300',
+  neutral: 'border-gray-200 text-gray-500 dark:border-white/10 dark:text-slate-400',
+}
+export function StatusPill({ tone = 'neutral', icon: Icon, dot = false, dotClass = 'bg-current', title, children }) {
+  return (
+    <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-semibold ${PILL_TONE[tone] || PILL_TONE.neutral}`} title={title}>
+      {dot && <span className={`h-1.5 w-1.5 rounded-full ${dotClass}`} />}
+      {Icon && <Icon size={11} aria-hidden="true" />}
+      {children}
+    </span>
+  )
+}
+
 const freshnessClass = {
   live: 'freshness-live',
   fresh: 'freshness-fresh',
@@ -39,6 +61,8 @@ const freshnessDot = {
 }
 
 export function FreshnessBadge({ status = 'fresh', label }) {
+  // Deviation-only: "fresh" is the expected default — don't add a chip for it.
+  if (status === 'fresh') return null
   return (
     <span className={freshnessClass[status] || freshnessClass.fresh}>
       <span className={`h-1.5 w-1.5 rounded-full ${freshnessDot[status] || freshnessDot.fresh}`} />
@@ -50,42 +74,20 @@ export function FreshnessBadge({ status = 'fresh', label }) {
 // Truth vs Sandbox data plane (5.1). Truth = verified facts; Sandbox = unverified claims.
 export function DataPlaneBadge({ plane }) {
   if (!plane) return null
-  if (plane === 'sandbox') {
-    return (
-      <span className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-xs font-semibold text-aims-ungoverned dark:border-amber-500/25 dark:bg-amber-500/10" title="Unverified candidate data — not promoted to Truth">
-        <FlaskConical size={11} /> Sandbox
-      </span>
-    )
-  }
-  return (
-    <span className="inline-flex items-center gap-1 rounded-full border border-sky-200 bg-sky-50 px-2 py-0.5 text-xs font-semibold text-sky-600 dark:border-sky-500/25 dark:bg-sky-500/10 dark:text-sky-300" title="Verified facts on the Truth Plane">
-      <ShieldCheck size={11} /> Truth
-    </span>
-  )
+  if (plane === 'sandbox') return <StatusPill tone="warning" icon={FlaskConical} title="Unverified candidate data — not promoted to Truth">Sandbox</StatusPill>
+  return <StatusPill tone="truth" icon={ShieldCheck} title="Verified facts on the Truth Plane">Truth</StatusPill>
 }
 
 // Environment chip (5.2). Suppressed for prod unless `always` (cost views pin prod).
 export function EnvironmentBadge({ env = 'prod', always = false }) {
   if (env === 'prod' && !always) return null
-  const tone =
-    env === 'prod'
-      ? 'border-gray-200 text-gray-500 dark:border-white/10 dark:text-slate-400'
-      : 'border-purple-200 bg-purple-50 text-purple-600 dark:border-purple-500/25 dark:bg-purple-500/10 dark:text-purple-300'
   const label = env === 'prod' ? 'Prod' : env === 'sandbox' ? 'Sandbox' : 'Dev'
-  return (
-    <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-semibold ${tone}`}>
-      <Layers size={10} /> {label}
-    </span>
-  )
+  return <StatusPill tone={env === 'prod' ? 'neutral' : 'info'} icon={Layers}>{label}</StatusPill>
 }
 
 // Scope rollup chip (5.5) — Me / My Team / All / Tenant…
 export function ScopeBadge({ label }) {
-  return (
-    <span className="inline-flex items-center gap-1 rounded-full border border-gray-200 px-2 py-0.5 text-[11px] font-medium text-gray-500 dark:border-white/10 dark:text-slate-400">
-      <Users size={10} /> {label}
-    </span>
-  )
+  return <StatusPill tone="neutral" icon={Users}>{label}</StatusPill>
 }
 
 // Live data badge (Phase 7) — a pulsing dot signals a real-time tile.
@@ -101,7 +103,10 @@ export function LiveBadge({ paused = false }) {
   )
 }
 
-export function GovernedBadge({ governed = true }) {
+// Deviation-only: "Governed" is the expected default, so only flag the exception
+// (Ungoverned). Pass `always` to force the affirmative chip where it's the focus.
+export function GovernedBadge({ governed = true, always = false }) {
+  if (governed && !always) return null
   return governed ? (
     <span className="badge-governed">
       <ShieldCheck size={12} /> Governed

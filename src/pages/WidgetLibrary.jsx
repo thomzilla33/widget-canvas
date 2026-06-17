@@ -20,9 +20,9 @@ import { entities, SCHEMA_DRIFT, CATALOG_CATEGORIES } from '../data/mock.js'
 // schema-drift fix to perform (the descriptive line tells the user what to do).
 const FIX_HINT = {
   'Wrong number': 'verify the calculation with the data owner',
-  'Stale / outdated': 're-pin the widget to restore freshness',
+  'Stale / outdated': 'remap the widget to restore freshness',
   'Wrong records shown': 'review the record filter and scope',
-  'Missing data': 're-pin to remap the missing fields',
+  'Missing data': 'remap the missing fields',
   Other: 'review and resolve',
 }
 
@@ -119,7 +119,7 @@ export default function WidgetLibrary() {
                 const canRepin = Boolean(drift && w)
                 const n = drift?.broken?.length || 0
                 const problem = drift
-                  ? `${n} field${n === 1 ? '' : 's'} changed in ${drift.source} (${drift.changedOn}) — re-pin to restore this widget.`
+                  ? `${n} field${n === 1 ? '' : 's'} changed in ${drift.source} (${drift.changedOn}) — remap to restore this widget.`
                   : `${f.details || 'Flagged for review'}${FIX_HINT[f.reason] ? ` — ${FIX_HINT[f.reason]}.` : ''}`
                 return (
                   <div
@@ -141,7 +141,7 @@ export default function WidgetLibrary() {
                     </div>
                     {canRepin ? (
                       <button className="btn-primary !py-1.5 !px-3 text-xs shrink-0" onClick={() => setRepinWidget(w)}>
-                        Re-pin widget
+                        Remap widget
                       </button>
                     ) : (
                       <button className="btn-secondary !py-1.5 !px-3 text-xs shrink-0" onClick={() => setDetailFlag(f)}>
@@ -185,9 +185,8 @@ export default function WidgetLibrary() {
 
               <div className="flex flex-wrap items-center gap-1.5">
                 <span className="cap-chip cap-chip-neutral">{w.skeleton}</span>
-                <span className={`cap-chip ${w.governed ? 'cap-chip-data' : 'cap-chip-tool'}`}>
-                  {w.governed ? 'Governed' : 'Ungoverned'}
-                </span>
+                {/* Deviation-only: flag Ungoverned (governed is the expected default). */}
+                {!w.governed && <span className="cap-chip cap-chip-tool">Ungoverned</span>}
                 <DataPlaneBadge plane={dataPlaneOf(w)} />
               </div>
 
@@ -205,7 +204,7 @@ export default function WidgetLibrary() {
                   }`}
                 >
                   {w.health === 'review'
-                    ? 'Re-pin needed →'
+                    ? 'Remap needed →'
                     : `Used in ${w.usedIn} dashboard${w.usedIn === 1 ? '' : 's'}`}
                 </span>
                 <FreshnessBadge status={w.freshness} label={w.freshness} />

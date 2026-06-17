@@ -61,7 +61,7 @@ export const widgets = [
   // Data Studio
   W({ id: 'w-aims-uptime', name: 'Connector Uptime', skeleton: 'Gauge', category: 'AIMS OS', freshness: 'live', usedIn: 2, source: 'AIMS OS — Data Studio' }),
   W({ id: 'w-aims-syncfail', name: 'Sync Failures', skeleton: 'KPI', category: 'AIMS OS', freshness: 'aging', usedIn: 1, source: 'AIMS OS — Data Studio' }),
-  // Stale — its source schema changed, so dependent workflows are paused until re-pinned
+  // Stale — its source schema changed, so dependent workflows are paused until remapped
   W({ id: 'w-aims-leadfeed', name: 'Lead Enrichment Feed', skeleton: 'Chart', category: 'AIMS OS', freshness: 'stale', health: 'review', usedIn: 2, source: 'AIMS OS — Data Studio' }),
   W({ id: 'w-revenue', name: 'Total Revenue', skeleton: 'KPI', category: 'Intelligence', freshness: 'live', usedIn: 9, source: 'Finance Data View' }),
   W({ id: 'w-mrr', name: 'MRR Trend', skeleton: 'Chart', category: 'Intelligence', freshness: 'live', usedIn: 7, source: 'Stripe' }),
@@ -177,7 +177,7 @@ export const HOME_INBOX = [
     actor: { name: 'Dana Lee', email: 'dana.lee@contoso.com', role: 'Support Lead' },
     body: 'Hey — the NPS Trend widget hasn’t moved in two weeks on the CS Health board. Can you check if the Survey Data View is still syncing? Customers are asking why the score looks flat.',
     related: { widgetId: 'w-nps', dashboardId: 'd-cs-health', label: 'CS Health' },
-    action: { kind: 'repin', label: 'Re-pin widget' },
+    action: { kind: 'repin', label: 'Remap widget' },
   },
   {
     id: 'm2', origin: 'contact', subject: 'Shared “Employee Performance” with you', when: '1h ago',
@@ -190,7 +190,7 @@ export const HOME_INBOX = [
     id: 'm3', origin: 'system', subject: '3 dashboards you follow were updated', when: '3h ago',
     at: 'Jun 16, 2026 · 6:40 AM', unread: true,
     actor: { name: 'RevOps', system: true },
-    body: 'Revenue Exec Report, Marketing Performance, and Finance Close were updated in the last 24 hours. Widgets were added or re-pinned.',
+    body: 'Revenue Exec Report, Marketing Performance, and Finance Close were updated in the last 24 hours. Widgets were added or remapped.',
     meta: { category: 'Activity' },
     related: { dashboardId: 'd-rev-exec', label: 'Revenue Exec Report' },
   },
@@ -280,9 +280,9 @@ export const HOME_TASKS = [
     id: 't2', origin: 'contact', title: 'Respond to Dana Lee’s data flag on NPS', due: 'Today', priority: 'med',
     at: 'Jun 16, 2026 · 9:42 AM',
     actor: { name: 'Dana Lee', email: 'dana.lee@contoso.com', role: 'Support Lead' },
-    body: 'Dana flagged the NPS Trend widget as frozen. Respond with whether the Survey Data View is syncing, or re-pin the widget if the schema changed.',
+    body: 'Dana flagged the NPS Trend widget as frozen. Respond with whether the Survey Data View is syncing, or remap the widget if the schema changed.',
     related: { widgetId: 'w-nps', dashboardId: 'd-cs-health', label: 'NPS Trend' },
-    action: { kind: 'repin', label: 'Re-pin widget' },
+    action: { kind: 'repin', label: 'Remap widget' },
   },
   {
     id: 't3', origin: 'contact', title: 'Review widget access request from James', due: 'Today', priority: 'med',
@@ -323,7 +323,7 @@ export const HTL_ITEMS = [
   { id: 'h1', source: 'Agent', title: 'Sales Copilot — send renewal email to Acme Corp?', detail: 'Drafted a follow-up. Awaiting your approval before it sends.', action: 'Approve', priority: 'high', when: '8m ago' },
   { id: 'h2', source: 'Workflow', title: 'Invoice approval — $84,200 over threshold', detail: 'NetSuite workflow paused for sign-off above $50k.', action: 'Review', priority: 'high', when: '22m ago' },
   { id: 'h3', source: 'Escalation', title: 'Support ticket #4821 needs a human', detail: 'AI couldn’t resolve; customer escalated to a person.', action: 'Take', priority: 'high', when: '40m ago' },
-  { id: 'h4', source: 'System', title: 'Schema drift — “NPS Trend” needs re-pin', detail: 'Survey Data View changed; 2 fields were removed.', action: 'Review', priority: 'med', when: '1h ago', flow: 'repin', widgetId: 'w-nps' },
+  { id: 'h4', source: 'System', title: 'Schema drift — “NPS Trend” needs remap', detail: 'Survey Data View changed; 2 fields were removed.', action: 'Review', priority: 'med', when: '1h ago', flow: 'repin', widgetId: 'w-nps' },
   { id: 'h5', source: 'Agent', title: 'Churn-risk agent flagged Globex Inc.', detail: 'Confidence 0.82 — recommends an outreach play.', action: 'Assign', priority: 'med', when: '2h ago' },
   { id: 'h6', source: 'Workflow', title: 'New-hire access — María González', detail: 'Approve dashboard access for onboarding.', action: 'Approve', priority: 'low', when: '1d ago' },
 ]
@@ -345,10 +345,10 @@ export function dashboardKind(dashboard) {
 }
 export function dashboardKindLabel(dashboard) {
   const p = dashboard?.placement
-  if (p?.surface === 'profile') return `Entity · ${PROFILE_TYPES.find((t) => t.id === p.profileType)?.id || 'Profile'}`
-  if (p?.surface === 'report') return 'Global · Report'
-  if (p?.surface === 'home') return 'Global · Home'
-  return 'Global'
+  if (p?.surface === 'profile') return `Profile · ${PROFILE_TYPES.find((t) => t.id === p.profileType)?.id || 'Profile'}`
+  if (p?.surface === 'report') return 'Standalone · Report'
+  if (p?.surface === 'home') return 'Standalone · Home'
+  return 'Standalone'
 }
 
 export const dashboardTemplates = [
@@ -532,7 +532,7 @@ export const notifications = [
 ]
 
 // Schema drift (S111–S114) — keyed by widget id. Describes what changed in the
-// source schema and which of the widget's bindings need re-mapping.
+// source schema and which of the widget's bindings need remapping.
 export const SCHEMA_DRIFT = {
   'w-nps': {
     source: 'Survey Data View',

@@ -13,7 +13,7 @@ function answerFor(q, ctx) {
   const first = names[0] || 'the data'
   const hit = names.find((n) => ql.includes(n.toLowerCase()) || ql.includes(n.toLowerCase().split(' ')[0]))
   const range = ctx.scopeLabel
-  const tail = ' (Prototype — this is a canned, on-device response.)'
+  const tail = ' (Demo — canned response.)'
 
   if (/summar|overview|how.*doing|tldr/.test(ql)) {
     return `“${ctx.name}” tracks ${names.length} widget${names.length === 1 ? '' : 's'} — ${names.slice(0, 3).join(', ')}${names.length > 3 ? '…' : ''}. Over ${range}, metrics are healthy with no open escalations.${tail}`

@@ -271,7 +271,7 @@ function ActionComposer({ kind, name, info, onClose }) {
               <Send size={18} />
             </div>
             <p className="mt-3 text-sm font-medium text-gray-900 dark:text-slate-100">{isEmail ? 'Email' : 'Message'} queued to {name}</p>
-            <p className="mt-1 text-xs text-gray-500 dark:text-slate-400">Prototype — nothing is actually sent.</p>
+            <p className="mt-1 text-xs text-gray-500 dark:text-slate-400">This is a preview — no message was delivered in this demo.</p>
             <button onClick={onClose} className="btn-secondary mt-4">Done</button>
           </div>
         ) : (
@@ -321,7 +321,7 @@ function AgentChatPanel({ name, kindLabel, onClose }) {
     setMsgs((m) => [
       ...m,
       { from: 'user', text: q },
-      { from: 'agent', text: `Here's what I found about ${name} for “${q}”: activity is healthy, with no open escalations. (Prototype — this is a canned response.)` },
+      { from: 'agent', text: `Here's what I found about ${name} for “${q}”: activity is healthy, with no open escalations. (Demo — canned response.)` },
     ])
     setDraft('')
   }

@@ -187,15 +187,15 @@ export default function NewDashboard() {
                     selected={kind === 'entity'}
                     onClick={() => selectKind('entity')}
                     icon={<UserSquare size={20} className="text-aims-blue" />}
-                    title="Entity dashboard"
-                    desc="Attached to a profile — Company, Contact, Employee, Deal, or Case. Lives in that profile's tabs."
+                    title="Profile dashboard"
+                    desc="Shows on a contact, account, or employee record — lives in that profile's tabs."
                   />
                   <StartCard
                     selected={kind === 'global'}
                     onClick={() => selectKind('global')}
                     icon={<LayoutGrid size={20} className="text-aims-blue" />}
-                    title="Global dashboard"
-                    desc="A workspace, team, or report rollup. Not tied to any single record."
+                    title="Standalone dashboard"
+                    desc="A report, home, or workspace page — not tied to any single record."
                   />
                 </div>
               </div>

@@ -9,7 +9,7 @@ const STATUS_CHIP = {
   removed: 'cap-chip-tool',
 }
 
-// S111–S114 — re-pin a widget whose source schema changed
+// S111–S114 — remap a widget whose source schema changed
 export default function RepinModal({ widget, onClose, onComplete }) {
   const trapRef = useFocusTrap()
   const drift = SCHEMA_DRIFT[widget.id]
@@ -25,7 +25,7 @@ export default function RepinModal({ widget, onClose, onComplete }) {
         <div className="card relative z-10 w-[420px] max-w-full p-6 text-center">
           <h3 className="text-base font-semibold text-gray-900 dark:text-slate-100">No schema drift recorded</h3>
           <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">
-            “{widget.name}” has no pending data-structure changes to re-pin.
+            “{widget.name}” has no pending data-structure changes to remap.
           </p>
           <button className="btn-primary mt-4" onClick={onClose}>
             Done
@@ -48,7 +48,7 @@ export default function RepinModal({ widget, onClose, onComplete }) {
         <div className="flex items-center justify-between border-b border-gray-200 px-5 py-3.5 dark:border-white/10">
           <div className="flex items-center gap-2">
             <Pin size={16} className="text-aims-blue" />
-            <span className="font-semibold text-gray-900 dark:text-slate-100">Re-pin — {widget.name}</span>
+            <span className="font-semibold text-gray-900 dark:text-slate-100">Remap — {widget.name}</span>
           </div>
           <button onClick={onClose} aria-label="Close" className="text-gray-400 hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aims-blue/50 dark:text-slate-500 dark:hover:text-slate-200">
             <X size={18} />
@@ -60,9 +60,9 @@ export default function RepinModal({ widget, onClose, onComplete }) {
             <div className="grid h-14 w-14 place-items-center rounded-2xl border border-green-200 bg-green-50 dark:border-green-500/25 dark:bg-green-500/10">
               <Check size={28} className="text-aims-governed" />
             </div>
-            <h3 className="mt-4 text-lg font-semibold text-gray-900 dark:text-slate-100">Re-pin submitted</h3>
+            <h3 className="mt-4 text-lg font-semibold text-gray-900 dark:text-slate-100">Remap submitted</h3>
             <p className="mt-1 max-w-sm text-sm text-gray-500 dark:text-slate-400">
-              “{widget.name}” was re-mapped and sent for approval. It returns to active once approved; a
+              “{widget.name}” was remapped and sent for approval. It returns to active once approved; a
               notification was sent.
             </p>
             <button className="btn-primary mt-5" onClick={onClose}>
@@ -80,7 +80,7 @@ export default function RepinModal({ widget, onClose, onComplete }) {
                     {drift.source} structure changed {drift.changedOn}
                   </div>
                   <div className="mt-0.5 text-xs text-gray-600 dark:text-slate-300">
-                    Two fields were removed. Re-map them to the new schema to re-pin this widget.
+                    Two fields were removed. Remap them to the new schema to remap this widget.
                   </div>
                 </div>
               </div>
@@ -93,7 +93,7 @@ export default function RepinModal({ widget, onClose, onComplete }) {
               </div>
 
               {/* S113 — field remapping */}
-              <div className="mb-1.5 text-sm font-medium text-gray-700 dark:text-slate-200">Re-map broken fields</div>
+              <div className="mb-1.5 text-sm font-medium text-gray-700 dark:text-slate-200">Remap broken fields</div>
               <div className="space-y-2">
                 {drift.broken.map((b) => (
                   <div key={b.was} className="flex items-center gap-2 rounded-lg border border-gray-200 p-2.5 dark:border-white/10">
@@ -131,15 +131,15 @@ export default function RepinModal({ widget, onClose, onComplete }) {
             {/* S114 — complete -> approval */}
             <div className="flex items-center justify-between border-t border-gray-200 px-5 py-3 dark:border-white/10">
               <span className="text-xs text-gray-500 dark:text-slate-400">
-                {allMapped ? 'Approval is notification-only.' : 'Map all changed fields to re-pin.'}
+                {allMapped ? 'Approval is notification-only.' : 'Map all changed fields to remap.'}
               </span>
               <button
                 className="btn-primary"
                 disabled={!allMapped}
                 onClick={submit}
-                title={allMapped ? undefined : 'Map all changed fields to re-pin.'}
+                title={allMapped ? undefined : 'Map all changed fields to remap.'}
               >
-                <Pin size={15} /> Re-pin & submit
+                <Pin size={15} /> Remap & submit
               </button>
             </div>
           </>

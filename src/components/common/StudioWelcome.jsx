@@ -12,7 +12,7 @@ const STUDIOS = {
     title: 'Dashboard Builder',
     subtitle: 'Compose entity & global dashboards from your governed widgets — a few quick steps.',
     steps: [
-      ['Choose', ' Entity or Global'],
+      ['Choose the scope', ' — Profile or Standalone'],
       ['Pick', ' the profile or placement'],
       ['Add & arrange', ' widgets in zones'],
       ['Set', ' the audience per widget'],
@@ -77,6 +77,10 @@ function readDismissed() {
 export default function StudioWelcome({ studioId, built, ctaLabel, onCta, secondaryLabel, onSecondary, links, dismissible = true }) {
   const cfg = STUDIOS[studioId]
   const [dismissed, setDismissed] = useState(() => dismissible && readDismissed().includes(studioId))
+  // First-run (nothing built yet, or a full-page hero) shows the steps; returning users
+  // get a compact strip with the walkthrough behind a "Show steps" toggle.
+  const firstRun = !dismissible || !built || built.count === 0
+  const [showSteps, setShowSteps] = useState(firstRun)
   if (!cfg || dismissed) return null
 
   const Icon = cfg.icon
@@ -92,7 +96,7 @@ export default function StudioWelcome({ studioId, built, ctaLabel, onCta, second
   const onSkip = onSecondary || (dismissible ? dismiss : null)
 
   return (
-    <div className="relative mb-5 overflow-hidden rounded-2xl border border-aims-blue/20 bg-gradient-to-br from-aims-blue/[0.07] via-transparent to-purple-500/[0.06] p-5 sm:p-6 dark:border-aims-blue/25">
+    <div className={`relative mb-5 overflow-hidden rounded-2xl border border-aims-blue/20 bg-gradient-to-br from-aims-blue/[0.07] via-transparent to-purple-500/[0.06] dark:border-aims-blue/25 ${showSteps ? 'p-5 sm:p-6' : 'p-4'}`}>
       {/* Decorative hero badge (top-right) */}
       {cfg.badge && (
         <span className="absolute right-5 top-1/2 hidden -translate-y-1/2 items-center gap-1.5 rounded-full border border-gray-200 bg-white/70 px-3 py-1.5 text-xs font-medium text-gray-600 shadow-sm lg:inline-flex dark:border-white/10 dark:bg-white/[0.04] dark:text-slate-300">
@@ -109,27 +113,29 @@ export default function StudioWelcome({ studioId, built, ctaLabel, onCta, second
         <span className="inline-flex items-center gap-1.5 rounded-full border border-aims-governed/30 bg-aims-governed/10 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-aims-governed">
           <span className="h-1.5 w-1.5 rounded-full bg-aims-fresh" /> {cfg.eyebrow}
         </span>
-        <div className="mt-3 flex items-center gap-3">
-          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl text-white shadow-sm" style={{ background: 'var(--grad)' }}>
-            <Icon size={20} aria-hidden="true" />
+        <div className={`flex items-center gap-3 ${showSteps ? 'mt-3' : 'mt-2.5'}`}>
+          <span className={`grid shrink-0 place-items-center rounded-xl text-white shadow-sm ${showSteps ? 'h-11 w-11' : 'h-9 w-9'}`} style={{ background: 'var(--grad)' }}>
+            <Icon size={showSteps ? 20 : 17} aria-hidden="true" />
           </span>
-          <h2 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-slate-100">Welcome to the {cfg.title}</h2>
+          <h2 className={`font-bold tracking-tight text-gray-900 dark:text-slate-100 ${showSteps ? 'text-2xl' : 'text-lg'}`}>Welcome to the {cfg.title}</h2>
         </div>
         <p className="mt-2 text-sm text-gray-600 dark:text-slate-300">{cfg.subtitle}</p>
 
-        <ol className="mt-4 space-y-2">
-          {cfg.steps.map(([bold, rest], i) => (
-            <li key={i} className="flex items-start gap-2.5 text-sm text-gray-600 dark:text-slate-300">
-              <span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full border border-gray-300 text-[11px] font-semibold text-gray-500 dark:border-white/15 dark:text-slate-400">{i + 1}</span>
-              <span>
-                <span className="font-semibold text-gray-900 dark:text-slate-100">{bold}</span>
-                {rest}
-              </span>
-            </li>
-          ))}
-        </ol>
+        {showSteps && (
+          <ol className="mt-4 space-y-2">
+            {cfg.steps.map(([bold, rest], i) => (
+              <li key={i} className="flex items-start gap-2.5 text-sm text-gray-600 dark:text-slate-300">
+                <span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full border border-gray-300 text-[11px] font-semibold text-gray-500 dark:border-white/15 dark:text-slate-400">{i + 1}</span>
+                <span>
+                  <span className="font-semibold text-gray-900 dark:text-slate-100">{bold}</span>
+                  {rest}
+                </span>
+              </li>
+            ))}
+          </ol>
+        )}
 
-        <div className="mt-5 flex flex-wrap items-center gap-3">
+        <div className={`flex flex-wrap items-center gap-3 ${showSteps ? 'mt-5' : 'mt-3'}`}>
           {ctaLabel && onCta && (
             <button onClick={onCta} className="btn-primary">
               {ctaLabel} <ArrowRight size={15} aria-hidden="true" />
@@ -138,6 +144,11 @@ export default function StudioWelcome({ studioId, built, ctaLabel, onCta, second
           {onSkip && (
             <button onClick={onSkip} className="btn-secondary">
               {secondaryLabel || 'Skip for now'}
+            </button>
+          )}
+          {cfg.steps?.length > 0 && (
+            <button onClick={() => setShowSteps((s) => !s)} className="text-xs font-medium text-aims-blue hover:underline" aria-expanded={showSteps}>
+              {showSteps ? 'Hide steps' : 'Show steps'}
             </button>
           )}
           {built && (

@@ -42,7 +42,7 @@ export default function DataStudio() {
           </div>
 
           <div className="mb-1 flex items-baseline gap-2">
-            <h3 className="text-sm font-bold text-gray-900 dark:text-slate-100">Data Sync candidates</h3>
+            <h3 className="text-sm font-bold text-gray-900 dark:text-slate-100">Available connectors</h3>
             <span className="text-xs text-gray-400 dark:text-slate-500">{candidates.length}</span>
           </div>
           <p className="mb-3 text-xs text-gray-500 dark:text-slate-400">A preview of the catalog. The wizard will pull from this list at step 2.</p>

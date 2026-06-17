@@ -17,8 +17,8 @@ const STATUS_OPTIONS = [
 ]
 const KIND_OPTIONS = [
   { value: 'All', label: 'All kinds' },
-  { value: 'Entity', label: 'Entity' },
-  { value: 'Global', label: 'Global' },
+  { value: 'Entity', label: 'Profile' },
+  { value: 'Global', label: 'Standalone' },
 ]
 
 // S76–S79 — dashboard list with search + status filter
@@ -152,7 +152,7 @@ export default function DashboardList() {
                     </div>
                     <div className="flex items-center gap-1.5">
                       <span className={`cap-chip ${dashboardKind(d) === 'entity' ? 'cap-chip-blue' : 'cap-chip-neutral'}`}>
-                        {dashboardKind(d) === 'entity' ? 'Entity' : 'Global'}
+                        {dashboardKind(d) === 'entity' ? 'Profile' : 'Standalone'}
                       </span>
                       <span className="flex items-center gap-1 truncate text-[11px] text-gray-500 dark:text-slate-400">
                         <MapPin size={11} className="shrink-0" />

@@ -104,7 +104,7 @@ export default function DashboardViewPage() {
                 <span className="font-semibold">
                   {stalePaused} tile{stalePaused === 1 ? '' : 's'} paused on stale data.
                 </span>{' '}
-                Workflows that depend on {stalePaused === 1 ? 'it' : 'them'} are paused until the source is re-pinned.
+                Workflows that depend on {stalePaused === 1 ? 'it' : 'them'} are paused until the source is remapped.
               </span>
             </div>
           )}
