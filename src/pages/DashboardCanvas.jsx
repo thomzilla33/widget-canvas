@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from 'react'
 import { useParams, Navigate } from 'react-router-dom'
-import { Plus, X, Lock, Unlock, Trash2, Sparkles, RotateCcw, SlidersHorizontal, GripVertical, Move, Check, RefreshCw } from 'lucide-react'
+import { Plus, X, Lock, Unlock, Trash2, Sparkles, RotateCcw, SlidersHorizontal, GripVertical, Move, Check, RefreshCw, MoreHorizontal } from 'lucide-react'
 import { PageHeader, GovernedBadge, FreshnessBadge, Badge, EmptyState } from '../components/common/index.jsx'
+import { PopoverPanel } from '../components/common/Popover.jsx'
 import WidgetRender from '../components/widgets/WidgetRender.jsx'
 import WidgetLibraryModal from '../components/widgets/WidgetLibraryModal.jsx'
 import PublishModal from '../components/dashboard/PublishModal.jsx'
@@ -39,6 +40,7 @@ export default function DashboardCanvas() {
   const { dashboards, updateDashboard } = useDashboards()
   const dashboard = dashboards.find((d) => d.id === id)
   const [addOpen, setAddOpen] = useState(false)
+  const [moreOpen, setMoreOpen] = useState(false)
   const [tipDismissed, setTipDismissed] = useState(false)
   const [selectedPid, setSelectedPid] = useState(null)
   const [publishOpen, setPublishOpen] = useState(false)
@@ -125,28 +127,15 @@ export default function DashboardCanvas() {
         title={dashboard?.name || 'Dashboard canvas'}
         description={
           dashboard ? (
-            <span>
-              <button
-                onClick={() => setEditSetupOpen(true)}
-                className="font-medium text-gray-600 underline-offset-2 hover:text-aims-blue hover:underline dark:text-slate-300"
-                title="Edit setup — change where this dashboard lives"
-              >
-                {dashboardKindLabel(dashboard)}
-              </button>
-              {` · ${dashboard.audience}${placements.length ? ` · ${placements.length} widget${placements.length === 1 ? '' : 's'}${lockedCount ? `, ${lockedCount} locked` : ''}` : ' — add widgets and resize freely'}`}
-            </span>
-          ) : (
-            'Add widgets and resize them freely; permissions are set per widget here.'
-          )
-        }
-        actions={
-          <>
-            {dashboard && <SaveIndicator state={saveState} />}
-            {dashboard && (
-              published && dirty ? (
+            <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
+              <span>
+                {`${dashboardKindLabel(dashboard)} · ${dashboard.audience}${placements.length ? ` · ${placements.length} widget${placements.length === 1 ? '' : 's'}${lockedCount ? `, ${lockedCount} locked` : ''}` : ''}`}
+              </span>
+              <span aria-hidden="true" className="text-gray-300 dark:text-slate-600">·</span>
+              {published && dirty ? (
                 <span
                   className="inline-flex items-center gap-1 rounded-full border border-amber-300/50 bg-amber-500/10 px-2 py-0.5 text-[11px] font-semibold text-aims-ungoverned"
-                  title="You have edits that aren’t live yet — publish to push them to viewers."
+                  title="Edits aren’t live yet — publish to push them to viewers."
                 >
                   Unpublished changes
                 </span>
@@ -154,34 +143,55 @@ export default function DashboardCanvas() {
                 <span title={!published ? 'Draft — only you can see this until you publish.' : undefined}>
                   <Badge variant={dashboard.status} />
                 </span>
-              )
-            )}
-            {dashboard && (
-              <button className="btn-secondary" onClick={() => setEditSetupOpen(true)} title="Change where this dashboard lives, or rename it">
-                <SlidersHorizontal size={15} /> Edit setup
-              </button>
-            )}
-            {placements.length > 0 && (
-              <button
-                className="btn-secondary"
-                onClick={() => setAllFixed(!allLocked)}
-                title={allLocked ? 'Unlock all widgets' : 'Lock every widget so end users cannot move or hide them'}
-              >
-                {allLocked ? <><Unlock size={15} /> Unlock all</> : <><Lock size={15} /> Lock all</>}
-              </button>
-            )}
-            <button className="btn-secondary" onClick={() => setSuggestOpen(true)} title="Suggest widgets for this profile">
-              <Sparkles size={15} /> Suggest
-            </button>
-            <button className="btn-secondary" onClick={() => setShareOpen(true)}>Share</button>
-            <button
-              className="btn-primary"
-              onClick={() => setPublishOpen(true)}
-              title={published && !dirty ? 'Already published — re-publish to push a fresh version' : 'Publish so this is visible to its audience'}
-            >
-              {published ? (dirty ? 'Publish changes' : <><Check size={15} aria-hidden="true" /> Published</>) : 'Publish'}
-            </button>
-          </>
+              )}
+              <SaveIndicator state={saveState} />
+            </span>
+          ) : (
+            'Add widgets and resize them freely; permissions are set per widget here.'
+          )
+        }
+        actions={
+          dashboard ? (
+            <>
+              <div className="relative">
+                <button
+                  className="btn-secondary !px-2"
+                  aria-label="More actions"
+                  aria-haspopup="menu"
+                  aria-expanded={moreOpen}
+                  onClick={() => setMoreOpen((o) => !o)}
+                >
+                  <MoreHorizontal size={16} aria-hidden="true" />
+                </button>
+                {moreOpen && (
+                  <PopoverPanel onClose={() => setMoreOpen(false)} align="right" className="w-56 p-1.5">
+                    <MenuItem icon={SlidersHorizontal} onClick={() => { setMoreOpen(false); setEditSetupOpen(true) }}>
+                      Edit setup
+                    </MenuItem>
+                    {placements.length > 0 && (
+                      <MenuItem icon={allLocked ? Unlock : Lock} onClick={() => { setMoreOpen(false); setAllFixed(!allLocked) }}>
+                        {allLocked ? 'Unlock all widgets' : 'Lock all widgets'}
+                      </MenuItem>
+                    )}
+                    <MenuItem icon={Sparkles} onClick={() => { setMoreOpen(false); setSuggestOpen(true) }}>
+                      Suggest widgets
+                    </MenuItem>
+                    {published && !dirty && (
+                      <MenuItem icon={RotateCcw} onClick={() => { setMoreOpen(false); setPublishOpen(true) }}>
+                        Re-publish
+                      </MenuItem>
+                    )}
+                  </PopoverPanel>
+                )}
+              </div>
+              <button className="btn-secondary" onClick={() => setShareOpen(true)}>Share</button>
+              {(!published || dirty) && (
+                <button className="btn-primary" onClick={() => setPublishOpen(true)} title="Publish so this is visible to its audience">
+                  {published ? 'Publish changes' : 'Publish'}
+                </button>
+              )}
+            </>
+          ) : null
         }
       />
 
@@ -311,6 +321,20 @@ function SaveIndicator({ state }) {
         <><Check size={11} className="text-aims-governed" aria-hidden="true" /> All changes saved</>
       )}
     </span>
+  )
+}
+
+/* ── A row in the header's "⋯ More" overflow menu ── */
+function MenuItem({ icon: Icon, onClick, children }) {
+  return (
+    <button
+      role="menuitem"
+      onClick={onClick}
+      className="flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-[13px] text-gray-700 hover:bg-gray-100 focus-visible:bg-gray-100 focus-visible:outline-none dark:text-slate-200 dark:hover:bg-white/10 dark:focus-visible:bg-white/10"
+    >
+      {Icon && <Icon size={15} aria-hidden="true" className="shrink-0 text-gray-500 dark:text-slate-400" />}
+      {children}
+    </button>
   )
 }
 
