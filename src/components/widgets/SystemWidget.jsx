@@ -21,12 +21,26 @@ function Empty({ children }) {
     </div>
   )
 }
-function CountSummary({ n, noun, tone = 'blue' }) {
+// sm tiles are read-only: a count headline + the top 1–2 item titles (no actions —
+// too cramped at one column). md/lg get the full interactive list.
+function CompactSummary({ n, noun, tone = 'blue', items = [] }) {
   const c = tone === 'amber' ? 'text-aims-aging' : tone === 'governed' ? 'text-aims-governed' : 'text-aims-blue'
   return (
-    <div className="py-1">
-      <span className={`num text-xl font-bold tracking-tight ${c}`}>{n}</span>
-      <span className="ml-1.5 text-[11px] text-gray-500 dark:text-slate-400">{noun}</span>
+    <div>
+      <div className="py-0.5">
+        <span className={`num text-xl font-bold tracking-tight ${c}`}>{n}</span>
+        <span className="ml-1.5 text-[11px] text-gray-500 dark:text-slate-400">{noun}</span>
+      </div>
+      {items.length > 0 && (
+        <ul className="mt-1 space-y-1 border-t border-gray-100 pt-1.5 dark:border-white/10">
+          {items.map((it, i) => (
+            <li key={i} className="flex min-w-0 items-center gap-1.5">
+              <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${it.amber ? 'bg-amber-500' : 'bg-aims-blue'}`} />
+              <span className="truncate text-[10px] text-gray-600 dark:text-slate-300">{it.label}</span>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   )
 }
@@ -35,7 +49,9 @@ function CountSummary({ n, noun, tone = 'blue' }) {
 function HtlBody({ size }) {
   const { htl, resolveHtl } = useWorkQueue()
   const pending = htl.filter((h) => h.status === 'pending')
-  if (size === 'sm') return pending.length ? <CountSummary n={pending.length} noun="awaiting you" tone="amber" /> : <Empty>All caught up</Empty>
+  if (size === 'sm') return pending.length
+    ? <CompactSummary n={pending.length} noun="awaiting you" tone="amber" items={pending.slice(0, 2).map((h) => ({ label: h.title, amber: true }))} />
+    : <Empty>All caught up</Empty>
   if (pending.length === 0) return <Empty>All caught up — no decisions pending</Empty>
   return (
     <ul className="space-y-1.5">
@@ -82,7 +98,9 @@ function InboxBody({ size }) {
   const unread = htlItems.length + nativeItems.filter((i) => !i.read).length
   const shown = all.filter((i) => (filter === 'all' ? true : filter === 'needs' ? i.humanTouch : i.kind === 'mention'))
 
-  if (size === 'sm') return unread ? <CountSummary n={unread} noun="unread" /> : <Empty>Inbox zero</Empty>
+  if (size === 'sm') return unread
+    ? <CompactSummary n={unread} noun="unread" items={all.slice(0, 2).map((i) => ({ label: i.title, amber: i.humanTouch }))} />
+    : <Empty>Inbox zero</Empty>
   return (
     <div>
       <div className="mb-1.5 flex flex-wrap items-center gap-1">
@@ -134,7 +152,9 @@ function TasksBody({ size }) {
   const { tasks, completeTask, addTask } = useWorkQueue()
   const [draft, setDraft] = useState('')
   const open = tasks.filter((t) => !t.done)
-  if (size === 'sm') return open.length ? <CountSummary n={open.length} noun="open" /> : <Empty>No open tasks</Empty>
+  if (size === 'sm') return open.length
+    ? <CompactSummary n={open.length} noun="open" items={open.slice(0, 2).map((t) => ({ label: t.title, amber: t.overdue }))} />
+    : <Empty>No open tasks</Empty>
   const shown = open.slice(0, rowMax(size) + 1) // completing a task drops it from the list
   return (
     <div>
