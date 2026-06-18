@@ -1,6 +1,6 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useParams, Navigate } from 'react-router-dom'
-import { Plus, X, Lock, Unlock, Trash2, Sparkles, RotateCcw, SlidersHorizontal, GripVertical, Move } from 'lucide-react'
+import { Plus, X, Lock, Unlock, Trash2, Sparkles, RotateCcw, SlidersHorizontal, GripVertical, Move, Check, RefreshCw } from 'lucide-react'
 import { PageHeader, GovernedBadge, FreshnessBadge, Badge, EmptyState } from '../components/common/index.jsx'
 import WidgetRender from '../components/widgets/WidgetRender.jsx'
 import WidgetLibraryModal from '../components/widgets/WidgetLibraryModal.jsx'
@@ -54,10 +54,27 @@ export default function DashboardCanvas() {
   const selected = placements.find((p) => p.pid === selectedPid)
   const lockedCount = placements.filter((p) => p.fixed).length
   const allLocked = placements.length > 0 && lockedCount === placements.length
+  // Lifecycle: edits auto-persist; a published dashboard with edits has unpublished changes.
+  const published = dashboard?.status === 'published'
+  const dirty = !!dashboard?.dirty
+
+  // Autosave feedback — edits persist immediately; flash "Saving…" → "All changes saved".
+  const [saveState, setSaveState] = useState('saved')
+  const savedTimer = useRef(null)
+  function flashSaved() {
+    setSaveState('saving')
+    if (savedTimer.current) clearTimeout(savedTimer.current)
+    savedTimer.current = setTimeout(() => setSaveState('saved'), 350)
+  }
+  // Clear a pending flash timer on unmount (no setState after the canvas is gone).
+  useEffect(() => () => { if (savedTimer.current) clearTimeout(savedTimer.current) }, [])
 
   function commit(updater) {
     const next = updater(placements)
-    updateDashboard(id, { layout: next, widgets: next.length })
+    const patch = { layout: next, widgets: next.length }
+    if (dashboard?.status === 'published') patch.dirty = true // edits diverge from the published version
+    updateDashboard(id, patch)
+    flashSaved()
   }
   function placeWidget(widget, size = 'md') {
     commit((prev) => [...prev, { pid: newPid(id, prev), widgetId: widget.id, fixed: false, size, audiences: [], quickActions: [] }])
@@ -124,7 +141,21 @@ export default function DashboardCanvas() {
         }
         actions={
           <>
-            {dashboard && <Badge variant={dashboard.status} />}
+            {dashboard && <SaveIndicator state={saveState} />}
+            {dashboard && (
+              published && dirty ? (
+                <span
+                  className="inline-flex items-center gap-1 rounded-full border border-amber-300/50 bg-amber-500/10 px-2 py-0.5 text-[11px] font-semibold text-aims-ungoverned"
+                  title="You have edits that aren’t live yet — publish to push them to viewers."
+                >
+                  Unpublished changes
+                </span>
+              ) : (
+                <span title={!published ? 'Draft — only you can see this until you publish.' : undefined}>
+                  <Badge variant={dashboard.status} />
+                </span>
+              )
+            )}
             {dashboard && (
               <button className="btn-secondary" onClick={() => setEditSetupOpen(true)} title="Change where this dashboard lives, or rename it">
                 <SlidersHorizontal size={15} /> Edit setup
@@ -143,7 +174,13 @@ export default function DashboardCanvas() {
               <Sparkles size={15} /> Suggest
             </button>
             <button className="btn-secondary" onClick={() => setShareOpen(true)}>Share</button>
-            <button className="btn-primary" onClick={() => setPublishOpen(true)}>Publish</button>
+            <button
+              className="btn-primary"
+              onClick={() => setPublishOpen(true)}
+              title={published && !dirty ? 'Already published — re-publish to push a fresh version' : 'Publish so this is visible to its audience'}
+            >
+              {published ? (dirty ? 'Publish changes' : <><Check size={15} aria-hidden="true" /> Published</>) : 'Publish'}
+            </button>
           </>
         }
       />
@@ -237,7 +274,7 @@ export default function DashboardCanvas() {
           placements={placements}
           widgetById={widgetById}
           onClose={() => setPublishOpen(false)}
-          onPublish={() => updateDashboard(dashboard.id, { status: 'published' })}
+          onPublish={() => { updateDashboard(dashboard.id, { status: 'published', dirty: false }); flashSaved() }}
           onShare={() => { setPublishOpen(false); setShareOpen(true) }}
         />
       )}
@@ -261,6 +298,19 @@ export default function DashboardCanvas() {
         />
       )}
     </div>
+  )
+}
+
+/* ── Autosave feedback — edits persist immediately; this just confirms it ── */
+function SaveIndicator({ state }) {
+  return (
+    <span className="inline-flex items-center gap-1 text-[11px] text-gray-400 dark:text-slate-500" aria-live="polite">
+      {state === 'saving' ? (
+        <><RefreshCw size={11} className="animate-spin" aria-hidden="true" /> Saving…</>
+      ) : (
+        <><Check size={11} className="text-aims-governed" aria-hidden="true" /> All changes saved</>
+      )}
+    </span>
   )
 }
 
