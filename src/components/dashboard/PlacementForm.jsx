@@ -45,10 +45,31 @@ export default function PlacementForm({ initial, onChange }) {
   const [entityId, setEntityId] = useState(p0?.entityId || null)
   const [tab, setTab] = useState(p0?.tab || typeOf(p0?.profileType || 'Company').tabs[0])
   const [addingTab, setAddingTab] = useState(false)
+  const [newTab, setNewTab] = useState('')
+  // Custom tabs created in this form (beyond the profile type's defaults). Seed from an
+  // existing custom destination tab (edit mode) so it shows as a chip.
+  const [customTabs, setCustomTabs] = useState(() => {
+    const def = typeOf(p0?.profileType || 'Company').tabs
+    return p0?.tab && !def.includes(p0.tab) ? [p0.tab] : []
+  })
   const [collection, setCollection] = useState(p0?.collection || REPORT_COLLECTIONS[0])
   const [homeScope, setHomeScope] = useState(p0?.homeScope || 'personal')
 
   const currentType = typeOf(profileType)
+  // Default tabs + any the admin just created, deduped.
+  const allTabs = [...currentType.tabs, ...customTabs.filter((t) => !currentType.tabs.includes(t))]
+  function addCustomTab() {
+    const n = newTab.trim()
+    if (n && !allTabs.some((t) => t.toLowerCase() === n.toLowerCase())) {
+      setCustomTabs((prev) => [...prev, n])
+      setTab(n) // select the one just created
+    }
+    setNewTab('') // keep the input open so several can be added in a row
+  }
+  function removeCustomTab(t) {
+    setCustomTabs((prev) => prev.filter((x) => x !== t))
+    if (tab === t) setTab(currentType.tabs[0] || 'Overview')
+  }
   const entitiesForType = entities.filter((e) => e.type === currentType.entityType)
   const kind = surface === 'profile' ? 'entity' : 'global'
 
@@ -94,6 +115,8 @@ export default function PlacementForm({ initial, onChange }) {
       setScope('all')
       setEntityId(null)
       setAddingTab(false)
+      setNewTab('')
+      setCustomTabs([])
       setTab(currentType.tabs[0])
     }
   }
@@ -105,6 +128,8 @@ export default function PlacementForm({ initial, onChange }) {
     setProfileType(id)
     setEntityId(null)
     setAddingTab(false)
+    setNewTab('')
+    setCustomTabs([])
     setTab(t.tabs[0] || 'Overview')
   }
 
@@ -173,23 +198,60 @@ export default function PlacementForm({ initial, onChange }) {
 
           <div>
             <div className="mb-1.5 text-sm font-medium text-gray-700 dark:text-slate-200">Tab</div>
-            {addingTab ? (
-              <div className="flex gap-2">
-                <input className="input" placeholder="New tab name…" value={tab} onChange={(e) => setTab(e.target.value)} autoFocus />
-                <button className="btn-secondary" onClick={() => { setAddingTab(false); setTab(currentType.tabs[0]) }}>Cancel</button>
-              </div>
-            ) : (
-              <div className="flex flex-wrap gap-2">
-                {currentType.tabs.map((t) => (
-                  <Chip key={t} active={tab === t} onClick={() => setTab(t)}>{t}</Chip>
-                ))}
+            <div className="flex flex-wrap items-center gap-2">
+              {allTabs.map((t) => {
+                const custom = !currentType.tabs.includes(t)
+                if (!custom) return <Chip key={t} active={tab === t} onClick={() => setTab(t)}>{t}</Chip>
+                const on = tab === t
+                return (
+                  <span
+                    key={t}
+                    className={`inline-flex h-8 items-center gap-1 rounded-full border pl-3 pr-1.5 text-xs font-semibold transition-colors ${
+                      on ? 'border-aims-blue bg-aims-blue/10 text-aims-blue' : 'border-gray-300 text-gray-600 dark:border-white/15 dark:text-slate-300'
+                    }`}
+                  >
+                    <button type="button" onClick={() => setTab(t)} className="focus:outline-none">{t}</button>
+                    <button
+                      type="button"
+                      onClick={() => removeCustomTab(t)}
+                      aria-label={`Remove ${t} tab`}
+                      title={`Remove ${t}`}
+                      className="grid h-4 w-4 place-items-center rounded-full text-gray-400 hover:bg-gray-200 hover:text-gray-700 dark:hover:bg-white/15 dark:hover:text-slate-200"
+                    >
+                      ×
+                    </button>
+                  </span>
+                )
+              })}
+
+              {addingTab ? (
+                <input
+                  className="input h-8 w-36 text-sm"
+                  placeholder="Name + Enter"
+                  value={newTab}
+                  autoFocus
+                  onChange={(e) => setNewTab(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') { e.preventDefault(); addCustomTab() }
+                    if (e.key === 'Escape') { setNewTab(''); setAddingTab(false) }
+                  }}
+                  onBlur={() => { if (!newTab.trim()) setAddingTab(false) }}
+                  aria-label="New tab name"
+                />
+              ) : (
                 <button
-                  onClick={() => { setAddingTab(true); setTab('') }}
+                  onClick={() => setAddingTab(true)}
                   className="h-8 rounded-full border border-dashed border-gray-300 px-3 text-xs font-semibold text-gray-500 transition-colors hover:border-aims-blue hover:text-aims-blue dark:border-white/15 dark:text-slate-400"
                 >
                   + New tab
                 </button>
-              </div>
+              )}
+              {addingTab && (
+                <button onClick={() => { setNewTab(''); setAddingTab(false) }} className="btn-ghost h-8 text-xs">Done</button>
+              )}
+            </div>
+            {addingTab && (
+              <p className="mt-1.5 text-[11px] text-gray-500 dark:text-slate-400">Press Enter to add — create as many tabs as you need.</p>
             )}
           </div>
         </div>
