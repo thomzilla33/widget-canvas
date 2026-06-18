@@ -5,6 +5,7 @@ import { PageHeader, Badge, EmptyState } from '../components/common/index.jsx'
 import StudioWelcome from '../components/common/StudioWelcome.jsx'
 import FilterToolbar from '../components/common/FilterToolbar.jsx'
 import AIGenerateModal from '../components/ai/AIGenerateModal.jsx'
+import CreateLauncher from '../components/create/CreateLauncher.jsx'
 import { useDashboards } from '../state/DashboardsContext.jsx'
 import { useRole } from '../state/RoleContext.jsx'
 import { placementLabel, DEACTIVATED_OWNERS, dashboardKind, SHARE_PEOPLE } from '../data/mock.js'
@@ -45,6 +46,17 @@ export default function DashboardList() {
   const reassignTargets = ['You (admin)', ...SHARE_PEOPLE.filter((p) => p.status === 'active').map((p) => p.name)]
   const [reassignTo, setReassignTo] = useState({}) // per departed-owner → chosen new owner
   const [aiOpen, setAiOpen] = useState(false)
+  const [launcher, setLauncher] = useState(false)
+
+  // Defer the successor a frame so the launcher's focus-trap restores focus to the
+  // Create button first; the next modal then traps from a real trigger, not a dead card.
+  function pickCreate(mode) {
+    setLauncher(false)
+    requestAnimationFrame(() => {
+      if (mode === 'ai') setAiOpen(true)
+      else navigate('/dashboard/new')
+    })
+  }
   const targetFor = (owner) => reassignTo[owner] || 'You (admin)'
   const reassignOne = (id, owner) => updateDashboard(id, { owner: targetFor(owner) })
   const reassignAll = (group) => {
@@ -84,8 +96,8 @@ export default function DashboardList() {
         <StudioWelcome
           studioId="dashboards"
           built={{ count: dashboards.length, label: 'dashboards' }}
-          ctaLabel={isAdmin ? 'New dashboard' : undefined}
-          onCta={isAdmin ? () => navigate('/dashboard/new') : undefined}
+          ctaLabel={isAdmin ? 'Create dashboard' : undefined}
+          onCta={isAdmin ? () => setLauncher(true) : undefined}
         />
       </div>
       <PageHeader
@@ -93,14 +105,9 @@ export default function DashboardList() {
         description={`${dashboards.length} dashboards · ${publishedCount} published`}
         actions={
           isAdmin ? (
-            <>
-              <button className="btn-secondary" onClick={() => setAiOpen(true)}>
-                <Sparkles size={15} /> Generate with AI
-              </button>
-              <button className="btn-primary" onClick={() => navigate('/dashboard/new')}>
-                + New dashboard
-              </button>
-            </>
+            <button className="btn-primary" onClick={() => setLauncher(true)}>
+              <Sparkles size={15} /> Create dashboard
+            </button>
           ) : null
         }
       />
@@ -255,6 +262,8 @@ export default function DashboardList() {
         )}
         <p className="mt-4 text-xs text-gray-500 dark:text-slate-400">Screens hosted here: S76–S79</p>
       </div>
+
+      {launcher && <CreateLauncher kind="dashboard" onPick={pickCreate} onClose={() => setLauncher(false)} />}
 
       {aiOpen && <AIGenerateModal initialMode="dashboard" onClose={() => setAiOpen(false)} />}
     </div>
