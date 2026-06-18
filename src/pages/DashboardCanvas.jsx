@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { useParams, Navigate, useNavigate } from 'react-router-dom'
-import { Plus, X, Lock, Unlock, Trash2, Sparkles, RotateCcw, SlidersHorizontal, GripVertical, Move, Check, RefreshCw, MoreHorizontal, Pencil, Flag, Info } from 'lucide-react'
+import { Plus, X, Lock, Unlock, Trash2, Sparkles, RotateCcw, SlidersHorizontal, GripVertical, Move, Check, RefreshCw, MoreHorizontal, Flag, Info } from 'lucide-react'
 import { PageHeader, GovernedBadge, FreshnessBadge, Badge, EmptyState } from '../components/common/index.jsx'
 import { PopoverPanel } from '../components/common/Popover.jsx'
 import WidgetRender from '../components/widgets/WidgetRender.jsx'
@@ -284,7 +284,6 @@ export default function DashboardCanvas() {
               placement={selected}
               widget={widgetById(selected.widgetId)}
               onChange={(patch) => updatePlacement(selected.pid, patch)}
-              onRename={(name) => updateWidget(selected.widgetId, { name })}
               onDetail={() => setDetailWidget(widgetById(selected.widgetId))}
               onRemap={() => setRemapWidget(widgetById(selected.widgetId))}
               onFeedback={() => setFeedbackWidget(widgetById(selected.widgetId))}
@@ -568,48 +567,19 @@ function CanvasTile({ placement: p, widget: w, selected, dragging, onSelect, onU
   )
 }
 
-/* ── Config panel body (size, visualization, fixed/flexible, audience, quick actions) ── */
-function ConfigPanel({ placement, widget, onChange, onRename, onDetail, onRemap, onFeedback, onAsk }) {
+/* ── Config panel body (placement-level: size, fixed/flexible, audience, quick actions) ── */
+function ConfigPanel({ placement, widget, onChange, onDetail, onRemap, onFeedback, onAsk }) {
   function toggleQuickAction(qa) {
     const has = placement.quickActions.includes(qa)
     onChange({ quickActions: has ? placement.quickActions.filter((x) => x !== qa) : [...placement.quickActions, qa] })
   }
   const allowedAudiences = placementAudiences(placement)
-  const [renaming, setRenaming] = useState(false)
-  const [nameDraft, setNameDraft] = useState(widget?.name || '')
-  function commitName() {
-    const n = nameDraft.trim()
-    if (n && n !== widget?.name) onRename?.(n)
-    setRenaming(false)
-  }
   return (
     <div className="space-y-5">
       <div>
-        {/* Name — inline editable */}
-        {renaming ? (
-          <input
-            autoFocus
-            className="input h-8 w-full text-sm font-semibold"
-            value={nameDraft}
-            onChange={(e) => setNameDraft(e.target.value)}
-            onKeyDown={(e) => { if (e.key === 'Enter') commitName(); if (e.key === 'Escape') { setNameDraft(widget?.name || ''); setRenaming(false) } }}
-            onBlur={commitName}
-            aria-label="Widget name"
-          />
-        ) : (
-          <div className="flex items-center gap-1.5">
-            <span className="min-w-0 truncate font-semibold text-gray-900 dark:text-slate-100">{widget?.name}</span>
-            <button
-              type="button"
-              onClick={() => { setNameDraft(widget?.name || ''); setRenaming(true) }}
-              aria-label="Rename widget"
-              title="Rename widget"
-              className="shrink-0 text-gray-400 hover:text-aims-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aims-blue/40"
-            >
-              <Pencil size={13} aria-hidden="true" />
-            </button>
-          </div>
-        )}
+        {/* Name is read-only here — it's part of the widget definition (set at creation;
+            change it via Details / the Widget Builder, not in the placement panel). */}
+        <div className="truncate font-semibold text-gray-900 dark:text-slate-100">{widget?.name}</div>
         <div className="mt-1 flex items-center gap-2 flex-wrap">
           <GovernedBadge governed={!!widget?.governed} />
           {widget?.freshness && <FreshnessBadge status={widget.freshness} label={widget.freshness} />}
