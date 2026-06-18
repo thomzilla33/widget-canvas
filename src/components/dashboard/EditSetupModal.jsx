@@ -5,6 +5,7 @@ import PlacementForm, { overlaps } from './PlacementForm.jsx'
 import { useDashboards } from '../../state/DashboardsContext.jsx'
 import { placementLabel } from '../../data/mock.js'
 import { dashboardLayout } from '../../data/layout.js'
+import { audienceKey, audienceLabel } from '../../data/audiences.js'
 
 // Recovery path for the placement/approach choice — change where a dashboard lives
 // (profile type / scope / tab / surface / audience) or rename it AFTER creation.
@@ -15,12 +16,12 @@ export default function EditSetupModal({ dashboard, onClose, onSave }) {
   const [form, setForm] = useState({ name: dashboard.name, audience: dashboard.audience, placement: dashboard.placement, valid: true })
 
   // Conflict-aware, but exclude THIS dashboard from the check.
-  const conflict = dashboards.find((d) => d.id !== dashboard.id && d.audience === form.audience && overlaps(d.placement, form.placement))
+  const conflict = dashboards.find((d) => d.id !== dashboard.id && audienceKey(d.audience) === audienceKey(form.audience) && overlaps(d.placement, form.placement))
 
   // Changing the dashboard audience can leave per-widget audience restrictions
   // pointing at the old role — warn (only) when that's actually the case.
   const hasRestricted = dashboardLayout(dashboard).some((p) => Array.isArray(p.audiences) && p.audiences.length > 0)
-  const audienceChanged = form.audience !== dashboard.audience && hasRestricted
+  const audienceChanged = audienceKey(form.audience) !== audienceKey(dashboard.audience) && hasRestricted
 
   const save = () => {
     const p = form.placement
@@ -52,7 +53,7 @@ export default function EditSetupModal({ dashboard, onClose, onSave }) {
               <AlertTriangle size={16} className="mt-0.5 shrink-0 text-aims-ungoverned" aria-hidden="true" />
               <div className="text-xs text-gray-600 dark:text-slate-300">
                 <span className="font-semibold text-gray-900 dark:text-slate-100">Another dashboard lives here.</span>{' '}
-                “{conflict.name}” already targets {placementLabel(conflict.placement)} · {conflict.audience}. Saving may cause overlap.
+                “{conflict.name}” already targets {placementLabel(conflict.placement)} · {audienceLabel(conflict.audience)}. Saving may cause overlap.
               </div>
             </div>
           )}
@@ -61,8 +62,8 @@ export default function EditSetupModal({ dashboard, onClose, onSave }) {
             <div className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-500/25 dark:bg-amber-500/10">
               <AlertTriangle size={16} className="mt-0.5 shrink-0 text-aims-ungoverned" aria-hidden="true" />
               <div className="text-xs text-gray-600 dark:text-slate-300">
-                <span className="font-semibold text-gray-900 dark:text-slate-100">Some widgets are restricted to {dashboard.audience}.</span>{' '}
-                Changing the audience to {form.audience} may hide them — review each widget's audience on the canvas after saving.
+                <span className="font-semibold text-gray-900 dark:text-slate-100">Some widgets are restricted to {audienceLabel(dashboard.audience)}.</span>{' '}
+                Changing the audience to {audienceLabel(form.audience)} may hide them — review each widget's audience on the canvas after saving.
               </div>
             </div>
           )}

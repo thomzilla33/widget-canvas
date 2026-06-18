@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { LayoutGrid, UserSquare, MapPin } from 'lucide-react'
-import { entities, audiences, PROFILE_TYPES, REPORT_COLLECTIONS, HOME_SCOPES, placementLabel } from '../../data/mock.js'
+import { entities, PROFILE_TYPES, REPORT_COLLECTIONS, HOME_SCOPES, placementLabel } from '../../data/mock.js'
+import { AUDIENCE_TYPES, AUDIENCE_TARGETS, audienceKey, audienceLabel, normalizeAudience } from '../../data/audiences.js'
 
 // Shared placement picker — the single source for "where does this dashboard live?"
 // Used by NewDashboard (create) AND EditSetupModal (recover/change after creation).
@@ -10,10 +11,11 @@ import { entities, audiences, PROFILE_TYPES, REPORT_COLLECTIONS, HOME_SCOPES, pl
 
 // Stable signature for a placement + audience (detects destination changes).
 export function placeKey(p, audience) {
+  const a = audienceKey(audience)
   if (!p) return ''
-  if (p.surface === 'report') return `report|${p.collection}|${audience}`
-  if (p.surface === 'home') return `home|${p.homeScope}|${audience}`
-  return `profile|${p.profileType}|${p.scope}|${p.entityId || 'all'}|${p.tab}|${audience}`
+  if (p.surface === 'report') return `report|${p.collection}|${a}`
+  if (p.surface === 'home') return `home|${p.homeScope}|${a}`
+  return `profile|${p.profileType}|${p.scope}|${p.entityId || 'all'}|${p.tab}|${a}`
 }
 
 // True if two placements would surface the same slot (type-wide overlaps any entity).
@@ -31,7 +33,12 @@ const typeOf = (id) => PROFILE_TYPES.find((t) => t.id === id) || PROFILE_TYPES[0
 export default function PlacementForm({ initial, onChange }) {
   const p0 = initial?.placement
   const [name, setName] = useState(initial?.name || '')
-  const [audience, setAudience] = useState(initial?.audience || 'Sales Agent')
+  // Audience is a structured target { type, label } (broad → narrow); back-compat with
+  // legacy string audiences via normalizeAudience.
+  const a0 = normalizeAudience(initial?.audience)
+  const [audType, setAudType] = useState(a0.type)
+  const [audTarget, setAudTarget] = useState(a0.label || AUDIENCE_TARGETS[a0.type]?.[0] || '')
+  const audience = audType === 'global' ? { type: 'global' } : { type: audType, label: audTarget }
   const [surface, setSurface] = useState(p0?.surface || 'profile')
   const [profileType, setProfileType] = useState(p0?.profileType || 'Company')
   const [scope, setScope] = useState(p0?.scope || 'all')
@@ -73,7 +80,13 @@ export default function PlacementForm({ initial, onChange }) {
   useEffect(() => {
     onChangeRef.current({ name: name.trim(), audience, placement, valid })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [name, audience, surface, profileType, scope, entityId, tab, collection, homeScope])
+  }, [name, audType, audTarget, surface, profileType, scope, entityId, tab, collection, homeScope])
+
+  // Switching audience type defaults the target to that type's first option.
+  function selectAudType(id) {
+    setAudType(id)
+    if (id !== 'global') setAudTarget(AUDIENCE_TARGETS[id]?.[0] || '')
+  }
 
   function selectSurface(id) {
     setSurface(id)
@@ -206,17 +219,29 @@ export default function PlacementForm({ initial, onChange }) {
       )}
 
       <Field label="Audience">
-        <select className="input" value={audience} onChange={(e) => setAudience(e.target.value)}>
-          {audiences.map((x) => (
-            <option key={x} value={x}>{x}</option>
-          ))}
-        </select>
+        <div className="space-y-2">
+          {/* Pick the audience TYPE (broad → narrow), then the specific target. */}
+          <div className="flex flex-wrap gap-1.5">
+            {AUDIENCE_TYPES.map((t) => (
+              <Chip key={t.id} active={audType === t.id} onClick={() => selectAudType(t.id)}>{t.label}</Chip>
+            ))}
+          </div>
+          {audType === 'global' ? (
+            <p className="text-xs text-gray-500 dark:text-slate-400">{AUDIENCE_TYPES[0].hint} — anyone with access can see this.</p>
+          ) : (
+            <select className="input" value={audTarget} onChange={(e) => setAudTarget(e.target.value)} aria-label={`Choose ${audType}`}>
+              {(AUDIENCE_TARGETS[audType] || []).map((x) => (
+                <option key={x} value={x}>{x}</option>
+              ))}
+            </select>
+          )}
+        </div>
       </Field>
 
       <div className="alert-info flex items-center gap-2">
         <MapPin size={14} className="shrink-0 text-aims-blue" />
         <span>
-          <span className="font-semibold text-aims-blue">Destination:</span> {placementLabel(placement)} · {audience}
+          <span className="font-semibold text-aims-blue">Destination:</span> {placementLabel(placement)} · {audienceLabel(audience)}
         </span>
       </div>
     </div>

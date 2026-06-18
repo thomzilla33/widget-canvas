@@ -16,7 +16,7 @@ import { useRole } from '../state/RoleContext.jsx'
 import { WIDGET_SIZES, dashboardKindLabel } from '../data/mock.js'
 import { dashboardLayout } from '../data/layout.js'
 import { vizRecommendation, vizInterchangeable, VIZ_OPTIONS } from '../data/preview.js'
-import { AUDIENCE_ROLES, placementAudiences, audienceSummary } from '../data/audiences.js'
+import { AUDIENCE_ROLES, placementAudiences, audienceSummary, audienceLabel } from '../data/audiences.js'
 
 // A widget's size IS its width — free grid, 1/2/3 columns by size (capped per breakpoint).
 const SIZE_SPAN_CLASS = { sm: '', md: 'sm:col-span-2', lg: 'sm:col-span-2 lg:col-span-3' }
@@ -129,7 +129,7 @@ export default function DashboardCanvas() {
           dashboard ? (
             <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
               <span>
-                {`${dashboardKindLabel(dashboard)} · ${dashboard.audience}${placements.length ? ` · ${placements.length} widget${placements.length === 1 ? '' : 's'}${lockedCount ? `, ${lockedCount} locked` : ''}` : ''}`}
+                {`${dashboardKindLabel(dashboard)} · ${audienceLabel(dashboard.audience)}${placements.length ? ` · ${placements.length} widget${placements.length === 1 ? '' : 's'}${lockedCount ? `, ${lockedCount} locked` : ''}` : ''}`}
               </span>
               <span aria-hidden="true" className="text-gray-300 dark:text-slate-600">·</span>
               {published && dirty ? (

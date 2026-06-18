@@ -7,6 +7,7 @@ import FilterToolbar from '../components/common/FilterToolbar.jsx'
 import AIGenerateModal from '../components/ai/AIGenerateModal.jsx'
 import CreateLauncher from '../components/create/CreateLauncher.jsx'
 import { useStaggerReveal } from '../hooks/useReveal.js'
+import { audienceLabel } from '../data/audiences.js'
 import { useDashboards } from '../state/DashboardsContext.jsx'
 import { useRole } from '../state/RoleContext.jsx'
 import { placementLabel, DEACTIVATED_OWNERS, dashboardKind, SHARE_PEOPLE } from '../data/mock.js'
@@ -257,7 +258,7 @@ export default function DashboardList() {
                 </div>
 
                 <div className="mt-auto flex items-center justify-between gap-2 border-t border-gray-100 pt-2.5 dark:border-white/10">
-                  <span className="text-[11px] text-gray-500 dark:text-slate-400">{widgetCount(d)} widgets · {d.audience}</span>
+                  <span className="text-[11px] text-gray-500 dark:text-slate-400">{widgetCount(d)} widgets · {audienceLabel(d.audience)}</span>
                   <span className="text-[11px] text-gray-500 dark:text-slate-400">{d.updated}</span>
                 </div>
               </button>

@@ -136,7 +136,9 @@ export function describeDashboard(text) {
     else profileType = 'Company'
   }
 
-  // Audience.
+  // Audience — intentionally a legacy ROLE STRING (normalizeAudience coerces it to
+  // {type:'role',label} downstream). If this ever returns a structured target, update
+  // AIGenerateModal's audience chip/correction to emit objects too.
   let audience = 'Sales Agent'
   if (/\bexec|executive|c-level|\bceo\b|\bcfo\b/.test(t)) audience = 'Executive'
   else if (/manager|\blead\b|leadership/.test(t)) audience = 'Manager'

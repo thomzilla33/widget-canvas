@@ -14,7 +14,7 @@ import { useRole } from '../state/RoleContext.jsx'
 import { placementLabel, dashboardKindLabel, dashboardKind, entities } from '../data/mock.js'
 import { dashboardLayout } from '../data/layout.js'
 import { isStale } from '../data/governance.js'
-import { AUDIENCE_OPTIONS, ALL_AUDIENCES, audienceVisibleTo } from '../data/audiences.js'
+import { AUDIENCE_OPTIONS, ALL_AUDIENCES, audienceVisibleTo, audienceLabel } from '../data/audiences.js'
 
 // Read-only consumption view of a dashboard (vs the /canvas editor).
 export default function DashboardViewPage() {
@@ -88,7 +88,7 @@ export default function DashboardViewPage() {
     <div className="flex h-full flex-col">
       <PageHeader
         title={dashboard.name}
-        description={`${dashboardKindLabel(dashboard)} · ${dashboard.audience} · Owner ${dashboard.owner || '—'}`}
+        description={`${dashboardKindLabel(dashboard)} · ${audienceLabel(dashboard.audience)} · Owner ${dashboard.owner || '—'}`}
         actions={
           <>
             <Badge variant={dashboard.status} />

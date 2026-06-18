@@ -33,7 +33,7 @@ import { useProfileConfig } from '../state/ProfileConfigContext.jsx'
 import { useRole } from '../state/RoleContext.jsx'
 import { entities, MANDATORY_TABS } from '../data/mock.js'
 import { suggestTabs } from '../data/suggestions.js'
-import { ALL_AUDIENCES, AUDIENCE_OPTIONS, audienceVisibleTo } from '../data/audiences.js'
+import { ALL_AUDIENCES, AUDIENCE_OPTIONS, dashAudienceVisibleTo } from '../data/audiences.js'
 import { useActivity, ACTIVITY_TYPE_LABEL } from '../state/ActivityContext.jsx'
 
 // Map an entity's type to the placement profile type used by dashboards.
@@ -96,7 +96,7 @@ export default function UCPView() {
     if (role === ALL_AUDIENCES || MANDATORY_TABS.includes(t)) return true
     const ds = profileDashboards.filter((d) => (d.placement.tab || 'Overview') === t)
     if (ds.length === 0) return true
-    return ds.some((d) => audienceVisibleTo({ audience: d.audience }, role))
+    return ds.some((d) => dashAudienceVisibleTo(d.audience, role))
   }
   const shownTabs = tabs.filter((t) => tabVisibleTo(t, viewAs))
   const hiddenTabCount = tabs.length - shownTabs.length

@@ -7,6 +7,7 @@ import { DescribeComposer } from '../components/common/DescribeComposer.jsx'
 import { useDashboards } from '../state/DashboardsContext.jsx'
 import { dashboardTemplates, TEMPLATE_SEED, placementLabel } from '../data/mock.js'
 import { describeDashboard } from '../data/describe.js'
+import { audienceKey, audienceLabel } from '../data/audiences.js'
 
 const DEFAULT_SEED = { name: '', audience: 'Sales Agent', placement: { surface: 'profile', profileType: 'Company', scope: 'all', entityId: null, entityName: null, tab: 'Overview' } }
 
@@ -44,7 +45,7 @@ export default function NewDashboard() {
   const myKey = placeKey(placement, form.audience)
 
   // S96 — conflict: another dashboard for the same audience overlaps this destination.
-  const conflict = dashboards.find((d) => d.audience === form.audience && overlaps(d.placement, placement))
+  const conflict = dashboards.find((d) => audienceKey(d.audience) === audienceKey(form.audience) && overlaps(d.placement, placement))
 
   // Reset the override whenever the destination changes.
   useEffect(() => {
@@ -109,7 +110,7 @@ export default function NewDashboard() {
                     <div className="flex-1">
                       <div className="text-sm font-semibold text-gray-900 dark:text-slate-100">A dashboard already lives here</div>
                       <div className="mt-1 text-sm leading-relaxed text-gray-600 dark:text-slate-300">
-                        “{conflict.name}” ({conflict.status}) already targets {placementLabel(conflict.placement)} · {conflict.audience}. Creating another may cause overlap.
+                        “{conflict.name}” ({conflict.status}) already targets {placementLabel(conflict.placement)} · {audienceLabel(conflict.audience)}. Creating another may cause overlap.
                       </div>
                       <div className="mt-3 flex items-center gap-2">
                         <button className="btn-secondary" onClick={() => navigate(`/dashboard/${conflict.id}/canvas`)}>View existing</button>

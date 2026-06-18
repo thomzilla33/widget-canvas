@@ -3,6 +3,7 @@ import { LayoutDashboard, MapPin } from 'lucide-react'
 import { Badge } from '../common/index.jsx'
 import { placementLabel } from '../../data/mock.js'
 import { widgetCount } from '../../data/layout.js'
+import { audienceLabel } from '../../data/audiences.js'
 
 // Reusable grid of dashboard cards that open the read-only view. Shared by the
 // Reports and Home consumption pages.
@@ -32,7 +33,7 @@ export default function DashboardCards({ items }) {
             </div>
           </div>
           <div className="mt-auto flex items-center justify-between gap-2 border-t border-gray-100 pt-2.5 dark:border-white/10">
-            <span className="text-[11px] text-gray-500 dark:text-slate-400">{widgetCount(d)} widgets · {d.audience}</span>
+            <span className="text-[11px] text-gray-500 dark:text-slate-400">{widgetCount(d)} widgets · {audienceLabel(d.audience)}</span>
             <span className="text-[11px] text-gray-500 dark:text-slate-400">{d.updated}</span>
           </div>
         </button>

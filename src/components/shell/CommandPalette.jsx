@@ -4,6 +4,7 @@ import { Home, LayoutDashboard, FileBarChart, Boxes, UserRound, Plus, Search, Co
 import { useDashboards } from '../../state/DashboardsContext.jsx'
 import { useWidgets } from '../../state/WidgetsContext.jsx'
 import { entities } from '../../data/mock.js'
+import { audienceLabel } from '../../data/audiences.js'
 import { useFocusTrap } from '../../hooks/useFocusTrap.js'
 
 const PER_GROUP = 6 // cap results per group so the list stays scannable
@@ -34,7 +35,7 @@ export default function CommandPalette({ onClose }) {
       { id: 'act-newwidget', group: 'Actions', label: 'New widget', icon: Plus, run: () => go('/widgets/new') },
     ]
     dashboards.forEach((d) =>
-      cmds.push({ id: `d-${d.id}`, group: 'Dashboards', label: d.name, sub: `${d.entity} · ${d.audience}`, icon: LayoutDashboard, run: () => go(`/dashboard/${d.id}`) }),
+      cmds.push({ id: `d-${d.id}`, group: 'Dashboards', label: d.name, sub: `${d.entity} · ${audienceLabel(d.audience)}`, icon: LayoutDashboard, run: () => go(`/dashboard/${d.id}`) }),
     )
     widgets.forEach((w) =>
       cmds.push({ id: `w-${w.id}`, group: 'Widgets', label: w.name, sub: `${w.skeleton} · ${w.source}`, icon: Boxes, run: () => go('/widgets') }),

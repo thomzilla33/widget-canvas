@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { X, Check, Rocket, History, RotateCcw, EyeOff, Users } from 'lucide-react'
-import { AUDIENCE_ROLES, audienceVisibleTo } from '../../data/audiences.js'
+import { AUDIENCE_ROLES, audienceVisibleTo, audienceLabel, normalizeAudience } from '../../data/audiences.js'
 import { useFocusTrap } from '../../hooks/useFocusTrap.js'
 
 const ROLES = AUDIENCE_ROLES
@@ -10,7 +10,10 @@ const ROLES = AUDIENCE_ROLES
 export default function PublishModal({ dashboard, placements, widgetById, onClose, onPublish, onShare }) {
   const trapRef = useFocusTrap()
   const [tab, setTab] = useState('preview')
-  const [role, setRole] = useState(dashboard?.audience && ROLES.includes(dashboard.audience) ? dashboard.audience : ROLES[0])
+  // Default the preview to the dashboard's own role (if it targets one); structured
+  // audiences are objects, so normalize before matching against the role list.
+  const initRole = normalizeAudience(dashboard?.audience)
+  const [role, setRole] = useState(initRole.type === 'role' && ROLES.includes(initRole.label) ? initRole.label : ROLES[0])
   const [published, setPublished] = useState(false)
   const [restoring, setRestoring] = useState(null)
   const [versions, setVersions] = useState([
@@ -141,7 +144,7 @@ export default function PublishModal({ dashboard, placements, widgetById, onClos
             {tab === 'preview' && (
               <div className="flex items-center justify-between border-t border-gray-200 px-5 py-3 dark:border-white/10">
                 <span className="text-xs text-gray-500 dark:text-slate-400">
-                  {all.length} widget{all.length === 1 ? '' : 's'} · {dashboard?.entity} · {dashboard?.audience}
+                  {all.length} widget{all.length === 1 ? '' : 's'} · {dashboard?.entity} · {audienceLabel(dashboard?.audience)}
                 </span>
                 <button className="btn-primary" onClick={publish}>
                   <Rocket size={15} /> Publish dashboard
@@ -179,7 +182,7 @@ function PublishedState({ dashboard, role, onClose, onHistory, onShare }) {
       </div>
       <h3 className="mt-4 text-lg font-semibold text-gray-900 dark:text-slate-100">Dashboard published</h3>
       <p className="mt-1 max-w-sm text-sm text-gray-500 dark:text-slate-400">
-        “{dashboard?.name}” is now live for {dashboard?.audience}. A notification was sent to assigned users.
+        “{dashboard?.name}” is now live for {audienceLabel(dashboard?.audience)}. A notification was sent to assigned users.
       </p>
       <div className="mt-5 flex items-center gap-2">
         <button className="btn-secondary" onClick={onHistory}>
