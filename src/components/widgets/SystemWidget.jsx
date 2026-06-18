@@ -106,6 +106,9 @@ function SystemQueueModal({ title, onClose, children }) {
 }
 
 /* ── Decision panel — the auditable HITL review surface ── */
+function Missing() {
+  return <span className="italic text-gray-400 dark:text-slate-500">Not provided</span>
+}
 function PanelRow({ icon: Icon, label, children }) {
   return (
     <div>
@@ -127,7 +130,8 @@ function DecisionPanel({ item: itemProp, onDecide, onClose }) {
   const [reason, setReason] = useState('')
   const [note, setNote] = useState('')
   const [target, setTarget] = useState('')
-  const canReject = !!reason
+  const isPending = item.status === 'pending' // guard against re-deciding an already-resolved item
+  const canReject = !!reason && (reason !== 'Other' || !!note.trim()) // "Other" must carry an explanation
   const canReassign = !!target
   const confirmReject = () => onDecide(item, 'rejected', { reason: reason === 'Other' && note.trim() ? note.trim() : reason })
   const confirmReassign = () => {
@@ -154,9 +158,9 @@ function DecisionPanel({ item: itemProp, onDecide, onClose }) {
 
         {/* Context */}
         <div className="min-h-0 flex-1 space-y-3.5 overflow-auto p-4">
-          <PanelRow icon={FileText} label="Request">{item.request}</PanelRow>
-          <PanelRow icon={Sparkles} label="Agent reasoning">{item.reasoning}</PanelRow>
-          <PanelRow icon={ScrollText} label="Policy">{item.policy}</PanelRow>
+          <PanelRow icon={FileText} label="Request">{item.request || <Missing />}</PanelRow>
+          <PanelRow icon={Sparkles} label="Agent reasoning">{item.reasoning || <Missing />}</PanelRow>
+          <PanelRow icon={ScrollText} label="Policy">{item.policy || <Missing />}</PanelRow>
           {item.evidence?.length > 0 && (
             <PanelRow icon={ListChecks} label="Evidence">
               <ul className="mt-1 space-y-1">
@@ -197,7 +201,15 @@ function DecisionPanel({ item: itemProp, onDecide, onClose }) {
 
         {/* Actions */}
         <div className="border-t border-gray-200 p-3 dark:border-white/10">
-          {mode === 'reject' ? (
+          {!isPending ? (
+            <div className="flex items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 text-xs text-gray-500 dark:text-slate-400">
+                <CheckCircle2 size={14} aria-hidden="true" className="text-aims-governed" />
+                Already {DECISION_VERB[item.decision]?.toLowerCase()} · {item.decidedBy} {item.decidedAt}
+              </span>
+              <button className="btn-secondary ml-auto !py-1.5 text-xs" onClick={onClose}>Close</button>
+            </div>
+          ) : mode === 'reject' ? (
             <div className="flex items-center justify-end gap-2">
               <button className="btn-ghost text-xs" onClick={() => { setMode(null); setReason(''); setNote('') }}>Back</button>
               <button disabled={!canReject} onClick={confirmReject}
@@ -268,7 +280,9 @@ function HtlBody({ size, full, onExpand, onReview, onDecide }) {
   if (size === 'sm') return pending.length
     ? <CompactSummary n={pending.length} noun="awaiting you" tone="amber" items={pending.slice(0, 2).map((h) => ({ label: h.title, amber: true }))} />
     : <Empty>All caught up</Empty>
-  if (pending.length === 0 && !(full && resolved.length)) return <Empty>All caught up — no decisions pending</Empty>
+  // Only fully bail when there's genuinely nothing — when the queue is cleared but
+  // decisions exist, keep rendering so the "Decision history" footer stays reachable.
+  if (pending.length === 0 && resolved.length === 0) return <Empty>All caught up — no decisions pending</Empty>
   const visible = full ? pending : pending.slice(0, rowMax(size))
   return (
     <>
@@ -292,7 +306,7 @@ function HtlBody({ size, full, onExpand, onReview, onDecide }) {
           </li>
         ))}
       </ul>
-      {full && pending.length === 0 && <Empty>All caught up — no decisions pending</Empty>}
+      {pending.length === 0 && <Empty>All caught up — no decisions pending</Empty>}
       {/* Footer entry to the full view: "View all" when the queue is truncated, else a
           path to the decision history so the audit trail stays reachable once cleared. */}
       {!full && onExpand && (

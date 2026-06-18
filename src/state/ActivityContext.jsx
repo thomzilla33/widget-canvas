@@ -25,19 +25,29 @@ export function ActivityProvider({ children }) {
   const seqRef = useRef(0)
 
   // Prepend an entry to an entity's log (newest first).
+  // Returns the new entry's id so callers can later remove it (e.g. an undone action).
   function logActivity(entityId, entry) {
-    if (!entityId) return
+    if (!entityId) return null
     seqRef.current += 1
     // Defaults first so the caller may set when/by; `id` is last so it can never be
     // clobbered (guarantees unique React keys).
-    const item = { when: 'just now', by: 'You', ...entry, id: `a-${seqRef.current}` }
+    const id = `a-${seqRef.current}`
+    const item = { when: 'just now', by: 'You', ...entry, id }
     setByEntity((prev) => ({ ...prev, [entityId]: [item, ...(prev[entityId] || [])] }))
+    return id
+  }
+
+  // Remove a previously-logged entry — used when an action that wrote to the feed is
+  // undone or superseded, so the audit trail can't show a reverted event.
+  function removeActivity(entityId, id) {
+    if (!entityId || !id) return
+    setByEntity((prev) => ({ ...prev, [entityId]: (prev[entityId] || []).filter((e) => e.id !== id) }))
   }
 
   const getActivity = (entityId) => byEntity[entityId] || []
 
   return (
-    <ActivityContext.Provider value={{ getActivity, logActivity }}>
+    <ActivityContext.Provider value={{ getActivity, logActivity, removeActivity }}>
       {children}
     </ActivityContext.Provider>
   )

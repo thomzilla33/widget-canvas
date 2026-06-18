@@ -95,7 +95,7 @@ export function WorkQueueProvider({ children }) {
   const [htl, setHtl] = useState(SEED_HTL)
   const [inbox, setInbox] = useState(SEED_INBOX)
   const [tasks, setTasks] = useState(SEED_TASKS)
-  const { logActivity } = useActivity()
+  const { logActivity, removeActivity } = useActivity()
 
   // HITL — resolve records the full decision (outcome + reason/assignee + who/when) and
   // flips status off 'pending' (clears it from the active queue AND the derived Inbox).
@@ -106,26 +106,35 @@ export function WorkQueueProvider({ children }) {
     // updater's result isn't visible synchronously), so the Activity cross-post can't
     // read a stale array.
     const item = htl.find((h) => h.id === id)
-    setHtl((p) =>
-      p.map((h) =>
-        h.id === id
-          ? { ...h, status: decision, decision, decidedAt: 'just now', decidedBy: 'You', reason: meta.reason || null, assignee: meta.assigneeLabel || null }
-          : h,
-      ),
-    )
-    // Cross-post to the entity Activity feed when the decision maps to a known profile.
+    // Re-deciding (after an undo, or overwriting an open-panel decision) must not leave a
+    // duplicate/contradictory note — drop the prior decision's audit entry first.
+    if (item?.entityId && item?.activityId) removeActivity(item.entityId, item.activityId)
+    // Cross-post to the entity Activity feed when the decision maps to a known profile;
+    // keep the entry's id on the item so an undo can remove it.
+    let activityId = null
     if (item?.entityId) {
       const detailBits = [meta.assigneeLabel && `to ${meta.assigneeLabel}`, meta.reason && `— ${meta.reason}`].filter(Boolean).join(' ')
-      logActivity(item.entityId, {
+      activityId = logActivity(item.entityId, {
         type: 'note',
         title: `${DECISION_VERB[decision]} — ${item.title}`,
         detail: `Human-in-the-Loop decision${detailBits ? ` ${detailBits}` : ''}`,
       })
     }
+    setHtl((p) =>
+      p.map((h) =>
+        h.id === id
+          ? { ...h, status: decision, decision, decidedAt: 'just now', decidedBy: 'You', reason: meta.reason || null, assignee: meta.assigneeLabel || null, activityId }
+          : h,
+      ),
+    )
   }
-  // Revert a just-made decision back to the pending queue (Undo).
-  const undoHtl = (id) =>
-    setHtl((p) => p.map((h) => (h.id === id ? { ...h, status: 'pending', decision: null, decidedAt: null, decidedBy: null, reason: null, assignee: null } : h)))
+  // Revert a just-made decision back to the pending queue (Undo) — also remove the audit
+  // entry it wrote, so the Activity feed can't show a reverted decision.
+  const undoHtl = (id) => {
+    const item = htl.find((h) => h.id === id)
+    if (item?.entityId && item?.activityId) removeActivity(item.entityId, item.activityId)
+    setHtl((p) => p.map((h) => (h.id === id ? { ...h, status: 'pending', decision: null, decidedAt: null, decidedBy: null, reason: null, assignee: null, activityId: null } : h)))
+  }
 
   const completeTask = (id) => setTasks((p) => p.map((t) => (t.id === id ? { ...t, done: !t.done } : t)))
   const addTask = (title) => {
