@@ -22,6 +22,12 @@ export const entities = [
 const W = (o) => ({ governed: true, freshness: 'fresh', health: 'active', usedIn: 0, category: 'Operational', ...o })
 export const CATALOG_CATEGORIES = ['AIMS OS', 'Operational', 'Engagement', 'Intelligence']
 export const widgets = [
+  // ── System defaults — every workspace ships with these work-queue widgets.
+  // Context-aware: entity-scoped on a profile, workspace-wide on Home/Reports.
+  W({ id: 'w-tasks', name: 'My Tasks', skeleton: 'Feed', category: 'Operational', freshness: 'live', usedIn: 0, source: 'AIMS OS', system: true }),
+  W({ id: 'w-inbox', name: 'Inbox', skeleton: 'Feed', category: 'Operational', freshness: 'live', usedIn: 0, source: 'AIMS OS', system: true }),
+  W({ id: 'w-htl', name: 'Human-in-the-Loop', skeleton: 'Feed', category: 'AIMS OS', freshness: 'live', usedIn: 0, source: 'AIMS OS — Agentic Studio', system: true }),
+
   // ── AIMS OS — our own platform activity (the V1 differentiator) ──
   W({ id: 'w-aims-hitl', name: 'Human-in-the-Loops', skeleton: 'KPI', category: 'AIMS OS', freshness: 'live', usedIn: 3, source: 'AIMS OS — Agentic Studio' }),
   W({ id: 'w-aims-runs', name: 'Workflow Runs', skeleton: 'Chart', category: 'AIMS OS', freshness: 'live', usedIn: 4, source: 'AIMS OS — Agentic Studio' }),
@@ -106,6 +112,7 @@ export const dashboards = [
   { id: 'd-employee-perf', template: 't-exec', name: 'Employee Performance', entity: 'Employee', audience: 'Manager', owner: 'Yuki Tanaka', status: 'draft', widgets: 6, updated: '4 hours ago', placement: { surface: 'profile', profileType: 'Employee', scope: 'all', entityId: null, entityName: null, tab: 'Performance' } },
   { id: 'd-cs-health', template: 't-support', name: 'CS Health', entity: 'Company', audience: 'Support Agent', owner: 'Aisha Khan', status: 'published', widgets: 9, updated: '6 days ago', placement: { surface: 'profile', profileType: 'Company', scope: 'all', entityId: null, entityName: null, tab: 'Activity' } },
   { id: 'd-team-home', template: 't-acct360', name: 'Sales Team Home', entity: 'Home', audience: 'Sales Agent', owner: 'Priya Nair', status: 'published', widgets: 5, updated: '2 weeks ago', placement: { surface: 'home', homeScope: 'team' } },
+  { id: 'd-workspace-home', template: 't-workspace-home', name: 'Workspace Home', entity: 'Home', audience: { type: 'global' }, owner: 'AIMS OS', status: 'published', widgets: 3, updated: 'just now', placement: { surface: 'home', homeScope: 'personal' } },
   { id: 'd-deal-room', template: 't-acct360', name: 'Deal Room', entity: 'Deal', audience: 'Sales Agent', owner: 'Liam Murphy', status: 'draft', widgets: 4, updated: '3 hours ago', placement: { surface: 'profile', profileType: 'Deal', scope: 'all', entityId: null, entityName: null, tab: 'Overview' } },
   { id: 'd-marketing', template: 't-exec', name: 'Marketing Performance', entity: 'Report', audience: 'Manager', owner: 'Elena Petrova', status: 'published', widgets: 11, updated: '5 days ago', placement: { surface: 'report', collection: 'Sales Reports' } },
   { id: 'd-support-mgr', template: 't-support', name: 'Support Leadership', entity: 'Report', audience: 'Manager', owner: 'James Okonkwo', status: 'pending', widgets: 8, updated: '1 week ago', placement: { surface: 'report', collection: 'Support Reports' } },
@@ -415,6 +422,12 @@ export const TEMPLATE_SEED = {
     { zone: 'main', widgetId: 'w-aims-roi' },
     { zone: 'sidebar', widgetId: 'w-aims-candidatefacts' },
     { zone: 'bottom', widgetId: 'w-aims-leadfeed' },
+  ],
+  // System-default work surface — ships seeded with Inbox, My Tasks and the HITL queue.
+  't-workspace-home': [
+    { zone: 'main', widgetId: 'w-inbox' },
+    { zone: 'sidebar', widgetId: 'w-htl' },
+    { zone: 'main', widgetId: 'w-tasks' },
   ],
 }
 

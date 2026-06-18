@@ -489,9 +489,16 @@ function FeedMini({ data, size }) {
     <ul className="space-y-1.5">
       {rows.map((f, i) => (
         <li key={`${f.when}-${i}`} className="flex min-w-0 gap-1.5">
-          <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-aims-blue" />
+          <span className={`mt-1 h-1.5 w-1.5 shrink-0 rounded-full ${f.humanTouch ? 'bg-amber-500' : 'bg-aims-blue'}`} />
           <div className="min-w-0">
-            <div className="truncate text-[11px] text-gray-700 dark:text-slate-200">{f.summary}</div>
+            <div className="flex min-w-0 items-center gap-1.5">
+              <span className="truncate text-[11px] text-gray-700 dark:text-slate-200">{f.summary}</span>
+              {f.humanTouch && (
+                <span className="shrink-0 rounded border border-amber-300/50 bg-amber-500/10 px-1 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-aims-aging">
+                  Human-touch
+                </span>
+              )}
+            </div>
             <div className="truncate text-[10px] text-gray-500 dark:text-slate-400">{f.actor} · {f.when}</div>
           </div>
         </li>
