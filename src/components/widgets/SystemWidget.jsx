@@ -20,13 +20,15 @@ export default function SystemWidget({ id, size = 'md' }) {
   const { resolveHtl, undoHtl } = useWorkQueue()
   const [expanded, setExpanded] = useState(false)
   const [reviewing, setReviewing] = useState(null) // htl item open in the Decision panel
-  const [toast, setToast] = useState(null) // { message, undoId }
+  const [toast, setToast] = useState(null) // { message, onUndo }
   const timer = useRef(null)
   useEffect(() => () => clearTimeout(timer.current), [])
 
-  const flashToast = (message, undoId) => {
+  // Generic reversible-action snackbar shared by all three widgets: the caller supplies
+  // the message and the function that reverts the action.
+  const notify = (message, onUndo) => {
     clearTimeout(timer.current)
-    setToast({ message, undoId })
+    setToast({ message, onUndo })
     timer.current = setTimeout(() => setToast(null), 6000)
   }
   // Resolve a decision (from the panel, or a quick-approve on a row).
@@ -34,17 +36,17 @@ export default function SystemWidget({ id, size = 'md' }) {
     resolveHtl(item.id, decision, meta)
     setReviewing(null)
     const to = meta.assigneeLabel ? ` to ${meta.assigneeLabel}` : ''
-    flashToast(`${DECISION_VERB[decision]}${to}: ${item.title}`, item.id)
+    notify(`${DECISION_VERB[decision]}${to}: ${item.title}`, () => undoHtl(item.id))
   }
-  const undo = () => {
-    if (toast?.undoId) undoHtl(toast.undoId)
+  const handleUndo = () => {
+    toast?.onUndo?.()
     clearTimeout(timer.current)
     setToast(null)
   }
 
   const Body = id === 'w-htl' ? HtlBody : id === 'w-inbox' ? InboxBody : id === 'w-tasks' ? TasksBody : null
   if (!Body) return null
-  const handlers = { onReview: setReviewing, onDecide: decide }
+  const handlers = { onReview: setReviewing, onDecide: decide, notify }
   return (
     <>
       <Body size={size} onExpand={() => setExpanded(true)} {...handlers} />
@@ -54,7 +56,7 @@ export default function SystemWidget({ id, size = 'md' }) {
         </SystemQueueModal>
       )}
       {reviewing && <DecisionPanel item={reviewing} onDecide={decide} onClose={() => setReviewing(null)} />}
-      {toast && <UndoToast message={toast.message} onUndo={toast.undoId ? undo : null} onClose={() => setToast(null)} />}
+      {toast && <UndoToast message={toast.message} onUndo={toast.onUndo ? handleUndo : null} onClose={() => setToast(null)} />}
     </>
   )
 }
@@ -354,12 +356,13 @@ const INBOX_FILTERS = [
   { id: 'needs', label: 'Needs you' },
   { id: 'mention', label: 'Mentions' },
 ]
-function InboxBody({ size, full, onExpand, onReview, onDecide }) {
-  const { inbox, htl, markRead, dismiss } = useWorkQueue()
+function InboxBody({ size, full, onExpand, onReview, onDecide, notify }) {
+  const { inbox, htl, markRead, dismiss, restoreInbox } = useWorkQueue()
   const [filter, setFilter] = useState('all')
+  const dismissItem = (i) => { dismiss(i.id); notify(`Dismissed: ${i.title}`, () => restoreInbox(i.id)) }
   // Unified list: native inbox items + pending HITL decisions (human-touch).
   const htlItems = htl.filter((h) => h.status === 'pending').map((h) => ({ ...h, humanTouch: true, actor: `${h.source} · needs you` }))
-  const nativeItems = inbox.map((i) => ({ ...i, humanTouch: false }))
+  const nativeItems = inbox.filter((i) => !i.dismissed).map((i) => ({ ...i, humanTouch: false }))
   const all = [...htlItems, ...nativeItems]
   const unread = htlItems.length + nativeItems.filter((i) => !i.read).length
   const matched = all.filter((i) => (filter === 'all' ? true : filter === 'needs' ? i.humanTouch : i.kind === 'mention'))
@@ -403,7 +406,7 @@ function InboxBody({ size, full, onExpand, onReview, onDecide }) {
                   {!i.read && (
                     <button onClick={() => markRead(i.id)} title="Mark read" className="grid h-5 w-5 place-items-center rounded text-gray-400 hover:bg-gray-200 hover:text-gray-700 dark:hover:bg-white/10"><Check size={12} aria-hidden="true" /></button>
                   )}
-                  <button onClick={() => dismiss(i.id)} title="Dismiss" className="grid h-5 w-5 place-items-center rounded text-gray-400 hover:bg-gray-200 hover:text-gray-700 dark:hover:bg-white/10"><X size={12} aria-hidden="true" /></button>
+                  <button onClick={() => dismissItem(i)} title="Dismiss" className="grid h-5 w-5 place-items-center rounded text-gray-400 hover:bg-gray-200 hover:text-gray-700 dark:hover:bg-white/10"><X size={12} aria-hidden="true" /></button>
                 </div>
               )}
             </li>
@@ -416,9 +419,11 @@ function InboxBody({ size, full, onExpand, onReview, onDecide }) {
 }
 
 /* ── My Tasks: to-dos with complete + quick-add ── */
-function TasksBody({ size, full, onExpand }) {
+function TasksBody({ size, full, onExpand, notify }) {
   const { tasks, completeTask, addTask } = useWorkQueue()
   const [draft, setDraft] = useState('')
+  // completeTask toggles done, so undo is the same call again (reopens the task).
+  const onComplete = (t) => { completeTask(t.id); notify(`Completed: ${t.title}`, () => completeTask(t.id)) }
   const open = tasks.filter((t) => !t.done)
   if (size === 'sm') return open.length
     ? <CompactSummary n={open.length} noun="open" items={open.slice(0, 2).map((t) => ({ label: t.title, amber: t.overdue }))} />
@@ -444,7 +449,7 @@ function TasksBody({ size, full, onExpand }) {
           {visible.map((t) => (
             <li key={t.id} className="flex min-w-0 items-center gap-2 rounded-md px-1.5 py-1 hover:bg-gray-50 dark:hover:bg-white/5">
               <button
-                onClick={() => completeTask(t.id)}
+                onClick={() => onComplete(t)}
                 aria-label={t.done ? `Reopen ${t.title}` : `Complete ${t.title}`}
                 className={`grid h-4 w-4 shrink-0 place-items-center rounded-full border ${t.done ? 'border-aims-governed bg-aims-governed text-white' : 'border-gray-300 text-transparent hover:border-aims-blue dark:border-white/25'}`}
               >

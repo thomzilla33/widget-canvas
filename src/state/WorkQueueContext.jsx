@@ -143,9 +143,11 @@ export function WorkQueueProvider({ children }) {
   }
 
   const markRead = (id) => setInbox((p) => p.map((i) => (i.id === id ? { ...i, read: true } : i)))
-  const dismiss = (id) => setInbox((p) => p.filter((i) => i.id !== id))
+  // Soft-delete so a dismiss can be undone — the widget filters out dismissed items.
+  const dismiss = (id) => setInbox((p) => p.map((i) => (i.id === id ? { ...i, dismissed: true } : i)))
+  const restoreInbox = (id) => setInbox((p) => p.map((i) => (i.id === id ? { ...i, dismissed: false } : i)))
 
-  const value = { htl, inbox, tasks, resolveHtl, undoHtl, completeTask, addTask, markRead, dismiss }
+  const value = { htl, inbox, tasks, resolveHtl, undoHtl, completeTask, addTask, markRead, dismiss, restoreInbox }
   return <WorkQueueContext.Provider value={value}>{children}</WorkQueueContext.Provider>
 }
 
