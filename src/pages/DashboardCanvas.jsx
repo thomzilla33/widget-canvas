@@ -19,7 +19,7 @@ import { useDashboards } from '../state/DashboardsContext.jsx'
 import { useRole } from '../state/RoleContext.jsx'
 import { WIDGET_SIZES, dashboardKindLabel } from '../data/mock.js'
 import { dashboardLayout } from '../data/layout.js'
-import { vizRecommendation, vizInterchangeable, VIZ_OPTIONS } from '../data/preview.js'
+import { vizRecommendation, vizInterchangeable } from '../data/preview.js'
 import { AUDIENCE_ROLES, placementAudiences, audienceSummary, audienceLabel } from '../data/audiences.js'
 
 // A widget's size IS its width — free grid, 1/2/3 columns by size (capped per breakpoint).
@@ -574,8 +574,6 @@ function ConfigPanel({ placement, widget, onChange, onRename, onDetail, onRemap,
     const has = placement.quickActions.includes(qa)
     onChange({ quickActions: has ? placement.quickActions.filter((x) => x !== qa) : [...placement.quickActions, qa] })
   }
-  const rec = widget ? vizRecommendation(widget) : null
-  const currentViz = placement.viewAs || widget?.skeleton
   const allowedAudiences = placementAudiences(placement)
   const [renaming, setRenaming] = useState(false)
   const [nameDraft, setNameDraft] = useState(widget?.name || '')
@@ -645,41 +643,6 @@ function ConfigPanel({ placement, widget, onChange, onRename, onDetail, onRemap,
         <p className="mt-1 text-xs text-gray-500 dark:text-slate-400">
           {WIDGET_SIZES.find((s) => s.id === placement.size)?.width} · {WIDGET_SIZES.find((s) => s.id === placement.size)?.detail}
         </p>
-      </div>
-
-      <div>
-        <div className="mb-1.5 flex items-center justify-between gap-2">
-          <span className="text-sm font-medium text-gray-700 dark:text-slate-200">Visualization</span>
-          <span className="inline-flex items-center gap-1 text-[11px] text-gray-500 dark:text-slate-400">
-            <Sparkles size={11} className="text-amber-500" aria-hidden="true" /> recommended
-          </span>
-        </div>
-        <div className="grid grid-cols-2 gap-1.5">
-          {VIZ_OPTIONS.map((v) => {
-            const isCurrent = currentViz === v
-            const isRec = rec?.recommended.includes(v)
-            return (
-              <button
-                key={v}
-                onClick={() => onChange({ viewAs: v === widget?.skeleton ? undefined : v })}
-                className={`flex items-center justify-between gap-1 rounded-lg border px-2 py-1.5 text-xs font-medium transition-colors ${
-                  isCurrent ? 'border-aims-blue bg-aims-blue/10 text-aims-blue' : 'border-gray-200 text-gray-600 hover:border-gray-300 dark:border-white/10 dark:text-slate-300 dark:hover:border-white/20'
-                }`}
-              >
-                <span className="truncate">{v}</span>
-                {isRec && <Sparkles size={11} aria-label="Recommended" className={isCurrent ? 'text-aims-blue' : 'text-amber-500'} />}
-              </button>
-            )
-          })}
-        </div>
-        {placement.viewAs && (
-          <button
-            onClick={() => onChange({ viewAs: undefined })}
-            className="mt-1.5 inline-flex items-center gap-1 text-[11px] text-gray-400 hover:text-gray-600 dark:text-slate-500 dark:hover:text-slate-300"
-          >
-            <RotateCcw size={11} aria-hidden="true" /> Revert to default ({widget?.skeleton})
-          </button>
-        )}
       </div>
 
       <div>
