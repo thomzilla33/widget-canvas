@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { LayoutGrid, UserSquare, MapPin } from 'lucide-react'
 import { entities, PROFILE_TYPES, REPORT_COLLECTIONS, HOME_SCOPES, placementLabel } from '../../data/mock.js'
 import { AUDIENCE_TYPES, AUDIENCE_TARGETS, audienceKey, audienceLabel, normalizeAudience } from '../../data/audiences.js'
+import { useProfileConfig } from '../../state/ProfileConfigContext.jsx'
 
 // Shared placement picker — the single source for "where does this dashboard live?"
 // Used by NewDashboard (create) AND EditSetupModal (recover/change after creation).
@@ -43,31 +44,28 @@ export default function PlacementForm({ initial, onChange }) {
   const [profileType, setProfileType] = useState(p0?.profileType || 'Company')
   const [scope, setScope] = useState(p0?.scope || 'all')
   const [entityId, setEntityId] = useState(p0?.entityId || null)
+  const { getTabs, setTabs } = useProfileConfig()
   const [tab, setTab] = useState(p0?.tab || typeOf(p0?.profileType || 'Company').tabs[0])
   const [addingTab, setAddingTab] = useState(false)
   const [newTab, setNewTab] = useState('')
-  // Custom tabs created in this form (beyond the profile type's defaults). Seed from an
-  // existing custom destination tab (edit mode) so it shows as a chip.
-  const [customTabs, setCustomTabs] = useState(() => {
-    const def = typeOf(p0?.profileType || 'Company').tabs
-    return p0?.tab && !def.includes(p0.tab) ? [p0.tab] : []
-  })
   const [collection, setCollection] = useState(p0?.collection || REPORT_COLLECTIONS[0])
   const [homeScope, setHomeScope] = useState(p0?.homeScope || 'personal')
 
   const currentType = typeOf(profileType)
-  // Default tabs + any the admin just created, deduped.
-  const allTabs = [...currentType.tabs, ...customTabs.filter((t) => !currentType.tabs.includes(t))]
+  // The profile type's DURABLE tabs (defaults + any persisted customs) — created tabs
+  // persist to ProfileConfigContext so they show on the UCP and survive reloads.
+  const allTabs = getTabs(profileType)
   function addCustomTab() {
     const n = newTab.trim()
     if (n && !allTabs.some((t) => t.toLowerCase() === n.toLowerCase())) {
-      setCustomTabs((prev) => [...prev, n])
+      setTabs(profileType, [...allTabs, n]) // persist → real profile tab
       setTab(n) // select the one just created
     }
     setNewTab('') // keep the input open so several can be added in a row
   }
   function removeCustomTab(t) {
-    setCustomTabs((prev) => prev.filter((x) => x !== t))
+    if (currentType.tabs.includes(t)) return // never remove a default tab
+    setTabs(profileType, allTabs.filter((x) => x !== t))
     if (tab === t) setTab(currentType.tabs[0] || 'Overview')
   }
   const entitiesForType = entities.filter((e) => e.type === currentType.entityType)
@@ -116,21 +114,18 @@ export default function PlacementForm({ initial, onChange }) {
       setEntityId(null)
       setAddingTab(false)
       setNewTab('')
-      setCustomTabs([])
-      setTab(currentType.tabs[0])
+      setTab(getTabs(profileType)[0])
     }
   }
   function selectKind(k) {
     selectSurface(k === 'entity' ? 'profile' : 'report')
   }
   function selectProfileType(id) {
-    const t = typeOf(id)
     setProfileType(id)
     setEntityId(null)
     setAddingTab(false)
     setNewTab('')
-    setCustomTabs([])
-    setTab(t.tabs[0] || 'Overview')
+    setTab(getTabs(id)[0] || 'Overview') // durable tabs for the new profile type
   }
 
   return (
