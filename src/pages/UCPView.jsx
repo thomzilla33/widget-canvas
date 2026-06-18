@@ -79,12 +79,11 @@ export default function UCPView() {
   const tabs = [...new Set([...configuredTabs, ...placementTabs])]
 
   const [activeTab, setActiveTab] = useState('Overview')
-  const [addingTab, setAddingTab] = useState(false)
   const [newTab, setNewTab] = useState('')
   const [renaming, setRenaming] = useState(null) // tab name being renamed
   const [renameValue, setRenameValue] = useState('')
   const [dragTab, setDragTab] = useState(null) // tab name being dragged
-  const [suggestTabsOpen, setSuggestTabsOpen] = useState(false) // U3 suggested-tabs popover
+  const [tabMenuOpen, setTabMenuOpen] = useState(false) // unified "+" menu: new tab + suggestions (U3)
   const tabDashboards = profileDashboards.filter((d) => (d.placement.tab || 'Overview') === activeTab)
 
   // U1.5 — tab-level audience visibility: preview the profile as a role and hide
@@ -101,6 +100,7 @@ export default function UCPView() {
   }
   const shownTabs = tabs.filter((t) => tabVisibleTo(t, viewAs))
   const hiddenTabCount = tabs.length - shownTabs.length
+  const tabSuggestions = isAdmin && !previewing ? suggestTabs(profileType, tabs) : [] // computed once for the "+" menu
   // Switching role: if the active tab is now hidden, fall back to Overview.
   function changeViewAs(role) {
     setViewAs(role)
@@ -122,7 +122,7 @@ export default function UCPView() {
       persistFrom([...tabs, name])
     }
     setNewTab('')
-    setAddingTab(false)
+    setTabMenuOpen(false)
   }
 
   function removeTab(name) {
@@ -172,7 +172,7 @@ export default function UCPView() {
     setActiveTab('Overview')
     // Tabs are durable per profile type now (context-backed) — don't reset them on
     // entity change. Only clear any transient add/rename/drag UI.
-    setAddingTab(false)
+    setTabMenuOpen(false)
     setNewTab('')
     setRenaming(null)
     setRenameValue('')
@@ -311,94 +311,80 @@ export default function UCPView() {
               </div>
             )
           })}
-
-          {isAdmin && !previewing && (addingTab ? (
-            <input
-              autoFocus
-              value={newTab}
-              onChange={(e) => setNewTab(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') addTab()
-                if (e.key === 'Escape') {
-                  setNewTab('')
-                  setAddingTab(false)
-                }
-              }}
-              onBlur={addTab}
-              placeholder="Tab name…"
-              aria-label="New tab name"
-              className="my-1 ml-1 w-32 rounded-md border border-aims-blue/40 bg-white px-2 py-1 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-aims-blue/30 dark:bg-white/5 dark:text-slate-100"
-            />
-          ) : (
-            <button
-              onClick={() => setAddingTab(true)}
-              className="ml-1 inline-flex shrink-0 items-center gap-1 rounded-md px-2 py-1.5 text-sm font-medium text-gray-500 hover:bg-gray-100 hover:text-aims-blue dark:text-slate-400 dark:hover:bg-white/5"
-            >
-              <Plus size={14} aria-hidden="true" /> Add tab
-            </button>
-          ))}
           </div>
 
-          {/* Right cluster — Suggest tabs + Viewing-as. shrink-0 so it never collides
-              with the scrollable tabs strip; sits outside the scroll so the popover/select
-              aren't clipped. */}
-          {isAdmin && (
-          <div className="flex shrink-0 items-center gap-2 pl-2">
-          {!previewing && suggestTabs(profileType, tabs).length > 0 && (
+          {/* Add-tab "+" — one affordance for a new tab AND the AI suggestions. Sits
+              outside the scrollable strip so its popover isn't clipped. */}
+          {isAdmin && !previewing && (
             <div className="relative shrink-0">
               <button
-                onClick={() => setSuggestTabsOpen((o) => !o)}
-                aria-expanded={suggestTabsOpen}
-                aria-haspopup="menu"
-                className="inline-flex items-center gap-1 rounded-md px-2 py-1.5 text-sm font-medium text-aims-blue hover:bg-aims-blue/10"
+                onClick={() => setTabMenuOpen((o) => !o)}
+                aria-label="Add a tab"
+                aria-haspopup="dialog"
+                aria-expanded={tabMenuOpen}
+                title="Add a tab"
+                className="grid h-8 w-8 place-items-center rounded-md text-gray-500 hover:bg-gray-100 hover:text-aims-blue dark:text-slate-400 dark:hover:bg-white/5"
               >
-                <Sparkles size={14} aria-hidden="true" /> Suggest tabs
+                <Plus size={16} aria-hidden="true" />
               </button>
-              {suggestTabsOpen && (
-                <PopoverPanel onClose={() => setSuggestTabsOpen(false)} align="left" className="top-full w-64 overflow-hidden py-1">
-                  <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-500">Suggested for {profileType}</div>
-                  {suggestTabs(profileType, tabs).map((s) => (
-                    <button
-                      key={s.tab}
-                      role="menuitem"
-                      onClick={() => {
-                        persistFrom([...tabs, s.tab])
-                        setSuggestTabsOpen(false)
-                      }}
-                      className="flex w-full items-start gap-2 px-3 py-2 text-left hover:bg-gray-50 dark:hover:bg-white/5"
-                    >
-                      <Plus size={13} className="mt-0.5 shrink-0 text-aims-blue" aria-hidden="true" />
-                      <span className="min-w-0">
-                        <span className="block text-sm font-medium text-gray-900 dark:text-slate-100">{s.tab}</span>
-                        <span className="block text-[11px] text-gray-500 dark:text-slate-400">{s.why}</span>
-                      </span>
-                    </button>
-                  ))}
+              {tabMenuOpen && (
+                <PopoverPanel onClose={() => setTabMenuOpen(false)} align="left" role="dialog" aria-label="Add a tab" className="top-full w-64 p-1.5">
+                  <input
+                    autoFocus
+                    value={newTab}
+                    onChange={(e) => setNewTab(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === 'Enter') addTab(); if (e.key === 'Escape') { e.stopPropagation(); setNewTab(''); setTabMenuOpen(false) } }}
+                    placeholder="New tab name… (Enter to add)"
+                    aria-label="New tab name"
+                    className="input h-8 w-full text-sm"
+                  />
+                  {tabSuggestions.length > 0 && (
+                    <>
+                      <div className="px-1 pb-1 pt-2 text-[10px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-500">
+                        <Sparkles size={10} className="mr-1 inline text-aims-blue" aria-hidden="true" />Suggested for {profileType}
+                      </div>
+                      {tabSuggestions.map((s) => (
+                        <button
+                          key={s.tab}
+                          onClick={() => { persistFrom([...tabs, s.tab]); setTabMenuOpen(false) }}
+                          className="flex w-full items-start gap-2 rounded-md px-2 py-1.5 text-left hover:bg-gray-50 dark:hover:bg-white/5"
+                        >
+                          <Plus size={13} className="mt-0.5 shrink-0 text-aims-blue" aria-hidden="true" />
+                          <span className="min-w-0">
+                            <span className="block text-sm font-medium text-gray-900 dark:text-slate-100">{s.tab}</span>
+                            <span className="block text-[11px] text-gray-500 dark:text-slate-400">{s.why}</span>
+                          </span>
+                        </button>
+                      ))}
+                    </>
+                  )}
                 </PopoverPanel>
               )}
             </div>
           )}
 
           {/* U1.5 — preview the profile as a role; tabs that role can't see are hidden. */}
-            {previewing && hiddenTabCount > 0 && (
-              <span className="hidden items-center gap-1 rounded-full border border-amber-300/40 bg-amber-500/10 px-2 py-0.5 text-[11px] font-medium text-aims-ungoverned sm:inline-flex">
-                {hiddenTabCount} tab{hiddenTabCount === 1 ? '' : 's'} hidden
-              </span>
-            )}
-            <label className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-slate-400">
-              <span className="hidden font-medium sm:inline">Viewing as</span>
-              <select
-                className="input !h-8 !w-auto !py-1 !pl-2 !pr-7 text-xs"
-                value={viewAs}
-                onChange={(e) => changeViewAs(e.target.value)}
-                aria-label="Preview this profile as a role"
-              >
-                {AUDIENCE_OPTIONS.map((a) => (
-                  <option key={a} value={a}>{a === ALL_AUDIENCES ? 'Admin (all tabs)' : a}</option>
-                ))}
-              </select>
-            </label>
-          </div>
+          {isAdmin && (
+            <div className="flex shrink-0 items-center gap-2 pl-1">
+              {previewing && hiddenTabCount > 0 && (
+                <span className="hidden items-center gap-1 rounded-full border border-amber-300/40 bg-amber-500/10 px-2 py-0.5 text-[11px] font-medium text-aims-ungoverned sm:inline-flex">
+                  {hiddenTabCount} tab{hiddenTabCount === 1 ? '' : 's'} hidden
+                </span>
+              )}
+              <label className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-slate-400">
+                <span className="hidden font-medium sm:inline">Viewing as</span>
+                <select
+                  className="input !h-8 !w-auto !py-1 !pl-2 !pr-7 text-xs"
+                  value={viewAs}
+                  onChange={(e) => changeViewAs(e.target.value)}
+                  aria-label="Preview this profile as a role"
+                >
+                  {AUDIENCE_OPTIONS.map((a) => (
+                    <option key={a} value={a}>{a === ALL_AUDIENCES ? 'Admin (all tabs)' : a}</option>
+                  ))}
+                </select>
+              </label>
+            </div>
           )}
         </div>
       </div>

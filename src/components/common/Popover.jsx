@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 // duplicated (a full-screen click-catcher to close, Escape-to-close, and the
 // .surface-pop chrome) so callers only own their trigger + open state + contents.
 // The caller renders <PopoverPanel> only while open.
-export function PopoverPanel({ onClose, align = 'right', className = '', role = 'menu', children }) {
+export function PopoverPanel({ onClose, align = 'right', className = '', role = 'menu', children, ...rest }) {
   // Escape closes regardless of where focus sits (the panel isn't auto-focused),
   // so listen at the window rather than on the panel node.
   useEffect(() => {
@@ -19,6 +19,7 @@ export function PopoverPanel({ onClose, align = 'right', className = '', role = 
       <div
         role={role}
         className={`surface-pop absolute z-20 mt-1 ${align === 'left' ? 'left-0' : 'right-0'} ${className}`}
+        {...rest}
       >
         {children}
       </div>
