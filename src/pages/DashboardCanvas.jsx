@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react'
 import { useParams, Navigate } from 'react-router-dom'
-import { Plus, X, Lock, Unlock, Trash2, Sparkles, RotateCcw, SlidersHorizontal, GripVertical } from 'lucide-react'
+import { Plus, X, Lock, Unlock, Trash2, Sparkles, RotateCcw, SlidersHorizontal, GripVertical, Move } from 'lucide-react'
 import { PageHeader, GovernedBadge, FreshnessBadge, Badge, EmptyState } from '../components/common/index.jsx'
 import WidgetRender from '../components/widgets/WidgetRender.jsx'
 import WidgetLibraryModal from '../components/widgets/WidgetLibraryModal.jsx'
@@ -21,6 +21,7 @@ import { AUDIENCE_ROLES, placementAudiences, audienceSummary } from '../data/aud
 const SIZE_SPAN_CLASS = { sm: '', md: 'sm:col-span-2', lg: 'sm:col-span-2 lg:col-span-3' }
 // Drag-resize maps a target column span (1/2/3) to a size, and back.
 const SIZE_FOR_SPAN = { 1: 'sm', 2: 'md', 3: 'lg' }
+const SIZE_ORDER = ['sm', 'md', 'lg'] // index = span-1; used by keyboard resize stepping
 const GRID_GAP = 12 // gap-3
 // Columns the grid actually renders at the current viewport (Tailwind sm=640, lg=1024).
 const gridColsAtViewport = () => (window.innerWidth >= 1024 ? 3 : window.innerWidth >= 640 ? 2 : 1)
@@ -38,6 +39,7 @@ export default function DashboardCanvas() {
   const { dashboards, updateDashboard } = useDashboards()
   const dashboard = dashboards.find((d) => d.id === id)
   const [addOpen, setAddOpen] = useState(false)
+  const [tipDismissed, setTipDismissed] = useState(false)
   const [selectedPid, setSelectedPid] = useState(null)
   const [publishOpen, setPublishOpen] = useState(false)
   const [shareOpen, setShareOpen] = useState(false)
@@ -82,6 +84,18 @@ export default function DashboardCanvas() {
       const without = prev.filter((_, i) => i !== from)
       const at = to > from ? to - 1 : to
       return [...without.slice(0, at), prev[from], ...without.slice(at)]
+    })
+  }
+  // Keyboard reorder: move a placement ±1 in the order (the accessible path for the grip).
+  function movePlacement(pid, delta) {
+    commit((prev) => {
+      const i = prev.findIndex((p) => p.pid === pid)
+      const j = i + delta
+      if (i < 0 || j < 0 || j >= prev.length) return prev
+      // j is the absolute destination index; after removing i, inserting prev[i] at j
+      // lands it there in both directions (no -1 offset — that's reorder's before-target case).
+      const without = prev.filter((_, idx) => idx !== i)
+      return [...without.slice(0, j), prev[i], ...without.slice(j)]
     })
   }
 
@@ -148,6 +162,18 @@ export default function DashboardCanvas() {
               </div>
             </div>
           ) : (
+            <>
+            {!tipDismissed && (
+              <div className="mb-3 flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-50/70 px-3 py-1.5 text-[11px] text-gray-500 dark:border-white/10 dark:bg-white/[0.03] dark:text-slate-400">
+                <Move size={13} aria-hidden="true" className="shrink-0 text-aims-blue" />
+                <span className="flex-1">
+                  <span className="font-medium text-gray-700 dark:text-slate-200">Drag</span> a tile to reorder, or drag its <span className="font-medium text-gray-700 dark:text-slate-200">bottom-right corner</span> to resize. Keyboard: focus a tile, then its grip or resize handle, and use the arrow keys.
+                </span>
+                <button onClick={() => setTipDismissed(true)} aria-label="Dismiss tip" className="shrink-0 rounded p-0.5 text-gray-400 hover:bg-gray-200/60 hover:text-gray-600 dark:hover:bg-white/10">
+                  <X size={13} aria-hidden="true" />
+                </button>
+              </div>
+            )}
             <div
               className="grid auto-rows-min grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3"
               onDragOver={(e) => e.preventDefault()}
@@ -161,6 +187,7 @@ export default function DashboardCanvas() {
                   dragging={dragPid === p.pid}
                   onSelect={() => setSelectedPid(p.pid)}
                   onUpdate={updatePlacement}
+                  onMove={movePlacement}
                   onDragStart={() => setDragPid(p.pid)}
                   onDragEnd={() => setDragPid(null)}
                   onDropOn={() => { reorder(dragPid, p.pid); setDragPid(null) }}
@@ -168,6 +195,7 @@ export default function DashboardCanvas() {
               ))}
               <AddWidgetCard onClick={() => setAddOpen(true)} />
             </div>
+            </>
           )}
           <p className="mt-4 text-xs text-gray-500 dark:text-slate-400">Screens hosted here: S84–S94</p>
         </div>
@@ -251,7 +279,7 @@ function AddWidgetCard({ onClick }) {
 }
 
 /* ── One editable widget tile in the free grid ── */
-function CanvasTile({ placement: p, widget: w, selected, dragging, onSelect, onUpdate, onDragStart, onDragEnd, onDropOn }) {
+function CanvasTile({ placement: p, widget: w, selected, dragging, onSelect, onUpdate, onMove, onDragStart, onDragEnd, onDropOn }) {
   // ?? not || — SIZE_SPAN_CLASS.sm is '' (falsy), so || would wrongly widen small tiles to md.
   const span = SIZE_SPAN_CLASS[p.size] ?? SIZE_SPAN_CLASS.md
   const current = p.viewAs || w?.skeleton
@@ -295,6 +323,16 @@ function CanvasTile({ placement: p, widget: w, selected, dragging, onSelect, onU
     document.body.style.cursor = 'nwse-resize'
   }
 
+  // Keyboard resize: step the size up/down, clamped to the columns this viewport renders.
+  function stepSize(delta) {
+    if (p.fixed) return
+    const maxIdx = Math.min(SIZE_ORDER.length, gridColsAtViewport()) - 1
+    const idx = Math.max(0, Math.min(maxIdx, SIZE_ORDER.indexOf(p.size) + delta))
+    const next = SIZE_ORDER[idx]
+    if (next && next !== p.size) onUpdate(p.pid, { size: next })
+  }
+  const sizeIdx = SIZE_ORDER.indexOf(p.size)
+
   return (
     <div
       ref={tileRef}
@@ -316,14 +354,25 @@ function CanvasTile({ placement: p, widget: w, selected, dragging, onSelect, onU
       {!p.fixed && (
         <div
           role="slider"
-          aria-label={`Resize ${w?.name || 'widget'} — drag to change width`}
+          tabIndex={0}
+          aria-label={`Resize ${w?.name || 'widget'}`}
+          aria-valuemin={0}
+          aria-valuemax={Math.min(SIZE_ORDER.length, gridColsAtViewport()) - 1}
+          aria-valuenow={sizeIdx}
           aria-valuetext={WIDGET_SIZES.find((s) => s.id === p.size)?.label || p.size}
-          title="Drag to resize"
+          title="Drag, or focus and use arrow keys, to resize"
           draggable={false}
           onPointerDown={startResize}
           onClick={stop}
+          onKeyDown={(e) => {
+            if (e.key === 'ArrowRight' || e.key === 'ArrowUp') { e.preventDefault(); e.stopPropagation(); stepSize(1) }
+            else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') { e.preventDefault(); e.stopPropagation(); stepSize(-1) }
+            else if (e.key === 'Home') { e.preventDefault(); e.stopPropagation(); stepSize(-SIZE_ORDER.length) }
+            else if (e.key === 'End') { e.preventDefault(); e.stopPropagation(); stepSize(SIZE_ORDER.length) }
+            else if (e.key === 'Enter' || e.key === ' ') { e.stopPropagation() } // don't fall through to tile-select
+          }}
           onDragStart={(e) => { e.preventDefault(); e.stopPropagation() }}
-          className={`absolute bottom-0 right-0 z-10 grid h-6 w-6 cursor-nwse-resize place-items-center rounded-tl-md rounded-br-lg text-gray-400 transition-opacity hover:text-aims-blue dark:text-slate-500 ${
+          className={`absolute bottom-0 right-0 z-10 grid h-6 w-6 cursor-nwse-resize place-items-center rounded-tl-md rounded-br-lg text-gray-400 transition-opacity hover:text-aims-blue focus-visible:opacity-100 focus-visible:text-aims-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aims-blue/50 dark:text-slate-500 ${
             resizing ? 'opacity-100 text-aims-blue' : 'opacity-0 group-hover:opacity-100 group-focus-within:opacity-100'
           }`}
         >
@@ -334,7 +383,20 @@ function CanvasTile({ placement: p, widget: w, selected, dragging, onSelect, onU
       )}
 
       <div className="flex items-center gap-1 pr-10">
-        <GripVertical size={13} aria-hidden="true" className="shrink-0 cursor-grab text-gray-300 group-hover:text-gray-400 dark:text-slate-600" />
+        <button
+          type="button"
+          aria-label={`Reorder ${w?.name || 'widget'} — use arrow keys`}
+          title="Drag, or focus and use arrow keys, to reorder"
+          onClick={stop}
+          onKeyDown={(e) => {
+            if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); e.stopPropagation(); onMove(p.pid, -1) }
+            else if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); e.stopPropagation(); onMove(p.pid, 1) }
+            else if (e.key === 'Enter' || e.key === ' ') { e.stopPropagation() } // grip isn't an action; don't select the tile
+          }}
+          className="shrink-0 cursor-grab rounded text-gray-300 hover:text-gray-500 focus-visible:text-aims-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aims-blue/50 group-hover:text-gray-400 dark:text-slate-600"
+        >
+          <GripVertical size={13} aria-hidden="true" />
+        </button>
         <span className="min-w-0 flex-1 truncate text-xs font-semibold text-gray-900 dark:text-slate-100">{w?.name || 'Widget'}</span>
         {p.fixed ? (
           <Lock size={12} aria-hidden="true" className="shrink-0 text-gray-500 dark:text-slate-400" />
