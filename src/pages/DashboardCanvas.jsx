@@ -1,15 +1,19 @@
 import { useState, useRef, useEffect } from 'react'
-import { useParams, Navigate } from 'react-router-dom'
-import { Plus, X, Lock, Unlock, Trash2, Sparkles, RotateCcw, SlidersHorizontal, GripVertical, Move, Check, RefreshCw, MoreHorizontal } from 'lucide-react'
+import { useParams, Navigate, useNavigate } from 'react-router-dom'
+import { Plus, X, Lock, Unlock, Trash2, Sparkles, RotateCcw, SlidersHorizontal, GripVertical, Move, Check, RefreshCw, MoreHorizontal, Pencil, Flag, Info } from 'lucide-react'
 import { PageHeader, GovernedBadge, FreshnessBadge, Badge, EmptyState } from '../components/common/index.jsx'
 import { PopoverPanel } from '../components/common/Popover.jsx'
 import WidgetRender from '../components/widgets/WidgetRender.jsx'
 import WidgetLibraryModal from '../components/widgets/WidgetLibraryModal.jsx'
+import WidgetDetailModal from '../components/widgets/WidgetDetailModal.jsx'
+import RepinModal from '../components/widgets/RepinModal.jsx'
 import PublishModal from '../components/dashboard/PublishModal.jsx'
 import ShareModal from '../components/dashboard/ShareModal.jsx'
 import EditSetupModal from '../components/dashboard/EditSetupModal.jsx'
 import EntityContextHeader, { entityHeaderApplies } from '../components/dashboard/EntityContextHeader.jsx'
 import SuggestWidgetsModal from '../components/dashboard/SuggestWidgetsModal.jsx'
+import AskDashboardModal from '../components/dashboard/AskDashboardModal.jsx'
+import FeedbackPanel from '../components/ucp/FeedbackPanel.jsx'
 import { useWidgets } from '../state/WidgetsContext.jsx'
 import { useDashboards } from '../state/DashboardsContext.jsx'
 import { useRole } from '../state/RoleContext.jsx'
@@ -35,8 +39,9 @@ const newPid = (dashboardId, arr) => `${dashboardId}-${Date.now().toString(36)}-
 // S84–S94 — dashboard canvas: a free, resizable widget grid (no fixed zones).
 export default function DashboardCanvas() {
   const { id } = useParams()
+  const navigate = useNavigate()
   const { isAdmin } = useRole()
-  const { widgets } = useWidgets()
+  const { widgets, updateWidget } = useWidgets()
   const { dashboards, updateDashboard } = useDashboards()
   const dashboard = dashboards.find((d) => d.id === id)
   const [addOpen, setAddOpen] = useState(false)
@@ -48,6 +53,11 @@ export default function DashboardCanvas() {
   const [suggestOpen, setSuggestOpen] = useState(false)
   const [editSetupOpen, setEditSetupOpen] = useState(false)
   const [dragPid, setDragPid] = useState(null)
+  // Per-widget actions opened from the Widget settings panel.
+  const [detailWidget, setDetailWidget] = useState(null)
+  const [remapWidget, setRemapWidget] = useState(null)
+  const [feedbackWidget, setFeedbackWidget] = useState(null)
+  const [askWidget, setAskWidget] = useState(null)
 
   // Layout is a flat ordered array, persisted on the dashboard (so edits surface on
   // the view/profile). Falls back to the template seed until the first edit.
@@ -255,8 +265,8 @@ export default function DashboardCanvas() {
           />
         )}
 
-        {/* Per-widget config */}
-        {selected && (
+        {/* Per-widget config — hidden while the feedback slide-over (same slot) is open */}
+        {selected && !feedbackWidget && (
           <SidePanel
             title="Widget settings"
             onClose={() => setSelectedPid(null)}
@@ -270,11 +280,22 @@ export default function DashboardCanvas() {
             }
           >
             <ConfigPanel
+              key={selected.widgetId}
               placement={selected}
               widget={widgetById(selected.widgetId)}
               onChange={(patch) => updatePlacement(selected.pid, patch)}
+              onRename={(name) => updateWidget(selected.widgetId, { name })}
+              onDetail={() => setDetailWidget(widgetById(selected.widgetId))}
+              onRemap={() => setRemapWidget(widgetById(selected.widgetId))}
+              onFeedback={() => setFeedbackWidget(widgetById(selected.widgetId))}
+              onAsk={() => setAskWidget(widgetById(selected.widgetId))}
             />
           </SidePanel>
+        )}
+
+        {/* Send feedback — absolute slide-over, so it lives inside this relative container */}
+        {feedbackWidget && (
+          <FeedbackPanel mode="flag" widget={feedbackWidget} entityId={null} onClose={() => setFeedbackWidget(null)} />
         )}
       </div>
 
@@ -307,6 +328,32 @@ export default function DashboardCanvas() {
           onSave={(patch) => { updateDashboard(dashboard.id, patch); setEditSetupOpen(false) }}
         />
       )}
+
+      {/* Per-widget actions (Details / Remap / Ask AI) opened from the Widget settings panel */}
+      {detailWidget && (
+        <WidgetDetailModal
+          widget={detailWidget}
+          isAdmin
+          onClose={() => setDetailWidget(null)}
+          onPlace={() => { setDetailWidget(null); navigate('/dashboards') }}
+          onRemap={() => { const w = detailWidget; setDetailWidget(null); setRemapWidget(w) }}
+        />
+      )}
+      {remapWidget && (
+        <RepinModal
+          widget={remapWidget}
+          onClose={() => setRemapWidget(null)}
+          onComplete={() => updateWidget(remapWidget.id, { health: 'active' })}
+        />
+      )}
+      {askWidget && (
+        <AskDashboardModal
+          name={askWidget.name}
+          kind="widget"
+          widgetNames={[askWidget.name]}
+          onClose={() => setAskWidget(null)}
+        />
+      )}
     </div>
   )
 }
@@ -321,6 +368,24 @@ function SaveIndicator({ state }) {
         <><Check size={11} className="text-aims-governed" aria-hidden="true" /> All changes saved</>
       )}
     </span>
+  )
+}
+
+/* ── A compact action button in the Widget settings panel ── */
+function ActionBtn({ icon: Icon, accent, onClick, children }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`inline-flex items-center justify-center gap-1.5 rounded-lg border px-2 py-1.5 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aims-blue/40 ${
+        accent
+          ? 'border-aims-blue/30 bg-aims-blue/10 text-aims-blue hover:bg-aims-blue/20'
+          : 'border-gray-200 text-gray-600 hover:border-gray-300 hover:text-gray-900 dark:border-white/10 dark:text-slate-300 dark:hover:border-white/20 dark:hover:text-slate-100'
+      }`}
+    >
+      {Icon && <Icon size={14} aria-hidden="true" />}
+      {children}
+    </button>
   )
 }
 
@@ -504,7 +569,7 @@ function CanvasTile({ placement: p, widget: w, selected, dragging, onSelect, onU
 }
 
 /* ── Config panel body (size, visualization, fixed/flexible, audience, quick actions) ── */
-function ConfigPanel({ placement, widget, onChange }) {
+function ConfigPanel({ placement, widget, onChange, onRename, onDetail, onRemap, onFeedback, onAsk }) {
   function toggleQuickAction(qa) {
     const has = placement.quickActions.includes(qa)
     onChange({ quickActions: has ? placement.quickActions.filter((x) => x !== qa) : [...placement.quickActions, qa] })
@@ -512,13 +577,52 @@ function ConfigPanel({ placement, widget, onChange }) {
   const rec = widget ? vizRecommendation(widget) : null
   const currentViz = placement.viewAs || widget?.skeleton
   const allowedAudiences = placementAudiences(placement)
+  const [renaming, setRenaming] = useState(false)
+  const [nameDraft, setNameDraft] = useState(widget?.name || '')
+  function commitName() {
+    const n = nameDraft.trim()
+    if (n && n !== widget?.name) onRename?.(n)
+    setRenaming(false)
+  }
   return (
     <div className="space-y-5">
       <div>
-        <div className="font-semibold text-gray-900 dark:text-slate-100">{widget?.name}</div>
+        {/* Name — inline editable */}
+        {renaming ? (
+          <input
+            autoFocus
+            className="input h-8 w-full text-sm font-semibold"
+            value={nameDraft}
+            onChange={(e) => setNameDraft(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') commitName(); if (e.key === 'Escape') { setNameDraft(widget?.name || ''); setRenaming(false) } }}
+            onBlur={commitName}
+            aria-label="Widget name"
+          />
+        ) : (
+          <div className="flex items-center gap-1.5">
+            <span className="min-w-0 truncate font-semibold text-gray-900 dark:text-slate-100">{widget?.name}</span>
+            <button
+              type="button"
+              onClick={() => { setNameDraft(widget?.name || ''); setRenaming(true) }}
+              aria-label="Rename widget"
+              title="Rename widget"
+              className="shrink-0 text-gray-400 hover:text-aims-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aims-blue/40"
+            >
+              <Pencil size={13} aria-hidden="true" />
+            </button>
+          </div>
+        )}
         <div className="mt-1 flex items-center gap-2 flex-wrap">
           <GovernedBadge governed={!!widget?.governed} />
           {widget?.freshness && <FreshnessBadge status={widget.freshness} label={widget.freshness} />}
+        </div>
+
+        {/* Per-widget actions — act on the widget itself, not just its placement */}
+        <div className="mt-3 grid grid-cols-2 gap-1.5">
+          <ActionBtn icon={Info} onClick={onDetail}>Details</ActionBtn>
+          <ActionBtn icon={RefreshCw} onClick={onRemap}>Remap source</ActionBtn>
+          <ActionBtn icon={Flag} onClick={onFeedback}>Send feedback</ActionBtn>
+          <ActionBtn icon={Sparkles} accent onClick={onAsk}>Ask AI</ActionBtn>
         </div>
       </div>
 
