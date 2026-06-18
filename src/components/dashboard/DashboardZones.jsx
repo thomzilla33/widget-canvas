@@ -2,6 +2,7 @@ import { memo, useMemo } from 'react'
 import { Lock, Maximize2 } from 'lucide-react'
 import { EmptyState, FreshnessBadge, DataPlaneBadge, EnvironmentBadge, LiveBadge } from '../common/index.jsx'
 import WidgetRender from '../widgets/WidgetRender.jsx'
+import { SystemCountBadge } from '../widgets/SystemWidget.jsx'
 import { useWidgets } from '../../state/WidgetsContext.jsx'
 import { dashboardLayout } from '../../data/layout.js'
 import { audienceVisibleTo, ALL_AUDIENCES } from '../../data/audiences.js'
@@ -84,6 +85,7 @@ const WidgetCard = memo(function WidgetCard({ placement: p, widget: w, span, sco
           {w.name || 'Widget'}
         </span>
         <div className="flex shrink-0 items-center gap-1">
+          {w.system && <SystemCountBadge id={w.id} />}
           {drillable && <Maximize2 size={12} aria-hidden="true" className="text-gray-300 transition-colors group-hover:text-aims-blue dark:text-slate-600" />}
           {p.fixed && <Lock size={12} aria-hidden="true" className="text-gray-500 dark:text-slate-400" />}
         </div>

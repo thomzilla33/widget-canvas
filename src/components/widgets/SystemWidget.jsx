@@ -63,6 +63,28 @@ export default function SystemWidget({ id, size = 'md' }) {
 
 const rowMax = (size) => (size === 'lg' ? 6 : 4)
 
+// Count badge for the tile header (rendered by DashboardZones next to the widget name) —
+// the at-a-glance "how much is waiting" signal. Hidden at 0 so a clear queue stays quiet.
+const COUNT_TONE = {
+  'w-htl': 'bg-amber-500/15 text-aims-aging',
+  'w-inbox': 'bg-aims-blue/15 text-aims-blue',
+  'w-tasks': 'bg-gray-200 text-gray-600 dark:bg-white/10 dark:text-slate-300',
+}
+export function SystemCountBadge({ id }) {
+  const { htl, inbox, tasks } = useWorkQueue()
+  const pendingHtl = htl.filter((h) => h.status === 'pending')
+  let n = 0
+  if (id === 'w-htl') n = pendingHtl.length
+  else if (id === 'w-inbox') n = pendingHtl.length + inbox.filter((i) => !i.dismissed && !i.read).length
+  else if (id === 'w-tasks') n = tasks.filter((t) => !t.done).length
+  if (!n) return null
+  return (
+    <span className={`num grid h-4 min-w-[16px] shrink-0 place-items-center rounded-full px-1 text-[10px] font-bold tabular-nums ${COUNT_TONE[id] || COUNT_TONE['w-tasks']}`}>
+      {n}
+    </span>
+  )
+}
+
 /* ── Risk signalling — paired with a label, never color-only ── */
 const RISK = {
   high: { label: 'High risk', cls: 'border-red-300/50 bg-red-500/10 text-red-600 dark:text-red-400' },
@@ -424,7 +446,8 @@ function TasksBody({ size, full, onExpand, notify }) {
   const [draft, setDraft] = useState('')
   // completeTask toggles done, so undo is the same call again (reopens the task).
   const onComplete = (t) => { completeTask(t.id); notify(`Completed: ${t.title}`, () => completeTask(t.id)) }
-  const open = tasks.filter((t) => !t.done)
+  // Overdue tasks bubble to the top (stable otherwise) — the most urgent shouldn't hide at the bottom.
+  const open = tasks.filter((t) => !t.done).sort((a, b) => (b.overdue ? 1 : 0) - (a.overdue ? 1 : 0))
   if (size === 'sm') return open.length
     ? <CompactSummary n={open.length} noun="open" items={open.slice(0, 2).map((t) => ({ label: t.title, amber: t.overdue }))} />
     : <Empty>No open tasks</Empty>
