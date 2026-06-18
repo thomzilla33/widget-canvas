@@ -52,10 +52,12 @@ export default function DashboardList() {
   // Create button first; the next modal then traps from a real trigger, not a dead card.
   function pickCreate(mode) {
     setLauncher(false)
-    requestAnimationFrame(() => {
+    // Defer past the launcher's focus-trap cleanup (setTimeout, not rAF — rAF can stall
+    // in a backgrounded tab, leaving the successor modal unopened).
+    setTimeout(() => {
       if (mode === 'ai') setAiOpen(true)
       else navigate('/dashboard/new')
-    })
+    }, 0)
   }
   const targetFor = (owner) => reassignTo[owner] || 'You (admin)'
   const reassignOne = (id, owner) => updateDashboard(id, { owner: targetFor(owner) })

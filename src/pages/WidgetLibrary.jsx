@@ -67,11 +67,13 @@ export default function WidgetLibrary() {
   // Create button first; the next modal then traps from a real trigger, not a dead card.
   function pickCreate(mode) {
     setLauncher(false)
-    requestAnimationFrame(() => {
+    // Defer past the launcher's focus-trap cleanup (setTimeout, not rAF — rAF can stall
+    // in a backgrounded tab, leaving the successor modal unopened).
+    setTimeout(() => {
       if (mode === 'ai') setAiOpen(true)
       else if (mode === 'marketplace') setMarketplace(true)
       else navigate('/widgets/new')
-    })
+    }, 0)
   }
 
   const catOptions = [{ value: 'All', label: 'All categories' }, ...CATALOG_CATEGORIES.map((c) => ({ value: c, label: c }))]

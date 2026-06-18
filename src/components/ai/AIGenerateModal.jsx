@@ -1,16 +1,36 @@
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Sparkles, X, ArrowUp, Check, LayoutDashboard, BarChart3, Pencil, ExternalLink, RefreshCw } from 'lucide-react'
+import { Sparkles, X, ArrowUp, Check, LayoutDashboard, BarChart3, Pencil, ExternalLink, RefreshCw, ChevronDown, AlertTriangle } from 'lucide-react'
 import { useFocusTrap } from '../../hooks/useFocusTrap.js'
 import WidgetPreview from '../playground/WidgetPreview.jsx'
 import WidgetRender from '../widgets/WidgetRender.jsx'
 import { useWidgets } from '../../state/WidgetsContext.jsx'
 import { useDashboards } from '../../state/DashboardsContext.jsx'
 import { describeWidget, describeDashboard } from '../../data/describe.js'
-import { dimensionById } from '../../data/fields.js'
+import { dimensionById, DIMENSIONS } from '../../data/fields.js'
+import { AUDIENCE_ROLES } from '../../data/audiences.js'
 import {
-  EXTERNAL_SOURCES, sourceFields, TYPE_LABEL, TEMPLATE_SEED, placementLabel,
+  EXTERNAL_SOURCES, sourceFields, TYPE_LABEL, WIDGET_TYPES, TEMPLATE_SEED, placementLabel,
 } from '../../data/mock.js'
+
+// Options for the one-tap corrections on a result card.
+const TYPE_OPTIONS = WIDGET_TYPES.map((t) => ({ id: t.id, label: t.label }))
+const DIM_OPTIONS = [{ id: 'none', label: 'No breakdown' }, ...DIMENSIONS.map((d) => ({ id: d.id, label: d.name }))]
+const AUDIENCE_OPTS = AUDIENCE_ROLES.map((r) => ({ id: r, label: r }))
+const TEMPLATE_OPTS = [
+  { id: 't-acct360', label: 'Account 360' },
+  { id: 't-support', label: 'Support Health' },
+  { id: 't-exec', label: 'Executive Overview' },
+]
+
+// Rebuild a widget name when the breakdown changes — mirrors describe.js: skip when the
+// metric name already encodes "by X", when it's a record set (kind==='records'), or no dim.
+function widgetName(metric, dimId) {
+  if (!metric) return ''
+  const fieldHasDim = /\bby\b/i.test(metric.name)
+  if (fieldHasDim || metric.kind === 'records' || !dimId || dimId === 'none') return metric.name
+  return `${metric.name} by ${dimensionById(dimId)?.name ?? dimId}`
+}
 
 const TEMPLATE_LABEL = { 't-acct360': 'Account 360', 't-support': 'Support Health', 't-exec': 'Executive Overview' }
 const slug = (s) => (s || 'untitled').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
@@ -122,6 +142,11 @@ export default function AIGenerateModal({ initialMode = 'widget', onClose }) {
     onClose()
   }
 
+  // One-tap corrections patch a specific result card's config (preview + Create follow).
+  function patchCfg(mid, cfgPatch) {
+    setMessages((ms) => ms.map((m) => (m.id === mid && m.result ? { ...m, result: { ...m.result, cfg: { ...m.result.cfg, ...cfgPatch } } } : m)))
+  }
+
   const placeholder = mode === 'widget' ? 'e.g. Win rate by region as a gauge…' : 'e.g. A support health dashboard for managers…'
 
   return (
@@ -155,6 +180,7 @@ export default function AIGenerateModal({ initialMode = 'widget', onClose }) {
         <div ref={scrollRef} className="min-h-0 flex-1 space-y-4 overflow-auto px-5 py-4">
           {messages.map((m) => (
             <Message key={m.id} m={m} mode={mode} widgets={widgets} onCreateWidget={createWidget} onCreateDashboard={createDashboard}
+              onPatch={(p) => patchCfg(m.id, p)}
               onTune={() => { onClose(); navigate('/widgets/new', { state: { describe: m.snapshotTranscript || transcript } }) }}
               onExample={send} navigate={navigate} onClose={onClose} />
           ))}
@@ -185,7 +211,7 @@ export default function AIGenerateModal({ initialMode = 'widget', onClose }) {
   )
 }
 
-function Message({ m, mode, widgets, onCreateWidget, onCreateDashboard, onTune, onExample, navigate, onClose }) {
+function Message({ m, mode, widgets, onCreateWidget, onCreateDashboard, onPatch, onTune, onExample, navigate, onClose }) {
   if (m.role === 'user') {
     return (
       <div className="flex justify-end">
@@ -231,43 +257,80 @@ function Message({ m, mode, widgets, onCreateWidget, onCreateDashboard, onTune, 
           </div>
         )}
 
-        {m.result?.kind === 'widget' && <WidgetResult result={m.result} onCreate={() => onCreateWidget(m.result)} onTune={() => onTune(m.result)} />}
-        {m.result?.kind === 'dashboard' && <DashboardResult result={m.result} widgets={widgets} onCreate={() => onCreateDashboard(m.result)} />}
+        {m.result?.kind === 'widget' && <WidgetResult result={m.result} onCreate={() => onCreateWidget(m.result)} onTune={() => onTune(m.result)} onPatch={onPatch} />}
+        {m.result?.kind === 'dashboard' && <DashboardResult result={m.result} widgets={widgets} onCreate={() => onCreateDashboard(m.result)} onPatch={onPatch} />}
       </div>
     </div>
   )
 }
 
-function WidgetResult({ result, onCreate, onTune }) {
+function WidgetResult({ result, onCreate, onTune, onPatch }) {
   const { cfg, source, metric } = result
   const dim = cfg.dimensionId && cfg.dimensionId !== 'none' ? dimensionById(cfg.dimensionId) : null
+  const [editing, setEditing] = useState(null) // 'type' | 'breakdown' | null
+  const toggle = (f) => setEditing((e) => (e === f ? null : f))
   return (
     <div className="rounded-xl border border-gray-200 bg-white p-3 dark:border-white/10 dark:bg-[#131a2c]">
-      <p className="mb-2 text-sm text-gray-700 dark:text-slate-200">
-        Here’s a <span className="font-semibold text-gray-900 dark:text-slate-100">{TYPE_LABEL[cfg.typeId]}</span> — “{cfg.name}” from {source?.name || 'your data'}{dim ? `, broken down by ${dim.name}` : ''}.
-      </p>
+      <ResultHeader />
+      <p className="mb-2 text-sm text-gray-700 dark:text-slate-200">Here’s a starting point — adjust the mapping below, or keep refining above.</p>
+
+      {/* What I mapped — source/metric are read-only; breakdown + chart are one-tap editable */}
+      <div className="mb-2 flex flex-wrap items-center gap-1.5">
+        <Chip label="Source" value={source?.name || '—'} />
+        <Chip label="Metric" value={metric?.name || cfg.name} />
+        <Chip label="Breakdown" value={dim ? dim.name : 'None'} editable active={editing === 'breakdown'} onClick={() => toggle('breakdown')} />
+        <Chip label="Chart" value={TYPE_LABEL[cfg.typeId] || cfg.typeId} editable active={editing === 'type'} onClick={() => toggle('type')} />
+      </div>
+      {editing === 'type' && (
+        <OptionRow options={TYPE_OPTIONS} current={cfg.typeId} onPick={(id) => { onPatch({ typeId: id }); setEditing(null) }} />
+      )}
+      {editing === 'breakdown' && (
+        <OptionRow options={DIM_OPTIONS} current={cfg.dimensionId || 'none'} onPick={(id) => { onPatch({ dimensionId: id, name: widgetName(metric, id) }); setEditing(null) }} />
+      )}
+
+      {cfg.confidence === 'low' && (
+        <p className="mb-2 inline-flex items-start gap-1 text-[11px] text-aims-ungoverned">
+          <AlertTriangle size={12} className="mt-0.5 shrink-0" aria-hidden="true" /> Best guess from your words — double-check the source and metric.
+        </p>
+      )}
+
       <div className="surface-sunken rounded-lg p-3">
         <WidgetPreview typeId={cfg.typeId} metric={metric} source={source} name={cfg.name} freshness="fresh" display={{ format: { style: 'auto' }, goal: {} }} shape={dim ? { dimension: dim, transform: 'none' } : undefined} />
       </div>
       <div className="mt-2.5 flex flex-wrap items-center gap-2">
         <button className="btn-primary !py-1.5 !px-3 text-xs" onClick={onCreate}><Check size={14} aria-hidden="true" /> Create widget</button>
         <button className="btn-secondary !py-1.5 !px-3 text-xs" onClick={onTune}><Pencil size={13} aria-hidden="true" /> Fine-tune in builder</button>
-        <span className="text-[11px] text-gray-400 dark:text-slate-500">or keep refining above</span>
       </div>
     </div>
   )
 }
 
-function DashboardResult({ result, widgets, onCreate }) {
+function DashboardResult({ result, widgets, onCreate, onPatch }) {
   const { cfg } = result
   const seed = TEMPLATE_SEED[cfg.templateId] || []
   const tiles = seed.map((s) => widgets.find((w) => w.id === s.widgetId)).filter(Boolean)
   const shown = tiles.slice(0, 4)
+  const [editing, setEditing] = useState(null) // 'audience' | 'template' | null
+  const toggle = (f) => setEditing((e) => (e === f ? null : f))
   return (
     <div className="rounded-xl border border-gray-200 bg-white p-3 dark:border-white/10 dark:bg-[#131a2c]">
+      <ResultHeader />
       <p className="mb-2 text-sm text-gray-700 dark:text-slate-200">
-        A <span className="font-semibold text-gray-900 dark:text-slate-100">{cfg.audience}</span> dashboard — “{cfg.name}” on {placementLabel(cfg.placement)}, starting from the <span className="font-semibold text-gray-900 dark:text-slate-100">{TEMPLATE_LABEL[cfg.templateId] || 'starter'}</span> template ({seed.length} widget{seed.length === 1 ? '' : 's'}).
+        A starting layout based on the <span className="font-semibold text-gray-900 dark:text-slate-100">closest template</span> — swap it or change the audience below, then refine on the canvas.
       </p>
+
+      <div className="mb-2 flex flex-wrap items-center gap-1.5">
+        <Chip label="Audience" value={cfg.audience} editable active={editing === 'audience'} onClick={() => toggle('audience')} />
+        <Chip label="Surface" value={placementLabel(cfg.placement)} />
+        <Chip label="Template" value={`${TEMPLATE_LABEL[cfg.templateId] || 'Starter'} · ${seed.length}`} editable active={editing === 'template'} onClick={() => toggle('template')} />
+      </div>
+      {editing === 'audience' && (
+        <OptionRow options={AUDIENCE_OPTS} current={cfg.audience} onPick={(id) => { onPatch({ audience: id }); setEditing(null) }} />
+      )}
+      {editing === 'template' && (
+        <OptionRow options={TEMPLATE_OPTS} current={cfg.templateId} onPick={(id) => { onPatch({ templateId: id }); setEditing(null) }} />
+      )}
+
       <div className="surface-sunken grid grid-cols-2 gap-2 rounded-lg p-2.5">
         {shown.length === 0 && (
           <p className="col-span-2 py-3 text-center text-xs text-gray-400 dark:text-slate-500">
@@ -290,6 +353,61 @@ function DashboardResult({ result, widgets, onCreate }) {
         <button className="btn-primary !py-1.5 !px-3 text-xs" onClick={onCreate}><ExternalLink size={13} aria-hidden="true" /> Create &amp; open canvas</button>
         <span className="text-[11px] text-gray-400 dark:text-slate-500">or keep refining above</span>
       </div>
+    </div>
+  )
+}
+
+// Honesty framing shown atop every result card.
+function ResultHeader() {
+  return (
+    <div className="mb-2 flex items-center justify-between">
+      <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide text-aims-blue">
+        <Sparkles size={11} aria-hidden="true" /> AI starting point
+      </span>
+      <span className="text-[10px] text-gray-400 dark:text-slate-500">Review before creating</span>
+    </div>
+  )
+}
+
+// A "Label: value" chip. Editable chips toggle an inline OptionRow for one-tap correction.
+function Chip({ label, value, editable, active, onClick }) {
+  const base = 'inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[11px]'
+  if (!editable) {
+    return (
+      <span className={`${base} border-gray-200 bg-gray-50 text-gray-600 dark:border-white/10 dark:bg-white/[0.03] dark:text-slate-300`}>
+        <span className="text-gray-400 dark:text-slate-500">{label}:</span>
+        <span className="font-medium text-gray-700 dark:text-slate-200">{value}</span>
+      </span>
+    )
+  }
+  return (
+    <button
+      onClick={onClick}
+      aria-expanded={active}
+      aria-label={`Change ${label.toLowerCase()} (currently ${value})`}
+      className={`${base} transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aims-blue/40 ${active ? 'border-aims-blue/50 bg-aims-blue/10 text-aims-blue' : 'border-gray-300 text-gray-600 hover:border-aims-blue/40 hover:text-aims-blue dark:border-white/15 dark:text-slate-300 dark:hover:border-aims-blue/40'}`}
+    >
+      <span className={active ? 'text-aims-blue/70' : 'text-gray-400 dark:text-slate-500'}>{label}:</span>
+      <span className="font-medium">{value}</span>
+      <ChevronDown size={11} aria-hidden="true" className={`transition-transform ${active ? 'rotate-180' : ''}`} />
+    </button>
+  )
+}
+
+// Inline option picker (no floating popover — avoids clipping inside the scroll area).
+function OptionRow({ options, current, onPick }) {
+  return (
+    <div className="mb-2 flex flex-wrap gap-1.5 rounded-lg border border-gray-200 bg-gray-50/60 p-2 dark:border-white/10 dark:bg-white/[0.02]">
+      {options.map((o) => (
+        <button
+          key={o.id}
+          onClick={() => onPick(o.id)}
+          aria-pressed={o.id === current}
+          className={`rounded-md px-2 py-1 text-[11px] font-medium transition-colors ${o.id === current ? 'bg-aims-blue text-white' : 'bg-white text-gray-600 hover:bg-gray-100 dark:bg-white/5 dark:text-slate-300 dark:hover:bg-white/10'}`}
+        >
+          {o.label}
+        </button>
+      ))}
     </div>
   )
 }

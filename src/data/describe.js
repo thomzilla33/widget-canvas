@@ -99,7 +99,10 @@ export function describeWidget(text) {
   const dimension = dimensionById(dimensionId)
   const typeId = detectType(t) || (best.field.kind === 'records' ? 'table' : recommendTile(best.field, dimension))
   const name = dimensionId !== 'none' && best.field.kind !== 'records' ? `${best.field.name} by ${dimName(dimensionId)}` : best.field.name
-  return { sourceId: best.sourceId, metricId: best.field.id, dimensionId, typeId, name }
+  // Confidence reflects how strongly the text matched a real field: a full-name hit
+  // (+3) is 'high'; a single shared token is a weak guess worth flagging to the user.
+  const confidence = bestScore >= 3 ? 'high' : 'low'
+  return { sourceId: best.sourceId, metricId: best.field.id, dimensionId, typeId, name, confidence }
 }
 
 // Title-case a short label from the free text (first ~6 significant words).
