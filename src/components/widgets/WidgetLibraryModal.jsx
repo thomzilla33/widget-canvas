@@ -131,7 +131,7 @@ function Card({ widget, onOpen, onAdd }) {
           <div className="truncate text-[11px] text-gray-500 dark:text-slate-400">{widget.source}</div>
         </div>
       </div>
-      <div className="surface-sunken rounded-md p-2">
+      <div className="surface-sunken pointer-events-none rounded-md p-2">
         <WidgetRender widget={widget} size="md" />
       </div>
       <div className="flex flex-wrap items-center gap-1.5">
@@ -193,7 +193,7 @@ function Detail({ widget, onBack, onAdd }) {
             </div>
           </div>
           <div className="rounded-xl border border-gray-200 bg-gray-50/60 p-6 dark:border-white/10 dark:bg-white/[0.02]">
-            <div className={`mx-auto rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition-all dark:border-white/10 dark:bg-[#131a2c] ${PREVIEW_WIDTH[size]}`}>
+            <div className={`pointer-events-none mx-auto rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition-all dark:border-white/10 dark:bg-[#131a2c] ${PREVIEW_WIDTH[size]}`}>
               <div className="mb-2 text-[10px] font-bold uppercase tracking-wide text-gray-500 dark:text-slate-400">{widget.name}</div>
               <WidgetRender widget={widget} size={size} />
             </div>

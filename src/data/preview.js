@@ -342,32 +342,6 @@ export function previewData(metric, opts) {
 // scope (date range × filters × PBAC rollup). The KPI base stays stable per
 // widget identity; only its magnitude scales — except live tiles, which wobble
 // the headline ±4% per tick on top (count/currency).
-// Curated feed content for the system-default work widgets (Feed skeleton). HITL items
-// carry humanTouch:true → they render a "Human-touch" tag and also surface in the Inbox.
-const SYSTEM_FEEDS = {
-  'w-tasks': [
-    { summary: 'Follow up on Acme renewal proposal', actor: 'Due today · You', when: 'Today' },
-    { summary: 'Review Q3 pipeline with Priya', actor: 'Due tomorrow · You', when: 'Tomorrow' },
-    { summary: 'Prep onboarding deck for Globex', actor: 'Due Fri · You', when: 'Fri' },
-    { summary: 'Reconcile churn report figures', actor: 'Overdue · You', when: 'Yesterday' },
-    { summary: 'Approve new dashboard layout', actor: 'Due Mon · You', when: 'Mon' },
-  ],
-  'w-htl': [
-    { summary: 'Approve refund — Globex ($2,400)', actor: 'Billing Agent · awaiting decision', when: '5m ago', humanTouch: true },
-    { summary: 'Confirm contract terms before send — Acme', actor: 'Sales Agent · awaiting decision', when: '22m ago', humanTouch: true },
-    { summary: 'Review flagged support reply — Initech', actor: 'Support Agent · awaiting decision', when: '1h ago', humanTouch: true },
-    { summary: 'Escalation: high-value cancellation — Hooli', actor: 'Retention Agent · awaiting decision', when: '2h ago', humanTouch: true },
-    { summary: 'Approve data export request — Umbrella', actor: 'Governance · awaiting decision', when: '3h ago', humanTouch: true },
-  ],
-  'w-inbox': [
-    { summary: 'Approve refund — Globex ($2,400)', actor: 'Billing Agent · needs you', when: '5m ago', humanTouch: true },
-    { summary: '@you mentioned in the “Renewals” thread', actor: 'Dana Lee', when: '18m ago' },
-    { summary: 'Confirm contract terms before send — Acme', actor: 'Sales Agent · needs you', when: '22m ago', humanTouch: true },
-    { summary: 'New comment on Q3 pipeline', actor: 'Priya Nair', when: '40m ago' },
-    { summary: 'Weekly performance digest is ready', actor: 'AIMS OS', when: '1h ago' },
-  ],
-}
-
 export function widgetSample(widget, scope) {
   const base = widget?.id || widget?.name || ''
   const name = widget?.name || ''
@@ -405,9 +379,7 @@ export function widgetSample(widget, scope) {
   // A "saved answer" widget (U6.4) carries free text in `note` — show it verbatim as
   // the AI-summary narrative instead of generated copy.
   const noteOverride = widget?.note ? { narrative: { text: widget.note, bullets: [] } } : null
-  // System-default work widgets render a curated feed (tasks / inbox / HITL queue).
-  const feedOverride = SYSTEM_FEEDS[widget?.id] ? { feed: SYSTEM_FEEDS[widget.id] } : null
-  return { ...SAMPLE, ...bundle, ...(kpiOverride || {}), ...(noteOverride || {}), ...(feedOverride || {}) }
+  return { ...SAMPLE, ...bundle, ...(kpiOverride || {}), ...(noteOverride || {}) }
 }
 
 // ── Table-backed widgets: REAL computed table data in the preview/render contract ──

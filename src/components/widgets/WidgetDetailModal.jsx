@@ -82,7 +82,7 @@ export default function WidgetDetailModal({ widget, isAdmin, onClose, onPlace, o
                 ))}
               </div>
             </div>
-            <div className={`mx-auto rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition-all dark:border-white/10 dark:bg-[#131a2c] ${PREVIEW_WIDTH[size]}`}>
+            <div className={`pointer-events-none mx-auto rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition-all dark:border-white/10 dark:bg-[#131a2c] ${PREVIEW_WIDTH[size]}`}>
               <WidgetRender widget={widget} size={size} />
             </div>
             {sizeMeta && <p className="mt-2 text-center text-[11px] text-gray-400 dark:text-slate-500">{sizeMeta.width} · {sizeMeta.detail}</p>}

@@ -11,6 +11,7 @@ import { LiveProvider } from './state/LiveContext.jsx'
 import { ProfileConfigProvider } from './state/ProfileConfigContext.jsx'
 import { RoleProvider } from './state/RoleContext.jsx'
 import { ActivityProvider } from './state/ActivityContext.jsx'
+import { WorkQueueProvider } from './state/WorkQueueContext.jsx'
 import './index.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
@@ -25,7 +26,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                   <ProfileConfigProvider>
                     <RoleProvider>
                       <ActivityProvider>
-                        <App />
+                        <WorkQueueProvider>
+                          <App />
+                        </WorkQueueProvider>
                       </ActivityProvider>
                     </RoleProvider>
                   </ProfileConfigProvider>

@@ -19,6 +19,7 @@ import { useChartTheme, SERIES } from '../playground/WidgetPreview.jsx'
 import { widgetSample, formatValue, tableData } from '../../data/preview.js'
 import { getTable, formatCell } from '../../data/tables.js'
 import { isBillingWidget, creditBreakdown } from '../../data/governance.js'
+import SystemWidget from './SystemWidget.jsx'
 
 // Chart heights per size — small is a sparkline, large gets axis room.
 const H = { sm: 52, md: 84, lg: 150 }
@@ -31,13 +32,19 @@ export default function WidgetRender({ widget, size = 'md', scope, viewAs }) {
   const scopeKey = scope
     ? `${scope.range || ''}|${Object.values(scope.filters || {}).filter((v) => v && v !== 'All').join(',')}|${scope.rollup || ''}|${scope.env || ''}|${liveTick}`
     : ''
+  // System work widgets render from live queue state, not widgetSample — skip the compute.
+  const sysId = widget?.id === 'w-tasks' || widget?.id === 'w-inbox' || widget?.id === 'w-htl'
   // Table-backed widgets pull REAL computed table data; scope (range/filters) doesn't apply to them.
   const data = useMemo(
-    () => (widget ? (widget.tableId ? tableData(getTable(widget.tableId), widget.tableColumn) : widgetSample(widget, scope)) : null),
-    [widget, scopeKey],
+    () => (!widget || sysId ? null : widget.tableId ? tableData(getTable(widget.tableId), widget.tableColumn) : widgetSample(widget, scope)),
+    [widget, scopeKey, sysId],
   )
   if (!widget) {
     return <div className="grid h-[88px] place-items-center text-[10px] text-gray-500 dark:text-slate-400">No data</div>
+  }
+  // System work widgets are interactive (live queue state) — bypass the static skeleton.
+  if (sysId) {
+    return <SystemWidget id={widget.id} size={size} />
   }
   const props = { data, size, format: widget.format, goal: widget.goal }
   const skel = viewAs || widget.skeleton
@@ -489,16 +496,9 @@ function FeedMini({ data, size }) {
     <ul className="space-y-1.5">
       {rows.map((f, i) => (
         <li key={`${f.when}-${i}`} className="flex min-w-0 gap-1.5">
-          <span className={`mt-1 h-1.5 w-1.5 shrink-0 rounded-full ${f.humanTouch ? 'bg-amber-500' : 'bg-aims-blue'}`} />
+          <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-aims-blue" />
           <div className="min-w-0">
-            <div className="flex min-w-0 items-center gap-1.5">
-              <span className="truncate text-[11px] text-gray-700 dark:text-slate-200">{f.summary}</span>
-              {f.humanTouch && (
-                <span className="shrink-0 rounded border border-amber-300/50 bg-amber-500/10 px-1 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-aims-aging">
-                  Human-touch
-                </span>
-              )}
-            </div>
+            <div className="truncate text-[11px] text-gray-700 dark:text-slate-200">{f.summary}</div>
             <div className="truncate text-[10px] text-gray-500 dark:text-slate-400">{f.actor} · {f.when}</div>
           </div>
         </li>
