@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Sparkles, X, ArrowUp, Check, LayoutDashboard, BarChart3, Pencil, ExternalLink, RefreshCw, ChevronDown, AlertTriangle } from 'lucide-react'
 import { useFocusTrap } from '../../hooks/useFocusTrap.js'
+import { useModalEnter } from '../../hooks/useReveal.js'
 import WidgetPreview from '../playground/WidgetPreview.jsx'
 import WidgetRender from '../widgets/WidgetRender.jsx'
 import { useWidgets } from '../../state/WidgetsContext.jsx'
@@ -50,6 +51,7 @@ const GREETING = {
 export default function AIGenerateModal({ initialMode = 'widget', onClose }) {
   const navigate = useNavigate()
   const trapRef = useFocusTrap()
+  useModalEnter(trapRef) // subtle scale + fade entrance on the dialog card
   const { widgets, addWidget } = useWidgets()
   const { addDashboard } = useDashboards()
 

@@ -6,6 +6,7 @@ import { useWidgets } from '../../state/WidgetsContext.jsx'
 import { dashboardLayout } from '../../data/layout.js'
 import { audienceVisibleTo, ALL_AUDIENCES } from '../../data/audiences.js'
 import { dataPlaneOf, freshnessState } from '../../data/governance.js'
+import { useStaggerReveal } from '../../hooks/useReveal.js'
 
 // Per-size column span — a widget's size IS its width in the free grid (no overflow).
 const SIZE_SPAN_CLASS = { sm: '', md: 'sm:col-span-2', lg: 'sm:col-span-2 lg:col-span-3' }
@@ -29,6 +30,8 @@ export default function DashboardZones({ dashboard, scope, onDrill, viewerRole }
   // Filter by the "view as" role — empty restriction or admin/all sees everything.
   const visible = layout.filter((p) => audienceVisibleTo(p, viewerRole))
   const roleScoped = viewerRole && viewerRole !== ALL_AUDIENCES
+  // Reveal the grid on entry / dashboard / role change — NOT on live ticks (key is stable).
+  const gridReveal = useStaggerReveal(`${dashboard?.id || ''}|${viewerRole || ''}`)
 
   if (!visible.length) {
     return (
@@ -47,7 +50,7 @@ export default function DashboardZones({ dashboard, scope, onDrill, viewerRole }
   }
 
   return (
-    <div className="grid auto-rows-fr grid-cols-1 items-stretch gap-3 sm:grid-cols-2 lg:grid-cols-3">
+    <div ref={gridReveal} className="grid auto-rows-fr grid-cols-1 items-stretch gap-3 sm:grid-cols-2 lg:grid-cols-3">
       {visible.map((p, i) => {
         const w = byId(p.widgetId)
         // Live tiles get the ticking scope; everything else gets the stable one (memo bails).

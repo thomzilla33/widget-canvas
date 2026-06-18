@@ -1,5 +1,6 @@
 import { Sparkles, PencilRuler, Store, ChevronRight, X } from 'lucide-react'
 import { useFocusTrap } from '../../hooks/useFocusTrap.js'
+import { useModalEnter } from '../../hooks/useReveal.js'
 
 // One front door for creation. Collapses the competing entry points (AI chat, manual
 // builder, marketplace) into a single launcher with a clear hierarchy — AI is the
@@ -18,6 +19,7 @@ const OPTIONS = {
 
 export default function CreateLauncher({ kind = 'widget', onPick, onClose }) {
   const trapRef = useFocusTrap()
+  useModalEnter(trapRef) // subtle scale + fade entrance
   const options = OPTIONS[kind] || OPTIONS.widget
 
   return (

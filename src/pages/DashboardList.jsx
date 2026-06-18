@@ -6,6 +6,7 @@ import StudioWelcome from '../components/common/StudioWelcome.jsx'
 import FilterToolbar from '../components/common/FilterToolbar.jsx'
 import AIGenerateModal from '../components/ai/AIGenerateModal.jsx'
 import CreateLauncher from '../components/create/CreateLauncher.jsx'
+import { useStaggerReveal } from '../hooks/useReveal.js'
 import { useDashboards } from '../state/DashboardsContext.jsx'
 import { useRole } from '../state/RoleContext.jsx'
 import { placementLabel, DEACTIVATED_OWNERS, dashboardKind, SHARE_PEOPLE } from '../data/mock.js'
@@ -47,6 +48,7 @@ export default function DashboardList() {
   const [reassignTo, setReassignTo] = useState({}) // per departed-owner → chosen new owner
   const [aiOpen, setAiOpen] = useState(false)
   const [launcher, setLauncher] = useState(false)
+  const gridReveal = useStaggerReveal('dashboards') // reveal the card grid once on entry
 
   // Defer the successor a frame so the launcher's focus-trap restores focus to the
   // Create button first; the next modal then traps from a real trigger, not a dead card.
@@ -216,7 +218,7 @@ export default function DashboardList() {
             />
           )
         ) : (
-          <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill,minmax(min(280px,100%),1fr))' }}>
+          <div ref={gridReveal} className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill,minmax(min(280px,100%),1fr))' }}>
             {shown.map((d) => (
               <button
                 key={d.id}

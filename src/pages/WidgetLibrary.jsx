@@ -11,6 +11,7 @@ import WidgetDetailModal from '../components/widgets/WidgetDetailModal.jsx'
 import WidgetMarketplace from '../components/widgets/WidgetMarketplace.jsx'
 import AIGenerateModal from '../components/ai/AIGenerateModal.jsx'
 import CreateLauncher from '../components/create/CreateLauncher.jsx'
+import { useStaggerReveal } from '../hooks/useReveal.js'
 import SourceTemplatesBanner from '../components/widgets/SourceTemplatesBanner.jsx'
 import StudioWelcome from '../components/common/StudioWelcome.jsx'
 import FilterToolbar from '../components/common/FilterToolbar.jsx'
@@ -61,6 +62,7 @@ export default function WidgetLibrary() {
   const [marketplace, setMarketplace] = useState(false)
   const [aiOpen, setAiOpen] = useState(false)
   const [launcher, setLauncher] = useState(false)
+  const gridReveal = useStaggerReveal('widgets')
 
   // Single front door for creation — routes to AI chat, manual builder, or marketplace.
   // Defer the successor a frame so the launcher's focus-trap restores focus to the
@@ -200,7 +202,7 @@ export default function WidgetLibrary() {
             description="Try adjusting your search or category filter."
           />
         ) : (
-        <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill,minmax(min(264px,100%),1fr))' }}>
+        <div ref={gridReveal} className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill,minmax(min(264px,100%),1fr))' }}>
           {shown.map((w) => (
             <button
               key={w.id}
