@@ -73,6 +73,10 @@ const WidgetCard = memo(function WidgetCard({ placement: p, widget: w, span, sco
   }
   const plane = dataPlaneOf(w)
   const fresh = freshnessState(w)
+  // System widgets are self-interactive (Approve/Reject/Complete + their own "View all"
+  // modal), so they can't be wrapped in a drill <button> — that nests buttons and makes
+  // every in-tile action also fire the drilldown. They render as a plain container.
+  const drillable = onDrill && !w.system
   const inner = (
     <>
       <div className="flex items-center justify-between gap-1">
@@ -80,7 +84,7 @@ const WidgetCard = memo(function WidgetCard({ placement: p, widget: w, span, sco
           {w.name || 'Widget'}
         </span>
         <div className="flex shrink-0 items-center gap-1">
-          {onDrill && <Maximize2 size={12} aria-hidden="true" className="text-gray-300 transition-colors group-hover:text-aims-blue dark:text-slate-600" />}
+          {drillable && <Maximize2 size={12} aria-hidden="true" className="text-gray-300 transition-colors group-hover:text-aims-blue dark:text-slate-600" />}
           {p.fixed && <Lock size={12} aria-hidden="true" className="text-gray-500 dark:text-slate-400" />}
         </div>
       </div>
@@ -94,7 +98,7 @@ const WidgetCard = memo(function WidgetCard({ placement: p, widget: w, span, sco
       </div>
     </>
   )
-  if (onDrill) {
+  if (drillable) {
     return (
       <button
         type="button"
