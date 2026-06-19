@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { X, LayoutGrid, RefreshCw, Plus, LayoutDashboard, Trash2 } from 'lucide-react'
+import { X, LayoutGrid, RefreshCw, Plus, LayoutDashboard, Trash2, Pencil } from 'lucide-react'
 import { useFocusTrap } from '../../hooks/useFocusTrap.js'
 import { HealthBadge, FreshnessBadge, DataPlaneBadge } from '../common/index.jsx'
 import { dataPlaneOf } from '../../data/governance.js'
@@ -14,7 +14,7 @@ const PREVIEW_WIDTH = { sm: 'max-w-[240px]', md: 'max-w-md', lg: 'max-w-2xl' }
 // Tier 2 — the consume seam for an existing widget. Clicking a Library card opens
 // THIS (preview + meta + where-it's-used + actions), not the builder. The builder
 // only creates net-new widgets, so there's no "edit" here — place, remap, or delete.
-export default function WidgetDetailModal({ widget, isAdmin, onClose, onPlace, onRemap, onDelete }) {
+export default function WidgetDetailModal({ widget, isAdmin, onClose, onPlace, onRemap, onDelete, onEdit }) {
   const ref = useFocusTrap()
   const { dashboards } = useDashboards()
   const [size, setSize] = useState('md')
@@ -145,7 +145,13 @@ export default function WidgetDetailModal({ widget, isAdmin, onClose, onPlace, o
                   <Trash2 size={14} aria-hidden="true" /> Delete
                 </button>
               )}
-              <button className="btn-secondary !py-1.5 text-xs ml-auto" onClick={onClose}>Close</button>
+              {/* Edit (admin) — safe, non-structural fields. System widgets aren't editable. */}
+              {isAdmin && onEdit && !widget.system && (
+                <button className="btn-secondary !py-1.5 text-xs ml-auto" onClick={onEdit}>
+                  <Pencil size={14} aria-hidden="true" /> Edit
+                </button>
+              )}
+              <button className={`btn-secondary !py-1.5 text-xs ${isAdmin && onEdit && !widget.system ? '' : 'ml-auto'}`} onClick={onClose}>Close</button>
               {needsRemap ? (
                 <button className="btn-primary !py-1.5 text-xs" onClick={onRemap}>
                   <RefreshCw size={14} aria-hidden="true" /> Remap widget

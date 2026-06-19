@@ -8,6 +8,7 @@ import WidgetRender from '../components/widgets/WidgetRender.jsx'
 import RepinModal from '../components/widgets/RepinModal.jsx'
 import FlagDetailModal from '../components/widgets/FlagDetailModal.jsx'
 import WidgetDetailModal from '../components/widgets/WidgetDetailModal.jsx'
+import EditWidgetModal from '../components/widgets/EditWidgetModal.jsx'
 import WidgetMarketplace from '../components/widgets/WidgetMarketplace.jsx'
 import AIGenerateModal from '../components/ai/AIGenerateModal.jsx'
 import CreateLauncher from '../components/create/CreateLauncher.jsx'
@@ -59,6 +60,7 @@ export default function WidgetLibrary() {
   const [repinWidget, setRepinWidget] = useState(null)
   const [detailFlag, setDetailFlag] = useState(null)
   const [detailWidget, setDetailWidget] = useState(null) // Tier 2 — widget detail (not the builder)
+  const [editWidget, setEditWidget] = useState(null) // CRUD U — edit safe fields
   const [marketplace, setMarketplace] = useState(false)
   const [aiOpen, setAiOpen] = useState(false)
   const [launcher, setLauncher] = useState(false)
@@ -282,8 +284,11 @@ export default function WidgetLibrary() {
           onPlace={() => { setDetailWidget(null); navigate('/dashboards') }}
           onRemap={() => { const w = detailWidget; setDetailWidget(null); setRepinWidget(w) }}
           onDelete={(w) => { removeWidget(w.id); setDetailWidget(null) }}
+          onEdit={() => { const w = detailWidget; setDetailWidget(null); setEditWidget(w) }}
         />
       )}
+
+      {editWidget && <EditWidgetModal widget={editWidget} onClose={() => setEditWidget(null)} />}
 
       {marketplace && <WidgetMarketplace onClose={() => setMarketplace(false)} />}
 
