@@ -18,8 +18,14 @@ export function WidgetsProvider({ children }) {
     setWidgets((prev) => prev.map((w) => (w.id === id ? { ...w, ...patch } : w)))
   }
 
+  // Immutable remove by id (the catalog "delete"). The Library guards against
+  // deleting a widget that's still placed on a dashboard.
+  function removeWidget(id) {
+    setWidgets((prev) => prev.filter((w) => w.id !== id))
+  }
+
   return (
-    <WidgetsContext.Provider value={{ widgets, addWidget, updateWidget }}>
+    <WidgetsContext.Provider value={{ widgets, addWidget, updateWidget, removeWidget }}>
       {children}
     </WidgetsContext.Provider>
   )

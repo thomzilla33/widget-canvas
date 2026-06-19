@@ -35,7 +35,7 @@ const FIX_HINT = {
 // S37–S47 catalog + health · S121–S123 Needs Attention / flag resolution
 export default function WidgetLibrary() {
   const navigate = useNavigate()
-  const { widgets, updateWidget } = useWidgets()
+  const { widgets, updateWidget, removeWidget } = useWidgets()
   const { dashboards } = useDashboards()
   const { isAdmin } = useRole()
   const { flags, resolveFlag } = useFeedback()
@@ -281,6 +281,7 @@ export default function WidgetLibrary() {
           onClose={() => setDetailWidget(null)}
           onPlace={() => { setDetailWidget(null); navigate('/dashboards') }}
           onRemap={() => { const w = detailWidget; setDetailWidget(null); setRepinWidget(w) }}
+          onDelete={(w) => { removeWidget(w.id); setDetailWidget(null) }}
         />
       )}
 
