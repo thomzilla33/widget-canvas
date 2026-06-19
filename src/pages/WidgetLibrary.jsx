@@ -320,6 +320,7 @@ export default function WidgetLibrary() {
           onRemap={() => { const w = detailWidget; setDetailWidget(null); setRepinWidget(w) }}
           onDelete={(w) => { setDetailWidget(null); setDeletingWidget(w) }}
           onEdit={() => { const w = detailWidget; setDetailWidget(null); setEditWidget(w) }}
+          onOpenDashboard={(id) => { setDetailWidget(null); navigate(`/dashboard/${id}`) }}
         />
       )}
 

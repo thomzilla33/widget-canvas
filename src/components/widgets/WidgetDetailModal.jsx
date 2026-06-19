@@ -14,7 +14,7 @@ const PREVIEW_WIDTH = { sm: 'max-w-[240px]', md: 'max-w-md', lg: 'max-w-2xl' }
 // Tier 2 — the consume seam for an existing widget. Clicking a Library card opens
 // THIS (preview + meta + where-it's-used + actions), not the builder. The builder
 // only creates net-new widgets, so there's no "edit" here — place, remap, or delete.
-export default function WidgetDetailModal({ widget, isAdmin, onClose, onPlace, onRemap, onDelete, onEdit }) {
+export default function WidgetDetailModal({ widget, isAdmin, onClose, onPlace, onRemap, onDelete, onEdit, onOpenDashboard }) {
   const ref = useFocusTrap()
   const { dashboards } = useDashboards()
   const [size, setSize] = useState('md')
@@ -104,9 +104,14 @@ export default function WidgetDetailModal({ widget, isAdmin, onClose, onPlace, o
             ) : (
               <div className="flex flex-wrap gap-1.5">
                 {usedOn.slice(0, 6).map((d) => (
-                  <span key={d.id} className="inline-flex items-center gap-1 rounded-full border border-gray-200 px-2 py-0.5 text-[11px] text-gray-600 dark:border-white/10 dark:text-slate-300">
+                  <button
+                    key={d.id}
+                    onClick={() => onOpenDashboard?.(d.id)}
+                    title={`Open ${d.name}`}
+                    className="inline-flex items-center gap-1 rounded-full border border-gray-200 px-2 py-0.5 text-[11px] text-gray-600 transition-colors hover:border-aims-blue/50 hover:bg-aims-blue/5 hover:text-aims-blue dark:border-white/10 dark:text-slate-300 dark:hover:border-aims-blue/50"
+                  >
                     <LayoutDashboard size={11} aria-hidden="true" /> {d.name}
-                  </span>
+                  </button>
                 ))}
                 {usedOn.length > 6 && <span className="text-[11px] text-gray-400 dark:text-slate-500">+{usedOn.length - 6} more</span>}
               </div>
