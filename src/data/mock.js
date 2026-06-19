@@ -55,6 +55,12 @@ export const widgets = [
   // Credits & Billing
   W({ id: 'w-aims-credits', name: 'Credits Consumed', skeleton: 'KPI', category: 'AIMS OS', freshness: 'live', usedIn: 5, source: 'AIMS OS — Credits & Billing' }),
   W({ id: 'w-aims-balance', name: 'Balance Remaining', skeleton: 'Gauge', category: 'AIMS OS', usedIn: 2, source: 'AIMS OS — Credits & Billing' }),
+  // Consumption pattern widgets (Wispr-style — communicate prompts/tokens/credits/cost)
+  W({ id: 'w-cons-spend', name: 'Credit Spend', skeleton: 'Cost KPI', category: 'AIMS OS', freshness: 'live', usedIn: 0, source: 'AIMS OS — Credits & Billing' }),
+  W({ id: 'w-cons-tokens', name: 'Tokens This Month', skeleton: 'Cost KPI', category: 'AIMS OS', freshness: 'live', usedIn: 0, source: 'AIMS OS — Credits & Billing' }),
+  W({ id: 'w-cons-activity', name: 'Workflow Activity', skeleton: 'Usage Heatmap', category: 'AIMS OS', freshness: 'live', usedIn: 0, source: 'AIMS OS — Agents (AMP)' }),
+  W({ id: 'w-cons-bysource', name: 'Spend by Agent', skeleton: 'Spend Breakdown', category: 'AIMS OS', freshness: 'live', usedIn: 0, source: 'AIMS OS — Agents (AMP)' }),
+  W({ id: 'w-cons-prompts', name: 'Prompts Run', skeleton: 'Composite Stat', category: 'AIMS OS', freshness: 'live', usedIn: 0, source: 'AIMS OS — Agentic Studio' }),
   // Conversations
   W({ id: 'w-aims-activeconv', name: 'Active Conversations', skeleton: 'KPI', category: 'AIMS OS', freshness: 'live', usedIn: 2, source: 'AIMS OS — Conversations' }),
   W({ id: 'w-aims-split', name: 'Agent vs Human Messages', skeleton: 'Chart', category: 'AIMS OS', usedIn: 1, source: 'AIMS OS — Conversations' }),
@@ -113,6 +119,7 @@ export const dashboards = [
   { id: 'd-cs-health', template: 't-support', name: 'CS Health', entity: 'Company', audience: 'Support Agent', owner: 'Aisha Khan', status: 'published', widgets: 9, updated: '6 days ago', placement: { surface: 'profile', profileType: 'Company', scope: 'all', entityId: null, entityName: null, tab: 'Activity' } },
   { id: 'd-team-home', template: 't-acct360', name: 'Sales Team Home', entity: 'Home', audience: 'Sales Agent', owner: 'Priya Nair', status: 'published', widgets: 5, updated: '2 weeks ago', placement: { surface: 'home', homeScope: 'team' } },
   { id: 'd-workspace-home', template: 't-workspace-home', name: 'Workspace Home', entity: 'Home', audience: { type: 'global' }, owner: 'AIMS OS', status: 'published', widgets: 3, updated: 'just now', placement: { surface: 'home', homeScope: 'personal' } },
+  { id: 'd-ai-consumption', template: 't-ai-consumption', name: 'AI Consumption', entity: 'Report', audience: { type: 'global' }, owner: 'AIMS OS', status: 'published', widgets: 5, updated: 'just now', placement: { surface: 'report', collection: 'Executive' } },
   { id: 'd-deal-room', template: 't-acct360', name: 'Deal Room', entity: 'Deal', audience: 'Sales Agent', owner: 'Liam Murphy', status: 'draft', widgets: 4, updated: '3 hours ago', placement: { surface: 'profile', profileType: 'Deal', scope: 'all', entityId: null, entityName: null, tab: 'Overview' } },
   { id: 'd-marketing', template: 't-exec', name: 'Marketing Performance', entity: 'Report', audience: 'Manager', owner: 'Elena Petrova', status: 'published', widgets: 11, updated: '5 days ago', placement: { surface: 'report', collection: 'Sales Reports' } },
   { id: 'd-support-mgr', template: 't-support', name: 'Support Leadership', entity: 'Report', audience: 'Manager', owner: 'James Okonkwo', status: 'pending', widgets: 8, updated: '1 week ago', placement: { surface: 'report', collection: 'Support Reports' } },
@@ -171,6 +178,10 @@ export const SKELETON_ABOUT = {
   Map: 'A geographic distribution of values.',
   'Heat Map': 'A matrix of values across two dimensions.',
   'AI Summary': 'An AI-written narrative of the data.',
+  'Cost KPI': 'A consumption total (credits/tokens/cost) with its month-over-month change.',
+  'Usage Heatmap': 'A daily activity calendar with current and longest streaks.',
+  'Spend Breakdown': 'Where consumption goes — ranked share by agent, workflow, or source.',
+  'Composite Stat': 'A headline total broken into the components that make it up.',
 }
 export const SKELETON_BESTFOR = {
   KPI: 'Headline numbers and at-a-glance status.',
@@ -181,6 +192,10 @@ export const SKELETON_BESTFOR = {
   Map: 'Comparing performance across regions.',
   'Heat Map': 'Finding hotspots across two dimensions.',
   'AI Summary': 'Executive summaries and quick context.',
+  'Cost KPI': 'Tracking spend or consumption against last month.',
+  'Usage Heatmap': 'Seeing the cadence of agent/workflow activity over time.',
+  'Spend Breakdown': 'Understanding what is driving consumption and cost.',
+  'Composite Stat': 'Showing a total and its mix in one tile.',
 }
 
 // ── Home pinned widgets: Inbox, Tasks, and the Human Touch Layer (HITL) ──
@@ -430,6 +445,15 @@ export const TEMPLATE_SEED = {
     { size: 'sm', widgetId: 'w-inbox' },
     { size: 'sm', widgetId: 'w-htl' },
     { size: 'sm', widgetId: 'w-tasks' },
+  ],
+  // AI Consumption — the Wispr-style insights board: 3 headline tiles, then the
+  // activity calendar and the spend breakdown full-width (tiles evenly, no gaps).
+  't-ai-consumption': [
+    { size: 'sm', widgetId: 'w-cons-spend' },
+    { size: 'sm', widgetId: 'w-cons-tokens' },
+    { size: 'sm', widgetId: 'w-cons-prompts' },
+    { size: 'lg', widgetId: 'w-cons-activity' },
+    { size: 'lg', widgetId: 'w-cons-bysource' },
   ],
 }
 

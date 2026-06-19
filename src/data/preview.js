@@ -230,6 +230,25 @@ const RANGE_MULT = { '7d': 0.45, '30d': 0.78, '90d': 1, qtd: 0.9, '12m': 1.7 }
 // widget render the SAME data — switching the widget type only re-visualizes it,
 // never swaps in unrelated canned rows. `h` seeds variety (stable per identity),
 // `m` is the magnitude multiplier (date range × filters × scope rollup).
+// Deterministic daily-activity calendar (GitHub-style) for consumption widgets —
+// 16 weeks × 7 days of intensity levels (0–4), weekends quieter. No Date/Math.random
+// (stable per identity). Returns the day grid + current trailing streak + longest run.
+function buildCalendar(h) {
+  const days = []
+  for (let i = 0; i < 112; i++) {
+    const r = ((h * 9301 + i * 49297 + 233) % 233280) / 233280
+    const dow = i % 7
+    let level = Math.floor(r * 5) // 0..4
+    if (dow === 0 || dow === 6) level = Math.max(0, level - 2) // quieter weekends
+    days.push(level)
+  }
+  let streak = 0
+  for (let i = days.length - 1; i >= 0 && days[i] > 0; i--) streak++
+  let longest = 0, run = 0
+  for (const lv of days) { if (lv > 0) { run += 1; longest = Math.max(longest, run) } else run = 0 }
+  return { days, streak, longest }
+}
+
 function metricBundle(name, { h = 0, m = 1, filterCount = 0, dimensionId, transform } = {}) {
   const unit = metricUnit(name)
   const additive = unit === 'currency' || unit === 'count'
@@ -321,6 +340,7 @@ function metricBundle(name, { h = 0, m = 1, filterCount = 0, dimensionId, transf
     recordTotal: records.length,
     narrative,
     gauge: { value: gaugeVal, label: 'of target' },
+    calendar: buildCalendar(h),
   }
 }
 

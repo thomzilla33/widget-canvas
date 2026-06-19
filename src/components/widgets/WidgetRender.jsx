@@ -14,7 +14,7 @@ import {
   PieChart,
   Pie,
 } from 'recharts'
-import { Sparkles } from 'lucide-react'
+import { Sparkles, TrendingUp, TrendingDown } from 'lucide-react'
 import { useChartTheme, SERIES } from '../playground/WidgetPreview.jsx'
 import { widgetSample, formatValue } from '../../data/preview.js'
 import { isBillingWidget, creditBreakdown } from '../../data/governance.js'
@@ -78,6 +78,14 @@ export default function WidgetRender({ widget, size = 'md', scope, viewAs }) {
       return <AlertsMini {...props} />
     case 'Stat Row':
       return <StatRowMini {...props} />
+    case 'Cost KPI': // consumption: big number + unit + MoM delta + sparkline
+      return <CostKpiMini {...props} />
+    case 'Usage Heatmap': // consumption: GitHub-style activity calendar + streak
+      return <UsageHeatmapMini {...props} />
+    case 'Spend Breakdown': // consumption: where it goes — ranked % bars
+      return <SpendBreakdownMini {...props} />
+    case 'Composite Stat': // consumption: headline total + its component split
+      return <CompositeStatMini {...props} />
     case 'Timeline': // marketplace-only skeleton — show as a trend line
       return <LineMini {...props} />
     case 'Chart':
@@ -198,6 +206,128 @@ function GaugeMini({ data, size, goal }) {
         <span className={`num font-bold ${size === 'lg' ? 'text-3xl' : 'text-lg'} ${goalSet ? '' : 'text-gray-900 dark:text-slate-100'}`} style={goalSet ? { color } : undefined}>{v}%</span>
         {size === 'lg' && <span className="text-[11px] text-gray-500 dark:text-slate-400">{data.gauge.label}</span>}
       </div>
+    </div>
+  )
+}
+
+// ── Consumption widgets: communicate prompts/tokens/credits/cost patterns ──
+
+// Display unit derived from the metric name (credits/tokens/$/prompts/runs).
+function consumptionUnit(label = '') {
+  if (/cost|spend|\$|usd/i.test(label)) return '$'
+  if (/token/i.test(label)) return 'tokens'
+  if (/credit/i.test(label)) return 'credits'
+  if (/prompt/i.test(label)) return 'prompts'
+  if (/run/i.test(label)) return 'runs'
+  return ''
+}
+
+// Big consumption number + unit + a subtle month-over-month delta pill + sparkline (lg).
+function CostKpiMini({ data, size, format }) {
+  const down = data.kpi.deltaDir === 'down'
+  const unit = consumptionUnit(data.label)
+  const isCurrency = unit === '$'
+  const useFmt = format && format.style && format.style !== 'auto'
+  const raw = useFmt ? formatValue(data.kpiRaw, format) : data.kpi.value
+  // The currency metric value already carries a $ — don't double it.
+  const value = isCurrency && !String(raw).trim().startsWith('$') ? `$${raw}` : raw
+  const Arrow = down ? TrendingDown : TrendingUp
+  return (
+    <div className="py-1">
+      <div className={`num font-bold tracking-tight text-gray-900 dark:text-slate-100 ${size === 'sm' ? 'text-xl' : size === 'lg' ? 'text-4xl' : 'text-2xl'}`}>
+        {value}
+      </div>
+      {unit && !isCurrency && <div className="text-[10px] uppercase tracking-wide text-gray-500 dark:text-slate-400">{unit}</div>}
+      {data.kpi.delta && (
+        <span className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-gray-600 dark:bg-white/10 dark:text-slate-300">
+          <Arrow size={11} aria-hidden="true" className={down ? 'text-aims-governed' : 'text-aims-stale'} /> {data.kpi.delta} this month
+        </span>
+      )}
+      {size === 'lg' && (
+        <div className="mt-2" aria-hidden="true">
+          <ResponsiveContainer width="100%" height={56}>
+            <LineChart data={data.series} margin={{ top: 4, right: 4, left: 4, bottom: 0 }}>
+              <Line type="monotone" dataKey="y" stroke={SERIES[0]} strokeWidth={2} dot={false} />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// GitHub-style activity calendar (consumption cadence) + current / longest streak.
+const CAL_LEVELS = ['bg-gray-100 dark:bg-white/[0.06]', 'bg-aims-blue/25', 'bg-aims-blue/45', 'bg-aims-blue/70', 'bg-aims-blue']
+function UsageHeatmapMini({ data, size }) {
+  const cal = data.calendar || { days: [], streak: 0, longest: 0 }
+  const weeks = size === 'sm' ? 8 : size === 'lg' ? 16 : 12
+  const slice = cal.days.slice(Math.max(0, cal.days.length - weeks * 7))
+  const cols = Array.from({ length: weeks }, (_, w) => slice.slice(w * 7, w * 7 + 7))
+  return (
+    <div role="img" aria-label={`Activity calendar — ${cal.streak} day current streak, longest ${cal.longest} days.`}>
+      <div className="mb-1.5 flex items-baseline gap-1.5">
+        <span className={`num font-bold text-gray-900 dark:text-slate-100 ${size === 'lg' ? 'text-2xl' : 'text-lg'}`}>{cal.streak}</span>
+        <span className="text-[11px] text-gray-500 dark:text-slate-400">day streak</span>
+        {size !== 'sm' && <span className="ml-auto text-[10px] text-gray-400 dark:text-slate-500">Longest {cal.longest}</span>}
+      </div>
+      <div className="flex gap-[3px]">
+        {cols.map((col, ci) => (
+          <div key={ci} className="flex flex-col gap-[3px]">
+            {col.map((lv, ri) => <span key={ri} className={`h-2.5 w-2.5 rounded-[2px] ${CAL_LEVELS[lv] || CAL_LEVELS[0]}`} />)}
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// Where consumption goes: ranked horizontal % bars (agent / workflow / source).
+function SpendBreakdownMini({ data, size }) {
+  const all = data.breakdown || []
+  const items = all.slice(0, size === 'sm' ? 3 : size === 'lg' ? 6 : 4)
+  const max = Math.max(...all.map((b) => b.value), 1)
+  const total = all.reduce((a, b) => a + b.value, 0) || 1
+  return (
+    <ul className="space-y-1.5">
+      {items.map((b, i) => (
+        <li key={b.label} className="flex items-center gap-2 text-[11px]">
+          <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: SERIES[i % SERIES.length] }} />
+          <span className="w-20 shrink-0 truncate text-gray-700 dark:text-slate-200">{b.label}</span>
+          <span className="h-2 flex-1 overflow-hidden rounded-full bg-gray-100 dark:bg-white/10">
+            <span className="block h-full rounded-full" style={{ width: `${(b.value / max) * 100}%`, background: SERIES[i % SERIES.length] }} />
+          </span>
+          <span className="num w-9 shrink-0 text-right font-semibold text-gray-900 dark:text-slate-100">{Math.round((b.value / total) * 100)}%</span>
+          {size === 'lg' && <span className="num w-12 shrink-0 text-right text-gray-500 dark:text-slate-400">{formatValue(b.value, { abbreviate: true })}</span>}
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+// Headline total + the 2–3 components that make it up (with share).
+function CompositeStatMini({ data, size }) {
+  const parts = (data.breakdown || []).slice(0, 3)
+  const sum = (data.breakdown || []).reduce((a, b) => a + b.value, 0) || 1
+  return (
+    <div>
+      <div className={`num font-bold tracking-tight text-gray-900 dark:text-slate-100 ${size === 'sm' ? 'text-xl' : size === 'lg' ? 'text-4xl' : 'text-2xl'}`}>
+        {data.kpi.value}
+      </div>
+      {parts.length > 0 && (
+        <ul className="mt-2 space-y-1 border-t border-gray-100 pt-2 dark:border-white/10">
+          {parts.map((p, i) => (
+            <li key={p.label} className="flex items-center justify-between gap-2 text-[11px]">
+              <span className="flex min-w-0 items-center gap-1.5 text-gray-600 dark:text-slate-300">
+                <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: SERIES[i % SERIES.length] }} />
+                <span className="truncate">{p.label}</span>
+              </span>
+              <span className="num shrink-0 font-semibold text-gray-900 dark:text-slate-100">
+                {formatValue(p.value, { abbreviate: true })} <span className="font-normal text-gray-400 dark:text-slate-500">{Math.round((p.value / sum) * 100)}%</span>
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   )
 }
