@@ -3,20 +3,32 @@ import { PageHeader } from '../components/common/index.jsx'
 import FilterToolbar from '../components/common/FilterToolbar.jsx'
 import StudioWelcome from '../components/common/StudioWelcome.jsx'
 import DashboardCards from '../components/dashboard/DashboardCards.jsx'
-import PinnedWidgets from '../components/home/PinnedWidgets.jsx'
+import DashboardZones from '../components/dashboard/DashboardZones.jsx'
+import { DEFAULT_SCOPE } from '../components/dashboard/DashboardControls.jsx'
 import { useDashboards } from '../state/DashboardsContext.jsx'
+import { useLive } from '../state/LiveContext.jsx'
 
-// Workspace home: pinned/actionable widgets (Inbox, Tasks, HITL) + home dashboards.
-// The pinned section is the hero; the filter toolbar scopes only the landing dashboards.
+// The board behind the "needs you" hero — the standardized Inbox · HITL · Tasks triage
+// board (also reachable as its own dashboard). Rendered here so Home and the Workspace
+// Home dashboard stay one and the same surface.
+const WORKSPACE_BOARD_ID = 'd-workspace-home'
+
+// Workspace home: the standardized work board (Inbox, Tasks, HITL) + home dashboards.
+// The board is the hero; the filter toolbar scopes only the landing dashboards.
 export default function HomePage() {
   const { dashboards } = useDashboards()
+  const { tick, paused } = useLive()
   const [search, setSearch] = useState('')
   const [scope, setScope] = useState('All')
   const [sortBy, setSortBy] = useState('name')
   const [sortDir, setSortDir] = useState('asc')
 
+  const board = dashboards.find((d) => d.id === WORKSPACE_BOARD_ID)
+  const boardScope = { ...DEFAULT_SCOPE, tick, paused }
+
   const homes = dashboards
     .filter((d) => d.placement?.surface === 'home')
+    .filter((d) => d.id !== WORKSPACE_BOARD_ID) // shown as the hero board above — don't list it twice
     .filter((d) => scope === 'All' || d.placement.homeScope === scope)
     .filter((d) => !search || d.name.toLowerCase().includes(search.toLowerCase()))
     .sort((a, b) => {
@@ -31,7 +43,15 @@ export default function HomePage() {
       <div className="flex-1 overflow-auto">
         <div className="mx-auto w-full max-w-[1800px] space-y-6 px-6 py-5 lg:px-8 2xl:px-12">
           <StudioWelcome studioId="home" built={{ count: homes.length, label: 'home dashboards' }} />
-          <PinnedWidgets />
+
+          {board && (
+            <section>
+              <div className="mb-2 flex flex-wrap items-center gap-3">
+                <span className="text-[11px] font-bold uppercase tracking-wide text-gray-500 dark:text-slate-400">Needs you</span>
+              </div>
+              <DashboardZones dashboard={board} scope={boardScope} />
+            </section>
+          )}
 
           {hasAnyHome && (
             <section>
