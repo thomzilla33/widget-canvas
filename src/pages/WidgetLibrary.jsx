@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Flag, Sparkles } from 'lucide-react'
+import { Flag, Sparkles, MoreHorizontal, Plus, Pencil, Trash2 } from 'lucide-react'
+import { PopoverPanel } from '../components/common/Popover.jsx'
 import { PageHeader, HealthBadge, FreshnessBadge, EmptyState, DataPlaneBadge } from '../components/common/index.jsx'
 import { dataPlaneOf } from '../data/governance.js'
 import { WidgetGlyph } from '../components/widgets/glyph.jsx'
@@ -63,6 +64,7 @@ export default function WidgetLibrary() {
   const [detailWidget, setDetailWidget] = useState(null) // Tier 2 — widget detail (not the builder)
   const [editWidget, setEditWidget] = useState(null) // CRUD U — edit safe fields
   const [deletingWidget, setDeletingWidget] = useState(null) // CRUD D — staged delete dialog
+  const [menuId, setMenuId] = useState(null) // per-card ⋯ actions menu (by widget id)
   const [marketplace, setMarketplace] = useState(false)
   const [aiOpen, setAiOpen] = useState(false)
   const [launcher, setLauncher] = useState(false)
@@ -217,17 +219,39 @@ export default function WidgetLibrary() {
               key={w.id}
               role="button"
               tabIndex={0}
-              onClick={open}
-              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open() } }}
+              onClick={(e) => { if (e.target === e.currentTarget || !e.target.closest('button')) open() }}
+              onKeyDown={(e) => { if (e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); open() } }}
               className="catalog-card min-h-[240px] cursor-pointer text-left"
             >
-              <div className="absolute top-3 right-3">
+              <div className="absolute top-3 right-3 flex items-center gap-1.5">
                 <HealthBadge health={w.health} />
+                {isAdmin && (
+                  <div className="relative">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setMenuId(menuId === w.id ? null : w.id) }}
+                      aria-label={`Actions for ${w.name}`}
+                      aria-haspopup="menu"
+                      aria-expanded={menuId === w.id}
+                      className="grid h-6 w-6 place-items-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-white/10 dark:hover:text-slate-200"
+                    >
+                      <MoreHorizontal size={15} aria-hidden="true" />
+                    </button>
+                    {menuId === w.id && (
+                      <PopoverPanel onClose={() => setMenuId(null)} align="right" className="w-44 p-1.5">
+                        <CardMenuItem icon={Plus} onClick={(e) => { e.stopPropagation(); setMenuId(null); navigate('/dashboards') }}>Add to a dashboard</CardMenuItem>
+                        {!w.system && (
+                          <CardMenuItem icon={Pencil} onClick={(e) => { e.stopPropagation(); setMenuId(null); setEditWidget(w) }}>Edit</CardMenuItem>
+                        )}
+                        <CardMenuItem icon={Trash2} danger onClick={(e) => { e.stopPropagation(); setMenuId(null); setDeletingWidget(w) }}>Delete</CardMenuItem>
+                      </PopoverPanel>
+                    )}
+                  </div>
+                )}
               </div>
 
               <div className="flex items-center gap-3">
                 <WidgetGlyph skeleton={w.skeleton} />
-                <div className="min-w-0 pr-16">
+                <div className={`min-w-0 ${isAdmin ? 'pr-24' : 'pr-16'}`}>
                   <div className="truncate text-sm font-semibold text-gray-900 dark:text-slate-100">
                     {w.name}
                   </div>
@@ -326,5 +350,22 @@ export default function WidgetLibrary() {
 
       {aiOpen && <AIGenerateModal mode="widget" onClose={() => setAiOpen(false)} />}
     </div>
+  )
+}
+
+// Row in the per-card ⋯ actions menu. `danger` tints destructive items red.
+function CardMenuItem({ icon: Icon, danger, onClick, children }) {
+  return (
+    <button
+      onClick={onClick}
+      role="menuitem"
+      className={`flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-xs ${
+        danger
+          ? 'text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-500/10'
+          : 'text-gray-700 hover:bg-gray-100 dark:text-slate-200 dark:hover:bg-white/10'
+      }`}
+    >
+      <Icon size={14} aria-hidden="true" /> {children}
+    </button>
   )
 }
