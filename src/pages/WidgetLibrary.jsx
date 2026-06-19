@@ -242,7 +242,9 @@ export default function WidgetLibrary() {
                         {!w.system && (
                           <CardMenuItem icon={Pencil} onClick={(e) => { e.stopPropagation(); setMenuId(null); setEditWidget(w) }}>Edit</CardMenuItem>
                         )}
-                        <CardMenuItem icon={Trash2} danger onClick={(e) => { e.stopPropagation(); setMenuId(null); setDeletingWidget(w) }}>Delete</CardMenuItem>
+                        {!w.system && (
+                          <CardMenuItem icon={Trash2} danger onClick={(e) => { e.stopPropagation(); setMenuId(null); setDeletingWidget(w) }}>Delete</CardMenuItem>
+                        )}
                       </PopoverPanel>
                     )}
                   </div>

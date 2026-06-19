@@ -121,8 +121,9 @@ export default function WidgetDetailModal({ widget, isAdmin, onClose, onPlace, o
 
         {/* Actions */}
         <div className="flex items-center gap-2 border-t border-gray-200 p-3 dark:border-white/10">
-          {/* Delete (admin) → opens the staged GitHub-style confirm (impact + type-to-confirm). */}
-          {isAdmin && onDelete && (
+          {/* Delete (admin) → opens the staged GitHub-style confirm. System/default widgets
+              (HITL/Inbox/Tasks) are protected — not deletable, same as not editable. */}
+          {isAdmin && onDelete && !widget.system && (
             <button
               onClick={() => onDelete(widget)}
               className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-500/10"
