@@ -18,7 +18,6 @@ export default function WidgetDetailModal({ widget, isAdmin, onClose, onPlace, o
   const ref = useFocusTrap()
   const { dashboards } = useDashboards()
   const [size, setSize] = useState('md')
-  const [confirmDelete, setConfirmDelete] = useState(false)
   if (!widget) return null
 
   const sizeMeta = WIDGET_SIZES.find((s) => s.id === size)
@@ -117,53 +116,32 @@ export default function WidgetDetailModal({ widget, isAdmin, onClose, onPlace, o
 
         {/* Actions */}
         <div className="flex items-center gap-2 border-t border-gray-200 p-3 dark:border-white/10">
-          {confirmDelete ? (
-            <>
-              <span className="text-xs text-gray-700 dark:text-slate-200">
-                Delete “{widget.name}”? This removes it from your catalog and can’t be undone.
-              </span>
-              <div className="ml-auto flex shrink-0 items-center gap-2">
-                <button className="btn-secondary !py-1.5 text-xs" onClick={() => setConfirmDelete(false)}>Cancel</button>
-                <button
-                  onClick={() => onDelete?.(widget)}
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-red-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/50"
-                >
-                  <Trash2 size={14} aria-hidden="true" /> Delete permanently
-                </button>
-              </div>
-            </>
+          {/* Delete (admin) → opens the staged GitHub-style confirm (impact + type-to-confirm). */}
+          {isAdmin && onDelete && (
+            <button
+              onClick={() => onDelete(widget)}
+              className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-500/10"
+            >
+              <Trash2 size={14} aria-hidden="true" /> Delete
+            </button>
+          )}
+          {/* Edit (admin) — safe, non-structural fields. System widgets aren't editable. */}
+          {isAdmin && onEdit && !widget.system && (
+            <button className="btn-secondary !py-1.5 text-xs ml-auto" onClick={onEdit}>
+              <Pencil size={14} aria-hidden="true" /> Edit
+            </button>
+          )}
+          <button className={`btn-secondary !py-1.5 text-xs ${isAdmin && onEdit && !widget.system ? '' : 'ml-auto'}`} onClick={onClose}>Close</button>
+          {needsRemap ? (
+            <button className="btn-primary !py-1.5 text-xs" onClick={onRemap}>
+              <RefreshCw size={14} aria-hidden="true" /> Remap widget
+            </button>
           ) : (
-            <>
-              {/* Delete (admin) — guarded: a widget still placed on a dashboard can't be deleted. */}
-              {isAdmin && onDelete && (
-                <button
-                  onClick={() => setConfirmDelete(true)}
-                  disabled={usedOn.length > 0}
-                  title={usedOn.length > 0 ? `On ${usedOn.length} dashboard${usedOn.length === 1 ? '' : 's'} — remove it there first` : undefined}
-                  className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:text-gray-400 disabled:hover:bg-transparent dark:text-red-400 dark:hover:bg-red-500/10 dark:disabled:text-slate-600"
-                >
-                  <Trash2 size={14} aria-hidden="true" /> Delete
-                </button>
-              )}
-              {/* Edit (admin) — safe, non-structural fields. System widgets aren't editable. */}
-              {isAdmin && onEdit && !widget.system && (
-                <button className="btn-secondary !py-1.5 text-xs ml-auto" onClick={onEdit}>
-                  <Pencil size={14} aria-hidden="true" /> Edit
-                </button>
-              )}
-              <button className={`btn-secondary !py-1.5 text-xs ${isAdmin && onEdit && !widget.system ? '' : 'ml-auto'}`} onClick={onClose}>Close</button>
-              {needsRemap ? (
-                <button className="btn-primary !py-1.5 text-xs" onClick={onRemap}>
-                  <RefreshCw size={14} aria-hidden="true" /> Remap widget
-                </button>
-              ) : (
-                isAdmin && (
-                  <button className="btn-primary !py-1.5 text-xs" onClick={onPlace}>
-                    <Plus size={14} aria-hidden="true" /> Add to a dashboard
-                  </button>
-                )
-              )}
-            </>
+            isAdmin && (
+              <button className="btn-primary !py-1.5 text-xs" onClick={onPlace}>
+                <Plus size={14} aria-hidden="true" /> Add to a dashboard
+              </button>
+            )
           )}
         </div>
       </div>

@@ -9,6 +9,7 @@ import RepinModal from '../components/widgets/RepinModal.jsx'
 import FlagDetailModal from '../components/widgets/FlagDetailModal.jsx'
 import WidgetDetailModal from '../components/widgets/WidgetDetailModal.jsx'
 import EditWidgetModal from '../components/widgets/EditWidgetModal.jsx'
+import DeleteWidgetDialog from '../components/widgets/DeleteWidgetDialog.jsx'
 import WidgetMarketplace from '../components/widgets/WidgetMarketplace.jsx'
 import AIGenerateModal from '../components/ai/AIGenerateModal.jsx'
 import CreateLauncher from '../components/create/CreateLauncher.jsx'
@@ -37,7 +38,7 @@ const FIX_HINT = {
 export default function WidgetLibrary() {
   const navigate = useNavigate()
   const { widgets, updateWidget, removeWidget } = useWidgets()
-  const { dashboards } = useDashboards()
+  const { dashboards, updateDashboard } = useDashboards()
   const { isAdmin } = useRole()
   const { flags, resolveFlag } = useFeedback()
 
@@ -61,6 +62,7 @@ export default function WidgetLibrary() {
   const [detailFlag, setDetailFlag] = useState(null)
   const [detailWidget, setDetailWidget] = useState(null) // Tier 2 — widget detail (not the builder)
   const [editWidget, setEditWidget] = useState(null) // CRUD U — edit safe fields
+  const [deletingWidget, setDeletingWidget] = useState(null) // CRUD D — staged delete dialog
   const [marketplace, setMarketplace] = useState(false)
   const [aiOpen, setAiOpen] = useState(false)
   const [launcher, setLauncher] = useState(false)
@@ -292,12 +294,31 @@ export default function WidgetLibrary() {
           onClose={() => setDetailWidget(null)}
           onPlace={() => { setDetailWidget(null); navigate('/dashboards') }}
           onRemap={() => { const w = detailWidget; setDetailWidget(null); setRepinWidget(w) }}
-          onDelete={(w) => { removeWidget(w.id); setDetailWidget(null) }}
+          onDelete={(w) => { setDetailWidget(null); setDeletingWidget(w) }}
           onEdit={() => { const w = detailWidget; setDetailWidget(null); setEditWidget(w) }}
         />
       )}
 
       {editWidget && <EditWidgetModal widget={editWidget} onClose={() => setEditWidget(null)} />}
+
+      {deletingWidget && (
+        <DeleteWidgetDialog
+          widget={deletingWidget}
+          usedOn={dashboards.filter((d) => dashboardLayout(d).some((p) => p.widgetId === deletingWidget.id))}
+          onClose={() => setDeletingWidget(null)}
+          onConfirm={() => {
+            // Cascade: strip the widget from every dashboard that hosts it, then drop it.
+            dashboards
+              .filter((d) => dashboardLayout(d).some((p) => p.widgetId === deletingWidget.id))
+              .forEach((d) => {
+                const layout = dashboardLayout(d).filter((p) => p.widgetId !== deletingWidget.id)
+                updateDashboard(d.id, { layout, widgets: layout.length })
+              })
+            removeWidget(deletingWidget.id)
+            setDeletingWidget(null)
+          }}
+        />
+      )}
 
       {marketplace && <WidgetMarketplace onClose={() => setMarketplace(false)} />}
 
