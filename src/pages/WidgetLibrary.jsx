@@ -205,11 +205,19 @@ export default function WidgetLibrary() {
           />
         ) : (
         <div ref={gridReveal} className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill,minmax(min(264px,100%),1fr))' }}>
-          {shown.map((w) => (
-            <button
+          {shown.map((w) => {
+            const open = () => (w.health === 'review' ? setRepinWidget(w) : setDetailWidget(w))
+            return (
+            // Not a <button>: the live preview renders interactive system widgets whose
+            // own buttons can't legally nest inside one. role=button + keydown keeps it
+            // keyboard-accessible.
+            <div
               key={w.id}
-              onClick={() => (w.health === 'review' ? setRepinWidget(w) : setDetailWidget(w))}
-              className="catalog-card min-h-[240px]"
+              role="button"
+              tabIndex={0}
+              onClick={open}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open() } }}
+              className="catalog-card min-h-[240px] cursor-pointer text-left"
             >
               <div className="absolute top-3 right-3">
                 <HealthBadge health={w.health} />
@@ -251,8 +259,9 @@ export default function WidgetLibrary() {
                 </span>
                 <FreshnessBadge status={w.freshness} label={w.freshness} />
               </div>
-            </button>
-          ))}
+            </div>
+            )
+          })}
         </div>
         )}
         <p className="mt-4 text-xs text-gray-500 dark:text-slate-400">Screens hosted here: S37, S38, S40–S47</p>
