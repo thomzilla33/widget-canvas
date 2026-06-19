@@ -8,8 +8,8 @@ import { MARKETPLACE_CATEGORIES, MARKETPLACE_WIDGETS, WIDGET_SIZES } from '../..
 
 const SHOW = [
   { id: 'all', label: 'All' },
-  { id: 'not-added', label: 'Not added' },
-  { id: 'added', label: 'Added' },
+  { id: 'not-added', label: 'Not installed' },
+  { id: 'added', label: 'Installed' },
 ]
 const SORTS = [
   { id: 'popular', label: 'Most installed' },
@@ -168,7 +168,7 @@ export default function WidgetMarketplace({ onClose }) {
         {/* Footer */}
         <div className="flex items-center justify-between border-t border-gray-200 px-6 py-3 dark:border-white/10">
           <span className="text-xs text-gray-500 dark:text-slate-400">
-            <strong className="text-gray-900 dark:text-slate-100">{installedCount}</strong> of {MARKETPLACE_WIDGETS.length} added to your catalog
+            <strong className="text-gray-900 dark:text-slate-100">{installedCount}</strong> of {MARKETPLACE_WIDGETS.length} installed in your catalog
           </span>
           <button className="btn-primary" onClick={onClose}>
             Done
@@ -315,13 +315,13 @@ function InstallButton({ installed, onInstall, full }) {
   if (installed) {
     return (
       <button className={`btn-secondary ${full ? 'w-full' : ''} cursor-default text-aims-governed dark:opacity-60`} disabled>
-        <Check size={15} /> Added
+        <Check size={15} /> Installed
       </button>
     )
   }
   return (
     <button className={`btn-primary ${full ? 'w-full' : ''}`} onClick={(e) => { e.stopPropagation(); onInstall() }}>
-      <Plus size={15} /> Add
+      <Plus size={15} /> Install
     </button>
   )
 }
