@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { LayoutDashboard, MapPin, UserX, RotateCcw, FileBarChart, ArrowRight, Sparkles } from 'lucide-react'
+import { LayoutDashboard, MapPin, UserX, RotateCcw, FileBarChart, ArrowRight, Sparkles, MoreHorizontal, Eye, Pencil, Trash2 } from 'lucide-react'
 import { PageHeader, Badge, EmptyState } from '../components/common/index.jsx'
+import { PopoverPanel } from '../components/common/Popover.jsx'
 import StudioWelcome from '../components/common/StudioWelcome.jsx'
 import FilterToolbar from '../components/common/FilterToolbar.jsx'
 import AIGenerateModal from '../components/ai/AIGenerateModal.jsx'
 import CreateLauncher from '../components/create/CreateLauncher.jsx'
+import DeleteDashboardDialog from '../components/dashboard/DeleteDashboardDialog.jsx'
 import { useStaggerReveal } from '../hooks/useReveal.js'
 import { audienceLabel } from '../data/audiences.js'
 import { useDashboards } from '../state/DashboardsContext.jsx'
@@ -28,8 +30,10 @@ const KIND_OPTIONS = [
 // S76–S79 — dashboard list with search + status filter
 export default function DashboardList() {
   const navigate = useNavigate()
-  const { dashboards, updateDashboard } = useDashboards()
+  const { dashboards, updateDashboard, removeDashboard } = useDashboards()
   const { isAdmin } = useRole()
+  const [menuId, setMenuId] = useState(null) // per-card ⋯ menu (by dashboard id)
+  const [deletingDashboard, setDeletingDashboard] = useState(null)
   const [search, setSearch] = useState('')
   const [status, setStatus] = useState('All')
   const [kind, setKind] = useState('All')
@@ -221,13 +225,36 @@ export default function DashboardList() {
         ) : (
           <div ref={gridReveal} className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill,minmax(min(280px,100%),1fr))' }}>
             {shown.map((d) => (
-              <button
+              <div
                 key={d.id}
-                onClick={() => navigate(`/dashboard/${d.id}`)}
-                className="catalog-card min-h-[124px]"
+                role="button"
+                tabIndex={0}
+                onClick={(e) => { if (!e.target.closest('button')) navigate(`/dashboard/${d.id}`) }}
+                onKeyDown={(e) => { if (e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); navigate(`/dashboard/${d.id}`) } }}
+                className="catalog-card min-h-[124px] cursor-pointer text-left"
               >
-                <div className="absolute top-3 right-3">
+                <div className="absolute top-3 right-3 flex items-center gap-1.5">
                   <Badge variant={d.status} />
+                  {isAdmin && (
+                    <div className="relative">
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setMenuId(menuId === d.id ? null : d.id) }}
+                        aria-label={`Actions for ${d.name}`}
+                        aria-haspopup="menu"
+                        aria-expanded={menuId === d.id}
+                        className="grid h-6 w-6 place-items-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-white/10 dark:hover:text-slate-200"
+                      >
+                        <MoreHorizontal size={15} aria-hidden="true" />
+                      </button>
+                      {menuId === d.id && (
+                        <PopoverPanel onClose={() => setMenuId(null)} align="right" className="w-40 p-1.5">
+                          <DashMenuItem icon={Eye} onClick={(e) => { e.stopPropagation(); setMenuId(null); navigate(`/dashboard/${d.id}`) }}>Open</DashMenuItem>
+                          <DashMenuItem icon={Pencil} onClick={(e) => { e.stopPropagation(); setMenuId(null); navigate(`/dashboard/${d.id}/canvas`) }}>Edit</DashMenuItem>
+                          <DashMenuItem icon={Trash2} danger onClick={(e) => { e.stopPropagation(); setMenuId(null); setDeletingDashboard(d) }}>Delete</DashMenuItem>
+                        </PopoverPanel>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex items-center gap-3">
@@ -235,8 +262,8 @@ export default function DashboardList() {
                     <LayoutDashboard size={18} />
                   </span>
                   <div className="min-w-0 flex-1">
-                    {/* only the title clears the absolute status badge — not the rows below */}
-                    <div className="truncate pr-20 text-sm font-semibold text-gray-900 dark:text-slate-100">
+                    {/* only the title clears the absolute status badge (+ ⋯ for admins) */}
+                    <div className={`truncate text-sm font-semibold text-gray-900 dark:text-slate-100 ${isAdmin ? 'pr-28' : 'pr-20'}`}>
                       {d.name}
                     </div>
                     <div className="mt-0.5 flex min-w-0 items-center gap-1.5">
@@ -261,7 +288,7 @@ export default function DashboardList() {
                   <span className="text-[11px] text-gray-500 dark:text-slate-400">{widgetCount(d)} widgets · {audienceLabel(d.audience)}</span>
                   <span className="text-[11px] text-gray-500 dark:text-slate-400">{d.updated}</span>
                 </div>
-              </button>
+              </div>
             ))}
           </div>
         )}
@@ -270,7 +297,32 @@ export default function DashboardList() {
 
       {launcher && <CreateLauncher kind="dashboard" onPick={pickCreate} onClose={() => setLauncher(false)} />}
 
+      {deletingDashboard && (
+        <DeleteDashboardDialog
+          dashboard={deletingDashboard}
+          onClose={() => setDeletingDashboard(null)}
+          onConfirm={() => { removeDashboard(deletingDashboard.id); setDeletingDashboard(null) }}
+        />
+      )}
+
       {aiOpen && <AIGenerateModal mode="dashboard" onClose={() => setAiOpen(false)} />}
     </div>
+  )
+}
+
+// Row in the per-card ⋯ actions menu. `danger` tints destructive items red.
+function DashMenuItem({ icon: Icon, danger, onClick, children }) {
+  return (
+    <button
+      onClick={onClick}
+      role="menuitem"
+      className={`flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-xs ${
+        danger
+          ? 'text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-500/10'
+          : 'text-gray-700 hover:bg-gray-100 dark:text-slate-200 dark:hover:bg-white/10'
+      }`}
+    >
+      <Icon size={14} aria-hidden="true" /> {children}
+    </button>
   )
 }

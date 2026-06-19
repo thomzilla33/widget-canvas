@@ -18,8 +18,14 @@ export function DashboardsProvider({ children }) {
     setDashboards((prev) => prev.map((d) => (d.id === id ? { ...d, ...patch } : d)))
   }
 
+  // Immutable remove by id. Widgets are catalog-level and survive — only the
+  // dashboard (its layout/placement) is dropped.
+  function removeDashboard(id) {
+    setDashboards((prev) => prev.filter((d) => d.id !== id))
+  }
+
   return (
-    <DashboardsContext.Provider value={{ dashboards, addDashboard, updateDashboard }}>
+    <DashboardsContext.Provider value={{ dashboards, addDashboard, updateDashboard, removeDashboard }}>
       {children}
     </DashboardsContext.Provider>
   )
