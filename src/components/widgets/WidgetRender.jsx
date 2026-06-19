@@ -16,8 +16,7 @@ import {
 } from 'recharts'
 import { Sparkles } from 'lucide-react'
 import { useChartTheme, SERIES } from '../playground/WidgetPreview.jsx'
-import { widgetSample, formatValue, tableData } from '../../data/preview.js'
-import { getTable, formatCell } from '../../data/tables.js'
+import { widgetSample, formatValue } from '../../data/preview.js'
 import { isBillingWidget, creditBreakdown } from '../../data/governance.js'
 import SystemWidget from './SystemWidget.jsx'
 
@@ -34,9 +33,8 @@ export default function WidgetRender({ widget, size = 'md', scope, viewAs }) {
     : ''
   // System work widgets render from live queue state, not widgetSample — skip the compute.
   const sysId = widget?.id === 'w-tasks' || widget?.id === 'w-inbox' || widget?.id === 'w-htl'
-  // Table-backed widgets pull REAL computed table data; scope (range/filters) doesn't apply to them.
   const data = useMemo(
-    () => (!widget || sysId ? null : widget.tableId ? tableData(getTable(widget.tableId), widget.tableColumn) : widgetSample(widget, scope)),
+    () => (!widget || sysId ? null : widgetSample(widget, scope)),
     [widget, scopeKey, sysId],
   )
   if (!widget) {
@@ -205,9 +203,7 @@ function GaugeMini({ data, size, goal }) {
 }
 
 function TableMini({ data, size }) {
-  // Table-backed widget → show the real computed grid (formula columns get a ƒ mark).
-  if (data.tableGrid) return <TableGridMini grid={data.tableGrid} size={size} />
-  // Metric widget → the breakdown as a table (Dimension | Metric | Share), the same
+  // The breakdown as a table (Dimension | Metric | Share), the same
   // data the bar/list show. Header + Share appear at the detailed (large) size.
   const rows = data.records.slice(0, size === 'sm' ? 2 : size === 'lg' ? 5 : 3)
   const detailed = size === 'lg'
@@ -231,38 +227,6 @@ function TableMini({ data, size }) {
               <td className="truncate px-2 py-1 text-gray-700 dark:text-slate-200">{r.name}</td>
               <td className="num px-2 py-1 text-right font-medium text-gray-900 dark:text-slate-100">{r.value}</td>
               {withShare && <td className="num px-2 py-1 text-right text-gray-500 dark:text-slate-400">{r.share}</td>}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  )
-}
-
-// Compact computed-table grid for table-backed widgets. Column count scales with size.
-function TableGridMini({ grid, size }) {
-  const cols = size === 'sm' ? grid.columns.slice(0, 2) : size === 'lg' ? grid.columns : grid.columns.slice(0, 4)
-  const rows = grid.rows.slice(0, size === 'sm' ? 2 : size === 'lg' ? 6 : 4)
-  return (
-    <div className="overflow-hidden rounded-md border border-gray-100 text-[10px] dark:border-white/10">
-      <table className="w-full">
-        <thead>
-          <tr className="bg-gray-50 text-left font-semibold text-gray-500 dark:bg-white/5 dark:text-slate-400">
-            {cols.map((c) => (
-              <th key={c.key} className={`px-2 py-1 font-semibold ${c.type === 'number' ? 'text-right' : ''}`}>
-                {c.label}{c.kind === 'formula' && <span className="ml-0.5 text-indigo-500 dark:text-indigo-300">ƒ</span>}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((r, i) => (
-            <tr key={i} className="border-b border-gray-100 last:border-0 dark:border-white/5">
-              {cols.map((c) => (
-                <td key={c.key} className={`px-2 py-1 ${c.type === 'number' ? 'num text-right font-medium text-gray-900 dark:text-slate-100' : 'truncate text-gray-700 dark:text-slate-200'}`}>
-                  {formatCell(r[c.key], c.format)}
-                </td>
-              ))}
             </tr>
           ))}
         </tbody>

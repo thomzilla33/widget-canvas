@@ -1,4 +1,3 @@
-import { computeTable, formatCell, columnAvg, tableDimColumn } from './tables.js'
 import { scopeMult } from './governance.js'
 import { dimensionCats, applyTransform, dimensionById } from './fields.js'
 
@@ -380,43 +379,6 @@ export function widgetSample(widget, scope) {
   // the AI-summary narrative instead of generated copy.
   const noteOverride = widget?.note ? { narrative: { text: widget.note, bullets: [] } } : null
   return { ...SAMPLE, ...bundle, ...(kpiOverride || {}), ...(noteOverride || {}) }
-}
-
-// ── Table-backed widgets: REAL computed table data in the preview/render contract ──
-// Builds a widgetSample-shaped bundle from a Table Definition's computed rows so the
-// existing KPI/Bar/List/Pie/Table views render the table's actual values (and formulas).
-export function tableData(def, valueKey) {
-  if (!def) return { ...SAMPLE, label: 'Table removed' }
-  const computed = computeTable(def)
-  const dim = tableDimColumn(def)
-  const col = def.columns.find((c) => c.key === valueKey)
-  if (!col) return { ...SAMPLE, label: 'Column removed' } // a saved widget can reference a since-deleted column
-  const fmt = col.format || 'number'
-  // Percent columns are stored as fractions (0.317) — scale to a readable magnitude
-  // for charts; KPI/cells still use formatCell so they read "31.7%".
-  const scale = fmt === 'percent' ? 100 : 1
-  const round1 = (n) => Math.round(n * 10) / 10
-  const rows = computed.rows
-  const breakdown = rows.map((r) => ({ label: String(r[dim.key]), value: round1((Number(r[valueKey]) || 0) * scale) }))
-  const series = breakdown.map((b) => ({ x: b.label, y: b.value }))
-  const avg = columnAvg(computed, valueKey)
-  const max = Math.max(0, ...rows.map((r) => Number(r[valueKey]) || 0))
-  const gaugeVal = fmt === 'percent' ? Math.round(avg * 100) : max > 0 ? Math.round((avg / max) * 100) : 0
-  const records = rows.map((r) => ({ name: String(r[dim.key]), value: formatCell(r[valueKey], fmt), share: '—' }))
-  return {
-    ...SAMPLE,
-    label: col.label,
-    breakdown,
-    series,
-    kpi: { value: formatCell(avg, fmt), delta: '', deltaDir: 'up' },
-    // Keep kpiRaw consistent with the scaled breakdown so a Percent format override reads "31.7%", not "0%".
-    kpiRaw: fmt === 'percent' ? round1(avg * 100) : avg,
-    gauge: { value: Math.min(100, Math.max(0, gaugeVal)), label: col.label },
-    records,
-    recordHeaders: [dim.label, col.label],
-    recordTotal: rows.length,
-    tableGrid: { columns: def.columns, rows },
-  }
 }
 
 // Soft fit of a widget type to a metric kind — drives the gallery's recommend/grey.

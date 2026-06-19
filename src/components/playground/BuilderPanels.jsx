@@ -21,12 +21,10 @@ import {
   Check,
   Search,
   Database,
-  FunctionSquare,
   ChevronLeft,
 } from 'lucide-react'
 import { EmptyState, ConnectionBadge } from '../common/index.jsx'
 import { EXTERNAL_SOURCES, WIDGET_TYPES, TYPE_LABEL } from '../../data/mock.js'
-import { TABLE_DEFINITIONS, tableValueColumns } from '../../data/tables.js'
 import { dimensionsFor, bindSlots, TRANSFORMS, AGGREGATIONS } from '../../data/fields.js'
 import { fitScore } from '../../data/preview.js'
 
@@ -181,90 +179,6 @@ function SourceRow({ source, selected, onSelect }) {
       {source.hasPII && <Lock size={12} className="shrink-0 text-gray-500 dark:text-slate-400" />}
       <ConnectionBadge status={source.status} />
     </button>
-  )
-}
-
-/* ── 1b. Table picker — your governed Table Definitions as a data source ── */
-export function TablePicker({ tableId, onSelect }) {
-  const [editing, setEditing] = useState(false)
-  const selected = TABLE_DEFINITIONS.find((t) => t.id === tableId)
-
-  // Collapsed: a chosen table locks in, everything below builds on it. Change re-opens.
-  if (selected && !editing) {
-    return (
-      <div className="flex items-center gap-3 rounded-lg border border-aims-blue/40 bg-aims-blue/5 p-3 dark:bg-aims-blue/10">
-        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-indigo-500/10 text-indigo-500 dark:text-indigo-300">
-          <Table2 size={16} />
-        </span>
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-1.5">
-            <span className="truncate text-sm font-semibold text-gray-900 dark:text-slate-100">{selected.name}</span>
-            <Check size={13} className="shrink-0 text-aims-blue" aria-hidden="true" />
-          </div>
-          <div className="truncate text-[11px] text-gray-500 dark:text-slate-400">
-            {selected.scope} · Owner {selected.owner} · {tableValueColumns(selected).length} value columns
-          </div>
-        </div>
-        <button onClick={() => setEditing(true)} className="btn-secondary !h-8 shrink-0 !px-3 text-xs">Change</button>
-      </div>
-    )
-  }
-
-  const pick = (id) => { onSelect(id); setEditing(false) }
-  return (
-    <div className="space-y-1.5">
-      {selected && (
-        <button onClick={() => setEditing(false)} className="mb-1 inline-flex items-center gap-1 text-xs font-medium text-gray-500 hover:text-aims-blue dark:text-slate-400">
-          <ChevronLeft size={13} aria-hidden="true" /> Keep {selected.name}
-        </button>
-      )}
-      {TABLE_DEFINITIONS.map((t) => (
-        <button
-          key={t.id}
-          onClick={() => pick(t.id)}
-          className={`flex w-full cursor-pointer items-center gap-2.5 rounded-lg border p-2.5 text-left transition-shadow hover:bg-gray-50 hover:shadow-sm dark:hover:bg-white/5 ${
-            tableId === t.id ? 'border-aims-blue ring-2 ring-aims-blue/30' : 'border-gray-200 dark:border-white/10'
-          }`}
-        >
-          <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-indigo-500/10 text-indigo-500 dark:text-indigo-300">
-            <Table2 size={15} />
-          </span>
-          <div className="min-w-0 flex-1">
-            <div className="truncate text-sm font-semibold text-gray-900 dark:text-slate-100">{t.name}</div>
-            <div className="truncate text-[11px] text-gray-500 dark:text-slate-400">
-              {t.scope} · Owner {t.owner} · {tableValueColumns(t).length} value columns
-            </div>
-          </div>
-        </button>
-      ))}
-    </div>
-  )
-}
-
-/* ── 2b. Table column picker — measure & formula (ƒ) columns you can chart ── */
-export function TableColumnPicker({ table, valueKey, onSelect }) {
-  if (!table) {
-    return <EmptyState icon="📋" title="Pick a table first" description="Choose a table above to chart one of its columns." />
-  }
-  const cols = tableValueColumns(table)
-  return (
-    <div className="space-y-2">
-      {cols.map((c) => (
-        <button
-          key={c.key}
-          onClick={() => onSelect(c.key)}
-          className={`card flex w-full cursor-pointer items-center justify-between gap-2 p-3 text-left transition-shadow hover:bg-gray-50 hover:shadow-md dark:hover:bg-white/5 ${
-            valueKey === c.key ? 'border-aims-blue ring-2 ring-aims-blue/30' : ''
-          }`}
-        >
-          <span className="flex min-w-0 items-center gap-1.5">
-            {c.kind === 'formula' && <FunctionSquare size={13} className="shrink-0 text-indigo-500 dark:text-indigo-300" title={`ƒ = ${c.formula}`} />}
-            <span className="block truncate text-sm font-medium text-gray-900 dark:text-slate-100">{c.label}</span>
-          </span>
-          <span className="cap-chip cap-chip-neutral shrink-0">{c.kind === 'formula' ? 'Formula' : 'Measure'} · {c.format}</span>
-        </button>
-      ))}
-    </div>
   )
 }
 

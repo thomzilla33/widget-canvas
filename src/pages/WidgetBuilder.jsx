@@ -4,14 +4,11 @@ import { Check } from 'lucide-react'
 import { PageHeader } from '../components/common/index.jsx'
 import { useWidgets } from '../state/WidgetsContext.jsx'
 import { EXTERNAL_SOURCES, TYPE_LABEL, sourceFields, WIDGET_SIZES } from '../data/mock.js'
-import { getTable } from '../data/tables.js'
 import { dimensionById, recommendTile } from '../data/fields.js'
 import { describeWidget } from '../data/describe.js'
 import { DescribeComposer } from '../components/common/DescribeComposer.jsx'
 import {
   SourcePicker,
-  TablePicker,
-  TableColumnPicker,
   MetricPicker,
   DimensionPicker,
   SlotPanel,
@@ -49,11 +46,8 @@ export default function WidgetBuilder() {
   const location = useLocation()
   const { addWidget } = useWidgets()
 
-  const [sourceMode, setSourceMode] = useState('connected') // 'connected' | 'table'
   const [sourceId, setSourceId] = useState(null)
   const [metricId, setMetricId] = useState(null)
-  const [tableId, setTableId] = useState(null)
-  const [tableColumn, setTableColumn] = useState(null)
   const [dimensionId, setDimensionId] = useState('none') // Phase 1: slice-by dimension
   const [transform, setTransform] = useState('none')
   const [aggregation, setAggregation] = useState('sum')
@@ -72,42 +66,14 @@ export default function WidgetBuilder() {
   const setFormat = (patch) => setFormatState((f) => ({ ...f, ...patch }))
   const setGoal = (patch) => setGoalState((g) => ({ ...g, ...patch }))
 
-  const extSource = sourceMode === 'connected' ? EXTERNAL_SOURCES.find((s) => s.id === sourceId) || null : null
-  const tableDef = sourceMode === 'table' ? getTable(tableId) : null
-  const valueCol = tableDef && tableColumn ? tableDef.columns.find((c) => c.key === tableColumn) || null : null
-
-  // A table presents to the rest of the builder as a governed, PII-free source.
-  const source =
-    sourceMode === 'table'
-      ? tableDef
-        ? { id: tableDef.id, name: tableDef.name, governed: true, hasPII: false }
-        : null
-      : extSource
-  // A "field" is an aggregate metric, a row-level record set, or a table value column.
-  const metric =
-    sourceMode === 'table'
-      ? valueCol
-        ? { id: `${tableId}:${tableColumn}`, name: valueCol.label, kind: 'breakdown', recommendedType: 'bar', _table: { def: tableDef, valueKey: tableColumn } }
-        : null
-      : extSource
-        ? sourceFields(extSource).find((f) => f.id === metricId) || null
-        : null
+  const source = EXTERNAL_SOURCES.find((s) => s.id === sourceId) || null
+  // A "field" is an aggregate metric or a row-level record set on the chosen source.
+  const metric = source ? sourceFields(source).find((f) => f.id === metricId) || null : null
 
   function resetShape() {
     setDimensionId('none')
     setTransform('none')
     setAggregation('sum')
-  }
-  function selectMode(mode) {
-    if (mode === sourceMode) return
-    setSourceMode(mode)
-    setSourceId(null)
-    setMetricId(null)
-    setTableId(null)
-    setTableColumn(null)
-    setTypeId(null)
-    setTypeTouched(false)
-    resetShape()
   }
   function selectSource(id) {
     if (id === sourceId) return // re-selecting the active source shouldn't wipe the metric/type
@@ -120,25 +86,14 @@ export default function WidgetBuilder() {
   function selectMetric(id) {
     setMetricId(id)
     resetShape()
-    if (!extSource) return // table mode has no external source to search
-    const m = sourceFields(extSource).find((x) => x.id === id)
+    if (!source) return
+    const m = sourceFields(source).find((x) => x.id === id)
     // Recommend a tile from the measure's natural shape (no dimension yet).
     if (m && !typeTouched) setTypeId(recommendTile(m, dimensionById('none')))
   }
   function selectDimension(id) {
     setDimensionId(id)
     if (!typeTouched && metric) setTypeId(recommendTile(metric, dimensionById(id))) // re-recommend from measure × dimension
-  }
-  function selectTable(id) {
-    if (id === tableId) return
-    setTableId(id)
-    setTableColumn(null)
-    setTypeId(null)
-    setTypeTouched(false)
-  }
-  function selectColumn(key) {
-    setTableColumn(key)
-    if (!typeTouched) setTypeId('bar') // a value-by-row bar is the natural default for a table column
   }
   function selectType(id) {
     setTypeId(id)
@@ -150,9 +105,6 @@ export default function WidgetBuilder() {
   function applyDescription(text) {
     const r = describeWidget(text)
     if (!r) return false
-    setSourceMode('connected')
-    setTableId(null)
-    setTableColumn(null)
     setSourceId(r.sourceId)
     setMetricId(r.metricId)
     setDimensionId(r.dimensionId || 'none')
@@ -206,9 +158,7 @@ export default function WidgetBuilder() {
       health: 'unused',
       usedIn: 0,
       source: source.name,
-      tableId: sourceMode === 'table' ? tableId : undefined,
-      tableColumn: sourceMode === 'table' ? tableColumn : undefined,
-      dimension: sourceMode !== 'table' && dimensionId !== 'none' ? dimensionId : undefined,
+      dimension: dimensionId !== 'none' ? dimensionId : undefined,
       transform: transform !== 'none' ? transform : undefined,
       aggregation: aggregation !== 'sum' ? aggregation : undefined,
       format: format.style === 'auto' ? undefined : format,
@@ -219,11 +169,10 @@ export default function WidgetBuilder() {
 
   if (saved) return <SavedConfirmation name={name} navigate={navigate} />
 
-  const isTable = sourceMode === 'table'
   const dimension = dimensionById(dimensionId)
-  // The gallery's recommendation reflects measure × dimension (connected mode only).
-  const galleryMetric = isTable || !metric ? metric : { ...metric, recommendedType: recommendTile(metric, dimension) }
-  const shape = !isTable ? { dimension, transform } : undefined
+  // The gallery's recommendation reflects measure × dimension.
+  const galleryMetric = metric ? { ...metric, recommendedType: recommendTile(metric, dimension) } : metric
+  const shape = { dimension, transform }
 
   return (
     <div className="h-full flex flex-col">
@@ -252,67 +201,33 @@ export default function WidgetBuilder() {
               onGenerate={applyDescription}
             />
             <section>
-              <SectionHeading n={1} title="Data source" sub="An external system, or one of your governed Tables." />
-              <div className="mb-3 flex overflow-hidden rounded-lg border border-gray-300 text-sm dark:border-white/15">
-                {[
-                  ['connected', 'Connected sources'],
-                  ['table', 'Tables'],
-                ].map(([v, label]) => (
-                  <button
-                    key={v}
-                    onClick={() => selectMode(v)}
-                    aria-pressed={sourceMode === v}
-                    className={`flex-1 px-2 py-1.5 font-medium transition-colors ${
-                      sourceMode === v ? 'bg-aims-blue text-white' : 'bg-white text-gray-600 hover:bg-gray-50 dark:bg-white/5 dark:text-slate-300 dark:hover:bg-white/10'
-                    }`}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-              {sourceMode === 'table' ? (
-                <TablePicker tableId={tableId} onSelect={selectTable} />
-              ) : (
-                <SourcePicker sourceId={sourceId} onSelect={selectSource} onBrowse={() => setBrowsing(true)} />
-              )}
+              <SectionHeading n={1} title="Data source" sub="An external system you've connected." />
+              <SourcePicker sourceId={sourceId} onSelect={selectSource} onBrowse={() => setBrowsing(true)} />
             </section>
             <section>
-              {isTable ? (
-                <>
-                  <SectionHeading n={2} title="Column" sub="Pick a measure or formula (ƒ) column to visualize." />
-                  <TableColumnPicker table={tableDef} valueKey={tableColumn} onSelect={selectColumn} />
-                </>
-              ) : (
-                <>
-                  <SectionHeading n={2} title="Measure" sub="The numeric value this widget shows (a record set for row-level tiles)." />
-                  <MetricPicker source={source} metricId={metricId} onSelect={selectMetric} />
-                </>
-              )}
+              <SectionHeading n={2} title="Measure" sub="The numeric value this widget shows (a record set for row-level tiles)." />
+              <MetricPicker source={source} metricId={metricId} onSelect={selectMetric} />
             </section>
-            {!isTable && (
-              <section>
-                <SectionHeading n={3} title="Slice by" sub="Break the measure down by a dimension — drives the chart's axis/segments." />
-                <DimensionPicker source={source} measure={metric} dimensionId={dimensionId} onSelect={selectDimension} />
-              </section>
-            )}
             <section>
-              <SectionHeading n={isTable ? 3 : 4} title="Widget type" sub="Choose how to visualize it — recommended type is marked." />
+              <SectionHeading n={3} title="Slice by" sub="Break the measure down by a dimension — drives the chart's axis/segments." />
+              <DimensionPicker source={source} measure={metric} dimensionId={dimensionId} onSelect={selectDimension} />
+            </section>
+            <section>
+              <SectionHeading n={4} title="Widget type" sub="Choose how to visualize it — recommended type is marked." />
               <TypeGallery typeId={typeId} metric={galleryMetric} onSelect={selectType} />
-              {!isTable && typeId && metric && (
+              {typeId && metric && (
                 <div className="mt-3">
                   <div className="mb-1.5 text-[11px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-500">Slots</div>
                   <SlotPanel typeId={typeId} measure={metric} dimension={dimension} transform={transform} />
                 </div>
               )}
             </section>
-            {!isTable && (
-              <section>
-                <SectionHeading n={5} title="Transform" sub="Reshape the measure — Δ, % of total, top-N, running total, aggregation." />
-                <TransformPanel transform={transform} setTransform={setTransform} aggregation={aggregation} setAggregation={setAggregation} />
-              </section>
-            )}
             <section>
-              <SectionHeading n={isTable ? 4 : 6} title="Configure" sub="Name, freshness, filters. Permissions are set later, on a dashboard." />
+              <SectionHeading n={5} title="Transform" sub="Reshape the measure — Δ, % of total, top-N, running total, aggregation." />
+              <TransformPanel transform={transform} setTransform={setTransform} aggregation={aggregation} setAggregation={setAggregation} />
+            </section>
+            <section>
+              <SectionHeading n={6} title="Configure" sub="Name, freshness, filters. Permissions are set later, on a dashboard." />
               <ConfigPanel
                 source={source}
                 name={name}
@@ -328,7 +243,7 @@ export default function WidgetBuilder() {
               />
             </section>
             <section>
-              <SectionHeading n={isTable ? 5 : 7} title="Format & display" sub="Number format, units, and a goal with conditional color." />
+              <SectionHeading n={7} title="Format & display" sub="Number format, units, and a goal with conditional color." />
               <FormatPanel format={format} setFormat={setFormat} goal={goal} setGoal={setGoal} />
             </section>
           </div>

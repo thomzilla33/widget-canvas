@@ -23,8 +23,7 @@ import { GovernedBadge, FreshnessBadge, DataPlaneBadge } from '../common/index.j
 import { dataPlaneOf } from '../../data/governance.js'
 import { dimensionsFor } from '../../data/fields.js'
 import { useTheme } from '../../state/ThemeContext.jsx'
-import { previewData, formatValue, tableData } from '../../data/preview.js'
-import { formatCell } from '../../data/tables.js'
+import { previewData, formatValue } from '../../data/preview.js'
 import { TYPE_LABEL } from '../../data/mock.js'
 
 // The date ranges a metric can be filtered to (time is always an applicable filter).
@@ -69,13 +68,13 @@ export default function WidgetPreview({ typeId, metric, source, name, freshness,
   // Applicable filters for THIS metric (Issue A): the date range (time is always
   // filterable) + the categorical dimensions dimensionsFor() says apply to this
   // source × measure. Toggling them narrows the live preview, demonstrating the
-  // filters end users would get. Table-backed widgets keep their own column flow.
-  const showFilters = ready && !metric._table
+  // filters end users would get.
+  const showFilters = ready
   const filterDims = showFilters ? dimensionsFor(source, metric).filter((d) => d.id !== 'none' && d.id !== 'time') : []
   const [range, setRange] = useState('90d')
   const [activeDims, setActiveDims] = useState(() => new Set())
   // Reset filters when the metric changes so stale narrowing doesn't carry over.
-  const metricKey = metric?._table ? `${metric._table.def?.id}:${metric._table.valueKey}` : metric?.id
+  const metricKey = metric?.id
   useEffect(() => {
     setRange('90d')
     setActiveDims(new Set())
@@ -152,8 +151,8 @@ export default function WidgetPreview({ typeId, metric, source, name, freshness,
 
       <div className="mt-3 flex-1">
         {ready ? (
-          // Key on type AND data identity so a prior render error clears when the table/column changes.
-          <ChartBoundary key={`${typeId}|${metric._table ? `${metric._table.def?.id}:${metric._table.valueKey}` : metric.id}|${previewOpts.dimension?.id || ''}|${previewOpts.transform || ''}|${previewOpts.range || ''}|${previewOpts.filterCount || 0}`}>
+          // Key on type AND data identity so a prior render error clears when the metric changes.
+          <ChartBoundary key={`${typeId}|${metric.id}|${previewOpts.dimension?.id || ''}|${previewOpts.transform || ''}|${previewOpts.range || ''}|${previewOpts.filterCount || 0}`}>
             <Renderer typeId={typeId} metric={metric} display={display} shape={previewOpts} />
           </ChartBoundary>
         ) : (
@@ -179,9 +178,8 @@ export default function WidgetPreview({ typeId, metric, source, name, freshness,
 
 // Renders only the selected view, so an unused view can't throw or do work.
 function Renderer({ typeId, metric, display, shape }) {
-  // Table-backed widgets render REAL computed table data; everything else uses the canned sample
-  // (sliced by the chosen dimension + transform when set — Phase 1).
-  const data = metric?._table ? tableData(metric._table.def, metric._table.valueKey) : previewData(metric, shape)
+  // The canned sample, sliced by the chosen dimension + transform when set (Phase 1).
+  const data = previewData(metric, shape)
   switch (typeId) {
     case 'line': return <LineView data={data} />
     case 'bar': return <BarView data={data} />
@@ -340,8 +338,6 @@ function KpiView({ data, display }) {
 }
 
 function TableView({ data }) {
-  // Table-backed widget → render the real computed grid (literal/measure/formula columns).
-  if (data.tableGrid) return <TableGridView grid={data.tableGrid} />
   // Metric preview → the breakdown as a table (Dimension | Metric | Share), tied to
   // the SAME data the bar/pie/list show.
   const headers = data.recordHeaders || ['Segment', 'Value']
@@ -371,36 +367,6 @@ function TableView({ data }) {
           Showing 7 of {data.recordTotal.toLocaleString()} rows
         </div>
       )}
-    </div>
-  )
-}
-
-// The real computed table grid — formula columns flagged with ƒ.
-function TableGridView({ grid }) {
-  return (
-    <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-white/10">
-      <table className="w-full text-left text-xs">
-        <thead className="bg-gray-50 text-[10px] uppercase tracking-wide text-gray-500 dark:bg-white/5 dark:text-slate-400">
-          <tr>
-            {grid.columns.map((c) => (
-              <th key={c.key} className="px-3 py-2 font-semibold" title={c.kind === 'formula' ? `ƒ = ${c.formula}` : c.kind}>
-                {c.label}{c.kind === 'formula' && <span className="ml-0.5 text-indigo-500 dark:text-indigo-300">ƒ</span>}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {grid.rows.map((r, i) => (
-            <tr key={i} className="border-t border-gray-100 dark:border-white/5">
-              {grid.columns.map((c) => (
-                <td key={c.key} className={`px-3 py-2 ${c.type === 'number' ? 'num text-gray-700 dark:text-slate-200' : 'font-medium text-gray-900 dark:text-slate-100'}`}>
-                  {formatCell(r[c.key], c.format)}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
     </div>
   )
 }

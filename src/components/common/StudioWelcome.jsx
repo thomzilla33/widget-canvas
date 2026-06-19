@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { LayoutDashboard, Boxes, Table2, Database, Sparkles, X, ArrowRight, FileBarChart, Home } from 'lucide-react'
+import { LayoutDashboard, Boxes, Database, Sparkles, X, ArrowRight, FileBarChart, Home } from 'lucide-react'
 
 // U5 — per-studio welcome/intro (modeled on the production "Welcome to Data Studio"):
 // eyebrow pill + title + subtitle + a numbered setup walkthrough + primary & secondary
@@ -30,18 +30,6 @@ const STUDIOS = {
       ['Slice by', ' a dimension'],
       ['Pick', ' the best tile type'],
       ['Save', ' to your library'],
-    ],
-  },
-  tables: {
-    icon: Table2,
-    eyebrow: 'Author a table',
-    title: 'Tables',
-    subtitle: 'Author governed tables with formula columns, then display them as widgets.',
-    steps: [
-      ['Define', ' literal & measure columns'],
-      ['Add', ' formula (ƒ) columns'],
-      ['Watch', ' calculated fields compute live'],
-      ['Chart', ' any column as a widget'],
     ],
   },
   reports: {
