@@ -288,7 +288,7 @@ export default function WidgetLibrary() {
 
       {launcher && <CreateLauncher kind="widget" onPick={pickCreate} onClose={() => setLauncher(false)} />}
 
-      {aiOpen && <AIGenerateModal initialMode="widget" onClose={() => setAiOpen(false)} />}
+      {aiOpen && <AIGenerateModal mode="widget" onClose={() => setAiOpen(false)} />}
     </div>
   )
 }

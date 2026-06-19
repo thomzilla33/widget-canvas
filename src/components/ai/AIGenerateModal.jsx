@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Sparkles, X, ArrowUp, Check, LayoutDashboard, BarChart3, Pencil, ExternalLink, RefreshCw, ChevronDown, AlertTriangle } from 'lucide-react'
+import { Sparkles, X, ArrowUp, Check, Pencil, ExternalLink, RefreshCw, ChevronDown, AlertTriangle } from 'lucide-react'
 import { useFocusTrap } from '../../hooks/useFocusTrap.js'
 import { useModalEnter } from '../../hooks/useReveal.js'
 import WidgetPreview from '../playground/WidgetPreview.jsx'
@@ -48,14 +48,15 @@ const GREETING = {
 // Conversational, chat-style generator for BOTH widgets and dashboards. Deterministic
 // (reuses the describe-to-build engine) — each turn re-reads the whole conversation so
 // follow-ups refine the result. Opened as a modal from the Library / Dashboards studios.
-export default function AIGenerateModal({ initialMode = 'widget', onClose }) {
+// `mode` is fixed by the entry point ('widget' from the Library, 'dashboard' from
+// Dashboards) — each opens its own dedicated generator; there's no in-modal switch.
+export default function AIGenerateModal({ mode = 'widget', onClose }) {
   const navigate = useNavigate()
   const trapRef = useFocusTrap()
   useModalEnter(trapRef) // subtle scale + fade entrance on the dialog card
   const { widgets, addWidget } = useWidgets()
   const { addDashboard } = useDashboards()
 
-  const [mode, setMode] = useState(initialMode)
   const [messages, setMessages] = useState([{ id: 0, role: 'assistant', greeting: true }])
   const [transcript, setTranscript] = useState('')
   const [input, setInput] = useState('')
@@ -68,16 +69,6 @@ export default function AIGenerateModal({ initialMode = 'widget', onClose }) {
     const el = scrollRef.current
     if (el) el.scrollTop = el.scrollHeight
   }, [messages, thinking])
-
-  function switchMode(m) {
-    if (m === mode) return
-    setMode(m)
-    setTranscript('')
-    setInput('')
-    setThinking(false)
-    idRef.current = 0
-    setMessages([{ id: 0, role: 'assistant', greeting: true }])
-  }
 
   // `genMode` is captured at send() time — never read from render scope inside the
   // async timeout, or a mid-flight mode switch would route to the wrong engine.
@@ -161,21 +152,11 @@ export default function AIGenerateModal({ initialMode = 'widget', onClose }) {
             <span className="grid h-7 w-7 place-items-center rounded-lg text-white" style={{ background: 'var(--grad)' }}>
               <Sparkles size={15} aria-hidden="true" />
             </span>
-            <h2 id="ai-gen-title" className="text-sm font-semibold text-gray-900 dark:text-slate-100">Generate with AI</h2>
+            <h2 id="ai-gen-title" className="text-sm font-semibold text-gray-900 dark:text-slate-100">Generate a {mode === 'widget' ? 'widget' : 'dashboard'} with AI</h2>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="flex overflow-hidden rounded-lg border border-gray-200 text-xs dark:border-white/15" role="tablist" aria-label="What to generate">
-              <button role="tab" aria-selected={mode === 'widget'} onClick={() => switchMode('widget')} className={`inline-flex items-center gap-1 px-2.5 py-1.5 font-semibold ${mode === 'widget' ? 'bg-aims-blue text-white' : 'text-gray-600 hover:bg-gray-100 dark:text-slate-300 dark:hover:bg-white/10'}`}>
-                <BarChart3 size={13} aria-hidden="true" /> Widget
-              </button>
-              <button role="tab" aria-selected={mode === 'dashboard'} onClick={() => switchMode('dashboard')} className={`inline-flex items-center gap-1 px-2.5 py-1.5 font-semibold ${mode === 'dashboard' ? 'bg-aims-blue text-white' : 'text-gray-600 hover:bg-gray-100 dark:text-slate-300 dark:hover:bg-white/10'}`}>
-                <LayoutDashboard size={13} aria-hidden="true" /> Dashboard
-              </button>
-            </div>
-            <button onClick={onClose} aria-label="Close" className="grid h-7 w-7 place-items-center rounded-md text-gray-400 hover:bg-gray-100 dark:hover:bg-white/10">
-              <X size={16} aria-hidden="true" />
-            </button>
-          </div>
+          <button onClick={onClose} aria-label="Close" className="grid h-7 w-7 place-items-center rounded-md text-gray-400 hover:bg-gray-100 dark:hover:bg-white/10">
+            <X size={16} aria-hidden="true" />
+          </button>
         </div>
 
         {/* Conversation */}

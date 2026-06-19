@@ -270,7 +270,7 @@ export default function DashboardList() {
 
       {launcher && <CreateLauncher kind="dashboard" onPick={pickCreate} onClose={() => setLauncher(false)} />}
 
-      {aiOpen && <AIGenerateModal initialMode="dashboard" onClose={() => setAiOpen(false)} />}
+      {aiOpen && <AIGenerateModal mode="dashboard" onClose={() => setAiOpen(false)} />}
     </div>
   )
 }
