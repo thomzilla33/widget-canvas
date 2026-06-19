@@ -271,39 +271,12 @@ function DecisionPanel({ item: itemProp, onDecide, onClose }) {
   )
 }
 
-// sm tiles are read-only: a count headline + the top 1–2 item titles (no actions —
-// too cramped at one column). md/lg get the full interactive list.
-function CompactSummary({ n, noun, tone = 'blue', items = [] }) {
-  const c = tone === 'amber' ? 'text-aims-aging' : tone === 'governed' ? 'text-aims-governed' : 'text-aims-blue'
-  return (
-    <div>
-      <div className="py-0.5">
-        <span className={`num text-xl font-bold tracking-tight ${c}`}>{n}</span>
-        <span className="ml-1.5 text-[11px] text-gray-500 dark:text-slate-400">{noun}</span>
-      </div>
-      {items.length > 0 && (
-        <ul className="mt-1 space-y-1 border-t border-gray-100 pt-1.5 dark:border-white/10">
-          {items.map((it, i) => (
-            <li key={i} className="flex min-w-0 items-center gap-1.5">
-              <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${it.amber ? 'bg-amber-500' : 'bg-aims-blue'}`} />
-              <span className="truncate text-[10px] text-gray-600 dark:text-slate-300">{it.label}</span>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-  )
-}
-
 /* ── Human-in-the-Loop: a queue of pending decisions ── */
 function HtlBody({ size, full, onExpand, onReview, onDecide }) {
   const { htl } = useWorkQueue()
   const [showResolved, setShowResolved] = useState(false)
   const pending = htl.filter((h) => h.status === 'pending')
   const resolved = htl.filter((h) => h.status !== 'pending')
-  if (size === 'sm') return pending.length
-    ? <CompactSummary n={pending.length} noun="awaiting you" tone="amber" items={pending.slice(0, 2).map((h) => ({ label: h.title, amber: true }))} />
-    : <Empty>All caught up</Empty>
   // Only fully bail when there's genuinely nothing — when the queue is cleared but
   // decisions exist, keep rendering so the "Decision history" footer stays reachable.
   if (pending.length === 0 && resolved.length === 0) return <Empty>All caught up — no decisions pending</Empty>
@@ -388,10 +361,6 @@ function InboxBody({ size, full, onExpand, onReview, onDecide, notify }) {
   const all = [...htlItems, ...nativeItems]
   const unread = htlItems.length + nativeItems.filter((i) => !i.read).length
   const matched = all.filter((i) => (filter === 'all' ? true : filter === 'needs' ? i.humanTouch : i.kind === 'mention'))
-
-  if (size === 'sm') return unread
-    ? <CompactSummary n={unread} noun="unread" items={all.slice(0, 2).map((i) => ({ label: i.title, amber: i.humanTouch }))} />
-    : <Empty>Inbox zero</Empty>
   const visible = full ? matched : matched.slice(0, rowMax(size))
   return (
     <div>
@@ -448,9 +417,6 @@ function TasksBody({ size, full, onExpand, notify }) {
   const onComplete = (t) => { completeTask(t.id); notify(`Completed: ${t.title}`, () => completeTask(t.id)) }
   // Overdue tasks bubble to the top (stable otherwise) — the most urgent shouldn't hide at the bottom.
   const open = tasks.filter((t) => !t.done).sort((a, b) => (b.overdue ? 1 : 0) - (a.overdue ? 1 : 0))
-  if (size === 'sm') return open.length
-    ? <CompactSummary n={open.length} noun="open" items={open.slice(0, 2).map((t) => ({ label: t.title, amber: t.overdue }))} />
-    : <Empty>No open tasks</Empty>
   const visible = full ? open : open.slice(0, rowMax(size)) // completing a task drops it from the list
   return (
     <div>

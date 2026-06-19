@@ -424,10 +424,12 @@ export const TEMPLATE_SEED = {
     { zone: 'bottom', widgetId: 'w-aims-leadfeed' },
   ],
   // System-default work surface — ships seeded with Inbox, My Tasks and the HITL queue.
+  // Three equal interactive columns (triage board) — same size so they tile the row
+  // evenly with no leftover gap.
   't-workspace-home': [
-    { zone: 'main', widgetId: 'w-inbox' },
-    { zone: 'sidebar', widgetId: 'w-htl' },
-    { zone: 'main', widgetId: 'w-tasks' },
+    { size: 'sm', widgetId: 'w-inbox' },
+    { size: 'sm', widgetId: 'w-htl' },
+    { size: 'sm', widgetId: 'w-tasks' },
   ],
 }
 

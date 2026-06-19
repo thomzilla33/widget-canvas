@@ -28,7 +28,7 @@ export function dashboardLayout(dashboard) {
   return seed.map((item, i) => ({
     pid: `${dashboard?.id || 'd'}-${i}`,
     widgetId: item.widgetId,
-    size: ZONE_SIZE[item.zone] || 'md',
+    size: item.size || ZONE_SIZE[item.zone] || 'md',
     fixed: false,
     audiences: [], // [] = visible to all audiences
     quickActions: [],

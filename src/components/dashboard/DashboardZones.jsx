@@ -90,7 +90,7 @@ const WidgetCard = memo(function WidgetCard({ placement: p, widget: w, span, sco
           {p.fixed && <Lock size={12} aria-hidden="true" className="text-gray-500 dark:text-slate-400" />}
         </div>
       </div>
-      <div className="mt-2 flex flex-1 flex-col justify-center">
+      <div className={`mt-2 flex flex-1 flex-col ${w.system ? 'justify-start' : 'justify-center'}`}>
         <WidgetRender widget={w} size={p.size} scope={scope} viewAs={p.viewAs} />
       </div>
       <div className="mt-2 flex flex-wrap items-center gap-1.5 border-t border-gray-100 pt-1.5 dark:border-white/5">
