@@ -25,6 +25,7 @@ import { dimensionsFor } from '../../data/fields.js'
 import { useTheme } from '../../state/ThemeContext.jsx'
 import { previewData, formatValue } from '../../data/preview.js'
 import { TYPE_LABEL } from '../../data/mock.js'
+import { CostKpiMini, UsageHeatmapMini, SpendBreakdownMini, CompositeStatMini } from '../widgets/WidgetRender.jsx'
 
 // The date ranges a metric can be filtered to (time is always an applicable filter).
 const PREVIEW_RANGES = [
@@ -197,6 +198,11 @@ function Renderer({ typeId, metric, display, shape }) {
     case 'feed': return <FeedView data={data} />
     case 'alerts': return <AlertsView data={data} />
     case 'statrow': return <StatRowView data={data} />
+    // Consumption widgets — reuse the placed renderers so preview == placed.
+    case 'costkpi': return <div className="px-1"><CostKpiMini data={data} size="lg" format={display?.format} /></div>
+    case 'usageheatmap': return <div className="px-1"><UsageHeatmapMini data={data} size="lg" /></div>
+    case 'spendbreakdown': return <div className="px-1"><SpendBreakdownMini data={data} size="lg" /></div>
+    case 'compositestat': return <div className="px-1"><CompositeStatMini data={data} size="lg" /></div>
     default: return <KpiView data={data} display={display} />
   }
 }

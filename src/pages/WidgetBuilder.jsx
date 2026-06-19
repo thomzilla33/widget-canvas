@@ -38,6 +38,10 @@ const TYPE_INFO = {
   list: { about: 'A ranked or chronological list.', bestFor: 'Tracking recent items and activity.' },
   summary: { about: 'An AI-written narrative of the data.', bestFor: 'Executive summaries and quick context.' },
   map: { about: 'A geographic distribution of values.', bestFor: 'Comparing performance across regions.' },
+  costkpi: { about: 'A consumption total with its month-over-month change and trend.', bestFor: 'Tracking spend (credits/tokens/cost) against last month.' },
+  usageheatmap: { about: 'A daily activity calendar with current and longest streaks.', bestFor: 'Seeing the cadence of agent/workflow activity over time.' },
+  spendbreakdown: { about: 'Ranked share of consumption by agent, workflow, or source.', bestFor: 'Understanding what is driving consumption and cost.' },
+  compositestat: { about: 'A headline total broken into the components that make it up.', bestFor: 'Showing a total and its mix in one tile.' },
 }
 
 // S50–S65 — Widget Playground: split-screen build (left) + live preview (right)

@@ -223,7 +223,7 @@ function consumptionUnit(label = '') {
 }
 
 // Big consumption number + unit + a subtle month-over-month delta pill + sparkline (lg).
-function CostKpiMini({ data, size, format }) {
+export function CostKpiMini({ data, size, format }) {
   const down = data.kpi.deltaDir === 'down'
   const unit = consumptionUnit(data.label)
   const isCurrency = unit === '$'
@@ -258,7 +258,7 @@ function CostKpiMini({ data, size, format }) {
 
 // GitHub-style activity calendar (consumption cadence) + current / longest streak.
 const CAL_LEVELS = ['bg-gray-100 dark:bg-white/[0.06]', 'bg-aims-blue/25', 'bg-aims-blue/45', 'bg-aims-blue/70', 'bg-aims-blue']
-function UsageHeatmapMini({ data, size }) {
+export function UsageHeatmapMini({ data, size }) {
   const cal = data.calendar || { days: [], streak: 0, longest: 0 }
   const weeks = size === 'sm' ? 8 : size === 'lg' ? 16 : 12
   const slice = cal.days.slice(Math.max(0, cal.days.length - weeks * 7))
@@ -282,7 +282,7 @@ function UsageHeatmapMini({ data, size }) {
 }
 
 // Where consumption goes: ranked horizontal % bars (agent / workflow / source).
-function SpendBreakdownMini({ data, size }) {
+export function SpendBreakdownMini({ data, size }) {
   const all = data.breakdown || []
   const items = all.slice(0, size === 'sm' ? 3 : size === 'lg' ? 6 : 4)
   const max = Math.max(...all.map((b) => b.value), 1)
@@ -305,7 +305,7 @@ function SpendBreakdownMini({ data, size }) {
 }
 
 // Headline total + the 2–3 components that make it up (with share).
-function CompositeStatMini({ data, size }) {
+export function CompositeStatMini({ data, size }) {
   const parts = (data.breakdown || []).slice(0, 3)
   const sum = (data.breakdown || []).reduce((a, b) => a + b.value, 0) || 1
   return (

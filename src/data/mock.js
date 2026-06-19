@@ -493,6 +493,11 @@ export const WIDGET_TYPES = [
   { id: 'alerts', label: 'Alerts', category: 'Activity', iconName: 'Bell' },
   { id: 'summary', label: 'AI Summary', category: 'Narrative', iconName: 'Sparkles' },
   { id: 'map', label: 'Map', category: 'Geo', iconName: 'Map' },
+  // Consumption widgets — communicate prompts/tokens/credits/cost patterns.
+  { id: 'costkpi', label: 'Cost KPI', category: 'Consumption', iconName: 'Hash' },
+  { id: 'usageheatmap', label: 'Usage Heatmap', category: 'Consumption', iconName: 'Grid3x3' },
+  { id: 'spendbreakdown', label: 'Spend Breakdown', category: 'Consumption', iconName: 'BarChart3' },
+  { id: 'compositestat', label: 'Composite Stat', category: 'Consumption', iconName: 'Rows3' },
 ]
 export const TYPE_LABEL = Object.fromEntries(WIDGET_TYPES.map((t) => [t.id, t.label]))
 

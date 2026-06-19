@@ -403,9 +403,9 @@ export function widgetSample(widget, scope) {
 
 // Soft fit of a widget type to a metric kind — drives the gallery's recommend/grey.
 const GOOD = {
-  timeseries: ['line', 'bar', 'table', 'kpi', 'carousel', 'summary'],
-  breakdown: ['bar', 'pie', 'funnel', 'table', 'list', 'heatmap'],
-  kpi: ['kpi', 'gauge', 'statrow', 'summary'],
+  timeseries: ['line', 'bar', 'table', 'kpi', 'carousel', 'summary', 'costkpi', 'usageheatmap'],
+  breakdown: ['bar', 'pie', 'funnel', 'table', 'list', 'heatmap', 'spendbreakdown', 'compositestat'],
+  kpi: ['kpi', 'gauge', 'statrow', 'summary', 'costkpi', 'compositestat'],
   twoVar: ['scatter', 'table'],
   matrix: ['heatmap', 'table'],
   records: ['table', 'list', 'board', 'feed', 'carousel'],
@@ -436,6 +436,10 @@ const SKELETON_KIND = {
   Map: 'geo',
   'AI Summary': 'narrative',
   Timeline: 'timeseries',
+  'Cost KPI': 'kpi',
+  'Usage Heatmap': 'timeseries',
+  'Spend Breakdown': 'breakdown',
+  'Composite Stat': 'kpi',
 }
 // Chart type id → the renderable skeleton label WidgetRender understands.
 const TYPEID_SKELETON = {
@@ -456,9 +460,13 @@ const TYPEID_SKELETON = {
   carousel: 'List',
   summary: 'AI Summary',
   map: 'Map',
+  costkpi: 'Cost KPI',
+  usageheatmap: 'Usage Heatmap',
+  spendbreakdown: 'Spend Breakdown',
+  compositestat: 'Composite Stat',
 }
 // All renderable visualization options (what a placement can be shown as).
-export const VIZ_OPTIONS = ['KPI', 'Stat Row', 'Chart', 'Donut', 'Funnel', 'Gauge', 'Table', 'List', 'Board', 'Feed', 'Alerts', 'Heat Map', 'Map', 'AI Summary']
+export const VIZ_OPTIONS = ['KPI', 'Stat Row', 'Chart', 'Donut', 'Funnel', 'Gauge', 'Table', 'List', 'Board', 'Feed', 'Alerts', 'Heat Map', 'Map', 'AI Summary', 'Cost KPI', 'Usage Heatmap', 'Spend Breakdown', 'Composite Stat']
 
 // KPI and Gauge are interchangeable single-value views — don't nag to swap between them.
 export function vizInterchangeable(a, b) {
