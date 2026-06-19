@@ -77,7 +77,9 @@ const WidgetCard = memo(function WidgetCard({ placement: p, widget: w, span, sco
   // System widgets are self-interactive (Approve/Reject/Complete + their own "View all"
   // modal), so they can't be wrapped in a drill <button> — that nests buttons and makes
   // every in-tile action also fire the drilldown. They render as a plain container.
-  const drillable = onDrill && !w.system
+  // Cost KPI has an in-tile unit toggle (its own buttons), so it can't be a drill
+  // <button> either — render it as a plain container, like system widgets.
+  const drillable = onDrill && !w.system && w.skeleton !== 'Cost KPI'
   const inner = (
     <>
       <div className="flex items-center justify-between gap-1">

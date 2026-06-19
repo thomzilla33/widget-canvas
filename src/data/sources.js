@@ -152,7 +152,7 @@ export const EXTERNAL_SOURCES = [
   S({
     id: 'src-aims-credits', name: 'AIMS OS — Credits & Billing', category: 'AIMS OS', logoColor: '#16A34A', initials: 'CR',
     status: 'connected', governed: true, owner: 'AIMS OS', reviewed: 'Jun 2026',
-    description: 'Unified credit consumption — governed actions (GE) and truth writes (TP). Unified pool only.',
+    description: 'Unified credit consumption + token and cost breakdowns — governed actions (GE) and truth writes (TP).',
     metrics: [
       { id: 'cr-consumed', name: 'Credits Consumed', kind: 'kpi', recommendedType: 'kpi' },
       { id: 'cr-balance', name: 'Balance Remaining', kind: 'kpi', recommendedType: 'gauge' },
@@ -160,6 +160,12 @@ export const EXTERNAL_SOURCES = [
       { id: 'cr-tier', name: 'Burn by Action Tier', kind: 'breakdown', recommendedType: 'bar' },
       { id: 'cr-getp', name: 'GE vs TP', kind: 'breakdown', recommendedType: 'pie' },
       { id: 'cr-projected', name: 'Projected Burn', kind: 'kpi', recommendedType: 'kpi' },
+      // Token + cost views of the same consumption.
+      { id: 'cr-tokens', name: 'Tokens Consumed', kind: 'kpi', recommendedType: 'costkpi' },
+      { id: 'cr-usd', name: 'Cost (USD)', kind: 'kpi', recommendedType: 'costkpi' },
+      { id: 'cr-tokens-over', name: 'Tokens Over Time', kind: 'timeseries', recommendedType: 'usageheatmap' },
+      { id: 'cr-tokens-model', name: 'Tokens by Model', kind: 'breakdown', recommendedType: 'spendbreakdown' },
+      { id: 'cr-cost-agent', name: 'Cost by Agent', kind: 'breakdown', recommendedType: 'spendbreakdown' },
     ],
     recordSets: [{ id: 'cr-rs-charges', name: 'Charge Records', entityType: 'Order', count: 124000 }],
   }),

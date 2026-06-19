@@ -222,30 +222,55 @@ function consumptionUnit(label = '') {
   return ''
 }
 
-// Big consumption number + unit + a subtle month-over-month delta pill + sparkline (lg).
-export function CostKpiMini({ data, size, format }) {
+// Three lenses on the SAME consumption, with demo conversion factors relative to a
+// credit base (1 credit ≈ 1,000 tokens ≈ $0.0023). The toggle re-expresses the value.
+const COST_UNITS = [
+  { id: 'credits', label: 'Credits', factor: 1, currency: false, suffix: 'credits' },
+  { id: 'tokens', label: 'Tokens', factor: 1000, currency: false, suffix: 'tokens' },
+  { id: 'usd', label: '$', factor: 0.0023, currency: true, suffix: '' },
+]
+const nativeUnitId = (label) => { const u = consumptionUnit(label); return u === '$' ? 'usd' : u === 'tokens' ? 'tokens' : 'credits' }
+
+// Big consumption number + a Credits·Tokens·$ unit toggle + MoM delta + sparkline (lg).
+export function CostKpiMini({ data, size }) {
+  const native = nativeUnitId(data.label)
+  const [unitId, setUnitId] = useState(native)
+  const u = COST_UNITS.find((x) => x.id === unitId) || COST_UNITS[0]
+  const nat = COST_UNITS.find((x) => x.id === native) || COST_UNITS[0]
+  // Normalize the metric's value to a credit base, then re-express in the chosen unit
+  // (so the default unit shows the metric's own value and the toggle stays consistent).
+  const base = data.kpiRaw / nat.factor
+  const v = base * u.factor
+  const value = u.currency ? `$${formatValue(v, { abbreviate: true, decimals: 1 })}` : formatValue(v, { abbreviate: true })
   const down = data.kpi.deltaDir === 'down'
-  const unit = consumptionUnit(data.label)
-  const isCurrency = unit === '$'
-  const useFmt = format && format.style && format.style !== 'auto'
-  const raw = useFmt ? formatValue(data.kpiRaw, format) : data.kpi.value
-  // The currency metric value already carries a $ — don't double it.
-  const value = isCurrency && !String(raw).trim().startsWith('$') ? `$${raw}` : raw
   const Arrow = down ? TrendingDown : TrendingUp
   return (
     <div className="py-1">
       <div className={`num font-bold tracking-tight text-gray-900 dark:text-slate-100 ${size === 'sm' ? 'text-xl' : size === 'lg' ? 'text-4xl' : 'text-2xl'}`}>
         {value}
       </div>
-      {unit && !isCurrency && <div className="text-[10px] uppercase tracking-wide text-gray-500 dark:text-slate-400">{unit}</div>}
+      {u.suffix && <div className="text-[10px] uppercase tracking-wide text-gray-500 dark:text-slate-400">{u.suffix}</div>}
       {data.kpi.delta && (
         <span className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-gray-600 dark:bg-white/10 dark:text-slate-300">
           <Arrow size={11} aria-hidden="true" className={down ? 'text-aims-governed' : 'text-aims-stale'} /> {data.kpi.delta} this month
         </span>
       )}
+      {/* Unit lens — view the same consumption in credits / tokens / $. */}
+      <div className="mt-2 inline-flex overflow-hidden rounded-md border border-gray-200 text-[10px] dark:border-white/15" role="group" aria-label="View unit">
+        {COST_UNITS.map((x) => (
+          <button
+            key={x.id}
+            onClick={(e) => { e.stopPropagation(); setUnitId(x.id) }}
+            aria-pressed={unitId === x.id}
+            className={`px-2 py-0.5 font-semibold transition-colors ${unitId === x.id ? 'bg-aims-blue text-white' : 'text-gray-500 hover:bg-gray-100 dark:text-slate-400 dark:hover:bg-white/10'}`}
+          >
+            {x.label}
+          </button>
+        ))}
+      </div>
       {size === 'lg' && (
         <div className="mt-2" aria-hidden="true">
-          <ResponsiveContainer width="100%" height={56}>
+          <ResponsiveContainer width="100%" height={48}>
             <LineChart data={data.series} margin={{ top: 4, right: 4, left: 4, bottom: 0 }}>
               <Line type="monotone" dataKey="y" stroke={SERIES[0]} strokeWidth={2} dot={false} />
             </LineChart>

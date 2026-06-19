@@ -59,8 +59,10 @@ export const widgets = [
   W({ id: 'w-cons-spend', name: 'Credit Spend', skeleton: 'Cost KPI', category: 'AIMS OS', freshness: 'live', usedIn: 0, source: 'AIMS OS — Credits & Billing' }),
   W({ id: 'w-cons-tokens', name: 'Tokens This Month', skeleton: 'Cost KPI', category: 'AIMS OS', freshness: 'live', usedIn: 0, source: 'AIMS OS — Credits & Billing' }),
   W({ id: 'w-cons-activity', name: 'Workflow Activity', skeleton: 'Usage Heatmap', category: 'AIMS OS', freshness: 'live', usedIn: 0, source: 'AIMS OS — Agents (AMP)' }),
-  W({ id: 'w-cons-bysource', name: 'Spend by Agent', skeleton: 'Spend Breakdown', category: 'AIMS OS', freshness: 'live', usedIn: 0, source: 'AIMS OS — Agents (AMP)' }),
+  W({ id: 'w-cons-bysource', name: 'Cost by Agent', skeleton: 'Spend Breakdown', category: 'AIMS OS', freshness: 'live', usedIn: 0, source: 'AIMS OS — Credits & Billing' }),
   W({ id: 'w-cons-prompts', name: 'Prompts Run', skeleton: 'Composite Stat', category: 'AIMS OS', freshness: 'live', usedIn: 0, source: 'AIMS OS — Agentic Studio' }),
+  W({ id: 'w-cons-cost', name: 'Cost (USD)', skeleton: 'Cost KPI', category: 'AIMS OS', freshness: 'live', usedIn: 0, source: 'AIMS OS — Credits & Billing' }),
+  W({ id: 'w-cons-bymodel', name: 'Tokens by Model', skeleton: 'Spend Breakdown', category: 'AIMS OS', freshness: 'live', usedIn: 0, source: 'AIMS OS — Credits & Billing' }),
   // Conversations
   W({ id: 'w-aims-activeconv', name: 'Active Conversations', skeleton: 'KPI', category: 'AIMS OS', freshness: 'live', usedIn: 2, source: 'AIMS OS — Conversations' }),
   W({ id: 'w-aims-split', name: 'Agent vs Human Messages', skeleton: 'Chart', category: 'AIMS OS', usedIn: 1, source: 'AIMS OS — Conversations' }),
@@ -450,10 +452,11 @@ export const TEMPLATE_SEED = {
   // activity calendar and the spend breakdown full-width (tiles evenly, no gaps).
   't-ai-consumption': [
     { size: 'sm', widgetId: 'w-cons-spend' },
-    { size: 'sm', widgetId: 'w-cons-tokens' },
+    { size: 'sm', widgetId: 'w-cons-cost' },
     { size: 'sm', widgetId: 'w-cons-prompts' },
     { size: 'lg', widgetId: 'w-cons-activity' },
     { size: 'lg', widgetId: 'w-cons-bysource' },
+    { size: 'lg', widgetId: 'w-cons-bymodel' },
   ],
 }
 
