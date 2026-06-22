@@ -292,7 +292,6 @@ export default function WidgetLibrary() {
           })}
         </div>
         )}
-        <p className="mt-4 text-xs text-gray-500 dark:text-slate-400">Screens hosted here: S37, S38, S40–S47</p>
       </div>
 
       {repinWidget && (

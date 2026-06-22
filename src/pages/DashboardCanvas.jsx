@@ -254,7 +254,6 @@ export default function DashboardCanvas() {
             </div>
             </>
           )}
-          <p className="mt-4 text-xs text-gray-500 dark:text-slate-400">Screens hosted here: S84–S94</p>
         </div>
 
         {/* Library browser — marketplace-style picker over the widget library */}

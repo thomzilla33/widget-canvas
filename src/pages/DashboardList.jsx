@@ -292,7 +292,6 @@ export default function DashboardList() {
             ))}
           </div>
         )}
-        <p className="mt-4 text-xs text-gray-500 dark:text-slate-400">Screens hosted here: S76–S79</p>
       </div>
 
       {launcher && <CreateLauncher kind="dashboard" onPick={pickCreate} onClose={() => setLauncher(false)} />}
