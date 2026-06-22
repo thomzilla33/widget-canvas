@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
-import { LayoutDashboard, Boxes, UserRound, Sun, Moon, Palette, Settings, LogOut, Home, FileBarChart, ShieldCheck, Eye } from 'lucide-react'
+import { LayoutDashboard, Boxes, UserRound, Sun, Moon, Palette, Settings, LogOut, Home, FileBarChart, ShieldCheck, Eye, MessagesSquare } from 'lucide-react'
 import { useTheme } from '../../state/ThemeContext.jsx'
 import { useRole } from '../../state/RoleContext.jsx'
 import { useNotifications } from '../../state/NotificationsContext.jsx'
@@ -14,6 +14,7 @@ const adminNav = [
   { to: '/dashboards', label: 'Dashboards', icon: LayoutDashboard },
   { to: '/reports', label: 'Reports', icon: FileBarChart },
   { to: '/widgets', label: 'Widgets', icon: Boxes },
+  { to: '/htl-studio', label: 'Human Touch', icon: MessagesSquare },
 ]
 const userNav = [{ to: '/profiles', label: 'Profiles', icon: UserRound }]
 

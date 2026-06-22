@@ -9,6 +9,7 @@ import ReportsPage from './pages/ReportsPage.jsx'
 import HomePage from './pages/HomePage.jsx'
 import WidgetLibrary from './pages/WidgetLibrary.jsx'
 import WidgetBuilder from './pages/WidgetBuilder.jsx'
+import HtlStudio from './pages/HtlStudio.jsx'
 import ProfilesPage from './pages/ProfilesPage.jsx'
 import UCPView from './pages/UCPView.jsx'
 
@@ -31,6 +32,7 @@ export default function App() {
         <Route path="/dashboard/:id" element={<DashboardViewPage />} />
         <Route path="/widgets" element={<WidgetLibrary />} />
         <Route path="/widgets/new" element={<AdminRoute><WidgetBuilder /></AdminRoute>} />
+        <Route path="/htl-studio" element={<AdminRoute><HtlStudio /></AdminRoute>} />
         <Route path="/profiles" element={<ProfilesPage />} />
         <Route path="/ucp/:entityId" element={<UCPView />} />
         <Route path="*" element={<Navigate to="/dashboards" replace />} />
