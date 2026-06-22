@@ -308,24 +308,52 @@ export function UsageHeatmapMini({ data, size }) {
 
 // Where consumption goes: ranked horizontal % bars (agent / workflow / source).
 export function SpendBreakdownMini({ data, size }) {
+  const native = nativeUnitId(data.label)
+  const [unitId, setUnitId] = useState(native)
+  const u = COST_UNITS.find((x) => x.id === unitId) || COST_UNITS[0]
+  const nat = COST_UNITS.find((x) => x.id === native) || COST_UNITS[0]
+  // Re-express each row's amount in the chosen unit (% share is unit-invariant).
+  const fmtUnit = (raw) => {
+    const v = (raw / nat.factor) * u.factor
+    return u.currency ? `$${formatValue(v, { abbreviate: true, decimals: 1 })}` : formatValue(v, { abbreviate: true })
+  }
   const all = data.breakdown || []
   const items = all.slice(0, size === 'sm' ? 3 : size === 'lg' ? 6 : 4)
   const max = Math.max(...all.map((b) => b.value), 1)
   const total = all.reduce((a, b) => a + b.value, 0) || 1
+  const showVal = size !== 'sm' // md + lg show the per-row amount in the chosen unit
   return (
-    <ul className="space-y-1.5">
-      {items.map((b, i) => (
-        <li key={b.label} className="flex items-center gap-2 text-[11px]">
-          <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: SERIES[i % SERIES.length] }} />
-          <span className="w-20 shrink-0 truncate text-gray-700 dark:text-slate-200">{b.label}</span>
-          <span className="h-2 flex-1 overflow-hidden rounded-full bg-gray-100 dark:bg-white/10">
-            <span className="block h-full rounded-full" style={{ width: `${(b.value / max) * 100}%`, background: SERIES[i % SERIES.length] }} />
-          </span>
-          <span className="num w-9 shrink-0 text-right font-semibold text-gray-900 dark:text-slate-100">{Math.round((b.value / total) * 100)}%</span>
-          {size === 'lg' && <span className="num w-12 shrink-0 text-right text-gray-500 dark:text-slate-400">{formatValue(b.value, { abbreviate: true })}</span>}
-        </li>
-      ))}
-    </ul>
+    <div>
+      {showVal && (
+        <div className="mb-1.5 flex justify-end">
+          <div className="inline-flex overflow-hidden rounded-md border border-gray-200 text-[10px] dark:border-white/15" role="group" aria-label="View unit">
+            {COST_UNITS.map((x) => (
+              <button
+                key={x.id}
+                onClick={(e) => { e.stopPropagation(); setUnitId(x.id) }}
+                aria-pressed={unitId === x.id}
+                className={`px-2 py-0.5 font-semibold transition-colors ${unitId === x.id ? 'bg-aims-blue text-white' : 'text-gray-500 hover:bg-gray-100 dark:text-slate-400 dark:hover:bg-white/10'}`}
+              >
+                {x.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+      <ul className="space-y-1.5">
+        {items.map((b, i) => (
+          <li key={b.label} className="flex items-center gap-2 text-[11px]">
+            <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: SERIES[i % SERIES.length] }} />
+            <span className="w-20 shrink-0 truncate text-gray-700 dark:text-slate-200">{b.label}</span>
+            <span className="h-2 flex-1 overflow-hidden rounded-full bg-gray-100 dark:bg-white/10">
+              <span className="block h-full rounded-full" style={{ width: `${(b.value / max) * 100}%`, background: SERIES[i % SERIES.length] }} />
+            </span>
+            <span className="num w-9 shrink-0 text-right font-semibold text-gray-900 dark:text-slate-100">{Math.round((b.value / total) * 100)}%</span>
+            {showVal && <span className="num w-14 shrink-0 text-right text-gray-500 dark:text-slate-400">{fmtUnit(b.value)}</span>}
+          </li>
+        ))}
+      </ul>
+    </div>
   )
 }
 
