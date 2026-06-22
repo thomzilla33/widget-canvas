@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import gsap from 'gsap'
-import { ChevronDown, PenSquare, Search, MoreHorizontal, X, Plus, FileText, Mic, ArrowUp, Sparkles } from 'lucide-react'
+import { ChevronDown, PenSquare, Search, MoreHorizontal, X, Plus, FileText, Mic, ArrowUp, Sparkles, Check } from 'lucide-react'
+import { PopoverPanel } from '../common/Popover.jsx'
 
 // Docked "UCP Concierge" — the internal chat that ships open by default on every
 // UCP. Stays MOUNTED across open/close (conversation persists); width is
@@ -22,6 +23,14 @@ function reply(q, entityName) {
 
 const PROMPTS = ['Summarize this contact', 'Draft a follow-up email', 'Any risks I should know?']
 
+// The concierge can switch persona — each is scoped to a slice of the profile.
+const AGENTS = [
+  { id: 'concierge', name: 'UCP Concierge', desc: 'Full profile context — summaries, drafts, and widget suggestions' },
+  { id: 'sales', name: 'Sales Assistant', desc: 'Pipeline, deals, and next best action' },
+  { id: 'support', name: 'Support Agent', desc: 'Tickets, SLAs, and escalations' },
+  { id: 'billing', name: 'Billing Specialist', desc: 'Invoices, disputes, and payments' },
+]
+
 export default function UcpConcierge({ entity, open, onClose }) {
   const entityName = entity?.name || 'this contact'
   const asideRef = useRef(null)
@@ -30,6 +39,9 @@ export default function UcpConcierge({ entity, open, onClose }) {
   const [width, setWidth] = useState(380)
   const [draft, setDraft] = useState('')
   const [typing, setTyping] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [agentId, setAgentId] = useState('concierge')
+  const agent = AGENTS.find((a) => a.id === agentId) || AGENTS[0]
   const [msgs, setMsgs] = useState([
     { from: 'agent', text: `Hi — I'm the concierge for ${entityName}. Ask me for a summary, to draft an email, or to suggest a widget for this profile.` },
   ])
@@ -57,6 +69,14 @@ export default function UcpConcierge({ entity, open, onClose }) {
       setTyping(false)
       scrollToEnd()
     }, 650)
+  }
+
+  const selectAgent = (a) => {
+    setMenuOpen(false)
+    if (a.id === agentId) return
+    setAgentId(a.id)
+    setMsgs((m) => [...m, { from: 'agent', text: `You're now chatting with the ${a.name} for ${entityName}. ${a.desc}.` }])
+    scrollToEnd()
   }
 
   // Drag-to-resize from the left edge. Mutates this panel's width via React state;
@@ -105,10 +125,38 @@ export default function UcpConcierge({ entity, open, onClose }) {
       <div ref={innerRef} className="flex h-full flex-col" style={{ width }}>
         {/* Header */}
         <div className="flex items-center gap-2 border-b border-gray-200 px-3 py-3 dark:border-white/10">
-          <button className="flex min-w-0 items-center gap-1 text-sm font-semibold text-gray-900 dark:text-slate-100" aria-label="Concierge menu">
-            <span className="truncate">UCP Concierge</span>
-            <ChevronDown size={15} className="shrink-0 text-gray-400" aria-hidden="true" />
-          </button>
+          <div className="relative min-w-0">
+            <button
+              onClick={() => setMenuOpen((o) => !o)}
+              aria-haspopup="menu"
+              aria-expanded={menuOpen}
+              aria-label="Switch concierge agent"
+              className="flex min-w-0 items-center gap-1 rounded-md px-1 py-0.5 text-sm font-semibold text-gray-900 hover:bg-gray-100 dark:text-slate-100 dark:hover:bg-white/5"
+            >
+              <span className="truncate">{agent.name}</span>
+              <ChevronDown size={15} className={`shrink-0 text-gray-400 transition-transform ${menuOpen ? 'rotate-180' : ''}`} aria-hidden="true" />
+            </button>
+            {menuOpen && (
+              <PopoverPanel onClose={() => setMenuOpen(false)} align="left" className="top-full w-64 p-1.5">
+                <div className="px-1 pb-1 pt-0.5 text-[10px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-500">Concierge agent</div>
+                {AGENTS.map((a) => (
+                  <button
+                    key={a.id}
+                    onClick={() => selectAgent(a)}
+                    role="menuitemradio"
+                    aria-checked={a.id === agentId}
+                    className="flex w-full items-start gap-2 rounded-md px-2 py-1.5 text-left hover:bg-gray-50 dark:hover:bg-white/5"
+                  >
+                    <span className="mt-0.5 grid h-4 w-4 shrink-0 place-items-center">{a.id === agentId && <Check size={13} className="text-aims-blue" aria-hidden="true" />}</span>
+                    <span className="min-w-0">
+                      <span className="block text-sm font-medium text-gray-900 dark:text-slate-100">{a.name}</span>
+                      <span className="block text-[11px] text-gray-500 dark:text-slate-400">{a.desc}</span>
+                    </span>
+                  </button>
+                ))}
+              </PopoverPanel>
+            )}
+          </div>
           <div className="ml-auto flex items-center gap-0.5 text-gray-400 dark:text-slate-500">
             <IconBtn label="New chat" onClick={() => { setMsgs([msgs[0]]); setDraft('') }}><PenSquare size={16} /></IconBtn>
             <IconBtn label="Search"><Search size={16} /></IconBtn>
