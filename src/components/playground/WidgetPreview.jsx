@@ -1,31 +1,12 @@
 import { useState, useEffect, Component } from 'react'
-import {
-  ResponsiveContainer,
-  LineChart,
-  Line,
-  BarChart,
-  Bar,
-  PieChart,
-  Pie,
-  Cell,
-  ScatterChart,
-  Scatter,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  RadialBarChart,
-  RadialBar,
-  PolarAngleAxis,
-} from 'recharts'
 import { ChevronLeft, ChevronRight, Lock, Sparkles, Filter } from 'lucide-react'
 import { GovernedBadge, FreshnessBadge, DataPlaneBadge } from '../common/index.jsx'
 import { dataPlaneOf } from '../../data/governance.js'
 import { dimensionsFor } from '../../data/fields.js'
-import { useTheme } from '../../state/ThemeContext.jsx'
 import { previewData, formatValue } from '../../data/preview.js'
 import { TYPE_LABEL } from '../../data/mock.js'
 import { CostKpiMini, UsageHeatmapMini, SpendBreakdownMini, CompositeStatMini } from '../widgets/WidgetRender.jsx'
+import { SERIES, LineHC, BarHC, PieHC, ScatterHC, GaugeHC, FunnelHC, HeatmapHC } from '../charts/hc.jsx'
 
 // The date ranges a metric can be filtered to (time is always an applicable filter).
 const PREVIEW_RANGES = [
@@ -40,25 +21,6 @@ const PREVIEW_RANGES = [
 function goalMet(raw, goal) {
   if (!goal || goal.value == null) return null
   return goal.direction === 'lower' ? raw <= goal.value : raw >= goal.value
-}
-
-export const SERIES = ['#2563EB', '#06B6D4', '#A78BFA', '#10B981', '#F59E0B', '#EC4899']
-
-export function useChartTheme() {
-  const { theme } = useTheme()
-  const dark = theme === 'dark'
-  return {
-    grid: dark ? 'rgba(255,255,255,0.08)' : '#e5e7eb',
-    axis: dark ? '#475569' : '#cbd5e1',
-    tick: { fill: dark ? '#94a3b8' : '#64748b', fontSize: 11 },
-    tooltip: {
-      background: dark ? '#131a2c' : '#ffffff',
-      border: `1px solid ${dark ? 'rgba(255,255,255,0.12)' : '#e5e7eb'}`,
-      borderRadius: 8,
-      color: dark ? '#e2e8f0' : '#0f172a',
-      fontSize: 12,
-    },
-  }
 }
 
 const H = 220
@@ -225,88 +187,33 @@ class ChartBoundary extends Component {
   }
 }
 
-/* ── Recharts views ── */
+/* ── Highcharts views (shared engine with the placed tile) ── */
 function LineView({ data }) {
-  const t = useChartTheme()
-  return (
-    <ResponsiveContainer width="100%" height={H}>
-      <LineChart data={data.series} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
-        <CartesianGrid stroke={t.grid} vertical={false} />
-        <XAxis dataKey="x" stroke={t.axis} tick={t.tick} tickLine={false} />
-        <YAxis stroke={t.axis} tick={t.tick} tickLine={false} axisLine={false} />
-        <Tooltip contentStyle={t.tooltip} itemStyle={{ color: t.tooltip.color }} labelStyle={{ color: t.tooltip.color }} cursor={{ stroke: t.grid }} />
-        <Line type="monotone" dataKey="y" name={data.label} stroke={SERIES[0]} strokeWidth={2.5} dot={false} />
-      </LineChart>
-    </ResponsiveContainer>
-  )
+  return <LineHC series={data.series} label={data.label} height={H} axes />
 }
 
 function BarView({ data }) {
-  const t = useChartTheme()
-  return (
-    <ResponsiveContainer width="100%" height={H}>
-      <BarChart data={data.breakdown} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
-        <CartesianGrid stroke={t.grid} vertical={false} />
-        <XAxis dataKey="label" stroke={t.axis} tick={{ ...t.tick, fontSize: 10 }} tickLine={false} interval={0} />
-        <YAxis stroke={t.axis} tick={t.tick} tickLine={false} axisLine={false} />
-        <Tooltip contentStyle={t.tooltip} itemStyle={{ color: t.tooltip.color }} labelStyle={{ color: t.tooltip.color }} cursor={{ fill: t.grid }} />
-        <Bar dataKey="value" name={data.label} radius={[4, 4, 0, 0]}>
-          {data.breakdown.map((entry, i) => (
-            <Cell key={entry.label} fill={SERIES[i % SERIES.length]} />
-          ))}
-        </Bar>
-      </BarChart>
-    </ResponsiveContainer>
-  )
+  return <BarHC breakdown={data.breakdown} label={data.label} height={H} axes />
 }
 
 function PieView({ data }) {
-  const t = useChartTheme()
-  return (
-    <ResponsiveContainer width="100%" height={H}>
-      <PieChart>
-        <Pie data={data.breakdown} dataKey="value" nameKey="label" innerRadius={48} outerRadius={80} paddingAngle={2}>
-          {data.breakdown.map((entry, i) => (
-            <Cell key={entry.label} fill={SERIES[i % SERIES.length]} stroke="none" />
-          ))}
-        </Pie>
-        <Tooltip contentStyle={t.tooltip} itemStyle={{ color: t.tooltip.color }} labelStyle={{ color: t.tooltip.color }} />
-      </PieChart>
-    </ResponsiveContainer>
-  )
+  return <PieHC breakdown={data.breakdown} height={H} inner="58%" withLegend />
 }
 
 function ScatterView({ data }) {
-  const t = useChartTheme()
-  return (
-    <ResponsiveContainer width="100%" height={H}>
-      <ScatterChart margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
-        <CartesianGrid stroke={t.grid} />
-        <XAxis type="number" dataKey="x" stroke={t.axis} tick={t.tick} tickLine={false} />
-        <YAxis type="number" dataKey="y" stroke={t.axis} tick={t.tick} tickLine={false} axisLine={false} />
-        <Tooltip contentStyle={t.tooltip} itemStyle={{ color: t.tooltip.color }} labelStyle={{ color: t.tooltip.color }} cursor={{ stroke: t.grid }} />
-        <Scatter data={data.twoVar} fill={SERIES[2]} />
-      </ScatterChart>
-    </ResponsiveContainer>
-  )
+  return <ScatterHC points={data.twoVar} height={H} axes />
 }
 
 // RAG color when a goal is set: ≥67% on track (green), ≥34% (amber), else red.
 const RAG = (v) => (v >= 67 ? '#16A34A' : v >= 34 ? '#D97706' : '#DC2626')
 
 function GaugeView({ data, display }) {
-  const t = useChartTheme()
   const v = data.gauge.value
   const goalSet = display?.goal?.value != null
   const color = goalSet ? RAG(v) : SERIES[0]
   return (
     <div className="relative" style={{ height: H }}>
-      <ResponsiveContainer width="100%" height="100%">
-        <RadialBarChart innerRadius="68%" outerRadius="100%" data={[{ value: v }]} startAngle={210} endAngle={-30}>
-          <PolarAngleAxis type="number" domain={[0, 100]} tick={false} />
-          <RadialBar dataKey="value" cornerRadius={8} fill={color} background={{ fill: t.grid }} />
-        </RadialBarChart>
-      </ResponsiveContainer>
+      <GaugeHC value={v} color={color} height={H} />
       <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
         <span
           className={`num text-3xl font-bold tracking-tight ${goalSet ? '' : 'text-gray-900 dark:text-slate-100'}`}
@@ -395,36 +302,7 @@ function ListView({ data }) {
 }
 
 function HeatmapView({ data }) {
-  const { rows, cols, cells } = data.matrix
-  return (
-    <div className="text-[11px]">
-      <div className="grid gap-1" style={{ gridTemplateColumns: `64px repeat(${cols.length}, 1fr)` }}>
-        <div />
-        {cols.map((c) => (
-          <div key={c} className="text-center font-semibold text-gray-500 dark:text-slate-400">{c}</div>
-        ))}
-        {rows.map((r, ri) => (
-          <Row key={r} label={r} values={cells[ri]} />
-        ))}
-      </div>
-    </div>
-  )
-}
-function Row({ label, values }) {
-  return (
-    <>
-      <div className="flex items-center font-semibold text-gray-500 dark:text-slate-400">{label}</div>
-      {values.map((v, ci) => (
-        <div
-          key={ci}
-          className="grid h-9 place-items-center rounded font-medium"
-          style={{ background: `rgba(37,99,235,${0.12 + (v / 100) * 0.78})`, color: v > 45 ? '#fff' : 'inherit' }}
-        >
-          {v}
-        </div>
-      ))}
-    </>
-  )
+  return <HeatmapHC matrix={data.matrix} height={H} labels />
 }
 
 function CarouselView({ data }) {
@@ -495,22 +373,7 @@ function MapView({ data }) {
 }
 
 function FunnelView({ data }) {
-  const stages = [...data.breakdown].sort((a, b) => b.value - a.value)
-  const max = stages.length ? Math.max(...stages.map((s) => s.value)) : 0
-  return (
-    <ul className="space-y-2">
-      {stages.map((s, i) => (
-        <li key={s.label} className="flex items-center gap-2 text-xs">
-          <span className="w-24 shrink-0 truncate text-gray-700 dark:text-slate-200">{s.label}</span>
-          <span className="h-6 flex-1 overflow-hidden rounded bg-gray-100 dark:bg-white/10">
-            <span className="flex h-full items-center justify-end rounded px-2 text-[11px] font-semibold text-white" style={{ width: `${max > 0 ? (s.value / max) * 100 : 0}%`, background: SERIES[i % SERIES.length] }}>
-              <span className="num">{s.value}</span>
-            </span>
-          </span>
-        </li>
-      ))}
-    </ul>
-  )
+  return <FunnelHC breakdown={data.breakdown} height={H} labels />
 }
 
 const BOARD_STATUS = {

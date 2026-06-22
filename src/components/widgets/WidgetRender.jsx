@@ -1,21 +1,6 @@
 import { useMemo, useState } from 'react'
-import {
-  ResponsiveContainer,
-  LineChart,
-  Line,
-  BarChart,
-  Bar,
-  Cell,
-  XAxis,
-  CartesianGrid,
-  RadialBarChart,
-  RadialBar,
-  PolarAngleAxis,
-  PieChart,
-  Pie,
-} from 'recharts'
 import { Sparkles, TrendingUp, TrendingDown } from 'lucide-react'
-import { useChartTheme, SERIES } from '../playground/WidgetPreview.jsx'
+import { SERIES, LineHC, BarHC, PieHC, GaugeHC, FunnelHC, HeatmapHC, SparklineHC } from '../charts/hc.jsx'
 import { widgetSample, formatValue } from '../../data/preview.js'
 import { isBillingWidget, creditBreakdown } from '../../data/governance.js'
 import SystemWidget from './SystemWidget.jsx'
@@ -116,11 +101,7 @@ function KpiMini({ data, size, format, goal }) {
       )}
       {size === 'lg' && (
         <div className="mt-2" aria-hidden="true">
-          <ResponsiveContainer width="100%" height={64}>
-            <LineChart data={data.series} margin={{ top: 4, right: 4, left: 4, bottom: 0 }}>
-              <Line type="monotone" dataKey="y" stroke={SERIES[0]} strokeWidth={2} dot={false} />
-            </LineChart>
-          </ResponsiveContainer>
+          <SparklineHC series={data.series} height={64} />
         </div>
       )}
     </div>
@@ -152,56 +133,34 @@ function CreditsMini({ widget, size }) {
 }
 
 function LineMini({ data, size }) {
-  const t = useChartTheme()
   const ys = data.series.map((d) => d.y)
-  const label = `Trend line — ${ys.length} points, latest ${ys[ys.length - 1]}, range ${Math.min(...ys)} to ${Math.max(...ys)}.`
+  const label = ys.length
+    ? `Trend line — ${ys.length} points, latest ${ys[ys.length - 1]}, range ${Math.min(...ys)} to ${Math.max(...ys)}.`
+    : 'Trend line — no data.'
   return (
     <div role="img" aria-label={label}>
-      <ResponsiveContainer width="100%" height={H[size]}>
-        <LineChart data={data.series} margin={{ top: 6, right: 6, left: 6, bottom: 0 }}>
-          {size === 'lg' && <CartesianGrid stroke={t.grid} vertical={false} />}
-          {size === 'lg' && <XAxis dataKey="x" stroke={t.axis} tick={{ ...t.tick, fontSize: 10 }} tickLine={false} />}
-          <Line type="monotone" dataKey="y" stroke={SERIES[0]} strokeWidth={2} dot={false} />
-        </LineChart>
-      </ResponsiveContainer>
+      <LineHC series={data.series} height={H[size]} axes={size === 'lg'} />
     </div>
   )
 }
 
 function BarMini({ data, size }) {
-  const t = useChartTheme()
   const label = `Bar chart — ${data.breakdown.map((b) => `${b.label} ${b.value}`).join(', ')}.`
   return (
     <div role="img" aria-label={label}>
-      <ResponsiveContainer width="100%" height={H[size]}>
-        <BarChart data={data.breakdown} margin={{ top: 6, right: 6, left: 6, bottom: 0 }}>
-          {size === 'lg' && <CartesianGrid stroke={t.grid} vertical={false} />}
-          {size === 'lg' && <XAxis dataKey="label" stroke={t.axis} tick={{ ...t.tick, fontSize: 9 }} tickLine={false} interval={0} />}
-          <Bar dataKey="value" radius={[3, 3, 0, 0]}>
-            {data.breakdown.map((entry, i) => (
-              <Cell key={entry.label} fill={SERIES[i % SERIES.length]} />
-            ))}
-          </Bar>
-        </BarChart>
-      </ResponsiveContainer>
+      <BarHC breakdown={data.breakdown} height={H[size]} axes={size === 'lg'} />
     </div>
   )
 }
 
 function GaugeMini({ data, size, goal }) {
-  const t = useChartTheme()
   const v = data.gauge.value
   const h = size === 'sm' ? 64 : size === 'lg' ? 132 : 88
   const goalSet = goal && goal.value != null
   const color = goalSet ? (v >= 67 ? '#16A34A' : v >= 34 ? '#D97706' : '#DC2626') : SERIES[0]
   return (
     <div className="relative" style={{ height: h }} role="img" aria-label={`${v}% ${data.gauge.label}`}>
-      <ResponsiveContainer width="100%" height="100%">
-        <RadialBarChart innerRadius="70%" outerRadius="100%" data={[{ value: v }]} startAngle={210} endAngle={-30}>
-          <PolarAngleAxis type="number" domain={[0, 100]} tick={false} />
-          <RadialBar dataKey="value" cornerRadius={6} fill={color} background={{ fill: t.grid }} />
-        </RadialBarChart>
-      </ResponsiveContainer>
+      <GaugeHC value={v} color={color} height={h} />
       <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
         <span className={`num font-bold ${size === 'lg' ? 'text-3xl' : 'text-lg'} ${goalSet ? '' : 'text-gray-900 dark:text-slate-100'}`} style={goalSet ? { color } : undefined}>{v}%</span>
         {size === 'lg' && <span className="text-[11px] text-gray-500 dark:text-slate-400">{data.gauge.label}</span>}
@@ -270,11 +229,7 @@ export function CostKpiMini({ data, size }) {
       </div>
       {size === 'lg' && (
         <div className="mt-2" aria-hidden="true">
-          <ResponsiveContainer width="100%" height={48}>
-            <LineChart data={data.series} margin={{ top: 4, right: 4, left: 4, bottom: 0 }}>
-              <Line type="monotone" dataKey="y" stroke={SERIES[0]} strokeWidth={2} dot={false} />
-            </LineChart>
-          </ResponsiveContainer>
+          <SparklineHC series={data.series} height={48} />
         </div>
       )}
     </div>
@@ -491,25 +446,13 @@ function MapMini({ data, size }) {
 
 function HeatMini({ data, size }) {
   const rowCount = size === 'sm' ? 2 : size === 'lg' ? 4 : 3
-  const cells = data.matrix.cells.slice(0, rowCount).map((row) => row.slice(0, 4))
-  const cellH = size === 'lg' ? 'h-7' : 'h-4'
-  return (
-    <div className="space-y-1">
-      {cells.map((row, ri) => (
-        <div key={data.matrix.rows[ri] || ri} className="flex gap-1">
-          {row.map((v, ci) => (
-            <span
-              key={`${ri}-${ci}`}
-              className={`${cellH} flex-1 rounded-sm ${size === 'lg' ? 'grid place-items-center text-[9px] font-medium text-white/90' : ''}`}
-              style={{ background: `rgba(37,99,235,${0.15 + (v / 100) * 0.75})` }}
-            >
-              {size === 'lg' && v > 40 ? v : ''}
-            </span>
-          ))}
-        </div>
-      ))}
-    </div>
-  )
+  const colCount = 4
+  const m = {
+    rows: data.matrix.rows.slice(0, rowCount),
+    cols: data.matrix.cols.slice(0, colCount),
+    cells: data.matrix.cells.slice(0, rowCount).map((row) => row.slice(0, colCount)),
+  }
+  return <HeatmapHC matrix={m} height={H[size]} labels={size === 'lg'} />
 }
 
 function SummaryMini({ data, size }) {
@@ -535,7 +478,6 @@ function SummaryMini({ data, size }) {
 }
 
 function DonutMini({ data, size }) {
-  const t = useChartTheme()
   const segs = data.breakdown
   const h = size === 'sm' ? 64 : size === 'lg' ? 140 : 96
   const inner = size === 'sm' ? '60%' : '64%'
@@ -543,15 +485,7 @@ function DonutMini({ data, size }) {
   return (
     <div role="img" aria-label={label} className={size === 'lg' ? 'flex items-center gap-2' : ''}>
       <div className={size === 'lg' ? 'flex-1' : ''}>
-        <ResponsiveContainer width="100%" height={h}>
-          <PieChart>
-            <Pie data={segs} dataKey="value" nameKey="label" innerRadius={inner} outerRadius="92%" stroke={t.grid} strokeWidth={1} paddingAngle={2}>
-              {segs.map((entry, i) => (
-                <Cell key={entry.label} fill={SERIES[i % SERIES.length]} />
-              ))}
-            </Pie>
-          </PieChart>
-        </ResponsiveContainer>
+        <PieHC breakdown={segs} height={h} inner={inner} />
       </div>
       {size === 'lg' && (
         <ul className="space-y-1 text-[10px]">
@@ -569,25 +503,7 @@ function DonutMini({ data, size }) {
 }
 
 function FunnelMini({ data, size }) {
-  const segs = [...data.breakdown].sort((a, b) => b.value - a.value)
-  const max = segs.length ? Math.max(...segs.map((s) => s.value)) : 0
-  const detailed = size !== 'sm'
-  return (
-    <div className="space-y-1">
-      {segs.map((b, i) => (
-        <div key={b.label} className="flex items-center gap-1.5 text-[10px]">
-          {detailed && <span className="w-14 shrink-0 truncate text-gray-600 dark:text-slate-300">{b.label}</span>}
-          <span className="flex-1">
-            <span
-              className="block h-3 rounded-sm"
-              style={{ width: `${max > 0 ? (b.value / max) * 100 : 0}%`, background: SERIES[i % SERIES.length] }}
-            />
-          </span>
-          {detailed && <span className="num w-8 shrink-0 text-right font-medium text-gray-900 dark:text-slate-100">{b.value}</span>}
-        </div>
-      ))}
-    </div>
-  )
+  return <FunnelHC breakdown={data.breakdown} height={H[size]} labels={size === 'lg'} />
 }
 
 // Status → dark-aware accent classes for the board view.
