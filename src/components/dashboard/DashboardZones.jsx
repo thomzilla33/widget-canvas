@@ -51,7 +51,7 @@ export default function DashboardZones({ dashboard, scope, onDrill, viewerRole }
   }
 
   return (
-    <div ref={gridReveal} className="grid auto-rows-fr grid-cols-1 items-stretch gap-3 sm:grid-cols-2 lg:grid-cols-3">
+    <div ref={gridReveal} className="flip-grid grid auto-rows-fr grid-cols-1 items-stretch gap-3 sm:grid-cols-2 lg:grid-cols-3">
       {visible.map((p, i) => {
         const w = byId(p.widgetId)
         // Live tiles get the ticking scope; everything else gets the stable one (memo bails).

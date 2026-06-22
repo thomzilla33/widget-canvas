@@ -1,5 +1,7 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useLayoutEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import gsap from 'gsap'
+import { Flip } from 'gsap/Flip'
 import {
   Sparkles,
   RefreshCw,
@@ -24,6 +26,7 @@ import {
 import { PageHeader, GovernedBadge, FreshnessBadge, EmptyState } from '../components/common/index.jsx'
 import { PopoverPanel } from '../components/common/Popover.jsx'
 import FeedbackPanel from '../components/ucp/FeedbackPanel.jsx'
+import UcpConcierge from '../components/ucp/UcpConcierge.jsx'
 import DashboardZones from '../components/dashboard/DashboardZones.jsx'
 import EntityContextHeader, { profileSupportsHeader } from '../components/dashboard/EntityContextHeader.jsx'
 import { useWidgets } from '../state/WidgetsContext.jsx'
@@ -35,6 +38,8 @@ import { entities, MANDATORY_TABS } from '../data/mock.js'
 import { suggestTabs } from '../data/suggestions.js'
 import { ALL_AUDIENCES, AUDIENCE_OPTIONS, dashAudienceVisibleTo } from '../data/audiences.js'
 import { useActivity, ACTIVITY_TYPE_LABEL } from '../state/ActivityContext.jsx'
+
+gsap.registerPlugin(Flip)
 
 // Map an entity's type to the placement profile type used by dashboards.
 const PROFILE_OF = { Account: 'Company', Contact: 'Contact', Employee: 'Employee', Deal: 'Deal', Case: 'Case' }
@@ -89,6 +94,24 @@ export default function UCPView() {
   // U1.5 — tab-level audience visibility: preview the profile as a role and hide
   // tabs whose content that role can't see. Mandatory + empty tabs always show.
   const [viewAs, setViewAs] = useState(ALL_AUDIENCES)
+
+  // The internal chat (UCP Concierge) is docked open by DEFAULT on every UCP.
+  // Toggling it reflows the widget grid; GSAP Flip animates the tiles to their new
+  // positions (transforms only) so the reorganization is fluid — no jump.
+  const [chatOpen, setChatOpen] = useState(true)
+  const contentRef = useRef(null)
+  const flipState = useRef(null)
+  const toggleChat = () => {
+    const reduce = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const tiles = !reduce && contentRef.current ? contentRef.current.querySelectorAll('.flip-grid > *') : null
+    flipState.current = tiles && tiles.length ? Flip.getState(tiles) : null
+    setChatOpen((v) => !v)
+  }
+  useLayoutEffect(() => {
+    if (!flipState.current) return
+    Flip.from(flipState.current, { duration: 0.5, ease: 'power2.inOut', absolute: true, stagger: 0.015 })
+    flipState.current = null
+  }, [chatOpen])
   const previewing = viewAs !== ALL_AUDIENCES
   // A tab is visible to `role` if it's mandatory, has no dashboards (empty/configured),
   // or at least one of its dashboards is visible to that role.
@@ -386,10 +409,20 @@ export default function UCPView() {
               </label>
             </div>
           )}
+          <button
+            type="button"
+            onClick={toggleChat}
+            aria-pressed={chatOpen}
+            title="Toggle the UCP Concierge"
+            className={`ml-1 inline-flex shrink-0 items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs font-medium transition-colors ${chatOpen ? 'border-aims-blue/40 bg-aims-blue/10 text-aims-blue' : 'border-gray-200 text-gray-500 hover:text-aims-blue dark:border-white/15 dark:text-slate-400'}`}
+          >
+            <MessageCircle size={14} aria-hidden="true" /> Concierge
+          </button>
         </div>
       </div>
 
-      <div className="flex-1 overflow-auto relative">
+      <div className="flex min-h-0 flex-1 overflow-hidden">
+        <div ref={contentRef} className="relative flex-1 overflow-auto">
         {activeTab !== 'Overview' ? (
           <div className="mx-auto w-full max-w-[1800px] space-y-6 px-6 py-5 lg:px-8 2xl:px-12">
             {/* U2.3 — logged communications (Email/SMS/notes) for this entity */}
@@ -445,7 +478,7 @@ export default function UCPView() {
               <EmptyState icon="🔍" title="No widgets match" description={`Nothing on this profile matches “${search}”.`} />
             </div>
           ) : (
-            <div className="mt-5 grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fill,minmax(min(300px,100%),1fr))' }}>
+            <div className="flip-grid mt-5 grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fill,minmax(min(300px,100%),1fr))' }}>
               {visible.map((inst) => (
                 <UCPWidget
                   key={inst.iid}
@@ -505,6 +538,8 @@ export default function UCPView() {
         )}
 
         {activeTab === 'Overview' && resetOpen && <ResetModal onCancel={() => setResetOpen(false)} onConfirm={resetLayout} />}
+        </div>
+        {chatOpen && <UcpConcierge entity={entity} onClose={toggleChat} />}
       </div>
     </div>
   )
