@@ -539,7 +539,7 @@ export default function UCPView() {
 
         {activeTab === 'Overview' && resetOpen && <ResetModal onCancel={() => setResetOpen(false)} onConfirm={resetLayout} />}
         </div>
-        {chatOpen && <UcpConcierge entity={entity} onClose={toggleChat} />}
+        <UcpConcierge entity={entity} open={chatOpen} onClose={toggleChat} />
       </div>
     </div>
   )
