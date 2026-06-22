@@ -147,6 +147,10 @@ function semanticKpi(name, h) {
 // Category labels that match the metric (stages / channels / regions / …).
 function breakdownCats(name = '') {
   if (/stage|pipeline|funnel|\bmql\b|\bsql\b/i.test(name)) return ['Prospecting', 'Qualified', 'Proposal', 'Negotiation', 'Closed']
+  // Human Touch Layer telemetry — AI/human outcome, handoff reasons, comms channels.
+  if (/resolved|escalat|ai vs|resolution mix|handoff rate/i.test(name)) return ['AI Resolved', 'Escalated to Human']
+  if (/handoff.*reason|reason.*handoff/i.test(name)) return ['Complex issue', 'Customer request', 'Low confidence', 'Policy block', 'Payment dispute']
+  if (/channel mix|channels used|conversation channel/i.test(name)) return ['Text', 'Voice', 'Video', 'Screen share', 'Co-browse']
   if (/channel/i.test(name)) return ['Email', 'Social', 'Search', 'Direct', 'Referral']
   if (/\bstore\b|rooftop|dealership|location/i.test(name)) return TASCA_STORES
   if (/region/i.test(name)) return ['North America', 'EMEA', 'APAC', 'LATAM']
@@ -211,6 +215,9 @@ function dimLabelOf(name = '') {
   if (/stage|pipeline|funnel|\bmql\b|\bsql\b/i.test(name)) return 'Stage'
   if (/channel/i.test(name)) return 'Channel'
   if (/\bstore\b|rooftop|dealership|location/i.test(name)) return 'Store'
+  if (/resolved|escalat|ai vs|resolution mix/i.test(name)) return 'Outcome'
+  if (/handoff.*reason|reason.*handoff/i.test(name)) return 'Reason'
+  if (/channel mix|channels used|conversation channel/i.test(name)) return 'Channel'
   if (/region/i.test(name)) return 'Region'
   if (/plan|tier|subscription/i.test(name)) return 'Tier'
   if (/action|type/i.test(name)) return 'Type'

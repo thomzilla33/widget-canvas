@@ -49,9 +49,17 @@ export const widgets = [
   W({ id: 'w-aims-facttier', name: 'Facts by Tier', skeleton: 'Chart', category: 'AIMS OS', usedIn: 1, source: 'AIMS OS — Truth Plane' }),
   // Sandbox plane — unverified candidate facts (never blended with Truth)
   W({ id: 'w-aims-candidatefacts', name: 'Candidate Facts (Sandbox)', skeleton: 'KPI', category: 'AIMS OS', dataPlane: 'sandbox', usedIn: 1, source: 'AIMS OS — Truth Plane' }),
-  // Human Touch Layer
+  // Human Touch Layer — the telemetry the human-touch widget generates
   W({ id: 'w-aims-queue', name: 'Queue Depth', skeleton: 'KPI', category: 'AIMS OS', freshness: 'live', usedIn: 4, source: 'AIMS OS — Human Touch Layer' }),
   W({ id: 'w-aims-sla', name: 'SLA Compliance Rate', skeleton: 'Gauge', category: 'AIMS OS', freshness: 'live', usedIn: 3, source: 'AIMS OS — Human Touch Layer' }),
+  W({ id: 'w-htl-sessions', name: 'HTL Sessions', skeleton: 'Chart', category: 'AIMS OS', freshness: 'live', usedIn: 0, source: 'AIMS OS — Human Touch Layer' }),
+  W({ id: 'w-htl-resolution', name: 'AI Resolved vs Handoff', skeleton: 'Donut', category: 'AIMS OS', freshness: 'live', usedIn: 0, source: 'AIMS OS — Human Touch Layer' }),
+  W({ id: 'w-htl-handoff-reason', name: 'Handoffs by Reason', skeleton: 'Chart', category: 'AIMS OS', usedIn: 0, source: 'AIMS OS — Human Touch Layer' }),
+  W({ id: 'w-htl-csat', name: 'Post-Chat CSAT', skeleton: 'Gauge', category: 'AIMS OS', usedIn: 0, source: 'AIMS OS — Human Touch Layer' }),
+  W({ id: 'w-htl-resrate', name: 'Resolution Rate', skeleton: 'Gauge', category: 'AIMS OS', freshness: 'live', usedIn: 0, source: 'AIMS OS — Human Touch Layer' }),
+  W({ id: 'w-htl-channels', name: 'Channel Mix', skeleton: 'Chart', category: 'AIMS OS', usedIn: 0, source: 'AIMS OS — Human Touch Layer' }),
+  W({ id: 'w-htl-frt', name: 'Time to First Response', skeleton: 'KPI', category: 'AIMS OS', freshness: 'live', usedIn: 0, source: 'AIMS OS — Human Touch Layer' }),
+  W({ id: 'w-htl-mttr', name: 'Mean Time to Resolution', skeleton: 'KPI', category: 'AIMS OS', usedIn: 0, source: 'AIMS OS — Human Touch Layer' }),
   // Credits & Billing
   W({ id: 'w-aims-credits', name: 'Credits Consumed', skeleton: 'KPI', category: 'AIMS OS', freshness: 'live', usedIn: 5, source: 'AIMS OS — Credits & Billing' }),
   W({ id: 'w-aims-balance', name: 'Balance Remaining', skeleton: 'Gauge', category: 'AIMS OS', usedIn: 2, source: 'AIMS OS — Credits & Billing' }),

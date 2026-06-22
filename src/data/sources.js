@@ -134,15 +134,21 @@ export const EXTERNAL_SOURCES = [
   S({
     id: 'src-aims-htl', name: 'AIMS OS — Human Touch Layer', category: 'AIMS OS', logoColor: '#F59E0B', initials: 'HT',
     status: 'connected', realtime: true, governed: true, owner: 'AIMS OS', reviewed: 'Jun 2026',
-    description: 'Human handoff queue, SLA timers, and escalations — the comms-hub monitoring surface.',
+    description: 'Telemetry the human-touch widget generates — sessions, AI-vs-human resolution, handoffs, queue, SLA, CSAT, and channel mix.',
     metrics: [
+      { id: 'htl-sessions', name: 'HTL Sessions', kind: 'timeseries', recommendedType: 'line' },
+      { id: 'htl-resolution', name: 'AI Resolved vs Handoff', kind: 'breakdown', recommendedType: 'pie' },
+      { id: 'htl-handoff-reason', name: 'Handoffs by Reason', kind: 'breakdown', recommendedType: 'bar' },
+      { id: 'htl-csat', name: 'Post-Chat CSAT', kind: 'kpi', recommendedType: 'gauge' },
+      { id: 'htl-resrate', name: 'Resolution Rate', kind: 'kpi', recommendedType: 'gauge' },
+      { id: 'htl-channels', name: 'Channel Mix', kind: 'breakdown', recommendedType: 'bar' },
       { id: 'htl-queue', name: 'Queue Depth', kind: 'kpi', recommendedType: 'kpi' },
       { id: 'htl-sla', name: 'SLA Compliance Rate', kind: 'kpi', recommendedType: 'gauge' },
       { id: 'htl-mttr', name: 'Mean Time to Resolution', kind: 'kpi', recommendedType: 'kpi' },
+      { id: 'htl-frt', name: 'Time to First Response', kind: 'kpi', recommendedType: 'kpi' },
       { id: 'htl-tickets', name: 'Tickets Over Time', kind: 'timeseries', recommendedType: 'line' },
       { id: 'htl-breach', name: 'Breaches by Reason', kind: 'breakdown', recommendedType: 'bar' },
       { id: 'htl-handoff', name: 'Handoffs by Destination', kind: 'breakdown', recommendedType: 'pie' },
-      { id: 'htl-frt', name: 'Time to First Response', kind: 'kpi', recommendedType: 'kpi' },
     ],
     recordSets: [
       { id: 'htl-rs-queue', name: 'HITL Queue', entityType: 'Case', count: 1240, recommendedType: 'list' },
