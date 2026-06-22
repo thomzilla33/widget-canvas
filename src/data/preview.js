@@ -148,6 +148,7 @@ function semanticKpi(name, h) {
 function breakdownCats(name = '') {
   if (/stage|pipeline|funnel|\bmql\b|\bsql\b/i.test(name)) return ['Prospecting', 'Qualified', 'Proposal', 'Negotiation', 'Closed']
   if (/channel/i.test(name)) return ['Email', 'Social', 'Search', 'Direct', 'Referral']
+  if (/\bstore\b|rooftop|dealership|location/i.test(name)) return TASCA_STORES
   if (/region/i.test(name)) return ['North America', 'EMEA', 'APAC', 'LATAM']
   if (/plan|tier|subscription/i.test(name)) return ['Free', 'Pro', 'Team', 'Enterprise']
   if (/action|type/i.test(name)) return ['Email', 'SMS', 'Call', 'Forward', 'Note']
@@ -209,6 +210,7 @@ function reformatRatio(unit, raw, originalValueStr = '') {
 function dimLabelOf(name = '') {
   if (/stage|pipeline|funnel|\bmql\b|\bsql\b/i.test(name)) return 'Stage'
   if (/channel/i.test(name)) return 'Channel'
+  if (/\bstore\b|rooftop|dealership|location/i.test(name)) return 'Store'
   if (/region/i.test(name)) return 'Region'
   if (/plan|tier|subscription/i.test(name)) return 'Tier'
   if (/action|type/i.test(name)) return 'Type'
@@ -249,10 +251,54 @@ function buildCalendar(h) {
   return { days, streak, longest }
 }
 
+// ── "Live Financial Watchdog" demo content (Bob Tasca / dealership GL case) ──
+// The agentic worker watches the mapped general-journal ledger live; when a
+// policy RO posts $1,200 it flags + routes to the human-in-the-loop. These
+// case-specific facets are keyed by the widget's metric NAME so they ride the
+// same metricBundle path as everything else (preview == placed).
+const TASCA_STORES = ['Tasca Ford', 'Tasca Lincoln', 'Tasca Chevrolet', 'Tasca CDJR', 'Tasca Used Cars']
+const GL_ANOMALIES = [
+  { severity: 'high', message: 'Policy RO #88231 posted $1,200 — routed to Joe Simon (Used Car Mgr)', when: 'just now' },
+  { severity: 'high', message: 'Duplicate vendor payment $3,480 flagged — Tasca Ford', when: '2m ago' },
+  { severity: 'med', message: 'Negative gross on deal #44192 — Tasca CDJR', when: '8m ago' },
+  { severity: 'med', message: 'Floorplan interest +$910 vs prior month — Tasca Lincoln', when: '21m ago' },
+  { severity: 'low', message: 'Parts credit memo $214 awaiting GM approval', when: '1h ago' },
+]
+const GL_LEDGER = {
+  records: [
+    { name: 'RO #88231 · Policy Repair', value: '$1,200', share: 'Tasca Used Cars' },
+    { name: 'INV #5567 · Vendor AP', value: '$3,480', share: 'Tasca Ford' },
+    { name: 'JE #2025-0612 · Floorplan', value: '$910', share: 'Tasca Lincoln' },
+    { name: 'RO #88198 · Internal Repair', value: '$642', share: 'Tasca CDJR' },
+    { name: 'INV #5571 · Parts', value: '$214', share: 'Tasca Chevrolet' },
+  ],
+  recordHeaders: ['GL Entry', 'Amount', 'Store'],
+  recordTotal: 18420,
+}
+const GL_TTD_STATS = [
+  { label: 'Live detection', value: '4 sec', delta: 'now', deltaDir: 'up' },
+  { label: 'Legacy (Accessa)', value: '15th next mo', delta: 'manual', deltaDir: 'down' },
+  { label: 'Caught (MTD)', value: '37', delta: '+9', deltaDir: 'up' },
+  { label: 'Legacy cost cut', value: '$2K/mo', delta: 'Accessa', deltaDir: 'up' },
+]
+// Fixed headline values for the exec watchdog tiles (override the generated KPI).
+const KPI_OVERRIDE = {
+  'Anomalies Caught (MTD)': { raw: 48200, value: '$48.2K' },
+}
+// Case-specific facet overrides, by metric name. Returns {} for everything else.
+function glOverrides(name = '') {
+  const o = {}
+  if (/anomal|watchdog|repair order|policy ro/i.test(name) && !/by store|caught|budget|ledger|detection/i.test(name)) o.alerts = GL_ANOMALIES
+  if (/ledger|gl detail|gl entr|general journal|journal detail/i.test(name)) { o.records = GL_LEDGER.records; o.recordHeaders = GL_LEDGER.recordHeaders; o.recordTotal = GL_LEDGER.recordTotal }
+  if (/time to detection|\bdetection\b/i.test(name)) o.stats = GL_TTD_STATS
+  return o
+}
+
 function metricBundle(name, { h = 0, m = 1, filterCount = 0, dimensionId, transform } = {}) {
   const unit = metricUnit(name)
   const additive = unit === 'currency' || unit === 'count'
-  const k = semanticKpi(name, h)
+  const fixedKpi = KPI_OVERRIDE[name] || null
+  const k = fixedKpi || semanticKpi(name, h)
   const transformed = !!(transform && transform !== 'none')
   // Additive metrics scale in MAGNITUDE (date range × filters × scope rollup).
   // Ratio metrics (rate/score/duration) don't scale with a date range — but active
@@ -260,8 +306,8 @@ function metricBundle(name, { h = 0, m = 1, filterCount = 0, dimensionId, transf
   // (filtering Escalation Rate by Agent shows that agent's rate, deterministically).
   let kpiRaw, kpiValue
   if (additive) {
-    kpiRaw = Math.max(1, Math.round(k.raw * m))
-    kpiValue = formatMetric(kpiRaw, unit)
+    kpiRaw = fixedKpi ? k.raw : Math.max(1, Math.round(k.raw * m))
+    kpiValue = fixedKpi ? k.value : formatMetric(kpiRaw, unit)
   } else {
     const shift = filterCount > 0 ? (((h + filterCount * 31) % 17) - 8) / 100 : 0 // deterministic ±8%
     kpiRaw = clampUnit(unit, k.raw * (1 + shift))
@@ -341,6 +387,7 @@ function metricBundle(name, { h = 0, m = 1, filterCount = 0, dimensionId, transf
     narrative,
     gauge: { value: gaugeVal, label: 'of target' },
     calendar: buildCalendar(h),
+    ...glOverrides(name),
   }
 }
 

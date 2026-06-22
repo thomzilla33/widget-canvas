@@ -63,6 +63,14 @@ export const widgets = [
   W({ id: 'w-cons-prompts', name: 'Prompts Run', skeleton: 'Composite Stat', category: 'AIMS OS', freshness: 'live', usedIn: 0, source: 'AIMS OS — Agentic Studio' }),
   W({ id: 'w-cons-cost', name: 'Cost (USD)', skeleton: 'Cost KPI', category: 'AIMS OS', freshness: 'live', usedIn: 0, source: 'AIMS OS — Credits & Billing' }),
   W({ id: 'w-cons-bymodel', name: 'Tokens by Model', skeleton: 'Spend Breakdown', category: 'AIMS OS', freshness: 'live', usedIn: 0, source: 'AIMS OS — Credits & Billing' }),
+  // Live Financial Watchdog (Bob Tasca / dealership GL case) — the agentic network
+  // monitors the mapped general-journal ledger live and routes anomalies to a human.
+  W({ id: 'w-gl-ttd', name: 'Time to Detection', skeleton: 'Stat Row', category: 'AIMS OS', freshness: 'live', usedIn: 0, source: 'AIMS OS — Dealership GL' }),
+  W({ id: 'w-gl-caught', name: 'Anomalies Caught (MTD)', skeleton: 'KPI', category: 'AIMS OS', usedIn: 0, source: 'AIMS OS — Dealership GL' }),
+  W({ id: 'w-gl-anomaly-feed', name: 'Live GL Anomalies', skeleton: 'Alerts', category: 'AIMS OS', freshness: 'live', usedIn: 0, source: 'AIMS OS — Dealership GL' }),
+  W({ id: 'w-gl-store', name: 'Anomalies by Store', skeleton: 'Chart', category: 'AIMS OS', freshness: 'live', usedIn: 0, source: 'AIMS OS — Dealership GL' }),
+  W({ id: 'w-gl-policy', name: 'Policy Budget Used', skeleton: 'Gauge', category: 'AIMS OS', freshness: 'live', usedIn: 0, source: 'AIMS OS — Dealership GL' }),
+  W({ id: 'w-gl-ledger', name: 'General Ledger — Detail', skeleton: 'Table', category: 'AIMS OS', freshness: 'live', usedIn: 0, source: 'AIMS OS — Dealership GL' }),
   // Conversations
   W({ id: 'w-aims-activeconv', name: 'Active Conversations', skeleton: 'KPI', category: 'AIMS OS', freshness: 'live', usedIn: 2, source: 'AIMS OS — Conversations' }),
   W({ id: 'w-aims-split', name: 'Agent vs Human Messages', skeleton: 'Chart', category: 'AIMS OS', usedIn: 1, source: 'AIMS OS — Conversations' }),
@@ -122,6 +130,7 @@ export const dashboards = [
   { id: 'd-team-home', template: 't-acct360', name: 'Sales Team Home', entity: 'Home', audience: 'Sales Agent', owner: 'Priya Nair', status: 'published', widgets: 5, updated: '2 weeks ago', placement: { surface: 'home', homeScope: 'team' } },
   { id: 'd-workspace-home', template: 't-workspace-home', name: 'Workspace Home', entity: 'Home', audience: { type: 'global' }, owner: 'AIMS OS', status: 'published', widgets: 3, updated: 'just now', placement: { surface: 'home', homeScope: 'personal' } },
   { id: 'd-ai-consumption', template: 't-ai-consumption', name: 'AI Consumption', entity: 'Report', audience: { type: 'global' }, owner: 'AIMS OS', status: 'published', widgets: 5, updated: 'just now', placement: { surface: 'report', collection: 'Executive' } },
+  { id: 'd-tasca-watchdog', template: 't-tasca-watchdog', name: 'Financial Watchdog — Tasca', entity: 'Report', audience: { type: 'global' }, owner: 'AIMS OS', status: 'published', widgets: 6, updated: 'just now', placement: { surface: 'report', collection: 'Executive' } },
   { id: 'd-deal-room', template: 't-acct360', name: 'Deal Room', entity: 'Deal', audience: 'Sales Agent', owner: 'Liam Murphy', status: 'draft', widgets: 4, updated: '3 hours ago', placement: { surface: 'profile', profileType: 'Deal', scope: 'all', entityId: null, entityName: null, tab: 'Overview' } },
   { id: 'd-marketing', template: 't-exec', name: 'Marketing Performance', entity: 'Report', audience: 'Manager', owner: 'Elena Petrova', status: 'published', widgets: 11, updated: '5 days ago', placement: { surface: 'report', collection: 'Sales Reports' } },
   { id: 'd-support-mgr', template: 't-support', name: 'Support Leadership', entity: 'Report', audience: 'Manager', owner: 'James Okonkwo', status: 'pending', widgets: 8, updated: '1 week ago', placement: { surface: 'report', collection: 'Support Reports' } },
@@ -457,6 +466,17 @@ export const TEMPLATE_SEED = {
     { size: 'lg', widgetId: 'w-cons-activity' },
     { size: 'lg', widgetId: 'w-cons-bysource' },
     { size: 'lg', widgetId: 'w-cons-bymodel' },
+  ],
+  // Live Financial Watchdog — the dealership-GL exec board. Headline ROI/timing,
+  // then the live anomaly feed full-width, store breakdown + policy gauge, and the
+  // familiar GL grid (Accessa parity). Tiles 3+3+3+3 with no gaps.
+  't-tasca-watchdog': [
+    { size: 'md', widgetId: 'w-gl-ttd' },
+    { size: 'sm', widgetId: 'w-gl-caught' },
+    { size: 'lg', widgetId: 'w-gl-anomaly-feed' },
+    { size: 'md', widgetId: 'w-gl-store' },
+    { size: 'sm', widgetId: 'w-gl-policy' },
+    { size: 'lg', widgetId: 'w-gl-ledger' },
   ],
 }
 

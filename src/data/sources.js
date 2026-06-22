@@ -583,6 +583,28 @@ export const EXTERNAL_SOURCES = [
   }),
 
   // ── Automotive ──
+  // The "Live Financial Watchdog" source: mapped & normalized general-journal
+  // ledger across the dealership group's rooftops, monitored live by an agentic
+  // worker. Replaces legacy static-grid reporting (Accessa) with instant anomaly
+  // detection + human-in-the-loop routing.
+  S({
+    id: 'src-tasca-gl', name: 'AIMS OS — Dealership GL', category: 'Automotive', logoColor: '#C8102E', initials: 'GL',
+    status: 'connected', featured: true, realtime: true, governed: true, owner: 'AIMS OS', reviewed: 'Jun 2026',
+    description: 'Mapped & normalized general-journal ledger across 46 rooftops, watched live by an agentic worker — instant anomaly detection + human-in-the-loop routing.',
+    metrics: [
+      { id: 'gl-anomalies', name: 'Live GL Anomalies', kind: 'kpi', recommendedType: 'alerts' },
+      { id: 'gl-ttd', name: 'Time to Detection', kind: 'kpi', recommendedType: 'statrow' },
+      { id: 'gl-caught', name: 'Anomalies Caught (MTD)', kind: 'kpi', recommendedType: 'kpi' },
+      { id: 'gl-bystore', name: 'Anomalies by Store', kind: 'breakdown', recommendedType: 'bar' },
+      { id: 'gl-policy', name: 'Policy Budget Used', kind: 'kpi', recommendedType: 'gauge' },
+      { id: 'gl-ledger', name: 'General Ledger — Detail', kind: 'records', recommendedType: 'table' },
+      { id: 'gl-posted', name: 'GL Entries Posted', kind: 'timeseries', recommendedType: 'line' },
+    ],
+    recordSets: [
+      { id: 'gl-rs-entries', name: 'Journal Entries', entityType: 'Event', count: 184200, recommendedType: 'table' },
+      { id: 'gl-rs-ros', name: 'Repair Orders', entityType: 'Order', count: 9600, recommendedType: 'list' },
+    ],
+  }),
   S({
     id: 'src-dms', name: 'Dealer Management System', category: 'Automotive', logoColor: '#C8102E', initials: 'DM',
     status: 'connected', owner: 'Ops', reviewed: 'Apr 2026',

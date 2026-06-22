@@ -79,7 +79,7 @@ const WidgetCard = memo(function WidgetCard({ placement: p, widget: w, span, sco
   // every in-tile action also fire the drilldown. They render as a plain container.
   // Widgets with an in-tile unit toggle (Cost KPI, Spend Breakdown) have their own
   // buttons, so they can't be a drill <button> — render as a plain container.
-  const INTERACTIVE_SKELETONS = ['Cost KPI', 'Spend Breakdown']
+  const INTERACTIVE_SKELETONS = ['Cost KPI', 'Spend Breakdown', 'Alerts']
   const drillable = onDrill && !w.system && !INTERACTIVE_SKELETONS.includes(w.skeleton)
   const inner = (
     <>
