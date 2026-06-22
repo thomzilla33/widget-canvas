@@ -263,7 +263,7 @@ export default function UCPView() {
       {hasEntityHeader ? (
         <div className="border-b border-gray-200 bg-white px-6 pt-4 dark:border-white/10 dark:bg-[#0f1629] lg:px-8 2xl:px-12">
           <div className="mx-auto w-full max-w-[1800px]">
-            <EntityContextHeader entity={entity} viewerRole={viewAs} />
+            <EntityContextHeader entity={entity} viewerRole={viewAs} onChat={toggleChat} />
           </div>
         </div>
       ) : (
@@ -409,15 +409,6 @@ export default function UCPView() {
               </label>
             </div>
           )}
-          <button
-            type="button"
-            onClick={toggleChat}
-            aria-pressed={chatOpen}
-            title="Toggle the UCP Concierge"
-            className={`ml-1 inline-flex shrink-0 items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs font-medium transition-colors ${chatOpen ? 'border-aims-blue/40 bg-aims-blue/10 text-aims-blue' : 'border-gray-200 text-gray-500 hover:text-aims-blue dark:border-white/15 dark:text-slate-400'}`}
-          >
-            <MessageCircle size={14} aria-hidden="true" /> Concierge
-          </button>
         </div>
       </div>
 

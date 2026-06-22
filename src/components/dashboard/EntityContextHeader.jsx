@@ -86,7 +86,7 @@ const SMS_TEMPLATES = [
 ]
 const CHAT_PROMPTS = ['Summarize recent activity', 'Any open items?', 'Draft a follow-up email']
 
-export default function EntityContextHeader({ placement, entity, viewerRole }) {
+export default function EntityContextHeader({ placement, entity, viewerRole, onChat }) {
   const navigate = useNavigate()
   const { logActivity } = useActivity()
   const [open, setOpen] = useState(false)
@@ -146,7 +146,7 @@ export default function EntityContextHeader({ placement, entity, viewerRole }) {
           <IconBtn label={can('sms') ? `Text this ${lower}` : denyTip('send texts')} onClick={() => setPanel('sms')} disabled={!can('sms')}><MessageSquare size={15} /></IconBtn>
           <button
             type="button"
-            onClick={() => setPanel('chat')}
+            onClick={onChat || (() => setPanel('chat'))}
             title={`Chat with an agent about this ${lower}`}
             aria-label={`Chat with an agent about this ${lower}`}
             className="grid h-8 w-8 place-items-center rounded-lg text-white shadow-sm"
