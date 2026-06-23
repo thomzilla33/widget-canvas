@@ -883,41 +883,232 @@ function CardAppearance({ config, onChange, entity }) {
 const FORMAT_TYPES_SET = new Set(['kpi', 'gauge', 'statrow', 'costkpi'])
 const GOAL_TYPES_SET = new Set(['kpi', 'gauge', 'statrow'])
 
-export function AppearancePanel({ typeId, format, setFormat, goal, setGoal, tableConfig, setTableConfig, listConfig, setListConfig, cardConfig, setCardConfig, entity }) {
+// ── Accent color palette ────────────────────────────────────────────────────
+const ACCENT_COLORS = [
+  { id: 'blue',   hex: '#155DFC' },
+  { id: 'green',  hex: '#059669' },
+  { id: 'teal',   hex: '#0D9488' },
+  { id: 'purple', hex: '#7C3AED' },
+  { id: 'amber',  hex: '#D97706' },
+  { id: 'red',    hex: '#DC2626' },
+  { id: 'cyan',   hex: '#06B6D4' },
+  { id: 'slate',  hex: '#475569' },
+]
+
+// ── Style variants per widget type ─────────────────────────────────────────
+const STYLE_VARIANTS = {
+  kpi:           [{ id: 'minimal', label: 'Minimal' }, { id: 'card', label: 'Card' }, { id: 'featured', label: 'Featured' }],
+  gauge:         [{ id: 'arc', label: 'Arc' }, { id: 'ring', label: 'Ring' }],
+  statrow:       [{ id: 'row', label: 'Row' }, { id: 'grid', label: 'Grid' }],
+  costkpi:       [{ id: 'minimal', label: 'Minimal' }, { id: 'card', label: 'Card' }],
+  line:          [{ id: 'line', label: 'Lines' }, { id: 'area', label: 'Filled' }, { id: 'smooth', label: 'Smooth' }],
+  bar:           [{ id: 'vertical', label: 'Vertical' }, { id: 'horizontal', label: 'Horizontal' }, { id: 'stacked', label: 'Stacked' }],
+  pie:           [{ id: 'pie', label: 'Pie' }, { id: 'donut', label: 'Donut' }],
+  scatter:       [{ id: 'dots', label: 'Dots' }, { id: 'bubbles', label: 'Bubbles' }],
+  heatmap:       [{ id: 'sequential', label: 'Sequential' }, { id: 'diverging', label: 'Diverging' }],
+  table:         [{ id: 'comfortable', label: 'Comfortable' }, { id: 'compact', label: 'Compact' }, { id: 'striped', label: 'Striped' }],
+  list:          [{ id: 'feed', label: 'Feed' }, { id: 'cards', label: 'Cards' }, { id: 'dense', label: 'Dense' }],
+  'record-card': [{ id: 'portrait', label: 'Portrait' }, { id: 'landscape', label: 'Landscape' }, { id: 'minimal', label: 'Minimal' }],
+  carousel:      [{ id: 'slides', label: 'Slides' }, { id: 'stack', label: 'Stack' }],
+}
+
+// ── Display toggles per widget type ────────────────────────────────────────
+const DISPLAY_OPTIONS = {
+  kpi:           [{ id: 'showTrend', label: 'Show trend vs prior period', def: true }, { id: 'showSparkline', label: 'Show sparkline', def: false }, { id: 'showTarget', label: 'Show target progress bar', def: false }],
+  gauge:         [{ id: 'showLabel', label: 'Show center label', def: true }, { id: 'showScale', label: 'Show scale markers', def: true }],
+  statrow:       [{ id: 'showTrend', label: 'Show trend arrows', def: true }],
+  costkpi:       [{ id: 'showBreakdown', label: 'Show cost breakdown', def: false }],
+  line:          [{ id: 'showLegend', label: 'Show legend', def: true }, { id: 'showLabels', label: 'Show data labels', def: false }, { id: 'showDots', label: 'Show data points', def: false }],
+  bar:           [{ id: 'showLegend', label: 'Show legend', def: true }, { id: 'showLabels', label: 'Show value labels', def: false }, { id: 'showGrid', label: 'Show grid lines', def: true }],
+  pie:           [{ id: 'showLegend', label: 'Show legend', def: true }, { id: 'showLabels', label: 'Show slice labels', def: true }, { id: 'showTotal', label: 'Show total in center', def: false }],
+  table:         [{ id: 'showFooter', label: 'Show row count footer', def: false }, { id: 'showBanding', label: 'Highlight alternate rows', def: false }],
+  list:          [{ id: 'showAvatar', label: 'Show avatars / icons', def: true }, { id: 'showTimestamp', label: 'Show timestamps', def: true }],
+  'record-card': [{ id: 'showBadges', label: 'Show status badges', def: true }, { id: 'showActions', label: 'Show quick actions', def: true }],
+  carousel:      [{ id: 'showDots', label: 'Show navigation dots', def: true }, { id: 'showArrows', label: 'Show prev/next arrows', def: true }],
+  map:           [{ id: 'showLegend', label: 'Show color legend', def: true }, { id: 'showLabels', label: 'Show region labels', def: false }],
+}
+
+// Sub-section label
+function AppearanceSectionLabel({ children }) {
+  return (
+    <div className="text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-slate-500">
+      {children}
+    </div>
+  )
+}
+
+export function AppearancePanel({
+  typeId, entity,
+  accentColor, setAccentColor,
+  styleVariant, setStyleVariant,
+  displayOptions, setDisplayOptions,
+  format, setFormat,
+  goal, setGoal,
+  tableConfig, setTableConfig,
+  listConfig, setListConfig,
+  cardConfig, setCardConfig,
+}) {
+  const [showFormat, setShowFormat] = useState(false)
+
   if (!typeId) {
     return (
       <div className="rounded-lg border border-dashed border-gray-200 p-6 text-center dark:border-white/10">
-        <p className="text-sm text-gray-500 dark:text-slate-400">Pick a widget type first to configure its appearance.</p>
+        <p className="text-sm text-gray-500 dark:text-slate-400">Pick a widget type first to see its appearance options.</p>
       </div>
     )
   }
 
-  if (FORMAT_TYPES_SET.has(typeId)) {
-    return (
-      <div className="space-y-1">
-        <p className="mb-4 text-xs text-gray-500 dark:text-slate-400">Control how numbers are formatted and set an optional goal with RAG coloring.</p>
-        <KpiAppearance format={format} setFormat={setFormat} goal={goal} setGoal={setGoal} showGoal={GOAL_TYPES_SET.has(typeId)} />
-      </div>
-    )
-  }
+  const entityColor = entity?.color || null
+  const effectiveAccent = accentColor
+    ? ACCENT_COLORS.find((c) => c.id === accentColor)?.hex
+    : entityColor
 
+  const variants = STYLE_VARIANTS[typeId] || []
+  const displayOpts = DISPLAY_OPTIONS[typeId] || []
+
+  // Compute effective display option values (state overrides defaults)
+  const effectiveOpts = Object.fromEntries(
+    displayOpts.map((o) => [o.id, displayOptions?.[o.id] !== undefined ? displayOptions[o.id] : o.def])
+  )
+  const toggleOpt = (id, val) => setDisplayOptions((prev) => ({ ...prev, [id]: val }))
+
+  // Effective style variant (state or first variant as default)
+  const effectiveVariant = styleVariant || (variants[0]?.id ?? '')
+
+  // Type-specific data-display config section (table columns/sort/pagination, card field mapping, etc.)
+  let dataConfigSection = null
   if (typeId === 'table') {
-    return <TableAppearance config={tableConfig} onChange={(p) => setTableConfig((c) => ({ ...c, ...p }))} entity={entity} />
+    dataConfigSection = (
+      <div className="space-y-4">
+        <AppearanceSectionLabel>Columns & data</AppearanceSectionLabel>
+        <TableAppearance config={tableConfig} onChange={(p) => setTableConfig((c) => ({ ...c, ...p }))} entity={entity} />
+      </div>
+    )
+  } else if (typeId === 'list') {
+    dataConfigSection = (
+      <div className="space-y-4">
+        <AppearanceSectionLabel>List options</AppearanceSectionLabel>
+        <ListAppearance config={listConfig} onChange={(p) => setListConfig((c) => ({ ...c, ...p }))} entity={entity} />
+      </div>
+    )
+  } else if (typeId === 'record-card') {
+    dataConfigSection = (
+      <div className="space-y-4">
+        <AppearanceSectionLabel>Field mapping</AppearanceSectionLabel>
+        <CardAppearance config={cardConfig} onChange={(p) => setCardConfig((c) => ({ ...c, ...p }))} entity={entity} />
+      </div>
+    )
   }
 
-  if (typeId === 'list') {
-    return <ListAppearance config={listConfig} onChange={(p) => setListConfig((c) => ({ ...c, ...p }))} entity={entity} />
-  }
-
-  if (typeId === 'record-card') {
-    return <CardAppearance config={cardConfig} onChange={(p) => setCardConfig((c) => ({ ...c, ...p }))} entity={entity} />
-  }
-
-  // Charts, maps, etc. — no custom appearance config yet
   return (
-    <div className="rounded-lg border border-gray-200 bg-gray-50/60 p-4 dark:border-white/10 dark:bg-white/[0.02]">
-      <p className="text-sm font-medium text-gray-700 dark:text-slate-200">No appearance options</p>
-      <p className="mt-1 text-xs text-gray-500 dark:text-slate-400">This widget type renders automatically based on your data selection. Appearance configuration is available for KPIs, tables, lists, and profile cards.</p>
+    <div className="space-y-5">
+
+      {/* ── Look & feel ── */}
+      <div className="space-y-4">
+        <AppearanceSectionLabel>Look & feel</AppearanceSectionLabel>
+
+        {/* Accent color */}
+        <div>
+          <p className="mb-2 text-xs text-gray-500 dark:text-slate-400">Accent color</p>
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Entity default swatch */}
+            {entityColor && (
+              <button
+                title="Entity color (default)"
+                onClick={() => setAccentColor('')}
+                className={`relative flex h-7 w-7 items-center justify-center rounded-full transition-all ${!accentColor ? 'ring-2 ring-white ring-offset-1 ring-offset-gray-900 scale-110' : 'opacity-80 hover:scale-105'}`}
+                style={{ backgroundColor: entityColor }}
+              >
+                {!accentColor && <Check size={10} className="text-white" strokeWidth={3} />}
+              </button>
+            )}
+            {ACCENT_COLORS.map((c) => (
+              <button
+                key={c.id}
+                title={c.id}
+                onClick={() => setAccentColor(accentColor === c.id ? '' : c.id)}
+                className={`relative flex h-7 w-7 items-center justify-center rounded-full transition-all ${accentColor === c.id ? 'ring-2 ring-white ring-offset-1 ring-offset-gray-900 scale-110' : 'opacity-70 hover:opacity-100 hover:scale-105'}`}
+                style={{ backgroundColor: c.hex }}
+              >
+                {accentColor === c.id && <Check size={10} className="text-white" strokeWidth={3} />}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Style variant */}
+        {variants.length > 0 && (
+          <div>
+            <p className="mb-2 text-xs text-gray-500 dark:text-slate-400">Style</p>
+            <div className="flex overflow-hidden rounded-lg border border-gray-300 text-sm dark:border-white/15">
+              {variants.map((v, i) => (
+                <button
+                  key={v.id}
+                  onClick={() => setStyleVariant(v.id)}
+                  className={`flex-1 px-3 py-1.5 font-medium transition-colors
+                    ${i > 0 ? 'border-l border-gray-300 dark:border-white/15' : ''}
+                    ${effectiveVariant === v.id
+                      ? 'bg-aims-blue text-white'
+                      : 'bg-white text-gray-600 hover:bg-gray-50 dark:bg-white/5 dark:text-slate-300 dark:hover:bg-white/10'
+                    }`}
+                >
+                  {v.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* ── Display toggles ── */}
+      {displayOpts.length > 0 && (
+        <>
+          <div className="border-t border-gray-100 dark:border-white/5" />
+          <div className="space-y-3">
+            <AppearanceSectionLabel>Display</AppearanceSectionLabel>
+            {displayOpts.map((opt) => (
+              <label key={opt.id} className="flex cursor-pointer items-center gap-2.5 text-sm text-gray-700 dark:text-slate-200">
+                <input
+                  type="checkbox"
+                  className="checkbox"
+                  checked={!!effectiveOpts[opt.id]}
+                  onChange={(e) => toggleOpt(opt.id, e.target.checked)}
+                />
+                {opt.label}
+              </label>
+            ))}
+          </div>
+        </>
+      )}
+
+      {/* ── Type-specific data config (columns, field mapping, etc.) ── */}
+      {dataConfigSection && (
+        <>
+          <div className="border-t border-gray-100 dark:border-white/5" />
+          {dataConfigSection}
+        </>
+      )}
+
+      {/* ── Number format (KPI types only, collapsible) ── */}
+      {FORMAT_TYPES_SET.has(typeId) && (
+        <>
+          <div className="border-t border-gray-100 dark:border-white/5" />
+          <div className="rounded-lg border border-gray-200 dark:border-white/10">
+            <button
+              className="flex w-full items-center justify-between px-3 py-2.5 text-sm font-medium text-gray-700 dark:text-slate-200"
+              onClick={() => setShowFormat((f) => !f)}
+            >
+              <span>Number format</span>
+              <ChevronDown size={14} className={`text-gray-400 transition-transform duration-200 ${showFormat ? 'rotate-180' : ''}`} />
+            </button>
+            {showFormat && (
+              <div className="border-t border-gray-200 p-3 dark:border-white/10">
+                <KpiAppearance format={format} setFormat={setFormat} goal={goal} setGoal={setGoal} showGoal={GOAL_TYPES_SET.has(typeId)} />
+              </div>
+            )}
+          </div>
+        </>
+      )}
     </div>
   )
 }

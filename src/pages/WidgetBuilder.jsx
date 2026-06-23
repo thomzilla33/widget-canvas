@@ -86,6 +86,11 @@ export default function WidgetBuilder() {
   const setFormat = (patch) => setFormatState((f) => ({ ...f, ...patch }))
   const setGoal = (patch) => setGoalState((g) => ({ ...g, ...patch }))
 
+  // Appearance — look & feel
+  const [accentColor, setAccentColor] = useState('')
+  const [styleVariant, setStyleVariant] = useState('')
+  const [displayOptions, setDisplayOptions] = useState({})
+
   // Appearance config for data-display widget types
   const [tableConfig, setTableConfig] = useState({ sortField: '', sortDir: 'desc', pageSize: 25, searchable: true, hiddenColumns: [] })
   const [listConfig, setListConfig] = useState({ sortField: '', maxItems: 10, showTimestamp: true })
@@ -349,6 +354,13 @@ export default function WidgetBuilder() {
               <div className="space-y-5">
                 <AppearancePanel
                   typeId={typeId}
+                  entity={source}
+                  accentColor={accentColor}
+                  setAccentColor={setAccentColor}
+                  styleVariant={styleVariant}
+                  setStyleVariant={setStyleVariant}
+                  displayOptions={displayOptions}
+                  setDisplayOptions={setDisplayOptions}
                   format={format}
                   setFormat={setFormat}
                   goal={goal}
@@ -359,7 +371,6 @@ export default function WidgetBuilder() {
                   setListConfig={setListConfig}
                   cardConfig={cardConfig}
                   setCardConfig={setCardConfig}
-                  entity={source}
                 />
               </div>
             )}
