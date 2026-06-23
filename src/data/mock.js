@@ -516,6 +516,7 @@ export const WIDGET_TYPES = [
   { id: 'funnel', label: 'Funnel', category: 'Breakdown', iconName: 'Filter' },
   { id: 'table', label: 'Table', category: 'Records', iconName: 'Table2' },
   { id: 'list', label: 'List', category: 'Records', iconName: 'List' },
+  { id: 'record-card', label: 'Profile Card', category: 'Records', iconName: 'IdCard' },
   { id: 'carousel', label: 'Carousel', category: 'Records', iconName: 'GalleryHorizontalEnd' },
   { id: 'heatmap', label: 'Heat Map', category: 'Relationship', iconName: 'Grid3x3' },
   { id: 'scatter', label: 'Correlation', category: 'Relationship', iconName: 'ScatterChart' },
