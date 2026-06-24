@@ -13,7 +13,6 @@ import EditWidgetModal from '../components/widgets/EditWidgetModal.jsx'
 import DeleteWidgetDialog from '../components/widgets/DeleteWidgetDialog.jsx'
 import WidgetMarketplace from '../components/widgets/WidgetMarketplace.jsx'
 import AIGenerateModal from '../components/ai/AIGenerateModal.jsx'
-import CreateLauncher from '../components/create/CreateLauncher.jsx'
 import { useStaggerReveal } from '../hooks/useReveal.js'
 import SourceTemplatesBanner from '../components/widgets/SourceTemplatesBanner.jsx'
 import StudioWelcome from '../components/common/StudioWelcome.jsx'
@@ -67,22 +66,7 @@ export default function WidgetLibrary() {
   const [menuId, setMenuId] = useState(null) // per-card ⋯ actions menu (by widget id)
   const [marketplace, setMarketplace] = useState(false)
   const [aiOpen, setAiOpen] = useState(false)
-  const [launcher, setLauncher] = useState(false)
   const gridReveal = useStaggerReveal('widgets')
-
-  // Single front door for creation — routes to AI chat, manual builder, or marketplace.
-  // Defer the successor a frame so the launcher's focus-trap restores focus to the
-  // Create button first; the next modal then traps from a real trigger, not a dead card.
-  function pickCreate(mode) {
-    setLauncher(false)
-    // Defer past the launcher's focus-trap cleanup (setTimeout, not rAF — rAF can stall
-    // in a backgrounded tab, leaving the successor modal unopened).
-    setTimeout(() => {
-      if (mode === 'ai') setAiOpen(true)
-      else if (mode === 'marketplace') setMarketplace(true)
-      else navigate('/widgets/new')
-    }, 0)
-  }
 
   const catOptions = [{ value: 'All', label: 'All categories' }, ...CATALOG_CATEGORIES.map((c) => ({ value: c, label: c }))]
   const typeOptions = [{ value: 'All', label: 'All types' }, ...Array.from(new Set(widgets.map((w) => w.skeleton))).map((t) => ({ value: t, label: t }))]
@@ -114,7 +98,7 @@ export default function WidgetLibrary() {
           studioId="widgets"
           built={{ count: widgets.length, label: 'widgets' }}
           ctaLabel={isAdmin ? 'Create widget' : undefined}
-          onCta={isAdmin ? () => setLauncher(true) : undefined}
+          onCta={isAdmin ? () => navigate('/widgets/new') : undefined}
         />
       </div>
       <PageHeader
@@ -122,7 +106,7 @@ export default function WidgetLibrary() {
         description={`${widgets.length} widgets · ${governedCount} governed`}
         actions={
           isAdmin ? (
-            <button className="btn-primary" onClick={() => setLauncher(true)}>
+            <button className="btn-primary" onClick={() => navigate('/widgets/new')}>
               <Sparkles size={15} /> Create widget
             </button>
           ) : null
@@ -348,7 +332,6 @@ export default function WidgetLibrary() {
 
       {marketplace && <WidgetMarketplace onClose={() => setMarketplace(false)} />}
 
-      {launcher && <CreateLauncher kind="widget" onPick={pickCreate} onClose={() => setLauncher(false)} />}
 
       {aiOpen && <AIGenerateModal mode="widget" onClose={() => setAiOpen(false)} />}
     </div>
