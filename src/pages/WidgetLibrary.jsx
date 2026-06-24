@@ -5,6 +5,8 @@ import { Flag, Sparkles, MoreHorizontal, Plus, Pencil, Trash2 } from 'lucide-rea
 import { PopoverPanel } from '../components/common/Popover.jsx'
 import { PageHeader, HealthBadge, FreshnessBadge, EmptyState, DataPlaneBadge } from '../components/common/index.jsx'
 import { Tag } from '@/components/ui/Tag'
+import { Button } from '@/components/ui/Button'
+import { CardContainer } from '@/components/ui/CardContainer'
 import { dataPlaneOf } from '../data/governance.js'
 import { WidgetGlyph } from '../components/widgets/glyph.jsx'
 import WidgetRender from '../components/widgets/WidgetRender.jsx'
@@ -109,9 +111,9 @@ export default function WidgetLibrary() {
         description={`${widgets.length} widgets · ${governedCount} governed`}
         actions={
           isAdmin ? (
-            <button className="btn-primary" onClick={() => navigate('/widgets/new')}>
+            <Button variant="primary" onClick={() => navigate('/widgets/new')}>
               <Sparkles size={15} /> Create widget
-            </button>
+            </Button>
           ) : null
         }
       />
@@ -173,13 +175,13 @@ export default function WidgetLibrary() {
                       </div>
                     </div>
                     {canRepin ? (
-                      <button className="btn-primary !py-1.5 !px-3 text-xs shrink-0" onClick={() => setRepinWidget(w)}>
+                      <Button variant="primary" size="sm" className="shrink-0" onClick={() => setRepinWidget(w)}>
                         Remap widget
-                      </button>
+                      </Button>
                     ) : (
-                      <button className="btn-secondary !py-1.5 !px-3 text-xs shrink-0" onClick={() => setDetailFlag(f)}>
+                      <Button variant="secondary" size="sm" className="shrink-0" onClick={() => setDetailFlag(f)}>
                         Review &amp; resolve
-                      </button>
+                      </Button>
                     )}
                   </div>
                 )
@@ -203,13 +205,11 @@ export default function WidgetLibrary() {
             // Not a <button>: the live preview renders interactive system widgets whose
             // own buttons can't legally nest inside one. role=button + keydown keeps it
             // keyboard-accessible.
-            <div
+            <CardContainer
               key={w.id}
-              role="button"
-              tabIndex={0}
               onClick={(e) => { if (e.target === e.currentTarget || !e.target.closest('button')) open() }}
               onKeyDown={(e) => { if (e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); open() } }}
-              className="catalog-card min-h-[240px] cursor-pointer text-left"
+              className="min-h-[240px] cursor-pointer text-left relative flex flex-col gap-2.5"
             >
               <div className="absolute top-3 right-3 flex items-center gap-1.5">
                 <HealthBadge health={w.health} />
@@ -275,7 +275,7 @@ export default function WidgetLibrary() {
                 </span>
                 <FreshnessBadge status={w.freshness} label={w.freshness} />
               </div>
-            </div>
+            </CardContainer>
             )
           })}
         </div>
@@ -367,9 +367,9 @@ function LoadMoreBar({ shown, total, remaining, onLoadMore }) {
   return (
     <div className="mt-5 flex items-center justify-center gap-3">
       <span className="text-xs text-gray-400 dark:text-slate-500">Showing {shown} of {total}</span>
-      <button onClick={onLoadMore} className="btn-secondary text-xs">
+      <Button variant="secondary" size="sm" onClick={onLoadMore}>
         Load {remaining} more
-      </button>
+      </Button>
     </div>
   )
 }

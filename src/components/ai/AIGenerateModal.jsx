@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Sparkles, X, ArrowUp, Check, Pencil, ExternalLink, RefreshCw, ChevronDown, AlertTriangle } from 'lucide-react'
 import { useFocusTrap } from '../../hooks/useFocusTrap.js'
 import { useModalEnter } from '../../hooks/useReveal.js'
+import { Button } from '@/components/ui/Button'
 import WidgetPreview from '../playground/WidgetPreview.jsx'
 import WidgetRender from '../widgets/WidgetRender.jsx'
 import { useWidgets } from '../../state/WidgetsContext.jsx'
@@ -234,8 +235,8 @@ function Message({ m, mode, widgets, onCreateWidget, onCreateDashboard, onPatch,
               <Check size={15} className="text-aims-governed" aria-hidden="true" /> Added “{m.created.name}” to your library
             </div>
             <div className="mt-2 flex flex-wrap gap-2">
-              <button className="btn-secondary !py-1.5 !px-3 text-xs" onClick={() => { onClose(); navigate('/widgets') }}>Open library</button>
-              <button className="btn-secondary !py-1.5 !px-3 text-xs" onClick={() => { onClose(); navigate('/dashboards') }}>Place on a dashboard</button>
+              <Button variant="secondary" size="sm" onClick={() => { onClose(); navigate('/widgets') }}>Open library</Button>
+              <Button variant="secondary" size="sm" onClick={() => { onClose(); navigate('/dashboards') }}>Place on a dashboard</Button>
             </div>
           </div>
         )}
@@ -281,8 +282,8 @@ function WidgetResult({ result, onCreate, onTune, onPatch }) {
         <WidgetPreview typeId={cfg.typeId} metric={metric} source={source} name={cfg.name} freshness="fresh" display={{ format: { style: 'auto' }, goal: {} }} shape={dim ? { dimension: dim, transform: 'none' } : undefined} />
       </div>
       <div className="mt-2.5 flex flex-wrap items-center gap-2">
-        <button className="btn-primary !py-1.5 !px-3 text-xs" onClick={onCreate}><Check size={14} aria-hidden="true" /> Create widget</button>
-        <button className="btn-secondary !py-1.5 !px-3 text-xs" onClick={onTune}><Pencil size={13} aria-hidden="true" /> Fine-tune in builder</button>
+        <Button variant="primary" size="sm" onClick={onCreate}><Check size={14} aria-hidden="true" /> Create widget</Button>
+        <Button variant="secondary" size="sm" onClick={onTune}><Pencil size={13} aria-hidden="true" /> Fine-tune in builder</Button>
       </div>
     </div>
   )
@@ -333,7 +334,7 @@ function DashboardResult({ result, widgets, onCreate, onPatch }) {
         )}
       </div>
       <div className="mt-2.5 flex flex-wrap items-center gap-2">
-        <button className="btn-primary !py-1.5 !px-3 text-xs" onClick={onCreate}><ExternalLink size={13} aria-hidden="true" /> Create &amp; open canvas</button>
+        <Button variant="primary" size="sm" onClick={onCreate}><ExternalLink size={13} aria-hidden="true" /> Create &amp; open canvas</Button>
         <span className="text-[11px] text-gray-400 dark:text-slate-500">or keep refining above</span>
       </div>
     </div>

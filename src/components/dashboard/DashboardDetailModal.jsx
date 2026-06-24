@@ -3,6 +3,7 @@ import gsap from 'gsap'
 import { X, LayoutDashboard, MapPin, Users, Pencil, Eye, Clock } from 'lucide-react'
 import { useFocusTrap } from '../../hooks/useFocusTrap.js'
 import { Badge } from '../common/index.jsx'
+import { Button } from '@/components/ui/Button'
 import { Tag } from '@/components/ui/Tag'
 import { useWidgets } from '../../state/WidgetsContext.jsx'
 import { dashboardLayout, widgetCount } from '../../data/layout.js'
@@ -307,16 +308,16 @@ export default function DashboardDetailModal({ dashboard, isAdmin, onClose, onOp
         {/* Footer */}
         <div className="flex items-center gap-2 border-t border-gray-200 p-3 dark:border-white/10">
           {isAdmin && (
-            <button className="btn-secondary !py-1.5 text-xs" onClick={onEdit}>
+            <Button variant="secondary" size="sm" onClick={onEdit}>
               <Pencil size={14} aria-hidden="true" /> Edit canvas
-            </button>
+            </Button>
           )}
-          <button className="btn-secondary !py-1.5 text-xs ml-auto" onClick={onClose}>
+          <Button variant="secondary" size="sm" className="ml-auto" onClick={onClose}>
             Close
-          </button>
-          <button className="btn-primary !py-1.5 text-xs" onClick={onOpen}>
+          </Button>
+          <Button variant="primary" size="sm" onClick={onOpen}>
             <Eye size={14} aria-hidden="true" /> Open dashboard
-          </button>
+          </Button>
         </div>
       </div>
     </div>

@@ -6,6 +6,7 @@ import {
 import { useWorkQueue, REASSIGN_TARGETS, REJECT_REASONS, DECISION_VERB } from '../../state/WorkQueueContext.jsx'
 import { useFocusTrap } from '../../hooks/useFocusTrap.js'
 import UndoToast from '../home/UndoToast.jsx'
+import { Button } from '@/components/ui/Button'
 
 // Interactive render for the three system work widgets. WidgetRender routes the widget
 // ids here (bypassing the static skeleton). sm = read-only compact summary; md/lg =
@@ -231,11 +232,11 @@ function DecisionPanel({ item: itemProp, onDecide, onClose }) {
                 <CheckCircle2 size={14} aria-hidden="true" className="text-aims-governed" />
                 Already {DECISION_VERB[item.decision]?.toLowerCase()} · {item.decidedBy} {item.decidedAt}
               </span>
-              <button className="btn-secondary ml-auto !py-1.5 text-xs" onClick={onClose}>Close</button>
+              <Button variant="secondary" size="sm" onClick={onClose} className="ml-auto">Close</Button>
             </div>
           ) : mode === 'reject' ? (
             <div className="flex items-center justify-end gap-2">
-              <button className="btn-ghost text-xs" onClick={() => { setMode(null); setReason(''); setNote('') }}>Back</button>
+              <Button variant="tertiary" size="sm" onClick={() => { setMode(null); setReason(''); setNote('') }}>Back</Button>
               <button disabled={!canReject} onClick={confirmReject}
                 className="inline-flex items-center gap-1.5 rounded-lg bg-red-600 px-3 py-2 text-xs font-semibold text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-40">
                 <X size={14} aria-hidden="true" /> Confirm reject
@@ -243,7 +244,7 @@ function DecisionPanel({ item: itemProp, onDecide, onClose }) {
             </div>
           ) : mode === 'reassign' ? (
             <div className="flex items-center justify-end gap-2">
-              <button className="btn-ghost text-xs" onClick={() => { setMode(null); setTarget('') }}>Back</button>
+              <Button variant="tertiary" size="sm" onClick={() => { setMode(null); setTarget('') }}>Back</Button>
               <button disabled={!canReassign} onClick={confirmReassign}
                 className="inline-flex items-center gap-1.5 rounded-lg bg-aims-blue px-3 py-2 text-xs font-semibold text-white hover:bg-aims-blue/90 disabled:cursor-not-allowed disabled:opacity-40">
                 <CornerUpRight size={14} aria-hidden="true" /> Confirm reassign

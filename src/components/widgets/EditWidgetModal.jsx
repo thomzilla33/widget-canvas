@@ -5,6 +5,7 @@ import { useWidgets } from '../../state/WidgetsContext.jsx'
 import { CATALOG_CATEGORIES } from '../../data/mock.js'
 import { FormatPanel } from '../playground/BuilderPanels.jsx'
 import WidgetRender from './WidgetRender.jsx'
+import { Button } from '@/components/ui/Button'
 
 const DEFAULT_FORMAT = { style: 'auto', decimals: 0, abbreviate: true, prefix: '', suffix: '' }
 const DEFAULT_GOAL = { value: null, direction: 'higher' }
@@ -83,10 +84,10 @@ export default function EditWidgetModal({ widget, onClose }) {
 
         {/* Footer */}
         <div className="flex items-center justify-end gap-2 border-t border-gray-200 p-3 dark:border-white/10">
-          <button className="btn-secondary !py-1.5 text-xs" onClick={onClose}>Cancel</button>
-          <button className="btn-primary !py-1.5 text-xs" disabled={!canSave} onClick={save}>
+          <Button variant="secondary" size="sm" onClick={onClose}>Cancel</Button>
+          <Button variant="primary" size="sm" disabled={!canSave} onClick={save}>
             <Check size={14} aria-hidden="true" /> Save changes
-          </button>
+          </Button>
         </div>
       </div>
     </div>

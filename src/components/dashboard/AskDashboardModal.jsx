@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Bot, X, Send, Sparkles, Plus, Check } from 'lucide-react'
 import { useFocusTrap } from '../../hooks/useFocusTrap.js'
+import { Button } from '@/components/ui/Button'
 
 // U6 — "Talk to your dashboard": an Ask panel scoped to THIS dashboard's widgets +
 // the active consumption scope. Deterministic canned answers reference the on-screen
@@ -119,9 +120,9 @@ export default function AskDashboardModal({ name, kind, widgetNames = [], scopeL
               placeholder="Ask about this dashboard…"
               aria-label="Ask the dashboard assistant"
             />
-            <button onClick={() => send()} disabled={!draft.trim()} className="btn-primary !px-2.5" aria-label="Send">
+            <Button variant="primary" onClick={() => send()} disabled={!draft.trim()} className="!px-2.5" aria-label="Send">
               <Send size={15} aria-hidden="true" />
-            </button>
+            </Button>
           </div>
         </div>
       </div>

@@ -4,6 +4,8 @@ import { WidgetGlyph } from './glyph.jsx'
 import WidgetRender from './WidgetRender.jsx'
 import { EmptyState, FreshnessBadge, GovernedBadge } from '../common/index.jsx'
 import { Tag } from '@/components/ui/Tag'
+import { Button } from '@/components/ui/Button'
+import { CardContainer } from '@/components/ui/CardContainer'
 import { widgets, CATALOG_CATEGORIES, WIDGET_SIZES, SKELETON_ABOUT, SKELETON_BESTFOR } from '../../data/mock.js'
 
 const PREVIEW_WIDTH = { sm: 'max-w-[240px]', md: 'max-w-md', lg: 'max-w-2xl' }
@@ -52,12 +54,9 @@ export default function WidgetLibraryModal({ zoneLabel, onAdd, onClose, onCreate
           </div>
           <div className="flex items-center gap-2">
             {onCreateNew && (
-              <button
-                onClick={onCreateNew}
-                className="btn-secondary flex items-center gap-1.5 text-sm"
-              >
+              <Button variant="secondary" size="default" onClick={onCreateNew}>
                 <Pencil size={14} aria-hidden="true" /> Create new widget
-              </button>
+              </Button>
             )}
             <button onClick={onClose} aria-label="Close" className="grid h-8 w-8 place-items-center rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:text-slate-500 dark:hover:bg-white/10 dark:hover:text-slate-200">
               <X size={18} />
@@ -111,13 +110,13 @@ export default function WidgetLibraryModal({ zoneLabel, onAdd, onClose, onCreate
                         Build your first widget in the playground — it takes about 2 minutes.
                       </p>
                       {onCreateNew && (
-                        <button onClick={onCreateNew} className="btn-primary mt-4 flex items-center gap-1.5">
+                        <Button variant="primary" size="default" onClick={onCreateNew} className="mt-4">
                           <Pencil size={14} aria-hidden="true" /> Create a widget
-                        </button>
+                        </Button>
                       )}
                     </div>
                   ) : list.length === 0 ? (
-                    <EmptyState icon="🔍" title="No widgets match" description="Try a different search or clear filters." action={<button className="btn-secondary" onClick={clearAll}>Clear filters</button>} />
+                    <EmptyState icon="🔍" title="No widgets match" description="Try a different search or clear filters." action={<Button variant="secondary" size="default" onClick={clearAll}>Clear filters</Button>} />
                   ) : (
                     <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill,minmax(min(280px,100%),1fr))' }}>
                       {list.map((w) => (
@@ -133,7 +132,7 @@ export default function WidgetLibraryModal({ zoneLabel, onAdd, onClose, onCreate
 
         <div className="flex items-center justify-between border-t border-gray-200 px-6 py-3 dark:border-white/10">
           <span className="text-xs text-gray-500 dark:text-slate-400">{widgets.length} widgets in your library</span>
-          <button className="btn-secondary" onClick={onClose}>Done</button>
+          <Button variant="secondary" size="default" onClick={onClose}>Done</Button>
         </div>
       </div>
     </div>
@@ -142,12 +141,10 @@ export default function WidgetLibraryModal({ zoneLabel, onAdd, onClose, onCreate
 
 function Card({ widget, onOpen, onAdd }) {
   return (
-    <div
-      role="button"
-      tabIndex={0}
+    <CardContainer
+      variant="default"
       onClick={onOpen}
-      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onOpen() } }}
-      className="catalog-card min-h-[210px] cursor-pointer"
+      className="min-h-[210px] cursor-pointer"
     >
       <div className="flex items-start gap-3">
         <WidgetGlyph skeleton={widget.skeleton} source={widget.source} />
@@ -165,11 +162,11 @@ function Card({ widget, onOpen, onAdd }) {
       </div>
       <div className="mt-auto flex items-center justify-between gap-2 border-t border-gray-100 pt-2.5 dark:border-white/10">
         <FreshnessBadge status={widget.freshness} label={widget.freshness} />
-        <button className="btn-primary !py-1.5 !px-3 text-xs" onClick={(e) => { e.stopPropagation(); onAdd() }}>
+        <Button variant="primary" size="sm" onClick={(e) => { e.stopPropagation(); onAdd() }}>
           <Plus size={14} /> Add
-        </button>
+        </Button>
       </div>
-    </div>
+    </CardContainer>
   )
 }
 
@@ -232,9 +229,9 @@ function Detail({ widget, onBack, onAdd }) {
           <FreshnessBadge status={widget.freshness} label={widget.freshness} />
         </div>
         <div className="flex justify-end border-t border-gray-100 pt-4 dark:border-white/10">
-          <button className="btn-primary" onClick={() => onAdd(size)}>
+          <Button variant="primary" size="default" onClick={() => onAdd(size)}>
             <Plus size={16} /> Add to dashboard
-          </button>
+          </Button>
         </div>
       </div>
     </div>

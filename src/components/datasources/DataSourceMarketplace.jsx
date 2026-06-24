@@ -9,6 +9,8 @@ import {
 } from '../common/index.jsx'
 import { EXTERNAL_SOURCES, SOURCE_CATEGORIES, TYPE_LABEL } from '../../data/mock.js'
 import { Tag } from '@/components/ui/Tag'
+import { Button } from '@/components/ui/Button'
+import { CardContainer } from '@/components/ui/CardContainer'
 
 const SHOW = [
   { id: 'all', label: 'All' },
@@ -154,9 +156,9 @@ export default function DataSourceMarketplace({ currentSourceId, onSelect, onClo
                       title="No sources match"
                       description="Try a different search or clear your filters."
                       action={
-                        <button className="btn-secondary" onClick={clearAll}>
+                        <Button variant="secondary" size="default" onClick={clearAll}>
                           Clear filters
-                        </button>
+                        </Button>
                       }
                     />
                   ) : (
@@ -183,9 +185,9 @@ export default function DataSourceMarketplace({ currentSourceId, onSelect, onClo
           <span className="text-xs text-gray-500 dark:text-slate-400">
             <strong className="text-gray-900 dark:text-slate-100">{connectedCount}</strong> connected · {EXTERNAL_SOURCES.length} sources available
           </span>
-          <button className="btn-secondary" onClick={onClose}>
+          <Button variant="secondary" size="default" onClick={onClose}>
             Close
-          </button>
+          </Button>
         </div>
       </div>
     </div>
@@ -281,7 +283,7 @@ function Toolbar({ search, onSearch, activeCats, onToggleCat, activeProviders, o
           ))}
           {show !== 'all' && <Chip onClear={onResetShow}>{SHOW.find((s) => s.id === show)?.label}</Chip>}
           {search && <Chip onClear={() => onSearch('')}>“{search}”</Chip>}
-          <button className="btn-ghost !px-2 !py-1 text-xs" onClick={onClearAll}>Clear all</button>
+          <Button variant="tertiary" size="sm" onClick={onClearAll}>Clear all</Button>
         </div>
       )}
     </div>
@@ -335,31 +337,25 @@ function Hero({ onOpen }) {
 function UseButton({ isCurrent, onUse, full }) {
   if (isCurrent) {
     return (
-      <button className={`btn-secondary ${full ? 'w-full' : ''} cursor-default text-aims-governed`} disabled>
+      <Button variant="secondary" size="default" disabled selected={true} className={full ? 'w-full cursor-default text-aims-governed' : 'cursor-default text-aims-governed'}>
         <Check size={15} /> Selected
-      </button>
+      </Button>
     )
   }
   return (
-    <button className={`btn-primary ${full ? 'w-full' : ''}`} onClick={(e) => { e.stopPropagation(); onUse() }}>
+    <Button variant="primary" size="default" onClick={(e) => { e.stopPropagation(); onUse() }} className={full ? 'w-full' : ''}>
       Use this source
-    </button>
+    </Button>
   )
 }
 
 function Card({ source, isCurrent, onUse, onOpen }) {
   return (
-    <div
-      role="button"
-      tabIndex={0}
+    <CardContainer
+      variant="default"
+      selected={isCurrent}
       onClick={onOpen}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault()
-          onOpen()
-        }
-      }}
-      className={`catalog-card min-h-[200px] cursor-pointer ${isCurrent ? 'border-aims-blue ring-2 ring-aims-blue/30' : ''}`}
+      className="min-h-[200px] cursor-pointer"
     >
       <div className="flex items-start gap-3">
         <Logo source={source} />
@@ -384,7 +380,7 @@ function Card({ source, isCurrent, onUse, onOpen }) {
         <span className="text-[11px] text-gray-500 dark:text-slate-400">{fieldCount(source)}</span>
         <UseButton isCurrent={isCurrent} onUse={onUse} />
       </div>
-    </div>
+    </CardContainer>
   )
 }
 

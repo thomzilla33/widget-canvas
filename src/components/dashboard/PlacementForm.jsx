@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { LayoutGrid, UserSquare, MapPin, ChevronDown, Wand2 } from 'lucide-react'
+import { Button } from '@/components/ui/Button'
 import { entities, PROFILE_TYPES, REPORT_COLLECTIONS, HOME_SCOPES, placementLabel } from '../../data/mock.js'
 import { AUDIENCE_TYPES, AUDIENCE_TARGETS, audienceKey, audienceLabel, normalizeAudience } from '../../data/audiences.js'
 import { useProfileConfig } from '../../state/ProfileConfigContext.jsx'
@@ -278,7 +279,7 @@ export default function PlacementForm({ initial, onChange }) {
                     </button>
                   )}
                   {addingTab && (
-                    <button onClick={() => { setNewTab(''); setAddingTab(false) }} className="btn-ghost h-8 text-xs">Cancel</button>
+                    <Button variant="tertiary" onClick={() => { setNewTab(''); setAddingTab(false) }} className="h-8 text-xs">Cancel</Button>
                   )}
                 </div>
                 {addingTab ? (

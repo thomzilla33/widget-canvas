@@ -38,6 +38,7 @@ import {
 } from 'lucide-react'
 import { EmptyState, ConnectionBadge } from '../common/index.jsx'
 import { Tag } from '@/components/ui/Tag'
+import { Button } from '@/components/ui/Button'
 import { EXTERNAL_SOURCES, WIDGET_TYPES, TYPE_LABEL } from '../../data/mock.js'
 import { MODEL_ENTITIES, ENTITY_CATEGORIES, ENTITY_FIELDS } from '../../data/entities.js'
 import { dimensionsFor, bindSlots, TRANSFORMS, AGGREGATIONS } from '../../data/fields.js'
@@ -163,9 +164,9 @@ export function SourcePicker({ sourceId, onSelect, onBrowse }) {
         </div>
       )}
 
-      <button className="btn-secondary w-full" onClick={onBrowse}>
+      <Button variant="secondary" size="default" onClick={onBrowse} className="w-full">
         <Database size={15} /> Browse all {EXTERNAL_SOURCES.length} sources
-      </button>
+      </Button>
     </div>
   )
 }
@@ -184,7 +185,7 @@ function SelectedSource({ source, onChange }) {
         <div className="truncate text-[11px] text-gray-500 dark:text-slate-400">{source.category}</div>
       </div>
       <ConnectionBadge status={source.status} />
-      <button onClick={onChange} className="btn-secondary !h-8 shrink-0 !px-3 text-xs">Change</button>
+      <Button variant="secondary" size="sm" onClick={onChange} className="shrink-0">Change</Button>
     </div>
   )
 }
@@ -390,7 +391,7 @@ function SelectedEntity({ entity, onChange }) {
           ))}
         </div>
       </div>
-      <button onClick={onChange} className="btn-secondary !h-7 shrink-0 !px-3 text-xs">Change</button>
+      <Button variant="secondary" size="sm" onClick={onChange} className="shrink-0">Change</Button>
     </div>
   )
 }

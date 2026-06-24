@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Sparkles, ArrowRight, Check } from 'lucide-react'
+import { Button } from '@/components/ui/Button'
 
 // "Describe-to-build" composer — a natural-language input that generates a first
 // config for a builder, which the user then edits. `onGenerate(text)` returns true
@@ -29,9 +30,9 @@ export function DescribeComposer({ placeholder = 'Describe what you want to buil
           onKeyDown={(e) => e.key === 'Enter' && run()}
           aria-label="Describe what to build"
         />
-        <button className="btn-primary shrink-0" onClick={() => run()} disabled={!text.trim()}>
+        <Button variant="primary" size="default" onClick={() => run()} disabled={!text.trim()} className="shrink-0">
           Generate <ArrowRight size={15} aria-hidden="true" />
-        </button>
+        </Button>
       </div>
 
       {examples.length > 0 && (

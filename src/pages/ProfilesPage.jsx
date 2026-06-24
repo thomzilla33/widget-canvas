@@ -3,6 +3,8 @@ import { useLoadMore } from '../hooks/useLoadMore.js'
 import { useNavigate } from 'react-router-dom'
 import { Building2, UserRound, UserCheck, Handshake, LifeBuoy, ChevronRight } from 'lucide-react'
 import { PageHeader, EmptyState, HealthBadge } from '../components/common/index.jsx'
+import { Button } from '@/components/ui/Button'
+import { CardContainer } from '@/components/ui/CardContainer'
 import FilterToolbar from '../components/common/FilterToolbar.jsx'
 import { entities } from '../data/mock.js'
 
@@ -70,7 +72,7 @@ export default function ProfilesPage() {
             {shownPage.map((e) => {
               const Icon = TYPE_ICON[e.type] || UserRound
               return (
-                <button key={e.id} onClick={() => navigate(`/ucp/${e.id}`)} className="catalog-card min-h-[120px]">
+                <CardContainer key={e.id} onClick={() => navigate(`/ucp/${e.id}`)} className="min-h-[120px] relative flex flex-col gap-2.5 text-left">
                   <div className="absolute top-3 right-3">
                     <HealthBadge health={e.health} />
                   </div>
@@ -92,14 +94,14 @@ export default function ProfilesPage() {
                       Open profile <ChevronRight size={12} aria-hidden="true" />
                     </span>
                   </div>
-                </button>
+                </CardContainer>
               )
             })}
           </div>
           {hasMore && (
             <div className="mt-5 flex items-center justify-center gap-3">
               <span className="text-xs text-gray-400 dark:text-slate-500">Showing {shownPage.length} of {shown.length}</span>
-              <button onClick={loadMore} className="btn-secondary text-xs">Load {remaining} more</button>
+              <Button variant="secondary" size="sm" onClick={loadMore}>Load {remaining} more</Button>
             </div>
           )}
           </>

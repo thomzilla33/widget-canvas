@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Settings, ChevronLeft, Lock, BellOff } from 'lucide-react'
 import { useNotifications } from '../../state/NotificationsContext.jsx'
 import { NOTIFICATION_CATEGORIES } from '../../data/mock.js'
+import { Button } from '@/components/ui/Button'
 
 // S115–S120 — dropdown under the topbar bell (list + settings + empty state)
 export default function NotificationsMenu({ onClose }) {
@@ -18,9 +19,9 @@ export default function NotificationsMenu({ onClose }) {
           <div className="flex items-center justify-between border-b border-gray-200 px-4 py-3 dark:border-white/10">
             <span className="font-semibold text-gray-900 dark:text-white">Notifications</span>
             <div className="flex items-center gap-1">
-              <button className="btn-ghost !px-2 !py-1 text-xs" onClick={markAllRead}>
+              <Button variant="tertiary" size="sm" onClick={markAllRead}>
                 Mark all read
-              </button>
+              </Button>
               <button
                 className="h-7 w-7 grid place-items-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:text-slate-500 dark:hover:bg-white/10 dark:hover:text-slate-200"
                 title="Notification settings"

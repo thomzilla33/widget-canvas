@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { LayoutDashboard, Boxes, Database, Sparkles, X, ArrowRight, FileBarChart, Home } from 'lucide-react'
+import { Button } from '@/components/ui/Button'
 
 // U5 — per-studio welcome/intro (modeled on the production "Welcome to Data Studio"):
 // eyebrow pill + title + subtitle + a numbered setup walkthrough + primary & secondary
@@ -145,14 +146,14 @@ export default function StudioWelcome({ studioId, built, ctaLabel, onCta, second
 
         <div className="mt-5 flex flex-wrap items-center gap-3">
           {ctaLabel && onCta && (
-            <button onClick={onCta} className="btn-primary">
+            <Button variant="primary" size="default" onClick={onCta}>
               {ctaLabel} <ArrowRight size={15} aria-hidden="true" />
-            </button>
+            </Button>
           )}
           {onSkip && (
-            <button onClick={onSkip} className="btn-secondary">
+            <Button variant="secondary" size="default" onClick={onSkip}>
               {secondaryLabel || 'Skip for now'}
-            </button>
+            </Button>
           )}
           {built && (
             <span className="inline-flex items-center gap-1.5 text-xs text-gray-500 dark:text-slate-400">

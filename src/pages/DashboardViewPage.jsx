@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Pencil, ChevronLeft, MapPin, PauseCircle, Sparkles, UserRound } from 'lucide-react'
 import { PageHeader, Badge } from '../components/common/index.jsx'
+import { Button } from '@/components/ui/Button'
 import DashboardZones from '../components/dashboard/DashboardZones.jsx'
 import DashboardControls, { DEFAULT_SCOPE, scopeLabel } from '../components/dashboard/DashboardControls.jsx'
 import WidgetDrilldownModal from '../components/dashboard/WidgetDrilldownModal.jsx'
@@ -79,9 +80,9 @@ export default function DashboardViewPage() {
       <div className="h-full grid place-items-center px-6 text-center">
         <div>
           <p className="text-sm text-gray-500 dark:text-slate-400">This dashboard doesn’t exist.</p>
-          <button className="btn-secondary mt-3" onClick={() => navigate('/dashboards')}>
+          <Button variant="secondary" className="mt-3" onClick={() => navigate('/dashboards')}>
             <ChevronLeft size={15} /> Back to dashboards
-          </button>
+          </Button>
         </div>
       </div>
     )
@@ -96,14 +97,14 @@ export default function DashboardViewPage() {
           <>
             <Badge variant={dashboard.status} />
             {profileEntity && (
-              <button className="btn-secondary" onClick={() => navigate(`/ucp/${profileEntity.id}`)} title={`Open ${profileEntity.name}'s profile`}>
+              <Button variant="secondary" onClick={() => navigate(`/ucp/${profileEntity.id}`)} title={`Open ${profileEntity.name}'s profile`}>
                 <UserRound size={15} /> View on profile
-              </button>
+              </Button>
             )}
             {isAdmin && (
-              <button className="btn-primary" onClick={() => navigate(`/dashboard/${dashboard.id}/canvas`)}>
+              <Button variant="primary" onClick={() => navigate(`/dashboard/${dashboard.id}/canvas`)}>
                 <Pencil size={15} /> Edit
-              </button>
+              </Button>
             )}
           </>
         }

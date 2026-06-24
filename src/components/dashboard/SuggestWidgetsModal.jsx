@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { Sparkles, X, Plus } from 'lucide-react'
 import WidgetRender from '../widgets/WidgetRender.jsx'
 import { useFocusTrap } from '../../hooks/useFocusTrap.js'
+import { Button } from '@/components/ui/Button'
 import { suggestWidgetsForProfile } from '../../data/suggestions.js'
 
 // U3 — "✨ Suggest widgets": ranked, reasoned widget suggestions for a dashboard's
@@ -27,7 +28,7 @@ export default function SuggestWidgetsModal({ profileType, placedIds = [], onAdd
           </div>
           <div className="flex items-center gap-2">
             {suggestions.length > 0 && (
-              <button onClick={addAll} className="btn-secondary !py-1.5 !px-3 text-xs">Add all</button>
+              <Button variant="secondary" size="sm" onClick={addAll}>Add all</Button>
             )}
             <button onClick={onClose} aria-label="Close" className="grid h-7 w-7 place-items-center rounded-md text-gray-400 hover:bg-gray-100 dark:hover:bg-white/10">
               <X size={16} />

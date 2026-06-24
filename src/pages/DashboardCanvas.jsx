@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useParams, Navigate, useNavigate, useLocation } from 'react-router-dom'
 import { Plus, X, Lock, Unlock, Trash2, Sparkles, RotateCcw, SlidersHorizontal, GripVertical, Move, Check, RefreshCw, MoreHorizontal, Flag, Info, Pencil } from 'lucide-react'
 import { PageHeader, GovernedBadge, FreshnessBadge, Badge, EmptyState } from '../components/common/index.jsx'
+import { Button } from '@/components/ui/Button'
 import { PopoverPanel } from '../components/common/Popover.jsx'
 import WidgetRender from '../components/widgets/WidgetRender.jsx'
 import WidgetLibraryModal from '../components/widgets/WidgetLibraryModal.jsx'
@@ -176,15 +177,16 @@ export default function DashboardCanvas() {
           dashboard ? (
             <>
               <div className="relative">
-                <button
-                  className="btn-secondary !px-2"
+                <Button
+                  variant="secondary"
+                  className="!px-2"
                   aria-label="More actions"
                   aria-haspopup="menu"
                   aria-expanded={moreOpen}
                   onClick={() => setMoreOpen((o) => !o)}
                 >
                   <MoreHorizontal size={16} aria-hidden="true" />
-                </button>
+                </Button>
                 {moreOpen && (
                   <PopoverPanel onClose={() => setMoreOpen(false)} align="right" className="w-56 p-1.5">
                     <MenuItem icon={SlidersHorizontal} onClick={() => { setMoreOpen(false); setEditSetupOpen(true) }}>
@@ -206,11 +208,11 @@ export default function DashboardCanvas() {
                   </PopoverPanel>
                 )}
               </div>
-              <button className="btn-secondary" onClick={() => setShareOpen(true)}>Share</button>
+              <Button variant="secondary" onClick={() => setShareOpen(true)}>Share</Button>
               {(!published || dirty) && (
-                <button className="btn-primary" onClick={() => setPublishOpen(true)} title="Publish so this is visible to its audience">
+                <Button variant="primary" onClick={() => setPublishOpen(true)} title="Publish so this is visible to its audience">
                   {published ? 'Publish changes' : 'Publish'}
-                </button>
+                </Button>
               )}
             </>
           ) : null
@@ -225,9 +227,9 @@ export default function DashboardCanvas() {
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
               <AddWidgetCard onClick={() => setAddOpen(true)} onCreateNew={() => navigate('/widgets/new', { state: { fromDashboard: id } })} />
               <div className="flex items-center sm:col-span-1 lg:col-span-2">
-                <button className="btn-secondary" onClick={() => setSuggestOpen(true)}>
+                <Button variant="secondary" onClick={() => setSuggestOpen(true)}>
                   <Sparkles size={15} aria-hidden="true" /> Suggest widgets
-                </button>
+                </Button>
               </div>
             </div>
           ) : (
@@ -286,12 +288,13 @@ export default function DashboardCanvas() {
             title="Widget settings"
             onClose={() => setSelectedPid(null)}
             footer={
-              <button
-                className="btn-secondary w-full text-red-600 dark:text-red-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aims-blue/50"
+              <Button
+                variant="secondary"
+                className="w-full text-red-600 dark:text-red-400"
                 onClick={() => removePlacement(selected.pid)}
               >
                 <Trash2 size={15} aria-hidden="true" /> Remove from dashboard
-              </button>
+              </Button>
             }
           >
             <ConfigPanel

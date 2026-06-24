@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { Check, ExternalLink, RefreshCw, PenLine, LayoutTemplate, Sparkles, BarChart3, LineChart, Hash, Gauge, PieChart, Table2, List, ArrowLeft } from 'lucide-react'
 import { PageHeader } from '../components/common/index.jsx'
+import { Button } from '@/components/ui/Button'
 import { useWidgets } from '../state/WidgetsContext.jsx'
 import { EXTERNAL_SOURCES, TYPE_LABEL, sourceFields, WIDGET_SIZES } from '../data/mock.js'
 import { MODEL_ENTITIES, entityById } from '../data/entities.js'
@@ -259,10 +260,10 @@ export default function WidgetBuilder() {
         description="Map an entity and metric, pick a widget type, and preview it live."
         actions={
           <>
-            <button className="btn-secondary" onClick={() => navigate('/widgets')}>Cancel</button>
-            <button className="btn-primary" disabled={!canSave} onClick={handleSave}>
+            <Button variant="secondary" onClick={() => navigate('/widgets')}>Cancel</Button>
+            <Button variant="primary" disabled={!canSave} onClick={handleSave}>
               <Check size={16} /> Save to catalog
-            </button>
+            </Button>
           </>
         }
       />
@@ -309,12 +310,13 @@ export default function WidgetBuilder() {
                 </section>
 
                 {dataComplete && (
-                  <button
+                  <Button
+                    variant="primary"
+                    className="w-full"
                     onClick={() => setTab('widget')}
-                    className="btn-primary w-full"
                   >
                     Continue to Widget →
-                  </button>
+                  </Button>
                 )}
               </div>
             )}
@@ -396,12 +398,13 @@ export default function WidgetBuilder() {
                 </section>
 
                 {widgetComplete && (
-                  <button
+                  <Button
+                    variant="secondary"
+                    className="w-full"
                     onClick={() => setTab('appearance')}
-                    className="btn-secondary w-full"
                   >
                     Configure Appearance →
-                  </button>
+                  </Button>
                 )}
               </div>
             )}
@@ -511,9 +514,9 @@ function EntryScreen({ onScratch, onAI, onTemplate, onBack }) {
         title="Create a widget"
         description="Choose how you'd like to start building."
         actions={
-          <button className="btn-secondary" onClick={onBack}>
+          <Button variant="secondary" onClick={onBack}>
             <ArrowLeft size={15} /> Back to library
-          </button>
+          </Button>
         }
       />
       <div className="flex-1 overflow-auto">
@@ -680,13 +683,13 @@ function SavedConfirmation({ name, widgetId, navigate }) {
           "{name || 'Untitled widget'}" is now in the Widget Library. Add it to a dashboard to make it visible to your team.
         </p>
         <div className="mt-5 flex items-center justify-center gap-2">
-          <button className="btn-secondary" onClick={() => navigate('/widgets')}>Back to library</button>
-          <button
-            className="btn-primary"
+          <Button variant="secondary" onClick={() => navigate('/widgets')}>Back to library</Button>
+          <Button
+            variant="primary"
             onClick={() => navigate('/dashboards', { state: { pendingPlace: { id: widgetId, name: name || 'Untitled widget' } } })}
           >
             Add to a dashboard
-          </button>
+          </Button>
         </div>
       </div>
     </div>

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { X, Check, AlertTriangle, Info } from 'lucide-react'
 import { useFocusTrap } from '../../hooks/useFocusTrap.js'
+import { Button } from '@/components/ui/Button'
 import PlacementForm, { overlaps } from './PlacementForm.jsx'
 import { useDashboards } from '../../state/DashboardsContext.jsx'
 import { placementLabel } from '../../data/mock.js'
@@ -70,10 +71,10 @@ export default function EditSetupModal({ dashboard, onClose, onSave }) {
         </div>
 
         <div className="flex items-center justify-end gap-2 border-t border-gray-200 px-5 py-3 dark:border-white/10">
-          <button className="btn-secondary" onClick={onClose}>Cancel</button>
-          <button className="btn-primary" disabled={!form.valid} onClick={save}>
+          <Button variant="tertiary" onClick={onClose}>Cancel</Button>
+          <Button variant="primary" disabled={!form.valid} onClick={save}>
             <Check size={15} aria-hidden="true" /> Save changes
-          </button>
+          </Button>
         </div>
       </div>
     </div>

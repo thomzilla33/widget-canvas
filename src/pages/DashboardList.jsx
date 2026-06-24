@@ -5,6 +5,7 @@ import { MapPin, UserX, RotateCcw, FileBarChart, ArrowRight, Sparkles, MoreHoriz
 import { PageHeader, Badge, EmptyState } from '../components/common/index.jsx'
 import { Tag } from '@/components/ui/Tag'
 import { Button } from '@/components/ui/Button'
+import { CardContainer } from '@/components/ui/CardContainer'
 import { PopoverPanel } from '../components/common/Popover.jsx'
 import StudioWelcome from '../components/common/StudioWelcome.jsx'
 import FilterToolbar from '../components/common/FilterToolbar.jsx'
@@ -258,13 +259,11 @@ export default function DashboardList() {
           <>
           <div ref={gridReveal} className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill,minmax(min(280px,100%),1fr))' }}>
             {shownPage.map((d) => (
-              <div
+              <CardContainer
                 key={d.id}
-                role="button"
-                tabIndex={0}
                 onClick={(e) => { if (!e.target.closest('button')) setDetailDashboard(d) }}
                 onKeyDown={(e) => { if (e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); setDetailDashboard(d) } }}
-                className={`catalog-card min-h-[152px] cursor-pointer text-left${menuId === d.id ? ' z-10' : ''}`}
+                className={`min-h-[152px] text-left relative flex flex-col gap-2.5${menuId === d.id ? ' z-10' : ''}`}
               >
                 <div className="absolute top-3 right-3 flex items-center gap-1.5">
                   <Badge variant={d.status} />
@@ -335,13 +334,13 @@ export default function DashboardList() {
                     <span className="text-[11px] text-gray-500 dark:text-slate-400">{d.updated}</span>
                   )}
                 </div>
-              </div>
+              </CardContainer>
             ))}
           </div>
           {hasMore && (
             <div className="mt-5 flex items-center justify-center gap-3">
               <span className="text-xs text-gray-400 dark:text-slate-500">Showing {shownPage.length} of {shown.length}</span>
-              <button onClick={loadMore} className="btn-secondary text-xs">Load {remaining} more</button>
+              <Button variant="secondary" size="sm" onClick={loadMore}>Load {remaining} more</Button>
             </div>
           )}
           </>

@@ -25,6 +25,7 @@ import {
   GripVertical,
 } from 'lucide-react'
 import { PageHeader, GovernedBadge, FreshnessBadge, EmptyState } from '../components/common/index.jsx'
+import { Button } from '@/components/ui/Button'
 import { PopoverPanel } from '../components/common/Popover.jsx'
 import FeedbackPanel from '../components/ucp/FeedbackPanel.jsx'
 import UcpConcierge from '../components/ucp/UcpConcierge.jsx'
@@ -249,7 +250,7 @@ export default function UCPView() {
           icon="🔍"
           title="Profile not found"
           description={`No entity matches “${entityId}”.`}
-          action={<button className="btn-secondary" onClick={() => navigate('/dashboards')}>Back to dashboards</button>}
+          action={<Button variant="secondary" onClick={() => navigate('/dashboards')}>Back to dashboards</Button>}
         />
       </div>
     )
@@ -427,9 +428,9 @@ export default function UCPView() {
                   title={`No dashboard on “${activeTab}” yet`}
                   description="Place a dashboard on this tab to fill it, or remove the tab if it’s not needed."
                   action={
-                    <button className="btn-primary" onClick={() => navigate('/dashboard/new')}>
+                    <Button variant="primary" onClick={() => navigate('/dashboard/new')}>
                       <Plus size={15} /> Add a dashboard to this tab
-                    </button>
+                    </Button>
                   }
                 />
               </div>
@@ -458,9 +459,9 @@ export default function UCPView() {
                 onChange={(e) => setSearch(e.target.value)}
               />
             </div>
-            <button className="btn-secondary ml-auto" onClick={() => setResetOpen(true)}>
+            <Button variant="secondary" className="ml-auto" onClick={() => setResetOpen(true)}>
               <RotateCcw size={15} /> Reset layout
-            </button>
+            </Button>
           </div>
 
           <AiSummary entityName={entity?.name || 'This account'} />
@@ -561,9 +562,9 @@ function AiSummary({ entityName }) {
         </div>
         <div className="flex items-center gap-3">
           <FreshnessBadge status={refreshing ? 'aging' : 'fresh'} label={refreshing ? 'Refreshing…' : updated} />
-          <button className="btn-ghost" onClick={refresh} disabled={refreshing}>
+          <Button variant="tertiary" onClick={refresh} disabled={refreshing}>
             <RefreshCw size={14} className={refreshing ? 'animate-spin' : ''} /> Refresh
-          </button>
+          </Button>
         </div>
       </div>
       <p className="mt-3 max-w-4xl text-sm text-gray-700 dark:text-slate-200 leading-relaxed">
@@ -632,12 +633,12 @@ function WidgetFilter({ onApply, onClear }) {
             </div>
           )}
           <div className="mt-3 flex justify-end gap-2">
-            <button className="btn-ghost !py-1 !px-2 text-xs" onClick={() => { onClear(); setOpen(false) }}>
+            <Button variant="tertiary" size="sm" onClick={() => { onClear(); setOpen(false) }}>
               Clear
-            </button>
-            <button className="btn-primary !py-1 !px-3 text-xs" onClick={apply}>
+            </Button>
+            <Button variant="primary" size="sm" onClick={apply}>
               Apply
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -861,9 +862,9 @@ function WidgetBody({ inst, widget }) {
       <div className="text-center py-3">
         <AlertTriangle size={20} className="text-aims-stale mx-auto" />
         <div className="mt-1 text-xs text-gray-600 dark:text-slate-300">Couldn't load this widget</div>
-        <button className="btn-ghost mt-1 text-xs text-aims-blue">
+        <Button variant="tertiary" size="sm" className="mt-1 text-aims-blue">
           <RotateCw size={12} /> Retry
-        </button>
+        </Button>
       </div>
     )
   }
@@ -925,12 +926,12 @@ function ResetModal({ onCancel, onConfirm }) {
           This restores the admin's default layout and clears your reordering, collapsed widgets, and filters.
         </p>
         <div className="mt-5 flex items-center justify-center gap-2">
-          <button className="btn-secondary" onClick={onCancel}>
+          <Button variant="secondary" onClick={onCancel}>
             Cancel
-          </button>
-          <button className="btn-primary" onClick={onConfirm}>
+          </Button>
+          <Button variant="primary" onClick={onConfirm}>
             <RotateCcw size={15} /> Reset to default
-          </button>
+          </Button>
         </div>
       </div>
     </div>
@@ -960,9 +961,9 @@ function QuickActionPanel({ action, widgetName, onClose }) {
       </div>
       {!done && (
         <div className="border-t border-gray-200 dark:border-white/10 p-3">
-          <button className="btn-primary w-full" onClick={() => setDone(true)}>
+          <Button variant="primary" className="w-full" onClick={() => setDone(true)}>
             <Check size={15} /> {action}
-          </button>
+          </Button>
         </div>
       )}
     </div>

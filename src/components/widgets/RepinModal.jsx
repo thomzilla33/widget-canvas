@@ -3,6 +3,7 @@ import { X, Check, AlertTriangle, ArrowRight, Pin } from 'lucide-react'
 import { SCHEMA_DRIFT } from '../../data/mock.js'
 import { useFocusTrap } from '../../hooks/useFocusTrap.js'
 import { Tag } from '@/components/ui/Tag'
+import { Button } from '@/components/ui/Button'
 
 const STATUS_VARIANT = {
   unchanged: 'neutral',
@@ -28,9 +29,9 @@ export default function RepinModal({ widget, onClose, onComplete }) {
           <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">
             “{widget.name}” has no pending data-structure changes to remap.
           </p>
-          <button className="btn-primary mt-4" onClick={onClose}>
+          <Button variant="primary" size="default" onClick={onClose} className="mt-4">
             Done
-          </button>
+          </Button>
         </div>
       </div>
     )
@@ -66,9 +67,9 @@ export default function RepinModal({ widget, onClose, onComplete }) {
               “{widget.name}” was remapped and sent for approval. It returns to active once approved; a
               notification was sent.
             </p>
-            <button className="btn-primary mt-5" onClick={onClose}>
+            <Button variant="primary" size="default" onClick={onClose} className="mt-5">
               Done
-            </button>
+            </Button>
           </div>
         ) : (
           <>
@@ -134,14 +135,15 @@ export default function RepinModal({ widget, onClose, onComplete }) {
               <span className="text-xs text-gray-500 dark:text-slate-400">
                 {allMapped ? 'Approval is notification-only.' : 'Map all changed fields to remap.'}
               </span>
-              <button
-                className="btn-primary"
+              <Button
+                variant="primary"
+                size="default"
                 disabled={!allMapped}
                 onClick={submit}
-                title={allMapped ? undefined : 'Map all changed fields to remap.'}
+                title={allMapped ? undefined : "Map all changed fields to remap."}
               >
-                <Pin size={15} /> Remap & submit
-              </button>
+                <Pin size={15} /> Remap &amp; submit
+              </Button>
             </div>
           </>
         )}

@@ -5,6 +5,7 @@ import {
   Briefcase, MessageSquare, MoreHorizontal, X, Send, Bot, Copy, ExternalLink,
 } from 'lucide-react'
 import { useFocusTrap } from '../../hooks/useFocusTrap.js'
+import { Button } from '@/components/ui/Button'
 import { PopoverPanel } from '../common/Popover.jsx'
 import { actionAllowedFor } from '../../data/audiences.js'
 import { useActivity } from '../../state/ActivityContext.jsx'
@@ -301,7 +302,7 @@ function ActionComposer({ kind, name, info, onClose, onSent }) {
             </div>
             <p className="mt-3 text-sm font-medium text-gray-900 dark:text-slate-100">{isEmail ? 'Email' : 'Message'} queued to {name}</p>
             <p className="mt-1 text-xs text-gray-500 dark:text-slate-400">This is a preview — no message was delivered in this demo.</p>
-            <button onClick={onClose} className="btn-secondary mt-4">Done</button>
+            <Button variant="secondary" onClick={onClose} className="mt-4">Done</Button>
           </div>
         ) : (
           <div className="space-y-3 p-4">
@@ -324,10 +325,10 @@ function ActionComposer({ kind, name, info, onClose, onSent }) {
               <textarea rows={isEmail ? 5 : 3} className="input" value={body} onChange={(e) => setBody(e.target.value)} placeholder={`Write your ${isEmail ? 'email' : 'message'}…`} />
             </Labeled>
             <div className="flex justify-end gap-2">
-              <button onClick={onClose} className="btn-secondary">Cancel</button>
-              <button onClick={handleSend} disabled={!body.trim()} className="btn-primary">
+              <Button variant="tertiary" onClick={onClose}>Cancel</Button>
+              <Button variant="primary" onClick={handleSend} disabled={!body.trim()}>
                 <Send size={14} /> Send
-              </button>
+              </Button>
             </div>
           </div>
         )}
@@ -396,9 +397,9 @@ function AgentChatPanel({ name, kindLabel, onClose }) {
               placeholder="Ask about this profile…"
               aria-label="Message the assistant"
             />
-            <button onClick={() => send()} disabled={!draft.trim()} className="btn-primary !px-2.5" aria-label="Send">
+            <Button variant="primary" onClick={() => send()} disabled={!draft.trim()} className="!px-2.5" aria-label="Send">
               <Send size={15} />
-            </button>
+            </Button>
           </div>
         </div>
       </div>

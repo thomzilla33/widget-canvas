@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Sparkles, X, Download, Check } from 'lucide-react'
 import { useWidgets } from '../../state/WidgetsContext.jsx'
 import { sourcesWithTemplates, templatesForSource } from '../../data/sources.js'
+import { Button } from '@/components/ui/Button'
 
 // U4 — per-source templates: connected sources that ship a ready-made widget bundle.
 // One-click install adds the not-yet-installed widgets (deduped by templateId).
@@ -56,9 +57,9 @@ export default function SourceTemplatesBanner() {
                 <div className="truncate text-sm font-semibold text-gray-900 dark:text-slate-100">{s.name}</div>
                 <div className="text-[11px] text-gray-500 dark:text-slate-400">{n} widget{n === 1 ? '' : 's'} ready to install</div>
               </div>
-              <button onClick={() => install(s)} className="btn-primary !py-1.5 !px-2.5 text-xs">
+              <Button variant="primary" size="sm" onClick={() => install(s)}>
                 <Download size={13} aria-hidden="true" /> Install
-              </button>
+              </Button>
             </div>
           )
         })}

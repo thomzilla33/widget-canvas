@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AlertTriangle, ChevronLeft, ChevronRight, LayoutGrid, Sparkles, Check, MapPin } from 'lucide-react'
 import { PageHeader, StepIndicator } from '../components/common/index.jsx'
+import { Button } from '@/components/ui/Button'
 import PlacementForm, { StartCard, overlaps, placeKey } from '../components/dashboard/PlacementForm.jsx'
 import { DescribeComposer } from '../components/common/DescribeComposer.jsx'
 import { useDashboards } from '../state/DashboardsContext.jsx'
@@ -119,10 +120,10 @@ export default function NewDashboard() {
                         "{conflict.name}" ({conflict.status}) already targets {placementLabel(conflict.placement)} · {audienceLabel(conflict.audience)}. Creating another may cause overlap.
                       </div>
                       <div className="mt-3 flex items-center gap-2">
-                        <button className="btn-secondary" onClick={() => navigate(`/dashboard/${conflict.id}/canvas`)}>View existing</button>
-                        <button className={`btn-secondary ${overrodeConflict ? 'text-aims-governed' : ''}`} onClick={() => setOverrodeConflict(true)}>
+                        <Button variant="secondary" onClick={() => navigate(`/dashboard/${conflict.id}/canvas`)}>View existing</Button>
+                        <Button variant="secondary" className={overrodeConflict ? 'text-aims-governed' : ''} onClick={() => setOverrodeConflict(true)}>
                           {overrodeConflict ? (<><Check size={15} /> Will create anyway</>) : 'Create anyway'}
-                        </button>
+                        </Button>
                       </div>
                     </div>
                   </div>
@@ -180,22 +181,22 @@ export default function NewDashboard() {
       {/* Footer nav — single Cancel/Back here; no duplicate in the header */}
       <div className="border-t border-gray-200 dark:border-white/10 bg-white dark:bg-[#0f1629] px-4 md:px-6 py-3">
         <div className="flex items-center justify-between">
-          <button className="btn-secondary" onClick={() => (step === 0 ? navigate('/dashboards') : setStep(0))}>
+          <Button variant="secondary" onClick={() => (step === 0 ? navigate('/dashboards') : setStep(0))}>
             <ChevronLeft size={16} />
             {step === 0 ? 'Cancel' : 'Back'}
-          </button>
+          </Button>
 
           <div className="flex flex-col items-end gap-1">
             {step === 0 ? (
-              <button className="btn-primary" disabled={!canNext} onClick={() => setStep(1)}>
+              <Button variant="primary" disabled={!canNext} onClick={() => setStep(1)}>
                 Next: Start point
                 <ChevronRight size={16} />
-              </button>
+              </Button>
             ) : (
-              <button className="btn-primary" disabled={!canNext} onClick={create}>
+              <Button variant="primary" disabled={!canNext} onClick={create}>
                 <Check size={16} />
                 Create dashboard
-              </button>
+              </Button>
             )}
             {blockingHint && (
               <p className="text-[11px] text-gray-400 dark:text-slate-500">{blockingHint}</p>

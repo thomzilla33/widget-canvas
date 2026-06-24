@@ -3,6 +3,7 @@ import { X, Check, Flag } from 'lucide-react'
 import { WidgetGlyph } from './glyph.jsx'
 import { useFocusTrap } from '../../hooks/useFocusTrap.js'
 import { Tag } from '@/components/ui/Tag'
+import { Button } from '@/components/ui/Button'
 
 // S122/S123 — flag detail with full context + resolve (notification-only).
 export default function FlagDetailModal({ flag, widget, entity, onClose, onResolve }) {
@@ -37,9 +38,9 @@ export default function FlagDetailModal({ flag, widget, entity, onClose, onResol
             <p className="mt-1 max-w-sm text-sm text-gray-500 dark:text-slate-400">
               A notification was sent to {flag.reporter}. The flag was cleared from Needs Attention.
             </p>
-            <button className="btn-primary mt-5" onClick={onClose}>
+            <Button variant="primary" size="default" onClick={onClose} className="mt-5">
               Done
-            </button>
+            </Button>
           </div>
         ) : (
           <>
@@ -74,9 +75,9 @@ export default function FlagDetailModal({ flag, widget, entity, onClose, onResol
 
             <div className="flex items-center justify-between border-t border-gray-200 px-5 py-3 dark:border-white/10">
               <span className="text-xs text-gray-500 dark:text-slate-400">Resolution is notification-only.</span>
-              <button className="btn-primary" onClick={resolve}>
-                <Check size={15} /> Resolve & notify
-              </button>
+              <Button variant="primary" size="default" onClick={resolve}>
+                <Check size={15} /> Resolve &amp; notify
+              </Button>
             </div>
           </>
         )}

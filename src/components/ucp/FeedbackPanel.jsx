@@ -3,6 +3,7 @@ import { X, Check, Send } from 'lucide-react'
 import { EmptyState } from '../common/index.jsx'
 import { useFeedback } from '../../state/FeedbackContext.jsx'
 import { FLAG_REASONS, CANNED_ANSWER } from '../../data/mock.js'
+import { Button } from '@/components/ui/Button'
 
 // S23/S24 (flag) and S26/S27 (ask) — right-side slide-over, two modes.
 export default function FeedbackPanel({ mode, widget, entityId, onClose }) {
@@ -82,9 +83,9 @@ function FlagForm({ widget, entityId, onClose }) {
         </div>
       </div>
       <div className="border-t border-gray-200 p-3 dark:border-white/10">
-        <button className="btn-primary w-full" onClick={submit}>
+        <Button variant="primary" size="default" onClick={submit} className="w-full">
           <Check size={15} /> Submit flag
-        </button>
+        </Button>
       </div>
     </>
   )
@@ -137,9 +138,9 @@ function AskChat({ widget }) {
             onChange={(e) => setDraft(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && send()}
           />
-          <button className="btn-primary !px-3" onClick={send} aria-label="Send">
+          <Button variant="primary" size="default" onClick={send} aria-label="Send">
             <Send size={15} />
-          </button>
+          </Button>
         </div>
       </div>
     </>

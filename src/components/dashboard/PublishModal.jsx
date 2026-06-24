@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { X, Check, Rocket, History, RotateCcw, EyeOff, Users } from 'lucide-react'
 import { AUDIENCE_ROLES, audienceVisibleTo, audienceLabel, normalizeAudience } from '../../data/audiences.js'
 import { useFocusTrap } from '../../hooks/useFocusTrap.js'
+import { Button } from '@/components/ui/Button'
 import { Tag } from '@/components/ui/Tag'
 
 const ROLES = AUDIENCE_ROLES
@@ -131,9 +132,9 @@ export default function PublishModal({ dashboard, placements, widgetById, onClos
                         <div className="mt-0.5 text-[11px] text-gray-500 dark:text-slate-400">{v.status} · {v.when}</div>
                       </div>
                       {!v.current && (
-                        <button className="btn-secondary !py-1.5 !px-3 text-xs" onClick={() => setRestoring(v)}>
+                        <Button variant="secondary" size="sm" onClick={() => setRestoring(v)}>
                           <RotateCcw size={13} /> Restore
-                        </button>
+                        </Button>
                       )}
                     </div>
                   ))}
@@ -147,9 +148,9 @@ export default function PublishModal({ dashboard, placements, widgetById, onClos
                 <span className="text-xs text-gray-500 dark:text-slate-400">
                   {all.length} widget{all.length === 1 ? '' : 's'} · {dashboard?.entity} · {audienceLabel(dashboard?.audience)}
                 </span>
-                <button className="btn-primary" onClick={publish}>
+                <Button variant="primary" onClick={publish}>
                   <Rocket size={15} /> Publish dashboard
-                </button>
+                </Button>
               </div>
             )}
           </>
@@ -186,16 +187,16 @@ function PublishedState({ dashboard, role, onClose, onHistory, onShare }) {
         “{dashboard?.name}” is now live for {audienceLabel(dashboard?.audience)}. A notification was sent to assigned users.
       </p>
       <div className="mt-5 flex items-center gap-2">
-        <button className="btn-secondary" onClick={onHistory}>
+        <Button variant="secondary" onClick={onHistory}>
           <History size={15} /> Version history
-        </button>
-        <button className="btn-primary" onClick={onShare}>
+        </Button>
+        <Button variant="primary" onClick={onShare}>
           <Users size={15} /> Share access
-        </button>
+        </Button>
       </div>
-      <button className="btn-ghost mt-2 text-xs" onClick={onClose}>
+      <Button variant="tertiary" className="mt-2 text-xs" onClick={onClose}>
         Done
-      </button>
+      </Button>
     </div>
   )
 }
@@ -211,12 +212,12 @@ function RestoreConfirm({ version, onCancel, onConfirm }) {
         This creates a new draft from “{version.label}” ({version.when}). The current layout is kept in history.
       </p>
       <div className="mt-5 flex items-center gap-2">
-        <button className="btn-secondary" onClick={onCancel}>
+        <Button variant="tertiary" onClick={onCancel}>
           Cancel
-        </button>
-        <button className="btn-primary" onClick={onConfirm}>
+        </Button>
+        <Button variant="primary" onClick={onConfirm}>
           <Check size={15} /> Restore version
-        </button>
+        </Button>
       </div>
     </div>
   )

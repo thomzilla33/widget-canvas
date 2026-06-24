@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { X, Building2, Trash2, Plus, Users, RotateCcw } from 'lucide-react'
 import { SHARE_PEOPLE, SHARE_DEPARTMENTS, SHARE_ROLES } from '../../data/mock.js'
 import { useFocusTrap } from '../../hooks/useFocusTrap.js'
+import { Button } from '@/components/ui/Button'
 import { Tag } from '@/components/ui/Tag'
 
 // S105–S107 — share access modal (empty / people added / departments added)
@@ -87,18 +88,18 @@ export default function ShareModal({ dashboard, onClose }) {
                       {!active ? (
                         <div className="flex shrink-0 items-center gap-1.5">
                           <Tag variant="neutral" size="sm">Deactivated</Tag>
-                          <button className="btn-secondary !py-1 !px-2.5 text-xs" onClick={() => restore(s.id)}>
+                          <Button variant="secondary" size="sm" onClick={() => restore(s.id)}>
                             <RotateCcw size={13} /> Restore
-                          </button>
+                          </Button>
                         </div>
                       ) : tab === 'people' && coveredTeams.has(s.team) ? (
                         <Tag variant="success" size="sm" className="shrink-0">
                           Via {s.team}
                         </Tag>
                       ) : (
-                        <button className="btn-secondary !py-1 !px-2.5 text-xs shrink-0" onClick={() => add(s)}>
+                        <Button variant="secondary" size="sm" className="shrink-0" onClick={() => add(s)}>
                           <Plus size={13} /> Add
-                        </button>
+                        </Button>
                       )}
                     </div>
                   )
@@ -154,9 +155,9 @@ export default function ShareModal({ dashboard, onClose }) {
           <span className="text-xs text-gray-500 dark:text-slate-400">
             {access.length === 0 ? 'Only you can see this dashboard.' : `${access.length} with access`}
           </span>
-          <button className="btn-primary" onClick={onClose}>
+          <Button variant="primary" onClick={onClose}>
             Done
-          </button>
+          </Button>
         </div>
       </div>
     </div>

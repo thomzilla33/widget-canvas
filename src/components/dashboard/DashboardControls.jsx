@@ -1,6 +1,7 @@
 import { CalendarRange, X, Layers, Users, Pause, Play } from 'lucide-react'
 import { ENVIRONMENTS, SCOPES, scopeLabel as scopeRollupLabel, environmentLabel } from '../../data/governance.js'
 import { useLive } from '../../state/LiveContext.jsx'
+import { Button } from '@/components/ui/Button'
 
 // Consumption controls for the dashboard view: a global date range plus
 // dashboard-level filters that cascade into every widget's data sample.
@@ -136,9 +137,9 @@ export default function DashboardControls({ scope, onChange }) {
         </label>
 
         {dirty && (
-          <button type="button" onClick={reset} className="btn-ghost !px-2 !py-1 text-xs">
+          <Button type="button" variant="tertiary" onClick={reset} className="!px-2 !py-1 text-xs">
             Reset
-          </button>
+          </Button>
         )}
 
         {/* Live stream pause/resume — freezes every live tile at once */}

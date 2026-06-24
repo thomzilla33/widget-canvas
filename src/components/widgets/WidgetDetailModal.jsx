@@ -3,6 +3,7 @@ import { X, LayoutGrid, RefreshCw, Plus, LayoutDashboard, Trash2, Pencil } from 
 import { useFocusTrap } from '../../hooks/useFocusTrap.js'
 import { HealthBadge, FreshnessBadge, DataPlaneBadge } from '../common/index.jsx'
 import { Tag } from '@/components/ui/Tag'
+import { Button } from '@/components/ui/Button'
 import { dataPlaneOf } from '../../data/governance.js'
 import { WidgetGlyph } from './glyph.jsx'
 import WidgetRender from './WidgetRender.jsx'
@@ -134,20 +135,20 @@ export default function WidgetDetailModal({ widget, isAdmin, onClose, onPlace, o
           )}
           {/* Edit (admin) — safe, non-structural fields. System widgets aren't editable. */}
           {isAdmin && onEdit && !widget.system && (
-            <button className="btn-secondary !py-1.5 text-xs ml-auto" onClick={onEdit}>
+            <Button variant="secondary" size="sm" onClick={onEdit} className="ml-auto">
               <Pencil size={14} aria-hidden="true" /> Edit
-            </button>
+            </Button>
           )}
-          <button className={`btn-secondary !py-1.5 text-xs ${isAdmin && onEdit && !widget.system ? '' : 'ml-auto'}`} onClick={onClose}>Close</button>
+          <Button variant="secondary" size="sm" onClick={onClose} className={isAdmin && onEdit && !widget.system ? '' : 'ml-auto'}>Close</Button>
           {needsRemap ? (
-            <button className="btn-primary !py-1.5 text-xs" onClick={onRemap}>
+            <Button variant="primary" size="sm" onClick={onRemap}>
               <RefreshCw size={14} aria-hidden="true" /> Remap widget
-            </button>
+            </Button>
           ) : (
             isAdmin && (
-              <button className="btn-primary !py-1.5 text-xs" onClick={onPlace}>
+              <Button variant="primary" size="sm" onClick={onPlace}>
                 <Plus size={14} aria-hidden="true" /> Add to a dashboard
-              </button>
+              </Button>
             )
           )}
         </div>

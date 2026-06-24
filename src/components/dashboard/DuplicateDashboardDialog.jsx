@@ -3,6 +3,7 @@ import { X, Copy, MapPin } from 'lucide-react'
 import { useFocusTrap } from '../../hooks/useFocusTrap.js'
 import { placementLabel } from '../../data/mock.js'
 import { audienceLabel } from '../../data/audiences.js'
+import { Button } from '@/components/ui/Button'
 
 export default function DuplicateDashboardDialog({ dashboard, onConfirm, onClose }) {
   const ref = useFocusTrap()
@@ -73,12 +74,12 @@ export default function DuplicateDashboardDialog({ dashboard, onConfirm, onClose
 
           {/* Actions */}
           <div className="flex justify-end gap-2 pt-1">
-            <button type="button" className="btn-secondary" onClick={onClose}>
+            <Button type="button" variant="tertiary" onClick={onClose}>
               Cancel
-            </button>
-            <button type="submit" className="btn-primary" disabled={!name.trim()}>
+            </Button>
+            <Button type="submit" variant="primary" disabled={!name.trim()}>
               <Copy size={14} aria-hidden="true" /> Create copy
-            </button>
+            </Button>
           </div>
         </form>
       </div>

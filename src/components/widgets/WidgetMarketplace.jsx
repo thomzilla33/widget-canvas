@@ -4,6 +4,8 @@ import { WidgetGlyph } from './glyph.jsx'
 import WidgetRender from './WidgetRender.jsx'
 import { EmptyState, FreshnessBadge } from '../common/index.jsx'
 import { Tag } from '@/components/ui/Tag'
+import { Button } from '@/components/ui/Button'
+import { CardContainer } from '@/components/ui/CardContainer'
 import { useWidgets } from '../../state/WidgetsContext.jsx'
 import { MARKETPLACE_CATEGORIES, MARKETPLACE_WIDGETS, WIDGET_SIZES } from '../../data/mock.js'
 
@@ -142,9 +144,9 @@ export default function WidgetMarketplace({ onClose }) {
                       title="No widgets match"
                       description="Try a different search or clear your filters."
                       action={
-                        <button className="btn-secondary" onClick={clearAll}>
+                        <Button variant="secondary" size="default" onClick={clearAll}>
                           Clear filters
-                        </button>
+                        </Button>
                       }
                     />
                   ) : (
@@ -171,9 +173,9 @@ export default function WidgetMarketplace({ onClose }) {
           <span className="text-xs text-gray-500 dark:text-slate-400">
             <strong className="text-gray-900 dark:text-slate-100">{installedCount}</strong> of {MARKETPLACE_WIDGETS.length} installed in your catalog
           </span>
-          <button className="btn-primary" onClick={onClose}>
+          <Button variant="primary" size="default" onClick={onClose}>
             Done
-          </button>
+          </Button>
         </div>
       </div>
     </div>
@@ -258,9 +260,9 @@ function Toolbar({ search, onSearch, activeCats, onToggleCat, show, onResetShow,
           ))}
           {show !== 'all' && <Chip onClear={onResetShow}>{SHOW.find((s) => s.id === show)?.label}</Chip>}
           {search && <Chip onClear={() => onSearch('')}>“{search}”</Chip>}
-          <button className="btn-ghost !px-2 !py-1 text-xs" onClick={onClearAll}>
+          <Button variant="tertiary" size="sm" onClick={onClearAll}>
             Clear all
-          </button>
+          </Button>
         </div>
       )}
     </div>
@@ -315,31 +317,24 @@ function MakerLine({ maker }) {
 function InstallButton({ installed, onInstall, full }) {
   if (installed) {
     return (
-      <button className={`btn-secondary ${full ? 'w-full' : ''} cursor-default text-aims-governed dark:opacity-60`} disabled>
+      <Button variant="secondary" size="default" disabled className={full ? 'w-full cursor-default text-aims-governed dark:opacity-60' : 'cursor-default text-aims-governed dark:opacity-60'}>
         <Check size={15} /> Installed
-      </button>
+      </Button>
     )
   }
   return (
-    <button className={`btn-primary ${full ? 'w-full' : ''}`} onClick={(e) => { e.stopPropagation(); onInstall() }}>
+    <Button variant="primary" size="default" onClick={(e) => { e.stopPropagation(); onInstall() }} className={full ? 'w-full' : ''}>
       <Plus size={15} /> Install
-    </button>
+    </Button>
   )
 }
 
 function Card({ mw, installed, onInstall, onOpen }) {
   return (
-    <div
-      role="button"
-      tabIndex={0}
+    <CardContainer
+      variant="default"
       onClick={onOpen}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault()
-          onOpen()
-        }
-      }}
-      className="catalog-card min-h-[188px] cursor-pointer"
+      className="min-h-[188px] cursor-pointer"
     >
       <div className="flex items-start gap-3">
         <WidgetGlyph skeleton={mw.skeleton} source={mw.source} />
@@ -372,7 +367,7 @@ function Card({ mw, installed, onInstall, onOpen }) {
         </span>
         <InstallButton installed={installed} onInstall={onInstall} />
       </div>
-    </div>
+    </CardContainer>
   )
 }
 
