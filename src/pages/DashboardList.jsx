@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { LayoutDashboard, MapPin, UserX, RotateCcw, FileBarChart, ArrowRight, Sparkles, MoreHorizontal, Eye, Pencil, Trash2, Copy } from 'lucide-react'
+import { useNavigate, useLocation } from 'react-router-dom'
+import { LayoutDashboard, MapPin, UserX, RotateCcw, FileBarChart, ArrowRight, Sparkles, MoreHorizontal, Eye, Pencil, Trash2, Copy, Plus } from 'lucide-react'
 import { PageHeader, Badge, EmptyState } from '../components/common/index.jsx'
 import { PopoverPanel } from '../components/common/Popover.jsx'
 import StudioWelcome from '../components/common/StudioWelcome.jsx'
@@ -31,7 +31,11 @@ const KIND_OPTIONS = [
 // S76–S79 — dashboard list with search + status filter
 export default function DashboardList() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { dashboards, updateDashboard, removeDashboard, duplicateDashboard } = useDashboards()
+
+  // Placement mode: arriving from widget builder with a widget to place
+  const pendingPlace = location.state?.pendingPlace || null
   const { isAdmin } = useRole()
   const [menuId, setMenuId] = useState(null) // per-card ⋯ menu (by dashboard id)
   const [deletingDashboard, setDeletingDashboard] = useState(null)
@@ -111,6 +115,26 @@ export default function DashboardList() {
           onCta={isAdmin ? () => setLauncher(true) : undefined}
         />
       </div>
+      {pendingPlace && (
+        <div className="mx-6 mt-3 flex items-center gap-3 rounded-xl border border-aims-blue/30 bg-aims-blue/5 px-4 py-3 dark:bg-aims-blue/10">
+          <div className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-aims-blue/10 dark:bg-aims-blue/20">
+            <Plus size={16} className="text-aims-blue" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-semibold text-gray-900 dark:text-slate-100">
+              Adding "{pendingPlace.name}" to a dashboard
+            </p>
+            <p className="text-[11px] text-gray-500 dark:text-slate-400">Pick a dashboard below to place it, or cancel to return to the library.</p>
+          </div>
+          <button
+            onClick={() => navigate('/widgets', { replace: true })}
+            className="shrink-0 text-[11px] font-medium text-gray-500 hover:text-gray-700 dark:text-slate-400 dark:hover:text-slate-200"
+          >
+            Cancel
+          </button>
+        </div>
+      )}
+
       <PageHeader
         title="Dashboards"
         description={`${dashboards.length} dashboards · ${publishedCount} published`}
@@ -289,7 +313,19 @@ export default function DashboardList() {
 
                 <div className="mt-auto flex items-center justify-between gap-2 border-t border-gray-100 pt-2.5 dark:border-white/10">
                   <span className="text-[11px] text-gray-500 dark:text-slate-400">{widgetCount(d)} widgets · {audienceLabel(d.audience)}</span>
-                  <span className="text-[11px] text-gray-500 dark:text-slate-400">{d.updated}</span>
+                  {pendingPlace ? (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        navigate(`/canvas/${d.id}`, { state: { autoAdd: pendingPlace.id } })
+                      }}
+                      className="shrink-0 rounded-md bg-aims-blue px-2.5 py-1 text-[11px] font-semibold text-white hover:bg-aims-blue/90 transition-colors"
+                    >
+                      Place here →
+                    </button>
+                  ) : (
+                    <span className="text-[11px] text-gray-500 dark:text-slate-400">{d.updated}</span>
+                  )}
                 </div>
               </div>
             ))}

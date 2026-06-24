@@ -26,7 +26,7 @@ function goalMet(raw, goal) {
 const H = 220
 
 // ── Trust header + type switcher ─────────────────────────────
-export default function WidgetPreview({ typeId, metric, source, name, freshness, display, shape }) {
+export default function WidgetPreview({ typeId, metric, source, name, subtitle, freshness, display, shape }) {
   const ready = source && metric && typeId
   // Applicable filters for THIS metric (Issue A): the date range (time is always
   // filterable) + the categorical dimensions dimensionsFor() says apply to this
@@ -67,6 +67,9 @@ export default function WidgetPreview({ typeId, metric, source, name, freshness,
       <div className="flex items-start justify-between gap-2" style={headerBg ? { ...headerBg, margin: '-1rem -1rem 0', padding: '0.75rem 1rem', borderRadius: '0.5rem 0.5rem 0 0' } : undefined}>
         <div className="min-w-0">
           <div className="truncate font-semibold text-gray-900 dark:text-slate-100">{name?.trim() || 'Untitled widget'}</div>
+          {subtitle?.trim() && (
+            <div className="truncate text-[11px] text-gray-600 dark:text-slate-300">{subtitle.trim()}</div>
+          )}
           {ready && (
             <div className="truncate text-[11px] text-gray-500 dark:text-slate-400">
               {TYPE_LABEL[typeId]} · {source.name} · {metric.name}

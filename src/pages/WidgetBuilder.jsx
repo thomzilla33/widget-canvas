@@ -90,11 +90,12 @@ export default function WidgetBuilder() {
   const [typeId, setTypeId] = useState(null)
   const [typeTouched, setTypeTouched] = useState(false)
   const [name, setName] = useState('')
+  const [subtitle, setSubtitle] = useState('')
   const [freshness, setFreshness] = useState('15m')
   const [interactiveFilters, setInteractiveFilters] = useState(true)
   const [piiAck, setPiiAck] = useState(false)
   const [ungovernedAck, setUngovernedAck] = useState(false)
-  const [saved, setSaved] = useState(false)
+  const [saved, setSaved] = useState(null) // null | widgetId string
   const [previewSize, setPreviewSize] = useState('lg')
 
   // Format & goal (KPI/Gauge/StatRow appearance)
@@ -196,6 +197,7 @@ export default function WidgetBuilder() {
     addWidget({
       id: wid,
       name: name.trim(),
+      subtitle: subtitle.trim() || undefined,
       skeleton: TYPE_LABEL[typeId],
       metric: metric.name,
       governed: source.governed,
@@ -215,7 +217,7 @@ export default function WidgetBuilder() {
     if (fromDashboard) {
       navigate(`/canvas/${fromDashboard}`, { state: { autoAdd: wid }, replace: true })
     } else {
-      setSaved(true)
+      setSaved(wid)
     }
   }
 
@@ -240,7 +242,7 @@ export default function WidgetBuilder() {
     )
   }
 
-  if (saved) return <SavedConfirmation name={name} navigate={navigate} />
+  if (saved) return <SavedConfirmation name={name} widgetId={saved} navigate={navigate} />
 
   const dimension = dimensionById(dimensionId)
   const galleryMetric = metric ? { ...metric, recommendedType: recommendTile(metric, dimension) } : metric
@@ -345,6 +347,20 @@ export default function WidgetBuilder() {
                     </div>
 
                     <div>
+                      <div className="mb-1.5 text-sm font-medium text-gray-700 dark:text-slate-200">
+                        Description <span className="font-normal text-gray-400 dark:text-slate-500">(optional)</span>
+                      </div>
+                      <input
+                        className="input w-full"
+                        placeholder="e.g. Rolling 30-day pipeline — updated daily"
+                        value={subtitle}
+                        onChange={(e) => setSubtitle(e.target.value)}
+                        maxLength={120}
+                      />
+                      <p className="mt-1 text-[11px] text-gray-400 dark:text-slate-500">Shown in the widget library card and detail modal.</p>
+                    </div>
+
+                    <div>
                       <div className="mb-1.5 flex items-center gap-1.5 text-sm font-medium text-gray-700 dark:text-slate-200">
                         <RefreshCw size={13} aria-hidden="true" />
                         Refresh rate
@@ -444,6 +460,7 @@ export default function WidgetBuilder() {
                   metric={metric}
                   source={source}
                   name={name}
+                  subtitle={subtitle}
                   freshness={FRESHNESS_STATUS[freshness] || 'fresh'}
                   display={{ format, goal, accentColor, styleVariant, displayOptions }}
                   shape={shape}
@@ -614,20 +631,25 @@ function EntryScreen({ onScratch, onAI, onTemplate, onBack }) {
 /* ── Tab navigation ── */
 function BuilderTabs({ tab, setTab, dataComplete, widgetComplete }) {
   const tabs = [
-    { id: 'data', label: 'Data', n: 1, done: dataComplete },
-    { id: 'widget', label: 'Widget', n: 2, done: widgetComplete },
-    { id: 'appearance', label: 'Appearance', n: 3, done: false },
+    { id: 'data', label: 'Data', n: 1, done: dataComplete, enabled: true },
+    { id: 'widget', label: 'Widget', n: 2, done: widgetComplete, enabled: dataComplete },
+    { id: 'appearance', label: 'Appearance', n: 3, done: false, enabled: widgetComplete },
   ]
   return (
     <div className="flex gap-1 rounded-xl bg-gray-100/80 p-1 dark:bg-white/[0.05]">
       {tabs.map((t) => (
         <button
           key={t.id}
-          onClick={() => setTab(t.id)}
+          onClick={() => t.enabled && setTab(t.id)}
+          disabled={!t.enabled}
+          aria-disabled={!t.enabled}
+          title={!t.enabled ? (t.id === 'widget' ? 'Complete the Data tab first' : 'Complete the Widget tab first') : undefined}
           className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg py-2 text-xs font-semibold transition-all ${
-            tab === t.id
-              ? 'bg-white text-aims-blue shadow-sm dark:bg-white/10 dark:text-aims-blue'
-              : 'text-gray-500 hover:text-gray-700 dark:text-slate-400 dark:hover:text-slate-200'
+            !t.enabled
+              ? 'cursor-not-allowed opacity-40'
+              : tab === t.id
+                ? 'bg-white text-aims-blue shadow-sm dark:bg-white/10 dark:text-aims-blue'
+                : 'text-gray-500 hover:text-gray-700 dark:text-slate-400 dark:hover:text-slate-200'
           }`}
         >
           <span className={`grid h-4 w-4 place-items-center rounded-full text-[10px] font-bold transition-colors ${
@@ -646,7 +668,7 @@ function BuilderTabs({ tab, setTab, dataComplete, widgetComplete }) {
   )
 }
 
-function SavedConfirmation({ name, navigate }) {
+function SavedConfirmation({ name, widgetId, navigate }) {
   return (
     <div className="h-full grid place-items-center px-6">
       <div className="max-w-sm text-center">
@@ -655,11 +677,16 @@ function SavedConfirmation({ name, navigate }) {
         </div>
         <h2 className="mt-4 text-lg font-semibold text-gray-900 dark:text-slate-100">Saved to catalog</h2>
         <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">
-          "{name || 'Untitled widget'}" is now in the Widget Library. Set permissions when you place it on a dashboard.
+          "{name || 'Untitled widget'}" is now in the Widget Library. Add it to a dashboard to make it visible to your team.
         </p>
         <div className="mt-5 flex items-center justify-center gap-2">
           <button className="btn-secondary" onClick={() => navigate('/widgets')}>Back to library</button>
-          <button className="btn-primary" onClick={() => navigate('/dashboards')}>Place on a dashboard</button>
+          <button
+            className="btn-primary"
+            onClick={() => navigate('/dashboards', { state: { pendingPlace: { id: widgetId, name: name || 'Untitled widget' } } })}
+          >
+            Add to a dashboard
+          </button>
         </div>
       </div>
     </div>
