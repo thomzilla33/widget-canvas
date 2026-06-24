@@ -260,7 +260,7 @@ export default function DashboardList() {
                 tabIndex={0}
                 onClick={(e) => { if (!e.target.closest('button')) navigate(`/dashboard/${d.id}`) }}
                 onKeyDown={(e) => { if (e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); navigate(`/dashboard/${d.id}`) } }}
-                className={`catalog-card min-h-[124px] cursor-pointer text-left${menuId === d.id ? ' z-10' : ''}`}
+                className={`catalog-card min-h-[152px] cursor-pointer text-left${menuId === d.id ? ' z-10' : ''}`}
               >
                 <div className="absolute top-3 right-3 flex items-center gap-1.5">
                   <Badge variant={d.status} />
@@ -313,6 +313,12 @@ export default function DashboardList() {
                     </div>
                   </div>
                 </div>
+
+                {d.description && (
+                  <p className="mt-2 line-clamp-2 text-[11px] leading-relaxed text-gray-500 dark:text-slate-400">
+                    {d.description}
+                  </p>
+                )}
 
                 <div className="mt-auto flex items-center justify-between gap-2 border-t border-gray-100 pt-2.5 dark:border-white/10">
                   <span className="text-[11px] text-gray-500 dark:text-slate-400">{widgetCount(d)} widgets · {audienceLabel(d.audience)}</span>
