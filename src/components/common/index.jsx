@@ -1,4 +1,16 @@
 import { ShieldCheck, ShieldAlert, FlaskConical, Layers, Users } from 'lucide-react'
+import { Tag } from '@/components/ui/Tag'
+
+const STATE_DOT_COLOR = {
+  success:    'bg-aims-governed',
+  alert:      'bg-aims-aging',
+  error:      'bg-aims-stale',
+  inProgress: 'bg-blue-400',
+  neutral:    'bg-gray-400 dark:bg-slate-400',
+}
+function DSBadge({ state = 'neutral' }) {
+  return <span className={`h-1.5 w-1.5 rounded-full ${STATE_DOT_COLOR[state] || STATE_DOT_COLOR.neutral}`} />
+}
 
 const badgeStyles = {
   published: 'bg-green-50 text-aims-governed border-green-200 dark:bg-green-500/10 dark:border-green-500/25',
@@ -131,10 +143,17 @@ const healthLabel = {
   review: 'Needs review',
 }
 
+const healthState = {
+  active: 'success',
+  inactive: 'alert',
+  unused: 'neutral',
+  review: 'error',
+}
+
 export function HealthBadge({ health = 'active' }) {
   return (
     <span className={healthClass[health] || healthClass.active}>
-      <span className="sc-dot" />
+      <DSBadge state={healthState[health] || 'neutral'} size="sm" />
       {healthLabel[health]}
     </span>
   )
@@ -149,32 +168,39 @@ const connClass = {
 }
 const connLabel = { connected: 'Connected', syncing: 'Syncing', error: 'Error', available: 'Available' }
 
+const connState = {
+  connected: 'success',
+  syncing: 'inProgress',
+  error: 'error',
+  available: 'neutral',
+}
+
 export function ConnectionBadge({ status = 'available' }) {
   return (
     <span className={connClass[status] || connClass.available}>
-      <span className="sc-dot" />
+      <DSBadge state={connState[status] || 'neutral'} size="sm" />
       {connLabel[status] || status}
     </span>
   )
 }
 
 // Source provenance (Official / Partner / Private), matching Integrations.
-const providerChip = { official: 'cap-chip-blue', partner: 'cap-chip-pink', private: 'cap-chip-tool' }
+const providerVariant = { official: 'primary', partner: 'purple', private: 'alert' }
 const providerLabel = { official: 'Official', partner: 'Partner', private: 'Private' }
 
 export function ProviderBadge({ provider = 'official' }) {
   return (
-    <span className={`cap-chip ${providerChip[provider] || 'cap-chip-neutral'}`}>
+    <Tag variant={providerVariant[provider] || 'neutral'} size="sm">
       {providerLabel[provider] || provider}
-    </span>
+    </Tag>
   )
 }
 
 // What a source exposes: aggregate Metrics, row-level Records, live Realtime.
 const capMeta = {
-  metrics: { label: 'Metrics', cls: 'cap-chip-data' },
-  records: { label: 'Records', cls: 'cap-chip-cyan' },
-  realtime: { label: 'Realtime', cls: 'cap-chip-blue' },
+  metrics: { label: 'Metrics', variant: 'success' },
+  records: { label: 'Records', variant: 'lightBlue' },
+  realtime: { label: 'Realtime', variant: 'primary' },
 }
 
 export function CapabilityChips({ capabilities = [] }) {
@@ -183,9 +209,9 @@ export function CapabilityChips({ capabilities = [] }) {
       {capabilities
         .filter((c) => capMeta[c])
         .map((c) => (
-          <span key={c} className={`cap-chip ${capMeta[c].cls}`}>
+          <Tag key={c} variant={capMeta[c].variant} size="sm">
             {capMeta[c].label}
-          </span>
+          </Tag>
         ))}
     </>
   )

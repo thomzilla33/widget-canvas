@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { X, Check, Flag } from 'lucide-react'
 import { WidgetGlyph } from './glyph.jsx'
 import { useFocusTrap } from '../../hooks/useFocusTrap.js'
+import { Tag } from '@/components/ui/Tag'
 
 // S122/S123 — flag detail with full context + resolve (notification-only).
 export default function FlagDetailModal({ flag, widget, entity, onClose, onResolve }) {
@@ -44,14 +45,14 @@ export default function FlagDetailModal({ flag, widget, entity, onClose, onResol
           <>
             <div className="p-5 space-y-4">
               <div className="flex items-center gap-3">
-                <WidgetGlyph skeleton={widget?.skeleton || 'KPI'} />
+                <WidgetGlyph skeleton={widget?.skeleton || 'KPI'} source={widget?.source || ''} />
                 <div className="min-w-0">
                   <div className="text-sm font-semibold text-gray-900 dark:text-slate-100">
                     {widget?.name || flag.widgetId}
                   </div>
                   <div className="text-[11px] text-gray-500 dark:text-slate-400">{widget?.source}</div>
                 </div>
-                <span className="cap-chip cap-chip-tool ml-auto">{flag.reason}</span>
+                <Tag variant="alert" size="sm" className="ml-auto">{flag.reason}</Tag>
               </div>
 
               <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">

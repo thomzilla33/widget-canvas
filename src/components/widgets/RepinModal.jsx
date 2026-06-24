@@ -2,11 +2,12 @@ import { useState } from 'react'
 import { X, Check, AlertTriangle, ArrowRight, Pin } from 'lucide-react'
 import { SCHEMA_DRIFT } from '../../data/mock.js'
 import { useFocusTrap } from '../../hooks/useFocusTrap.js'
+import { Tag } from '@/components/ui/Tag'
 
-const STATUS_CHIP = {
-  unchanged: 'cap-chip-neutral',
-  new: 'cap-chip-data',
-  removed: 'cap-chip-tool',
+const STATUS_VARIANT = {
+  unchanged: 'neutral',
+  new: 'success',
+  removed: 'alert',
 }
 
 // S111–S114 — remap a widget whose source schema changed
@@ -167,7 +168,7 @@ function SchemaColumn({ title, fields }) {
             >
               {f.name}
             </span>
-            <span className={`cap-chip ${STATUS_CHIP[f.status]}`}>{f.status}</span>
+            <Tag variant={STATUS_VARIANT[f.status] || 'neutral'} size="sm">{f.status}</Tag>
           </div>
         ))}
       </div>

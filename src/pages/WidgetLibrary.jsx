@@ -4,6 +4,7 @@ import { useLoadMore } from '../hooks/useLoadMore.js'
 import { Flag, Sparkles, MoreHorizontal, Plus, Pencil, Trash2 } from 'lucide-react'
 import { PopoverPanel } from '../components/common/Popover.jsx'
 import { PageHeader, HealthBadge, FreshnessBadge, EmptyState, DataPlaneBadge } from '../components/common/index.jsx'
+import { Tag } from '@/components/ui/Tag'
 import { dataPlaneOf } from '../data/governance.js'
 import { WidgetGlyph } from '../components/widgets/glyph.jsx'
 import WidgetRender from '../components/widgets/WidgetRender.jsx'
@@ -142,7 +143,7 @@ export default function WidgetLibrary() {
             <div className="mb-2.5 flex items-center gap-2">
               <Flag size={15} className="text-aims-stale" />
               <span className="text-sm font-semibold text-gray-900 dark:text-slate-100">Needs attention</span>
-              <span className="cap-chip cap-chip-neutral">{openFlags.length}</span>
+              <Tag variant="neutral" size="sm">{openFlags.length}</Tag>
             </div>
             <div className="space-y-2">
               {openFlags.map((f) => {
@@ -158,13 +159,13 @@ export default function WidgetLibrary() {
                     key={f.id}
                     className="flex flex-col sm:flex-row sm:items-start gap-3 rounded-lg border border-gray-200 bg-white p-2.5 dark:border-white/10 dark:bg-[#131a2c]"
                   >
-                    <WidgetGlyph skeleton={w?.skeleton || 'KPI'} sm />
+                    <WidgetGlyph skeleton={w?.skeleton || 'KPI'} source={w?.source || ''} sm />
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="truncate text-sm font-semibold text-gray-900 dark:text-slate-100">
                           {w?.name || f.widgetId}
                         </span>
-                        <span className="cap-chip cap-chip-tool shrink-0">{f.reason}</span>
+                        <Tag variant="alert" size="sm" className="shrink-0">{f.reason}</Tag>
                       </div>
                       <div className="mt-0.5 text-xs text-gray-600 dark:text-slate-300">{problem}</div>
                       <div className="mt-0.5 truncate text-[11px] text-gray-500 dark:text-slate-400">
@@ -239,7 +240,7 @@ export default function WidgetLibrary() {
               </div>
 
               <div className="flex items-center gap-3">
-                <WidgetGlyph skeleton={w.skeleton} />
+                <WidgetGlyph skeleton={w.skeleton} source={w.source} />
                 <div className={`min-w-0 ${isAdmin ? 'pr-24' : 'pr-16'}`}>
                   <div className="truncate text-sm font-semibold text-gray-900 dark:text-slate-100">
                     {w.name}
@@ -249,9 +250,9 @@ export default function WidgetLibrary() {
               </div>
 
               <div className="flex flex-wrap items-center gap-1.5">
-                <span className="cap-chip cap-chip-neutral">{w.skeleton}</span>
+                <Tag variant="neutral" size="sm">{w.skeleton}</Tag>
                 {/* Deviation-only: flag Ungoverned (governed is the expected default). */}
-                {!w.governed && <span className="cap-chip cap-chip-tool">Ungoverned</span>}
+                {!w.governed && <Tag variant="alert" size="sm">Ungoverned</Tag>}
                 <DataPlaneBadge plane={dataPlaneOf(w)} />
               </div>
 

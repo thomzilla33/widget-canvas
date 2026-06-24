@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { X, LayoutGrid, RefreshCw, Plus, LayoutDashboard, Trash2, Pencil } from 'lucide-react'
 import { useFocusTrap } from '../../hooks/useFocusTrap.js'
 import { HealthBadge, FreshnessBadge, DataPlaneBadge } from '../common/index.jsx'
+import { Tag } from '@/components/ui/Tag'
 import { dataPlaneOf } from '../../data/governance.js'
 import { WidgetGlyph } from './glyph.jsx'
 import WidgetRender from './WidgetRender.jsx'
@@ -44,7 +45,7 @@ export default function WidgetDetailModal({ widget, isAdmin, onClose, onPlace, o
       >
         {/* Header */}
         <div className="flex items-start gap-3 border-b border-gray-200 p-4 dark:border-white/10">
-          <WidgetGlyph skeleton={widget.skeleton} />
+          <WidgetGlyph skeleton={widget.skeleton} source={widget.source} />
           <div className="min-w-0 flex-1">
             <h2 id="wdetail-title" className="truncate text-base font-semibold text-gray-900 dark:text-slate-100">{widget.name}</h2>
             <div className="truncate text-xs text-gray-500 dark:text-slate-400">{widget.source}</div>
@@ -58,8 +59,8 @@ export default function WidgetDetailModal({ widget, isAdmin, onClose, onPlace, o
         <div className="min-h-0 flex-1 space-y-4 overflow-auto p-4">
           {/* Chips (deviation-only, matches the card) */}
           <div className="flex flex-wrap items-center gap-1.5">
-            <span className="cap-chip cap-chip-neutral">{widget.skeleton}</span>
-            {!widget.governed && <span className="cap-chip cap-chip-tool">Ungoverned</span>}
+            <Tag variant="neutral" size="sm">{widget.skeleton}</Tag>
+            {!widget.governed && <Tag variant="alert" size="sm">Ungoverned</Tag>}
             <DataPlaneBadge plane={dataPlaneOf(widget)} />
             <FreshnessBadge status={widget.freshness} label={widget.freshness} />
           </div>

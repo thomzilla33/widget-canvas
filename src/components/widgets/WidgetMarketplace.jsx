@@ -3,6 +3,7 @@ import { Store, X, Search, Eye, Check, Plus, ChevronLeft, BadgeCheck, Info, Layo
 import { WidgetGlyph } from './glyph.jsx'
 import WidgetRender from './WidgetRender.jsx'
 import { EmptyState, FreshnessBadge } from '../common/index.jsx'
+import { Tag } from '@/components/ui/Tag'
 import { useWidgets } from '../../state/WidgetsContext.jsx'
 import { MARKETPLACE_CATEGORIES, MARKETPLACE_WIDGETS, WIDGET_SIZES } from '../../data/mock.js'
 
@@ -219,7 +220,7 @@ function Rail({ show, onShow, sort, onSort, counts, activeCats, onToggleCat }) {
               <span className={`flex-1 text-xs ${on ? 'font-semibold text-gray-900 dark:text-slate-100' : 'text-gray-600 dark:text-slate-300'}`}>
                 {c}
               </span>
-              <span className="cap-chip cap-chip-neutral !px-1.5">{counts[c]}</span>
+              <Tag variant="neutral" size="sm">{counts[c]}</Tag>
             </label>
           )
         })}
@@ -268,12 +269,12 @@ function Toolbar({ search, onSearch, activeCats, onToggleCat, show, onResetShow,
 
 function Chip({ children, onClear }) {
   return (
-    <span className="cap-chip cap-chip-neutral">
+    <Tag variant="neutral" size="sm">
       {children}
       <button onClick={onClear} className="hover:text-aims-stale" aria-label="Remove filter">
         <X size={11} />
       </button>
-    </span>
+    </Tag>
   )
 }
 
@@ -290,7 +291,7 @@ function Hero({ onOpen }) {
             onClick={() => onOpen(mw)}
             className="flex items-center gap-3 rounded-lg bg-white/70 p-3 text-left transition-shadow hover:shadow-md dark:bg-white/5"
           >
-            <WidgetGlyph skeleton={mw.skeleton} />
+            <WidgetGlyph skeleton={mw.skeleton} source={mw.source} />
             <div className="min-w-0">
               <div className="truncate text-sm font-semibold text-gray-900 dark:text-slate-100">{mw.name}</div>
               <div className="truncate text-[11px] text-gray-500 dark:text-slate-400">{mw.description}</div>
@@ -341,7 +342,7 @@ function Card({ mw, installed, onInstall, onOpen }) {
       className="catalog-card min-h-[188px] cursor-pointer"
     >
       <div className="flex items-start gap-3">
-        <WidgetGlyph skeleton={mw.skeleton} />
+        <WidgetGlyph skeleton={mw.skeleton} source={mw.source} />
         <div className="min-w-0 flex-1">
           <div className="truncate text-sm font-semibold text-gray-900 dark:text-slate-100">{mw.name}</div>
           <MakerLine maker={mw.maker} />
@@ -359,10 +360,10 @@ function Card({ mw, installed, onInstall, onOpen }) {
       <p className="line-clamp-2 text-xs text-gray-500 dark:text-slate-400">{mw.description}</p>
 
       <div className="flex flex-wrap items-center gap-1.5">
-        <span className="cap-chip cap-chip-neutral">{mw.category}</span>
-        <span className={`cap-chip ${mw.governed ? 'cap-chip-data' : 'cap-chip-tool'}`}>
+        <Tag variant="neutral" size="sm">{mw.category}</Tag>
+        <Tag variant={mw.governed ? 'success' : 'alert'} size="sm">
           {mw.governed ? 'Governed' : 'Ungoverned'}
-        </span>
+        </Tag>
       </div>
 
       <div className="mt-auto flex items-center justify-between gap-2 border-t border-gray-100 pt-2.5 dark:border-white/10">
@@ -387,7 +388,7 @@ function Detail({ mw, installed, onInstall, onBack }) {
         <button onClick={onBack} className="grid h-7 w-7 place-items-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:text-slate-500 dark:hover:bg-white/10" aria-label="Back">
           <ChevronLeft size={16} />
         </button>
-        <WidgetGlyph skeleton={mw.skeleton} sm />
+        <WidgetGlyph skeleton={mw.skeleton} source={mw.source} sm />
         <span className="truncate text-sm font-semibold text-gray-900 dark:text-slate-100">{mw.name}</span>
         <MakerLine maker={mw.maker} />
       </div>
@@ -446,10 +447,10 @@ function Detail({ mw, installed, onInstall, onBack }) {
 
         {/* Meta + Add */}
         <div className="flex flex-wrap items-center gap-1.5">
-          <span className="cap-chip cap-chip-neutral">{mw.category}</span>
-          <span className={`cap-chip ${mw.governed ? 'cap-chip-data' : 'cap-chip-tool'}`}>
+          <Tag variant="neutral" size="sm">{mw.category}</Tag>
+          <Tag variant={mw.governed ? 'success' : 'alert'} size="sm">
             {mw.governed ? 'Governed' : 'Ungoverned'}
-          </span>
+          </Tag>
           <FreshnessBadge status={mw.freshness} label={mw.freshness} />
           <span className="ml-auto text-[11px] text-gray-500 dark:text-slate-400">{mw.stats.installs.toLocaleString()} installs · {mw.source}</span>
         </div>

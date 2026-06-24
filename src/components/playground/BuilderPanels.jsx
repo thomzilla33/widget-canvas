@@ -37,6 +37,7 @@ import {
   ToggleLeft,
 } from 'lucide-react'
 import { EmptyState, ConnectionBadge } from '../common/index.jsx'
+import { Tag } from '@/components/ui/Tag'
 import { EXTERNAL_SOURCES, WIDGET_TYPES, TYPE_LABEL } from '../../data/mock.js'
 import { MODEL_ENTITIES, ENTITY_CATEGORIES, ENTITY_FIELDS } from '../../data/entities.js'
 import { dimensionsFor, bindSlots, TRANSFORMS, AGGREGATIONS } from '../../data/fields.js'
@@ -539,7 +540,7 @@ function FieldButton({ field, selected, onSelect }) {
           </span>
         )}
       </span>
-      <span className="cap-chip cap-chip-neutral shrink-0">Rec: {TYPE_LABEL[field.recommendedType]}</span>
+      <Tag variant="neutral" size="sm" className="shrink-0">Rec: {TYPE_LABEL[field.recommendedType]}</Tag>
     </button>
   )
 }

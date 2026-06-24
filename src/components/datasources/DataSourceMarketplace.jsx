@@ -8,6 +8,7 @@ import {
   CapabilityChips,
 } from '../common/index.jsx'
 import { EXTERNAL_SOURCES, SOURCE_CATEGORIES, TYPE_LABEL } from '../../data/mock.js'
+import { Tag } from '@/components/ui/Tag'
 
 const SHOW = [
   { id: 'all', label: 'All' },
@@ -243,7 +244,7 @@ function Rail({ show, onShow, sort, onSort, counts, activeCats, onToggleCat, act
               <span className={`flex-1 text-xs ${on ? 'font-semibold text-gray-900 dark:text-slate-100' : 'text-gray-600 dark:text-slate-300'}`}>
                 {c}
               </span>
-              <span className="cap-chip cap-chip-neutral !px-1.5">{counts[c]}</span>
+              <Tag variant="neutral" size="sm">{counts[c]}</Tag>
             </label>
           )
         })}
@@ -289,12 +290,12 @@ function Toolbar({ search, onSearch, activeCats, onToggleCat, activeProviders, o
 
 function Chip({ children, onClear }) {
   return (
-    <span className="cap-chip cap-chip-neutral">
+    <Tag variant="neutral" size="sm">
       {children}
       <button onClick={onClear} className="hover:text-aims-stale" aria-label="Remove filter">
         <X size={11} />
       </button>
-    </span>
+    </Tag>
   )
 }
 
@@ -375,9 +376,7 @@ function Card({ source, isCurrent, onUse, onOpen }) {
         <ProviderBadge provider={source.provider} />
         <CapabilityChips capabilities={source.capabilities} />
         {source.hasPII && (
-          <span className="cap-chip cap-chip-neutral">
-            <Lock size={10} /> PII
-          </span>
+          <Tag variant="neutral" size="sm"><Lock size={10} /> PII</Tag>
         )}
       </div>
 
@@ -400,7 +399,7 @@ function FieldRow({ field }) {
           </div>
         )}
       </div>
-      <span className="cap-chip cap-chip-neutral shrink-0">Rec: {TYPE_LABEL[field.recommendedType]}</span>
+      <Tag variant="neutral" size="sm" className="shrink-0">Rec: {TYPE_LABEL[field.recommendedType]}</Tag>
     </div>
   )
 }
@@ -435,9 +434,7 @@ function Detail({ source, isCurrent, onUse, onBack }) {
           <GovernedBadge governed={source.governed} />
           <CapabilityChips capabilities={source.capabilities} />
           {source.hasPII && (
-            <span className="cap-chip cap-chip-neutral">
-              <Lock size={10} /> Contains PII
-            </span>
+            <Tag variant="neutral" size="sm"><Lock size={10} /> Contains PII</Tag>
           )}
         </div>
 

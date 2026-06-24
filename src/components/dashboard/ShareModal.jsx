@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { X, Building2, Trash2, Plus, Users, RotateCcw } from 'lucide-react'
 import { SHARE_PEOPLE, SHARE_DEPARTMENTS, SHARE_ROLES } from '../../data/mock.js'
 import { useFocusTrap } from '../../hooks/useFocusTrap.js'
+import { Tag } from '@/components/ui/Tag'
 
 // S105–S107 — share access modal (empty / people added / departments added)
 export default function ShareModal({ dashboard, onClose }) {
@@ -85,15 +86,15 @@ export default function ShareModal({ dashboard, onClose }) {
                       </div>
                       {!active ? (
                         <div className="flex shrink-0 items-center gap-1.5">
-                          <span className="cap-chip cap-chip-neutral">Deactivated</span>
+                          <Tag variant="neutral" size="sm">Deactivated</Tag>
                           <button className="btn-secondary !py-1 !px-2.5 text-xs" onClick={() => restore(s.id)}>
                             <RotateCcw size={13} /> Restore
                           </button>
                         </div>
                       ) : tab === 'people' && coveredTeams.has(s.team) ? (
-                        <span className="cap-chip cap-chip-data shrink-0" title={`Already has access via ${s.team}`}>
+                        <Tag variant="success" size="sm" className="shrink-0">
                           Via {s.team}
-                        </span>
+                        </Tag>
                       ) : (
                         <button className="btn-secondary !py-1 !px-2.5 text-xs shrink-0" onClick={() => add(s)}>
                           <Plus size={13} /> Add

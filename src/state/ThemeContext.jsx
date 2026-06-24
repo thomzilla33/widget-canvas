@@ -14,7 +14,9 @@ export function ThemeProvider({ children }) {
 
   useEffect(() => {
     const root = document.documentElement
-    root.classList.toggle('dark', theme === 'dark')
+    root.classList.toggle('dark',  theme === 'dark')
+    root.classList.toggle('light', theme === 'light')
+    root.dataset.theme = theme === 'dark' ? 'dark' : 'light'
     try {
       localStorage.setItem('theme', theme)
     } catch {

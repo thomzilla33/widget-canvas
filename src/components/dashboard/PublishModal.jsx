@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { X, Check, Rocket, History, RotateCcw, EyeOff, Users } from 'lucide-react'
 import { AUDIENCE_ROLES, audienceVisibleTo, audienceLabel, normalizeAudience } from '../../data/audiences.js'
 import { useFocusTrap } from '../../hooks/useFocusTrap.js'
+import { Tag } from '@/components/ui/Tag'
 
 const ROLES = AUDIENCE_ROLES
 
@@ -109,9 +110,9 @@ export default function PublishModal({ dashboard, placements, widgetById, onClos
                     ) : (
                       <div className="flex flex-wrap gap-1.5">
                         {visibleForRole.map((p) => (
-                          <span key={p.pid} className="cap-chip cap-chip-neutral">
+                          <Tag key={p.pid} variant="neutral" size="sm">
                             {widgetById(p.widgetId)?.name || 'Widget'}
-                          </span>
+                          </Tag>
                         ))}
                       </div>
                     )}
@@ -125,7 +126,7 @@ export default function PublishModal({ dashboard, placements, widgetById, onClos
                         <div className="flex items-center gap-2">
                           <span className="text-sm font-semibold text-gray-900 dark:text-slate-100">{v.id}</span>
                           <span className="text-xs text-gray-500 dark:text-slate-400">{v.label}</span>
-                          {v.current && <span className="cap-chip cap-chip-data">Current</span>}
+                          {v.current && <Tag variant="success" size="sm">Current</Tag>}
                         </div>
                         <div className="mt-0.5 text-[11px] text-gray-500 dark:text-slate-400">{v.status} · {v.when}</div>
                       </div>

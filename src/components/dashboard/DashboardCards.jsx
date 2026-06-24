@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { LayoutDashboard, MapPin } from 'lucide-react'
 import { Badge } from '../common/index.jsx'
+import { CardContainer } from '@/components/ui/CardContainer'
 import { placementLabel } from '../../data/mock.js'
 import { widgetCount } from '../../data/layout.js'
 import { audienceLabel } from '../../data/audiences.js'
@@ -15,7 +16,7 @@ export default function DashboardCards({ items }) {
   return (
     <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill,minmax(min(280px,100%),1fr))' }}>
       {items.map((d) => (
-        <button key={d.id} onClick={() => navigate(`/dashboard/${d.id}`)} className="catalog-card min-h-[120px]">
+        <CardContainer key={d.id} onClick={() => navigate(`/dashboard/${d.id}`)} size="sm" className="min-h-[120px] flex flex-col gap-2.5 text-left !p-4 !rounded-xl">
           <div className="absolute right-3 top-3">
             <Badge variant={d.status} />
           </div>
@@ -36,7 +37,7 @@ export default function DashboardCards({ items }) {
             <span className="text-[11px] text-gray-500 dark:text-slate-400">{widgetCount(d)} widgets · {audienceLabel(d.audience)}</span>
             <span className="text-[11px] text-gray-500 dark:text-slate-400">{d.updated}</span>
           </div>
-        </button>
+        </CardContainer>
       ))}
     </div>
   )

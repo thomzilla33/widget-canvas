@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { X, Table2, ShieldCheck, FileText, GitBranch, BadgeCheck, Workflow } from 'lucide-react'
 import WidgetRender from '../widgets/WidgetRender.jsx'
 import { FreshnessBadge, DataPlaneBadge, EnvironmentBadge } from '../common/index.jsx'
+import { Tag } from '@/components/ui/Tag'
 import { widgetSample } from '../../data/preview.js'
 import { dataPlaneOf, freshnessState, hasBridgeCitation, bridgeCitation } from '../../data/governance.js'
 import { scopeLabel } from './DashboardControls.jsx'
@@ -19,7 +20,7 @@ function BridgeCitation({ widget }) {
           <BadgeCheck size={13} aria-hidden="true" /> Bridge ID citation
         </span>
         <code className="rounded bg-white px-1.5 py-0.5 font-mono text-[11px] text-gray-700 dark:bg-white/10 dark:text-slate-200">{c.bridgeId}</code>
-        <span className="cap-chip cap-chip-blue">{c.tier}</span>
+        <Tag variant="primary" size="sm">{c.tier}</Tag>
         <span className="text-[11px] text-gray-500 dark:text-slate-400">Confidence {(c.confidence * 100).toFixed(0)}%</span>
       </div>
       <ol className="mt-2.5 space-y-1.5">

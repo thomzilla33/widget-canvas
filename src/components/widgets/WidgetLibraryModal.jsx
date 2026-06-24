@@ -3,6 +3,7 @@ import { LayoutGrid, X, Search, ChevronLeft, Info, Plus, Pencil } from 'lucide-r
 import { WidgetGlyph } from './glyph.jsx'
 import WidgetRender from './WidgetRender.jsx'
 import { EmptyState, FreshnessBadge, GovernedBadge } from '../common/index.jsx'
+import { Tag } from '@/components/ui/Tag'
 import { widgets, CATALOG_CATEGORIES, WIDGET_SIZES, SKELETON_ABOUT, SKELETON_BESTFOR } from '../../data/mock.js'
 
 const PREVIEW_WIDTH = { sm: 'max-w-[240px]', md: 'max-w-md', lg: 'max-w-2xl' }
@@ -84,7 +85,7 @@ export default function WidgetLibraryModal({ zoneLabel, onAdd, onClose, onCreate
                       <label key={c} className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-gray-50 dark:hover:bg-white/5">
                         <input type="checkbox" checked={on} onChange={() => toggleCat(c)} />
                         <span className={`flex-1 text-xs ${on ? 'font-semibold text-gray-900 dark:text-slate-100' : 'text-gray-600 dark:text-slate-300'}`}>{c}</span>
-                        <span className="cap-chip cap-chip-neutral !px-1.5">{counts[c]}</span>
+                        <Tag variant="neutral" size="sm">{counts[c]}</Tag>
                       </label>
                     )
                   })}
@@ -149,7 +150,7 @@ function Card({ widget, onOpen, onAdd }) {
       className="catalog-card min-h-[210px] cursor-pointer"
     >
       <div className="flex items-start gap-3">
-        <WidgetGlyph skeleton={widget.skeleton} />
+        <WidgetGlyph skeleton={widget.skeleton} source={widget.source} />
         <div className="min-w-0 flex-1">
           <div className="truncate text-sm font-semibold text-gray-900 dark:text-slate-100">{widget.name}</div>
           <div className="truncate text-[11px] text-gray-500 dark:text-slate-400">{widget.source}</div>
@@ -159,8 +160,8 @@ function Card({ widget, onOpen, onAdd }) {
         <WidgetRender widget={widget} size="md" />
       </div>
       <div className="flex flex-wrap items-center gap-1.5">
-        <span className="cap-chip cap-chip-neutral">{widget.category}</span>
-        <span className={`cap-chip ${widget.governed ? 'cap-chip-data' : 'cap-chip-tool'}`}>{widget.governed ? 'Governed' : 'Ungoverned'}</span>
+        <Tag variant="neutral" size="sm">{widget.category}</Tag>
+        <Tag variant={widget.governed ? 'success' : 'alert'} size="sm">{widget.governed ? 'Governed' : 'Ungoverned'}</Tag>
       </div>
       <div className="mt-auto flex items-center justify-between gap-2 border-t border-gray-100 pt-2.5 dark:border-white/10">
         <FreshnessBadge status={widget.freshness} label={widget.freshness} />
@@ -181,7 +182,7 @@ function Detail({ widget, onBack, onAdd }) {
         <button onClick={onBack} className="grid h-7 w-7 place-items-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:text-slate-500 dark:hover:bg-white/10" aria-label="Back">
           <ChevronLeft size={16} />
         </button>
-        <WidgetGlyph skeleton={widget.skeleton} sm />
+        <WidgetGlyph skeleton={widget.skeleton} source={widget.source} sm />
         <span className="truncate text-sm font-semibold text-gray-900 dark:text-slate-100">{widget.name}</span>
         <span className="truncate text-[11px] text-gray-500 dark:text-slate-400">{widget.source}</span>
       </div>
@@ -226,7 +227,7 @@ function Detail({ widget, onBack, onAdd }) {
         </div>
 
         <div className="flex flex-wrap items-center gap-1.5">
-          <span className="cap-chip cap-chip-neutral">{widget.category}</span>
+          <Tag variant="neutral" size="sm">{widget.category}</Tag>
           <GovernedBadge governed={!!widget.governed} />
           <FreshnessBadge status={widget.freshness} label={widget.freshness} />
         </div>

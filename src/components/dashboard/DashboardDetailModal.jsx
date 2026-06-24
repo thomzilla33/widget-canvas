@@ -3,6 +3,7 @@ import gsap from 'gsap'
 import { X, LayoutDashboard, MapPin, Users, Pencil, Eye, Clock } from 'lucide-react'
 import { useFocusTrap } from '../../hooks/useFocusTrap.js'
 import { Badge } from '../common/index.jsx'
+import { Tag } from '@/components/ui/Tag'
 import { useWidgets } from '../../state/WidgetsContext.jsx'
 import { dashboardLayout, widgetCount } from '../../data/layout.js'
 import { placementLabel, dashboardKind, DEACTIVATED_OWNERS } from '../../data/mock.js'
@@ -212,9 +213,9 @@ export default function DashboardDetailModal({ dashboard, isAdmin, onClose, onOp
               {dashboard.name}
             </h2>
             <div className="mt-0.5 flex min-w-0 items-center gap-1.5">
-              <span className={`cap-chip shrink-0 ${kind === 'entity' ? 'cap-chip-blue' : 'cap-chip-neutral'}`}>
+              <Tag variant={kind === 'entity' ? 'primary' : 'neutral'} size="sm" className="shrink-0">
                 {kind === 'entity' ? 'Profile' : 'Standalone'}
-              </span>
+              </Tag>
               <span className="flex min-w-0 items-center gap-1 text-[11px] text-gray-500 dark:text-slate-400">
                 <MapPin size={11} className="shrink-0" aria-hidden="true" />
                 <span className="truncate">{placement}</span>
@@ -247,9 +248,7 @@ export default function DashboardDetailModal({ dashboard, isAdmin, onClose, onOp
             <span className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-gray-50 px-2.5 py-1 text-[11px] text-gray-600 dark:border-white/10 dark:bg-white/5 dark:text-slate-300">
               Owner · {dashboard.owner}
               {DEACTIVATED_OWNERS.includes(dashboard.owner) && (
-                <span className="cap-chip cap-chip-neutral ml-0.5 !border-amber-300 !text-aims-ungoverned dark:!border-amber-500/30 dark:!text-amber-400">
-                  offboarded
-                </span>
+                <Tag variant="alert" size="sm" className="ml-0.5">offboarded</Tag>
               )}
             </span>
             <span className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-gray-50 px-2.5 py-1 text-[11px] font-semibold text-gray-700 dark:border-white/10 dark:bg-white/5 dark:text-slate-200">

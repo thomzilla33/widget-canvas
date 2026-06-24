@@ -3,6 +3,8 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { useLoadMore } from '../hooks/useLoadMore.js'
 import { MapPin, UserX, RotateCcw, FileBarChart, ArrowRight, Sparkles, MoreHorizontal, Eye, Pencil, Trash2, Copy, Plus } from 'lucide-react'
 import { PageHeader, Badge, EmptyState } from '../components/common/index.jsx'
+import { Tag } from '@/components/ui/Tag'
+import { Button } from '@/components/ui/Button'
 import { PopoverPanel } from '../components/common/Popover.jsx'
 import StudioWelcome from '../components/common/StudioWelcome.jsx'
 import FilterToolbar from '../components/common/FilterToolbar.jsx'
@@ -144,9 +146,9 @@ export default function DashboardList() {
         description={`${dashboards.length} dashboards · ${publishedCount} published`}
         actions={
           isAdmin ? (
-            <button className="btn-primary" onClick={() => setLauncher(true)}>
-              <Sparkles size={15} /> Create dashboard
-            </button>
+            <Button onClick={() => setLauncher(true)} icon={<Sparkles size={15} />}>
+              Create dashboard
+            </Button>
           ) : null
         }
       />
@@ -207,9 +209,9 @@ export default function DashboardList() {
                           ))}
                         </select>
                       </label>
-                      <button className="btn-primary !py-1.5 !px-3 text-xs" onClick={() => reassignAll(group)}>
-                        <RotateCcw size={13} /> Reassign all
-                      </button>
+                      <Button size="sm" onClick={() => reassignAll(group)} icon={<RotateCcw size={13} />}>
+                        Reassign all
+                      </Button>
                     </div>
                   </div>
                   {/* the dashboards this person owns — each reassignable on its own */}
@@ -243,7 +245,7 @@ export default function DashboardList() {
               icon="🗂️"
               title="No dashboards yet"
               description="Create your first dashboard and choose where it lives."
-              action={<button className="btn-primary" onClick={() => navigate('/dashboard/new')}>+ New dashboard</button>}
+              action={<Button onClick={() => navigate('/dashboard/new')}>+ New dashboard</Button>}
             />
           ) : (
             <EmptyState
@@ -295,9 +297,9 @@ export default function DashboardList() {
                       {d.name}
                     </div>
                     <div className="mt-0.5 flex min-w-0 items-center gap-1.5">
-                      <span className={`cap-chip shrink-0 ${dashboardKind(d) === 'entity' ? 'cap-chip-blue' : 'cap-chip-neutral'}`}>
+                      <Tag variant={dashboardKind(d) === 'entity' ? 'primary' : 'neutral'} size="sm" className="shrink-0">
                         {dashboardKind(d) === 'entity' ? 'Profile' : 'Standalone'}
-                      </span>
+                      </Tag>
                       <span className="flex min-w-0 items-center gap-1 text-[11px] text-gray-500 dark:text-slate-400">
                         <MapPin size={11} className="shrink-0" />
                         <span className="truncate">{placementLabel(d.placement)}</span>
@@ -306,7 +308,7 @@ export default function DashboardList() {
                     <div className="mt-0.5 flex min-w-0 items-center gap-1 text-[11px] text-gray-500 dark:text-slate-400">
                       <span className="truncate">Owner · {d.owner}</span>
                       {DEACTIVATED_OWNERS.includes(d.owner) && (
-                        <span className="cap-chip cap-chip-neutral shrink-0 !border-amber-300 !text-aims-ungoverned dark:!border-amber-500/30 dark:!text-amber-400">offboarded</span>
+                        <Tag variant="alert" size="sm" className="shrink-0">offboarded</Tag>
                       )}
                     </div>
                 </div>

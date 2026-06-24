@@ -36,7 +36,7 @@ export default function DeleteWidgetDialog({ widget, usedOn = [], onConfirm, onC
         <div className="space-y-4 p-5">
           {/* Identity */}
           <div className="flex flex-col items-center gap-2 text-center">
-            <WidgetGlyph skeleton={widget.skeleton} />
+            <WidgetGlyph skeleton={widget.skeleton} source={widget.source} />
             <div className="text-sm font-semibold text-gray-900 dark:text-slate-100">{widget.name}</div>
             <div className="flex items-center gap-3 text-[11px] text-gray-500 dark:text-slate-400">
               <span>{widget.source}</span>
