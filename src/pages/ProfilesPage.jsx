@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useLoadMore } from '../hooks/useLoadMore.js'
 import { useNavigate } from 'react-router-dom'
 import { Building2, UserRound, UserCheck, Handshake, LifeBuoy, ChevronRight } from 'lucide-react'
 import { PageHeader, EmptyState, HealthBadge } from '../components/common/index.jsx'
@@ -40,6 +41,7 @@ export default function ProfilesPage() {
     const d = sortBy === 'type' ? a.type.localeCompare(b.type) || a.name.localeCompare(b.name) : a.name.localeCompare(b.name)
     return sortDir === 'asc' ? d : -d
   })
+  const { visible: shownPage, hasMore, remaining, loadMore } = useLoadMore(shown, { initial: 24, increment: 24 })
 
   return (
     <div className="flex h-full flex-col">
@@ -63,8 +65,9 @@ export default function ProfilesPage() {
         {shown.length === 0 ? (
           <EmptyState icon="🔍" title="No profiles found" description="Try a different search or type filter." />
         ) : (
+          <>
           <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill,minmax(min(280px,100%),1fr))' }}>
-            {shown.map((e) => {
+            {shownPage.map((e) => {
               const Icon = TYPE_ICON[e.type] || UserRound
               return (
                 <button key={e.id} onClick={() => navigate(`/ucp/${e.id}`)} className="catalog-card min-h-[120px]">
@@ -93,6 +96,13 @@ export default function ProfilesPage() {
               )
             })}
           </div>
+          {hasMore && (
+            <div className="mt-5 flex items-center justify-center gap-3">
+              <span className="text-xs text-gray-400 dark:text-slate-500">Showing {shownPage.length} of {shown.length}</span>
+              <button onClick={loadMore} className="btn-secondary text-xs">Load {remaining} more</button>
+            </div>
+          )}
+          </>
         )}
       </div>
     </div>

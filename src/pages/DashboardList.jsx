@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
+import { useLoadMore } from '../hooks/useLoadMore.js'
 import { LayoutDashboard, MapPin, UserX, RotateCcw, FileBarChart, ArrowRight, Sparkles, MoreHorizontal, Eye, Pencil, Trash2, Copy, Plus } from 'lucide-react'
 import { PageHeader, Badge, EmptyState } from '../components/common/index.jsx'
 import { PopoverPanel } from '../components/common/Popover.jsx'
@@ -103,6 +104,7 @@ export default function DashboardList() {
     }
     return sortDir === 'desc' ? filtered : [...filtered].reverse()
   })()
+  const { visible: shownPage, hasMore, remaining, loadMore } = useLoadMore(shown, { initial: 12, increment: 12 })
 
   return (
     // The studio welcome leads the page; the title + filters + list scroll below it.
@@ -249,8 +251,9 @@ export default function DashboardList() {
             />
           )
         ) : (
+          <>
           <div ref={gridReveal} className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill,minmax(min(280px,100%),1fr))' }}>
-            {shown.map((d) => (
+            {shownPage.map((d) => (
               <div
                 key={d.id}
                 role="button"
@@ -330,6 +333,13 @@ export default function DashboardList() {
               </div>
             ))}
           </div>
+          {hasMore && (
+            <div className="mt-5 flex items-center justify-center gap-3">
+              <span className="text-xs text-gray-400 dark:text-slate-500">Showing {shownPage.length} of {shown.length}</span>
+              <button onClick={loadMore} className="btn-secondary text-xs">Load {remaining} more</button>
+            </div>
+          )}
+          </>
         )}
       </div>
 

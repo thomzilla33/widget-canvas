@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useLayoutEffect } from 'react'
+import { useLoadMore } from '../hooks/useLoadMore.js'
 import { useParams, useNavigate } from 'react-router-dom'
 import gsap from 'gsap'
 import { Flip } from 'gsap/Flip'
@@ -770,14 +771,16 @@ const ACTIVITY_TONE = {
   chat: 'bg-purple-500/10 text-purple-600 dark:text-purple-300',
 }
 function ActivityFeed({ entries = [] }) {
+  const { visible, hasMore, remaining, loadMore } = useLoadMore(entries, { initial: 8, increment: 8 })
   return (
     <section className="card p-4">
       <div className="mb-3 text-[11px] font-bold uppercase tracking-wide text-gray-500 dark:text-slate-400">Activity</div>
       {entries.length === 0 ? (
         <p className="text-sm text-gray-500 dark:text-slate-400">No activity yet. Email or text this profile from the header and it’ll show up here.</p>
       ) : (
+        <>
         <ul className="space-y-3">
-          {entries.map((e) => (
+          {visible.map((e) => (
             <li key={e.id} className="flex items-start gap-3">
               <span className={`mt-0.5 shrink-0 rounded-md px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide ${ACTIVITY_TONE[e.type] || ACTIVITY_TONE.note}`}>
                 {ACTIVITY_TYPE_LABEL[e.type] || e.type}
@@ -790,6 +793,12 @@ function ActivityFeed({ entries = [] }) {
             </li>
           ))}
         </ul>
+        {hasMore && (
+          <button onClick={loadMore} className="mt-4 w-full rounded-lg border border-gray-200 py-2 text-xs text-gray-500 hover:bg-gray-50 dark:border-white/10 dark:text-slate-400 dark:hover:bg-white/5">
+            Show {remaining} older
+          </button>
+        )}
+        </>
       )}
     </section>
   )

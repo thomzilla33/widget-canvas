@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useLoadMore } from '../hooks/useLoadMore.js'
 import { Flag, Sparkles, MoreHorizontal, Plus, Pencil, Trash2 } from 'lucide-react'
 import { PopoverPanel } from '../components/common/Popover.jsx'
 import { PageHeader, HealthBadge, FreshnessBadge, EmptyState, DataPlaneBadge } from '../components/common/index.jsx'
@@ -86,6 +87,7 @@ export default function WidgetLibrary() {
       const d = sortBy === 'usage' ? (a.usedIn || 0) - (b.usedIn || 0) : a.name.localeCompare(b.name)
       return sortDir === 'asc' ? d : -d
     })
+  const { visible: shownPage, hasMore, remaining, loadMore } = useLoadMore(shown, { initial: 24, increment: 24 })
   const governedCount = widgets.filter((w) => w.governed).length
   const openFlags = flags.filter((f) => f.status === 'open')
   const widgetById = (id) => widgets.find((w) => w.id === id)
@@ -192,8 +194,9 @@ export default function WidgetLibrary() {
             description="Try adjusting your search or category filter."
           />
         ) : (
+        <>
         <div ref={gridReveal} className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill,minmax(min(264px,100%),1fr))' }}>
-          {shown.map((w) => {
+          {shownPage.map((w) => {
             const open = () => (w.health === 'review' ? setRepinWidget(w) : setDetailWidget(w))
             return (
             // Not a <button>: the live preview renders interactive system widgets whose
@@ -275,6 +278,10 @@ export default function WidgetLibrary() {
             )
           })}
         </div>
+        {hasMore && (
+          <LoadMoreBar shown={shownPage.length} total={shown.length} remaining={remaining} onLoadMore={loadMore} />
+        )}
+        </>
         )}
       </div>
 
@@ -352,5 +359,16 @@ function CardMenuItem({ icon: Icon, danger, onClick, children }) {
     >
       <Icon size={14} aria-hidden="true" /> {children}
     </button>
+  )
+}
+
+function LoadMoreBar({ shown, total, remaining, onLoadMore }) {
+  return (
+    <div className="mt-5 flex items-center justify-center gap-3">
+      <span className="text-xs text-gray-400 dark:text-slate-500">Showing {shown} of {total}</span>
+      <button onClick={onLoadMore} className="btn-secondary text-xs">
+        Load {remaining} more
+      </button>
+    </div>
   )
 }
