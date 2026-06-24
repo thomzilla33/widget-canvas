@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useLoadMore } from '../hooks/useLoadMore.js'
-import { LayoutDashboard, MapPin, UserX, RotateCcw, FileBarChart, ArrowRight, Sparkles, MoreHorizontal, Eye, Pencil, Trash2, Copy, Plus } from 'lucide-react'
+import { MapPin, UserX, RotateCcw, FileBarChart, ArrowRight, Sparkles, MoreHorizontal, Eye, Pencil, Trash2, Copy, Plus } from 'lucide-react'
 import { PageHeader, Badge, EmptyState } from '../components/common/index.jsx'
 import { PopoverPanel } from '../components/common/Popover.jsx'
 import StudioWelcome from '../components/common/StudioWelcome.jsx'
@@ -289,11 +289,7 @@ export default function DashboardList() {
                   )}
                 </div>
 
-                <div className="flex items-center gap-3">
-                  <span className="logo-sq" style={{ background: 'var(--grad)' }}>
-                    <LayoutDashboard size={18} />
-                  </span>
-                  <div className="min-w-0 flex-1">
+                <div className="min-w-0">
                     {/* only the title clears the absolute status badge (+ ⋯ for admins) */}
                     <div className={`truncate text-sm font-semibold text-gray-900 dark:text-slate-100 ${isAdmin ? 'pr-28' : 'pr-20'}`}>
                       {d.name}
@@ -313,7 +309,6 @@ export default function DashboardList() {
                         <span className="cap-chip cap-chip-neutral shrink-0 !border-amber-300 !text-aims-ungoverned dark:!border-amber-500/30 dark:!text-amber-400">offboarded</span>
                       )}
                     </div>
-                  </div>
                 </div>
 
                 {d.description && (
