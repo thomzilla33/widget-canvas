@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { LayoutDashboard, MapPin, UserX, RotateCcw, FileBarChart, ArrowRight, Sparkles, MoreHorizontal, Eye, Pencil, Trash2 } from 'lucide-react'
+import { LayoutDashboard, MapPin, UserX, RotateCcw, FileBarChart, ArrowRight, Sparkles, MoreHorizontal, Eye, Pencil, Trash2, Copy } from 'lucide-react'
 import { PageHeader, Badge, EmptyState } from '../components/common/index.jsx'
 import { PopoverPanel } from '../components/common/Popover.jsx'
 import StudioWelcome from '../components/common/StudioWelcome.jsx'
@@ -8,6 +8,7 @@ import FilterToolbar from '../components/common/FilterToolbar.jsx'
 import AIGenerateModal from '../components/ai/AIGenerateModal.jsx'
 import CreateLauncher from '../components/create/CreateLauncher.jsx'
 import DeleteDashboardDialog from '../components/dashboard/DeleteDashboardDialog.jsx'
+import DuplicateDashboardDialog from '../components/dashboard/DuplicateDashboardDialog.jsx'
 import { useStaggerReveal } from '../hooks/useReveal.js'
 import { audienceLabel } from '../data/audiences.js'
 import { useDashboards } from '../state/DashboardsContext.jsx'
@@ -30,10 +31,11 @@ const KIND_OPTIONS = [
 // S76–S79 — dashboard list with search + status filter
 export default function DashboardList() {
   const navigate = useNavigate()
-  const { dashboards, updateDashboard, removeDashboard } = useDashboards()
+  const { dashboards, updateDashboard, removeDashboard, duplicateDashboard } = useDashboards()
   const { isAdmin } = useRole()
   const [menuId, setMenuId] = useState(null) // per-card ⋯ menu (by dashboard id)
   const [deletingDashboard, setDeletingDashboard] = useState(null)
+  const [duplicatingDashboard, setDuplicatingDashboard] = useState(null)
   const [search, setSearch] = useState('')
   const [status, setStatus] = useState('All')
   const [kind, setKind] = useState('All')
@@ -231,7 +233,7 @@ export default function DashboardList() {
                 tabIndex={0}
                 onClick={(e) => { if (!e.target.closest('button')) navigate(`/dashboard/${d.id}`) }}
                 onKeyDown={(e) => { if (e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); navigate(`/dashboard/${d.id}`) } }}
-                className="catalog-card min-h-[124px] cursor-pointer text-left"
+                className={`catalog-card min-h-[124px] cursor-pointer text-left${menuId === d.id ? ' z-10' : ''}`}
               >
                 <div className="absolute top-3 right-3 flex items-center gap-1.5">
                   <Badge variant={d.status} />
@@ -250,6 +252,7 @@ export default function DashboardList() {
                         <PopoverPanel onClose={() => setMenuId(null)} align="right" className="w-40 p-1.5">
                           <DashMenuItem icon={Eye} onClick={(e) => { e.stopPropagation(); setMenuId(null); navigate(`/dashboard/${d.id}`) }}>Open</DashMenuItem>
                           <DashMenuItem icon={Pencil} onClick={(e) => { e.stopPropagation(); setMenuId(null); navigate(`/dashboard/${d.id}/canvas`) }}>Edit</DashMenuItem>
+                          <DashMenuItem icon={Copy} onClick={(e) => { e.stopPropagation(); setMenuId(null); setDuplicatingDashboard(d) }}>Duplicate</DashMenuItem>
                           <DashMenuItem icon={Trash2} danger onClick={(e) => { e.stopPropagation(); setMenuId(null); setDeletingDashboard(d) }}>Delete</DashMenuItem>
                         </PopoverPanel>
                       )}
@@ -301,6 +304,18 @@ export default function DashboardList() {
           dashboard={deletingDashboard}
           onClose={() => setDeletingDashboard(null)}
           onConfirm={() => { removeDashboard(deletingDashboard.id); setDeletingDashboard(null) }}
+        />
+      )}
+
+      {duplicatingDashboard && (
+        <DuplicateDashboardDialog
+          dashboard={duplicatingDashboard}
+          onClose={() => setDuplicatingDashboard(null)}
+          onConfirm={(name) => {
+            const newId = duplicateDashboard(duplicatingDashboard.id, name)
+            setDuplicatingDashboard(null)
+            navigate(`/dashboard/${newId}/canvas`)
+          }}
         />
       )}
 

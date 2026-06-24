@@ -51,9 +51,20 @@ export default function WidgetPreview({ typeId, metric, source, name, freshness,
   // Merge the interactive filters into the preview opts (alongside dimension/transform).
   const previewOpts = { ...(shape || {}), range, filterCount: activeDims.size }
 
+  const accentColor = display?.accentColor || ''
+  const styleVariant = display?.styleVariant || ''
+
+  // Card-level appearance: top accent border + optional tinted header for 'card'/'featured' variants
+  const cardStyle = accentColor ? { borderTopColor: accentColor, borderTopWidth: 3 } : undefined
+  const headerBg = accentColor && styleVariant === 'card'
+    ? { background: `${accentColor}12` }
+    : accentColor && styleVariant === 'featured'
+      ? { background: `linear-gradient(135deg, ${accentColor}22 0%, transparent 100%)` }
+      : undefined
+
   return (
-    <div className="card flex flex-col p-4">
-      <div className="flex items-start justify-between gap-2">
+    <div className="card flex flex-col p-4" style={cardStyle}>
+      <div className="flex items-start justify-between gap-2" style={headerBg ? { ...headerBg, margin: '-1rem -1rem 0', padding: '0.75rem 1rem', borderRadius: '0.5rem 0.5rem 0 0' } : undefined}>
         <div className="min-w-0">
           <div className="truncate font-semibold text-gray-900 dark:text-slate-100">{name?.trim() || 'Untitled widget'}</div>
           {ready && (
@@ -210,7 +221,8 @@ const RAG = (v) => (v >= 67 ? '#16A34A' : v >= 34 ? '#D97706' : '#DC2626')
 function GaugeView({ data, display }) {
   const v = data.gauge.value
   const goalSet = display?.goal?.value != null
-  const color = goalSet ? RAG(v) : SERIES[0]
+  const accentColor = display?.accentColor
+  const color = accentColor || (goalSet ? RAG(v) : SERIES[0])
   return (
     <div className="relative" style={{ height: H }}>
       <GaugeHC value={v} color={color} height={H} />
@@ -232,15 +244,35 @@ function KpiView({ data, display }) {
   const fmt = display?.format
   const useFmt = fmt && fmt.style && fmt.style !== 'auto'
   const goal = display?.goal
+  const accentColor = display?.accentColor
+  const displayOpts = display?.displayOptions || {}
+  const showTrend = displayOpts.showTrend !== false
+  const showTarget = displayOpts.showTarget === true
+
   const value = useFmt ? formatValue(data.kpiRaw, fmt) : data.kpi.value
   const met = goalMet(data.kpiRaw, goal)
-  const valueColor = met == null ? 'text-gray-900 dark:text-slate-100' : met ? 'text-aims-governed' : 'text-aims-stale'
+
+  // accentColor overrides goal-based RAG on the value text
+  const valueStyle = accentColor ? { color: accentColor } : undefined
+  const valueClass = accentColor ? '' : met == null ? 'text-gray-900 dark:text-slate-100' : met ? 'text-aims-governed' : 'text-aims-stale'
   const missLabel = goal?.direction === 'lower' ? 'above target' : 'below target'
+
   return (
     <div className="flex h-full min-h-[180px] flex-col justify-center">
-      <div className={`num text-4xl font-bold tracking-tight ${valueColor}`}>{value}</div>
-      {data.kpi.delta && <div className="num mt-1 text-sm font-semibold text-aims-governed">{data.kpi.delta} vs last quarter</div>}
-      {goal?.value != null && (
+      <div className={`num text-4xl font-bold tracking-tight ${valueClass}`} style={valueStyle}>{value}</div>
+      {showTrend && data.kpi.delta && (
+        <div className="num mt-1 text-sm font-semibold text-aims-governed">{data.kpi.delta} vs last quarter</div>
+      )}
+      {!showTrend && (
+        <div className="mt-1 text-xs text-gray-400 dark:text-slate-500 italic">Trend hidden</div>
+      )}
+      {showTarget && goal?.value != null && (
+        <div className="mt-1.5 text-xs text-gray-500 dark:text-slate-400">
+          Goal: {useFmt ? formatValue(goal.value, fmt) : goal.value} ·{' '}
+          <span className={met ? 'font-semibold text-aims-governed' : 'font-semibold text-aims-stale'}>{met ? 'met' : missLabel}</span>
+        </div>
+      )}
+      {!showTarget && goal?.value != null && (
         <div className="mt-1.5 text-xs text-gray-500 dark:text-slate-400">
           Goal: {useFmt ? formatValue(goal.value, fmt) : goal.value} ·{' '}
           <span className={met ? 'font-semibold text-aims-governed' : 'font-semibold text-aims-stale'}>{met ? 'met' : missLabel}</span>

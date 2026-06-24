@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { LayoutGrid, X, Search, ChevronLeft, Info, Plus } from 'lucide-react'
+import { LayoutGrid, X, Search, ChevronLeft, Info, Plus, Pencil } from 'lucide-react'
 import { WidgetGlyph } from './glyph.jsx'
 import WidgetRender from './WidgetRender.jsx'
 import { EmptyState, FreshnessBadge, GovernedBadge } from '../common/index.jsx'
@@ -9,7 +9,8 @@ const PREVIEW_WIDTH = { sm: 'max-w-[240px]', md: 'max-w-md', lg: 'max-w-2xl' }
 
 // Marketplace-style browser over the widget library — used on the canvas to add
 // a real widget to a zone (with a size preview), instead of a thin list.
-export default function WidgetLibraryModal({ zoneLabel, onAdd, onClose }) {
+// onCreateNew — called when the user wants to build a brand-new widget from here.
+export default function WidgetLibraryModal({ zoneLabel, onAdd, onClose, onCreateNew }) {
   const [search, setSearch] = useState('')
   const [activeCats, setActiveCats] = useState(new Set())
   const [selected, setSelected] = useState(null)
@@ -48,9 +49,19 @@ export default function WidgetLibraryModal({ zoneLabel, onAdd, onClose }) {
               <div className="text-xs text-gray-500 dark:text-slate-400">From your widget library{zoneLabel ? ` · into ${zoneLabel}` : ''}</div>
             </div>
           </div>
-          <button onClick={onClose} aria-label="Close" className="grid h-8 w-8 place-items-center rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:text-slate-500 dark:hover:bg-white/10 dark:hover:text-slate-200">
-            <X size={18} />
-          </button>
+          <div className="flex items-center gap-2">
+            {onCreateNew && (
+              <button
+                onClick={onCreateNew}
+                className="btn-secondary flex items-center gap-1.5 text-sm"
+              >
+                <Pencil size={14} aria-hidden="true" /> Create new widget
+              </button>
+            )}
+            <button onClick={onClose} aria-label="Close" className="grid h-8 w-8 place-items-center rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:text-slate-500 dark:hover:bg-white/10 dark:hover:text-slate-200">
+              <X size={18} />
+            </button>
+          </div>
         </div>
 
         {/* Body */}
@@ -90,7 +101,20 @@ export default function WidgetLibraryModal({ zoneLabel, onAdd, onClose }) {
                 </div>
                 <div className="flex-1 overflow-auto p-6">
                   {widgets.length === 0 ? (
-                    <EmptyState icon="📭" title="Your widget library is empty" description="Create your first widget in the Widget Playground, then add it here." />
+                    <div className="flex flex-col items-center justify-center py-16 text-center">
+                      <div className="mb-3 grid h-14 w-14 place-items-center rounded-2xl border border-gray-200 bg-gray-50 dark:border-white/10 dark:bg-white/5">
+                        <LayoutGrid size={24} className="text-gray-400 dark:text-slate-500" />
+                      </div>
+                      <h3 className="text-sm font-semibold text-gray-900 dark:text-slate-100">No widgets yet</h3>
+                      <p className="mt-1 max-w-xs text-xs text-gray-500 dark:text-slate-400">
+                        Build your first widget in the playground — it takes about 2 minutes.
+                      </p>
+                      {onCreateNew && (
+                        <button onClick={onCreateNew} className="btn-primary mt-4 flex items-center gap-1.5">
+                          <Pencil size={14} aria-hidden="true" /> Create a widget
+                        </button>
+                      )}
+                    </div>
                   ) : list.length === 0 ? (
                     <EmptyState icon="🔍" title="No widgets match" description="Try a different search or clear filters." action={<button className="btn-secondary" onClick={clearAll}>Clear filters</button>} />
                   ) : (

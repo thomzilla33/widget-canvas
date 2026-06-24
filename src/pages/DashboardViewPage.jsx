@@ -7,6 +7,7 @@ import DashboardControls, { DEFAULT_SCOPE, scopeLabel } from '../components/dash
 import WidgetDrilldownModal from '../components/dashboard/WidgetDrilldownModal.jsx'
 import EntityContextHeader, { entityHeaderApplies } from '../components/dashboard/EntityContextHeader.jsx'
 import AskDashboardModal from '../components/dashboard/AskDashboardModal.jsx'
+import UcpConcierge from '../components/ucp/UcpConcierge.jsx'
 import { useDashboards } from '../state/DashboardsContext.jsx'
 import { useWidgets } from '../state/WidgetsContext.jsx'
 import { useLive } from '../state/LiveContext.jsx'
@@ -31,6 +32,8 @@ export default function DashboardViewPage() {
   const [drill, setDrill] = useState(null) // widget opened in the drill-down
   const [viewAs, setViewAs] = useState(ALL_AUDIENCES) // "view as role" audience preview
   const [askOpen, setAskOpen] = useState(false) // U6 — talk to your dashboard
+  const [chatOpen, setChatOpen] = useState(false)
+  const toggleChat = () => setChatOpen((v) => !v)
 
   // Tier 2 — an entity-scoped Profile dashboard surfaces on one specific record;
   // resolve it so the header links back to that Unified Profile (the consume seam).
@@ -106,56 +109,62 @@ export default function DashboardViewPage() {
         }
       />
 
-      <div className="flex-1 overflow-auto">
-        <div className="mx-auto w-full max-w-[1800px] px-6 py-5 lg:px-8 2xl:px-12">
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-            <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-slate-400">
-              <MapPin size={12} aria-hidden="true" className="shrink-0" />
-              <span>{placementLabel(dashboard.placement)}</span>
+      {/* Flex row: scrollable content + docked Concierge as siblings */}
+      <div className="flex min-h-0 flex-1 overflow-hidden">
+        <div className="flex-1 overflow-auto">
+          <div className="mx-auto w-full max-w-[1800px] px-6 py-5 lg:px-8 2xl:px-12">
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-slate-400">
+                <MapPin size={12} aria-hidden="true" className="shrink-0" />
+                <span>{placementLabel(dashboard.placement)}</span>
+              </div>
+              <label htmlFor="view-as-select" className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-slate-400">
+                <span className="font-medium">Viewing as</span>
+                <select
+                  id="view-as-select"
+                  className="input !h-8 !w-auto !py-1 !pl-2 !pr-7 text-xs"
+                  value={viewAs}
+                  onChange={(e) => setViewAs(e.target.value)}
+                >
+                  {AUDIENCE_OPTIONS.map((a) => (
+                    <option key={a} value={a}>
+                      {a === ALL_AUDIENCES ? 'Admin (everything)' : a}
+                    </option>
+                  ))}
+                </select>
+              </label>
             </div>
-            <label htmlFor="view-as-select" className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-slate-400">
-              <span className="font-medium">Viewing as</span>
-              <select
-                id="view-as-select"
-                className="input !h-8 !w-auto !py-1 !pl-2 !pr-7 text-xs"
-                value={viewAs}
-                onChange={(e) => setViewAs(e.target.value)}
-              >
-                {AUDIENCE_OPTIONS.map((a) => (
-                  <option key={a} value={a}>
-                    {a === ALL_AUDIENCES ? 'Admin (everything)' : a}
-                  </option>
-                ))}
-              </select>
-            </label>
+            {hiddenForRole > 0 && (
+              <div className="mb-3 inline-flex items-center gap-1.5 rounded-lg border border-amber-300/40 bg-amber-500/10 px-2.5 py-1 text-[11px] font-medium text-aims-ungoverned">
+                {hiddenForRole} widget{hiddenForRole === 1 ? '' : 's'} hidden for {viewAs}
+              </div>
+            )}
+            {stalePaused > 0 && (
+              <div className="mb-3 flex items-start gap-2 rounded-lg border border-red-300/40 bg-red-500/10 px-3 py-2 text-xs text-aims-stale">
+                <PauseCircle size={15} className="mt-0.5 shrink-0" aria-hidden="true" />
+                <span>
+                  <span className="font-semibold">
+                    {stalePaused} tile{stalePaused === 1 ? '' : 's'} paused on stale data.
+                  </span>{' '}
+                  Workflows that depend on {stalePaused === 1 ? 'it' : 'them'} are paused until the source is remapped.
+                </span>
+              </div>
+            )}
+            {entityHeaderApplies(dashboard.placement) && <EntityContextHeader placement={dashboard.placement} entity={profileEntity} viewerRole={viewAs} onChat={profileEntity ? toggleChat : undefined} />}
+            <DashboardControls scope={scope} onChange={setScope} />
+            <DashboardZones dashboard={dashboard} scope={liveScope} onDrill={setDrill} viewerRole={viewAs} />
           </div>
-          {hiddenForRole > 0 && (
-            <div className="mb-3 inline-flex items-center gap-1.5 rounded-lg border border-amber-300/40 bg-amber-500/10 px-2.5 py-1 text-[11px] font-medium text-aims-ungoverned">
-              {hiddenForRole} widget{hiddenForRole === 1 ? '' : 's'} hidden for {viewAs}
-            </div>
-          )}
-          {stalePaused > 0 && (
-            <div className="mb-3 flex items-start gap-2 rounded-lg border border-red-300/40 bg-red-500/10 px-3 py-2 text-xs text-aims-stale">
-              <PauseCircle size={15} className="mt-0.5 shrink-0" aria-hidden="true" />
-              <span>
-                <span className="font-semibold">
-                  {stalePaused} tile{stalePaused === 1 ? '' : 's'} paused on stale data.
-                </span>{' '}
-                Workflows that depend on {stalePaused === 1 ? 'it' : 'them'} are paused until the source is remapped.
-              </span>
-            </div>
-          )}
-          {entityHeaderApplies(dashboard.placement) && <EntityContextHeader placement={dashboard.placement} entity={profileEntity} viewerRole={viewAs} />}
-          <DashboardControls scope={scope} onChange={setScope} />
-          <DashboardZones dashboard={dashboard} scope={liveScope} onDrill={setDrill} viewerRole={viewAs} />
         </div>
+
+        {/* Docked Concierge — only for entity-scoped profile dashboards */}
+        {profileEntity && <UcpConcierge entity={profileEntity} open={chatOpen} onClose={toggleChat} />}
       </div>
 
-      {/* U6 — Talk to your dashboard: floating Ask button */}
+      {/* U6 — Talk to your dashboard: floating Ask button (offset when Concierge is open) */}
       <button
         onClick={() => setAskOpen(true)}
-        className="fixed bottom-5 right-5 z-20 inline-flex items-center gap-1.5 rounded-full px-4 py-2.5 text-sm font-semibold text-white shadow-lg transition-transform hover:scale-105"
-        style={{ background: 'var(--grad)' }}
+        className="fixed bottom-5 z-20 inline-flex items-center gap-1.5 rounded-full px-4 py-2.5 text-sm font-semibold text-white shadow-lg transition-all hover:scale-105"
+        style={{ background: 'var(--grad)', right: chatOpen ? '400px' : '20px' }}
         title="Ask this dashboard"
       >
         <Sparkles size={16} aria-hidden="true" /> Ask

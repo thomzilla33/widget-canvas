@@ -24,8 +24,22 @@ export function DashboardsProvider({ children }) {
     setDashboards((prev) => prev.filter((d) => d.id !== id))
   }
 
+  // Deep-copy a dashboard under a new id, marked draft, inserted newest-first.
+  // Accepts an optional custom name; returns the new id for post-action navigation.
+  function duplicateDashboard(id, name) {
+    const stamp = Date.now().toString(36)
+    const newId = `${id}-copy-${stamp}`
+    setDashboards((prev) => {
+      const src = prev.find((d) => d.id === id)
+      if (!src) return prev
+      const copy = { ...src, id: newId, name: name ?? `${src.name} (copy)`, status: 'draft', updated: 'just now' }
+      return [copy, ...prev]
+    })
+    return newId
+  }
+
   return (
-    <DashboardsContext.Provider value={{ dashboards, addDashboard, updateDashboard, removeDashboard }}>
+    <DashboardsContext.Provider value={{ dashboards, addDashboard, updateDashboard, removeDashboard, duplicateDashboard }}>
       {children}
     </DashboardsContext.Provider>
   )

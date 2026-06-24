@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
-import { useParams, Navigate, useNavigate } from 'react-router-dom'
-import { Plus, X, Lock, Unlock, Trash2, Sparkles, RotateCcw, SlidersHorizontal, GripVertical, Move, Check, RefreshCw, MoreHorizontal, Flag, Info } from 'lucide-react'
+import { useParams, Navigate, useNavigate, useLocation } from 'react-router-dom'
+import { Plus, X, Lock, Unlock, Trash2, Sparkles, RotateCcw, SlidersHorizontal, GripVertical, Move, Check, RefreshCw, MoreHorizontal, Flag, Info, Pencil } from 'lucide-react'
 import { PageHeader, GovernedBadge, FreshnessBadge, Badge, EmptyState } from '../components/common/index.jsx'
 import { PopoverPanel } from '../components/common/Popover.jsx'
 import WidgetRender from '../components/widgets/WidgetRender.jsx'
@@ -40,6 +40,7 @@ const newPid = (dashboardId, arr) => `${dashboardId}-${Date.now().toString(36)}-
 export default function DashboardCanvas() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const location = useLocation()
   const { isAdmin } = useRole()
   const { widgets, updateWidget } = useWidgets()
   const { dashboards, updateDashboard } = useDashboards()
@@ -80,6 +81,17 @@ export default function DashboardCanvas() {
   }
   // Clear a pending flash timer on unmount (no setState after the canvas is gone).
   useEffect(() => () => { if (savedTimer.current) clearTimeout(savedTimer.current) }, [])
+
+  // Auto-place a widget created via the "Create new widget" shortcut from this canvas.
+  // The builder navigates back with state.autoAdd = widgetId after saving.
+  useEffect(() => {
+    const wid = location.state?.autoAdd
+    if (!wid) return
+    const w = widgets.find((x) => x.id === wid)
+    if (w) placeWidget(w)
+    // Clear the state so a reload or back-navigation doesn't re-place.
+    navigate(location.pathname, { replace: true, state: {} })
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   function commit(updater) {
     const next = updater(placements)
@@ -211,7 +223,7 @@ export default function DashboardCanvas() {
 
           {placements.length === 0 ? (
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              <AddWidgetCard onClick={() => setAddOpen(true)} />
+              <AddWidgetCard onClick={() => setAddOpen(true)} onCreateNew={() => navigate('/widgets/new', { state: { fromDashboard: id } })} />
               <div className="flex items-center sm:col-span-1 lg:col-span-2">
                 <button className="btn-secondary" onClick={() => setSuggestOpen(true)}>
                   <Sparkles size={15} aria-hidden="true" /> Suggest widgets
@@ -250,7 +262,7 @@ export default function DashboardCanvas() {
                   onDropOn={() => { reorder(dragPid, p.pid); setDragPid(null) }}
                 />
               ))}
-              <AddWidgetCard onClick={() => setAddOpen(true)} />
+              <AddWidgetCard onClick={() => setAddOpen(true)} onCreateNew={() => navigate('/widgets/new', { state: { fromDashboard: id } })} />
             </div>
             </>
           )}
@@ -261,6 +273,10 @@ export default function DashboardCanvas() {
           <WidgetLibraryModal
             onAdd={(w, size) => placeWidget(w, size)}
             onClose={() => setAddOpen(false)}
+            onCreateNew={() => {
+              setAddOpen(false)
+              navigate('/widgets/new', { state: { fromDashboard: id } })
+            }}
           />
         )}
 
@@ -401,17 +417,35 @@ function MenuItem({ icon: Icon, onClick, children }) {
   )
 }
 
-/* ── A dashed "Add widget" tile that opens the marketplace picker ── */
-function AddWidgetCard({ onClick }) {
+/* ── A dashed "Add widget" tile — browse existing or create a new one ── */
+function AddWidgetCard({ onClick, onCreateNew }) {
   return (
-    <button
-      onClick={onClick}
-      className="flex min-h-[180px] flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed border-gray-300 text-gray-500 transition-colors hover:border-aims-blue/50 hover:text-aims-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aims-blue/40 dark:border-white/15 dark:text-slate-400"
-    >
-      <span className="grid h-9 w-9 place-items-center rounded-full border border-current"><Plus size={18} aria-hidden="true" /></span>
-      <span className="mt-1 text-sm font-medium">Add widget</span>
-      <span className="text-[11px] text-gray-400 dark:text-slate-500">Browse your widget library</span>
-    </button>
+    <div className="flex min-h-[180px] flex-col items-center justify-center gap-4 rounded-lg border-2 border-dashed border-gray-300 px-4 py-6 dark:border-white/15">
+      <button
+        onClick={onClick}
+        className="flex w-full items-center gap-3 rounded-lg border border-gray-200 bg-white px-4 py-3 text-left text-gray-700 transition-all hover:border-aims-blue/50 hover:text-aims-blue hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aims-blue/40 dark:border-white/10 dark:bg-white/5 dark:text-slate-300 dark:hover:border-aims-blue/40 dark:hover:text-aims-blue"
+      >
+        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-gray-100 dark:bg-white/10">
+          <Plus size={16} aria-hidden="true" />
+        </span>
+        <span>
+          <span className="block text-sm font-medium">Browse library</span>
+          <span className="block text-[11px] text-gray-400 dark:text-slate-500">Pick from your existing widgets</span>
+        </span>
+      </button>
+      <button
+        onClick={onCreateNew}
+        className="flex w-full items-center gap-3 rounded-lg border border-aims-blue/30 bg-aims-blue/5 px-4 py-3 text-left text-aims-blue transition-all hover:border-aims-blue/60 hover:bg-aims-blue/10 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aims-blue/40 dark:bg-aims-blue/10 dark:hover:bg-aims-blue/15"
+      >
+        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-aims-blue/10">
+          <Pencil size={15} aria-hidden="true" />
+        </span>
+        <span>
+          <span className="block text-sm font-medium">Create new widget</span>
+          <span className="block text-[11px] text-aims-blue/60">Build one in ~2 min, placed here automatically</span>
+        </span>
+      </button>
+    </div>
   )
 }
 

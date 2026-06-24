@@ -13,24 +13,26 @@ const DEFAULT_SEED = { name: '', audience: 'Sales Agent', placement: { surface: 
 
 const STEPS = ['Placement', 'Start point']
 
+// Step titles + descriptions — make each step feel focused.
+const STEP_COPY = [
+  { title: 'New dashboard', desc: 'Choose where this dashboard lives and who it\'s for.' },
+  { title: 'Choose a starting point', desc: 'Start from a blank canvas or jump-start with a pre-built layout.' },
+]
+
 // S80, S81, S82, S96 — placement (where the dashboard lives) + conflict + start point
 export default function NewDashboard() {
   const navigate = useNavigate()
   const { dashboards, addDashboard } = useDashboards()
 
   const [step, setStep] = useState(0)
-  // The placement form drives name + audience + placement; we hold its last emit.
   const [form, setForm] = useState({ ...DEFAULT_SEED, valid: false })
-  // Describe-to-build re-seeds the PlacementForm by remounting it (key bump).
   const [seed, setSeed] = useState(DEFAULT_SEED)
   const [seedKey, setSeedKey] = useState(0)
 
-  const [startMode, setStartMode] = useState('blank')
-  const [templateId, setTemplateId] = useState(null)
+  const [startMode, setStartMode] = useState('template')
+  const [templateId, setTemplateId] = useState(dashboardTemplates[0]?.id ?? null)
   const [overrodeConflict, setOverrodeConflict] = useState(false)
 
-  // Describe a dashboard → prefill placement/audience/name + preselect a template
-  // (the first-preview layout). The user reviews, then Creates onto a seeded canvas.
   function applyDescription(text) {
     const r = describeDashboard(text)
     if (!r) return false
@@ -44,10 +46,8 @@ export default function NewDashboard() {
   const placement = form.placement
   const myKey = placeKey(placement, form.audience)
 
-  // S96 — conflict: another dashboard for the same audience overlaps this destination.
   const conflict = dashboards.find((d) => audienceKey(d.audience) === audienceKey(form.audience) && overlaps(d.placement, placement))
 
-  // Reset the override whenever the destination changes.
   useEffect(() => {
     setOverrodeConflict(false)
   }, [myKey])
@@ -56,6 +56,18 @@ export default function NewDashboard() {
     step === 0
       ? form.valid && (!conflict || overrodeConflict)
       : startMode === 'blank' || (startMode === 'template' && !!templateId)
+
+  // Inline hint telling the user exactly what's blocking the Next/Create button.
+  const blockingHint =
+    step === 0 && !canNext
+      ? form.name === ''
+        ? 'Name your dashboard to continue'
+        : !form.valid
+          ? 'Complete placement settings to continue'
+          : conflict && !overrodeConflict
+            ? 'Resolve the destination conflict above'
+            : ''
+      : ''
 
   function create() {
     const id = `d-${form.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now().toString(36)}`
@@ -76,24 +88,18 @@ export default function NewDashboard() {
     navigate(`/dashboard/${id}/canvas`)
   }
 
+  const { title, desc } = STEP_COPY[step]
+
   return (
     <div className="h-full flex flex-col">
-      <PageHeader
-        title="New dashboard"
-        description="Choose where this dashboard lives, then start from a blank canvas or an AIMS template."
-        actions={
-          <button className="btn-secondary" onClick={() => navigate('/dashboards')}>
-            Cancel
-          </button>
-        }
-      />
-
-      <div className="shrink-0 px-6 py-4 border-b border-gray-200 dark:border-white/10 bg-white dark:bg-[#0f1629]">
-        <StepIndicator steps={STEPS} current={step} />
-      </div>
+      {/* Single-cancel header — footer handles Back/Cancel so no duplicate here */}
+      <PageHeader title={title} description={desc} />
 
       <div className="flex-1 overflow-auto px-6 py-6">
         <div className="max-w-2xl mx-auto space-y-6">
+          {/* Lightweight step indicator inline with the form content */}
+          <StepIndicator steps={STEPS} current={step} />
+
           {step === 0 ? (
             <>
               <DescribeComposer
@@ -110,7 +116,7 @@ export default function NewDashboard() {
                     <div className="flex-1">
                       <div className="text-sm font-semibold text-gray-900 dark:text-slate-100">A dashboard already lives here</div>
                       <div className="mt-1 text-sm leading-relaxed text-gray-600 dark:text-slate-300">
-                        “{conflict.name}” ({conflict.status}) already targets {placementLabel(conflict.placement)} · {audienceLabel(conflict.audience)}. Creating another may cause overlap.
+                        "{conflict.name}" ({conflict.status}) already targets {placementLabel(conflict.placement)} · {audienceLabel(conflict.audience)}. Creating another may cause overlap.
                       </div>
                       <div className="mt-3 flex items-center gap-2">
                         <button className="btn-secondary" onClick={() => navigate(`/dashboard/${conflict.id}/canvas`)}>View existing</button>
@@ -171,23 +177,31 @@ export default function NewDashboard() {
         </div>
       </div>
 
-      {/* Footer nav */}
-      <div className="border-t border-gray-200 dark:border-white/10 bg-white dark:bg-[#0f1629] px-4 md:px-6 py-3 flex items-center justify-between">
-        <button className="btn-secondary" onClick={() => (step === 0 ? navigate('/dashboards') : setStep(0))}>
-          <ChevronLeft size={16} />
-          {step === 0 ? 'Cancel' : 'Back'}
-        </button>
-        {step === 0 ? (
-          <button className="btn-primary" disabled={!canNext} onClick={() => setStep(1)}>
-            Next
-            <ChevronRight size={16} />
+      {/* Footer nav — single Cancel/Back here; no duplicate in the header */}
+      <div className="border-t border-gray-200 dark:border-white/10 bg-white dark:bg-[#0f1629] px-4 md:px-6 py-3">
+        <div className="flex items-center justify-between">
+          <button className="btn-secondary" onClick={() => (step === 0 ? navigate('/dashboards') : setStep(0))}>
+            <ChevronLeft size={16} />
+            {step === 0 ? 'Cancel' : 'Back'}
           </button>
-        ) : (
-          <button className="btn-primary" disabled={!canNext} onClick={create}>
-            <Check size={16} />
-            Create dashboard
-          </button>
-        )}
+
+          <div className="flex flex-col items-end gap-1">
+            {step === 0 ? (
+              <button className="btn-primary" disabled={!canNext} onClick={() => setStep(1)}>
+                Next: Start point
+                <ChevronRight size={16} />
+              </button>
+            ) : (
+              <button className="btn-primary" disabled={!canNext} onClick={create}>
+                <Check size={16} />
+                Create dashboard
+              </button>
+            )}
+            {blockingHint && (
+              <p className="text-[11px] text-gray-400 dark:text-slate-500">{blockingHint}</p>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   )

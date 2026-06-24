@@ -23,7 +23,14 @@ export default function WidgetRender({ widget, size = 'md', scope, viewAs }) {
     [widget, scopeKey, sysId],
   )
   if (!widget) {
-    return <div className="grid h-[88px] place-items-center text-[10px] text-gray-500 dark:text-slate-400">No data</div>
+    return (
+      <div className="grid h-[88px] place-items-center text-center px-3">
+        <div>
+          <div className="text-[11px] font-medium text-gray-400 dark:text-slate-500">No data connected</div>
+          <a href="#data-studio" className="mt-0.5 block text-[10px] text-aims-blue hover:underline">Map in Data Studio →</a>
+        </div>
+      </div>
+    )
   }
   // System work widgets are interactive (live queue state) — bypass the static skeleton.
   if (sysId) {
