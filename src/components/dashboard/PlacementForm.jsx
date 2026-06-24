@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { LayoutGrid, UserSquare, MapPin, ChevronDown, Wand2 } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
+import EntityRecordPicker from '../common/EntityRecordPicker.jsx'
 import { entities, PROFILE_TYPES, REPORT_COLLECTIONS, HOME_SCOPES, placementLabel } from '../../data/mock.js'
 import { AUDIENCE_TYPES, AUDIENCE_TARGETS, audienceKey, audienceLabel, normalizeAudience } from '../../data/audiences.js'
 import { useProfileConfig } from '../../state/ProfileConfigContext.jsx'
@@ -83,7 +84,6 @@ export default function PlacementForm({ initial, onChange }) {
     setTabs(profileType, allTabs.filter((x) => x !== t))
     if (tab === t) setTab(currentType.tabs[0] || 'Overview')
   }
-  const entitiesForType = entities.filter((e) => e.type === currentType.entityType)
   const kind = surface === 'profile' ? 'entity' : 'global'
 
   // Auto-suggested name derived from current placement + audience context.
@@ -208,12 +208,11 @@ export default function PlacementForm({ initial, onChange }) {
               <Chip active={scope === 'entity'} onClick={() => setScope('entity')}>A specific {currentType.label}</Chip>
             </div>
             {scope === 'entity' && (
-              <select className="input mt-2" value={entityId || ''} onChange={(e) => setEntityId(e.target.value)}>
-                <option value="" disabled>Choose a {currentType.label}…</option>
-                {entitiesForType.map((e) => (
-                  <option key={e.id} value={e.id}>{e.name}</option>
-                ))}
-              </select>
+              <EntityRecordPicker
+                entityType={currentType.entityType}
+                value={entityId}
+                onChange={setEntityId}
+              />
             )}
           </div>
 

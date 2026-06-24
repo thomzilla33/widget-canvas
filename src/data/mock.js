@@ -1,20 +1,51 @@
 // All mock data for the prototype: entities, widgets, dashboards, skeletons, chart data.
 
 export const entities = [
-  // Companies / Accounts
+  // ── Accounts ──────────────────────────────────────────────────────────────
   { id: 'acme-001', name: 'Acme Corporation', type: 'Account', owner: 'Priya Nair', health: 'active', email: 'billing@acme.com', phone: '+1 (415) 555-0110', address: '500 Market St, San Francisco, CA', company: 'Enterprise · SaaS', status: 'Renewal in Q3' },
   { id: 'globex-002', name: 'Globex Inc.', type: 'Account', owner: 'Dana Lee', health: 'inactive', email: 'ap@globex.com', phone: '+1 (212) 555-0144', address: '1 Globex Plaza, New York, NY', company: 'Mid-Market · Manufacturing', status: 'At risk' },
   { id: 'initech-003', name: 'Initech LLC', type: 'Account', owner: 'Sam Ortiz', health: 'active', email: 'accounts@initech.com', phone: '+1 (512) 555-0188', address: '88 Office Park, Austin, TX', company: 'SMB · Software', status: 'Active' },
-  // Contacts (UCP)
+  { id: 'umbrella-004', name: 'Umbrella Corp', type: 'Account', owner: 'Priya Nair', health: 'active', email: 'procurement@umbrella.com', phone: '+1 (302) 555-0201', address: '1 Corporate Way, Wilmington, DE', company: 'Enterprise · Pharma', status: 'Expansion in progress' },
+  { id: 'dunder-005', name: 'Dunder Mifflin', type: 'Account', owner: 'Sam Ortiz', health: 'active', email: 'accounting@dundermifflin.com', phone: '+1 (570) 555-0177', address: '1725 Slough Ave, Scranton, PA', company: 'Mid-Market · Paper & Office', status: 'Active' },
+  { id: 'stark-006', name: 'Stark Industries', type: 'Account', owner: 'David Kim', health: 'active', email: 'enterprise@stark.com', phone: '+1 (212) 555-0399', address: '200 Park Ave, New York, NY', company: 'Enterprise · Aerospace & Defense', status: 'Renewal in Q4' },
+  { id: 'wayne-007', name: 'Wayne Enterprises', type: 'Account', owner: 'Dana Lee', health: 'active', email: 'corp@wayne.com', phone: '+1 (212) 555-0488', address: '1 Wayne Tower, Gotham, NJ', company: 'Enterprise · Finance & Real Estate', status: 'Active' },
+  { id: 'hive-008', name: 'Hive Global', type: 'Account', owner: 'Sam Ortiz', health: 'inactive', email: 'ops@hiveglobal.io', phone: '+1 (415) 555-0319', address: '88 Freight Blvd, Oakland, CA', company: 'Mid-Market · Logistics', status: 'Churning' },
+  { id: 'pied-009', name: 'Pied Piper Inc.', type: 'Account', owner: 'Priya Nair', health: 'active', email: 'billing@piedpiper.com', phone: '+1 (650) 555-0212', address: '5230 Newell Rd, Palo Alto, CA', company: 'SMB · SaaS / Dev Tools', status: 'Trial — convert by EOQ' },
+  { id: 'vance-010', name: 'Vance Refrigeration', type: 'Account', owner: 'David Kim', health: 'active', email: 'ar@vancerefrig.com', phone: '+1 (570) 555-0106', address: '401 Industrial Park, Scranton, PA', company: 'SMB · HVAC & Industrial', status: 'Active' },
+
+  // ── Contacts ──────────────────────────────────────────────────────────────
   { id: 'c-dana', name: 'Dana Lee', type: 'Contact', owner: 'David Kim', health: 'active', email: 'dana.lee@acme.com', phone: '+1 (415) 555-0192', address: 'San Francisco, CA', company: 'Acme Corp', title: 'VP Operations', status: 'Appointment Today' },
   { id: 'c-sam', name: 'Sam Ortiz', type: 'Contact', owner: 'David Kim', health: 'active', email: 'sam.ortiz@globex.com', phone: '+1 (212) 555-0177', address: 'New York, NY', company: 'Globex Inc.', title: 'Procurement Lead', status: 'Follow-up due' },
-  // Employees (UEP)
+  { id: 'c-marcus', name: 'Marcus White', type: 'Contact', owner: 'Priya Nair', health: 'active', email: 'marcus.white@umbrella.com', phone: '+1 (302) 555-0233', address: 'Wilmington, DE', company: 'Umbrella Corp', title: 'CFO', status: 'Meeting scheduled' },
+  { id: 'c-rachel', name: 'Rachel Chen', type: 'Contact', owner: 'Sam Ortiz', health: 'active', email: 'r.chen@globex.com', phone: '+1 (212) 555-0155', address: 'New York, NY', company: 'Globex Inc.', title: 'VP Sales', status: 'Active' },
+  { id: 'c-jordan', name: 'Jordan Avery', type: 'Contact', owner: 'David Kim', health: 'inactive', email: 'javery@stark.com', phone: '+1 (212) 555-0411', address: 'New York, NY', company: 'Stark Industries', title: 'Director of Procurement', status: 'Unresponsive' },
+  { id: 'c-priya-m', name: 'Priya Malik', type: 'Contact', owner: 'Dana Lee', health: 'active', email: 'priya.malik@wayne.com', phone: '+1 (212) 555-0504', address: 'Gotham, NJ', company: 'Wayne Enterprises', title: 'Head of Operations', status: 'Active' },
+  { id: 'c-tyler', name: 'Tyler Ross', type: 'Contact', owner: 'Sam Ortiz', health: 'inactive', email: 'tyler@hiveglobal.io', phone: '+1 (415) 555-0341', address: 'Oakland, CA', company: 'Hive Global', title: 'Director of Logistics', status: 'At risk' },
+  { id: 'c-sofia', name: 'Sofia Reyes', type: 'Contact', owner: 'Priya Nair', health: 'active', email: 'sofia@piedpiper.com', phone: '+1 (650) 555-0229', address: 'Palo Alto, CA', company: 'Pied Piper Inc.', title: 'CTO', status: 'Trial evaluation' },
+
+  // ── Employees ─────────────────────────────────────────────────────────────
   { id: 'e-maria', name: 'María González', type: 'Employee', owner: 'David Kim', health: 'active', email: 'maria.gonzalez@aims.com', phone: '+1 (415) 555-0144', address: 'Austin, TX', company: 'People Ops · AIMS', title: 'Senior CSM', status: 'Active' },
   { id: 'e-tom', name: 'Tom Becker', type: 'Employee', owner: 'Priya Nair', health: 'active', email: 'tom.becker@aims.com', phone: '+1 (206) 555-0123', address: 'Seattle, WA', company: 'Sales · AIMS', title: 'Account Executive', status: 'Active' },
-  // Deals
+  { id: 'e-james', name: 'James Park', type: 'Employee', owner: 'David Kim', health: 'active', email: 'james.park@aims.com', phone: '+1 (512) 555-0187', address: 'Austin, TX', company: 'Product · AIMS', title: 'Product Manager', status: 'Active' },
+  { id: 'e-alicia', name: 'Alicia Moore', type: 'Employee', owner: 'Priya Nair', health: 'active', email: 'alicia.moore@aims.com', phone: '+1 (415) 555-0163', address: 'San Francisco, CA', company: 'Sales Engineering · AIMS', title: 'Sales Engineer', status: 'Active' },
+  { id: 'e-noah', name: 'Noah Kim', type: 'Employee', owner: 'David Kim', health: 'active', email: 'noah.kim@aims.com', phone: '+1 (512) 555-0199', address: 'Austin, TX', company: 'Data · AIMS', title: 'Data Analyst', status: 'Active' },
+  { id: 'e-fatima', name: 'Fatima Hassan', type: 'Employee', owner: 'Priya Nair', health: 'active', email: 'fatima.hassan@aims.com', phone: '+1 (206) 555-0141', address: 'Seattle, WA', company: 'Customer Success · AIMS', title: 'Customer Success Manager', status: 'Active' },
+
+  // ── Deals ─────────────────────────────────────────────────────────────────
   { id: 'deal-acme-q3', name: 'Acme Renewal — Q3', type: 'Deal', owner: 'Priya Nair', health: 'active', email: 'billing@acme.com', phone: '+1 (415) 555-0110', address: 'San Francisco, CA', company: 'Acme Corp', status: 'Negotiation' },
-  // Cases
+  { id: 'deal-globex-exp', name: 'Globex Expansion — EMEA', type: 'Deal', owner: 'Sam Ortiz', health: 'inactive', email: 'ap@globex.com', phone: '+1 (212) 555-0144', address: 'New York, NY', company: 'Globex Inc.', status: 'Stalled — awaiting budget' },
+  { id: 'deal-stark-ent', name: 'Stark Industries — Enterprise', type: 'Deal', owner: 'David Kim', health: 'active', email: 'enterprise@stark.com', phone: '+1 (212) 555-0399', address: 'New York, NY', company: 'Stark Industries', status: 'Proposal sent' },
+  { id: 'deal-wayne-new', name: 'Wayne Enterprises — Renewal', type: 'Deal', owner: 'Dana Lee', health: 'active', email: 'corp@wayne.com', phone: '+1 (212) 555-0488', address: 'Gotham, NJ', company: 'Wayne Enterprises', status: 'Contract review' },
+  { id: 'deal-pied-trial', name: 'Pied Piper — Trial to Enterprise', type: 'Deal', owner: 'Priya Nair', health: 'active', email: 'billing@piedpiper.com', phone: '+1 (650) 555-0212', address: 'Palo Alto, CA', company: 'Pied Piper Inc.', status: 'Demo scheduled' },
+  { id: 'deal-hive-annual', name: 'Hive Global — Pilot to Annual', type: 'Deal', owner: 'Sam Ortiz', health: 'inactive', email: 'ops@hiveglobal.io', phone: '+1 (415) 555-0319', address: 'Oakland, CA', company: 'Hive Global', status: 'At risk — churn signal' },
+
+  // ── Cases ─────────────────────────────────────────────────────────────────
   { id: 'case-4821', name: 'Case #4821 — Outage', type: 'Case', owner: 'Sam Ortiz', health: 'active', email: 'support@initech.com', phone: '+1 (512) 555-0188', address: 'Austin, TX', company: 'Initech LLC', status: 'Escalated' },
+  { id: 'case-5102', name: 'Case #5102 — Billing Dispute', type: 'Case', owner: 'María González', health: 'active', email: 'ap@globex.com', phone: '+1 (212) 555-0144', address: 'New York, NY', company: 'Globex Inc.', status: 'In progress' },
+  { id: 'case-5217', name: 'Case #5217 — API Integration', type: 'Case', owner: 'Tom Becker', health: 'active', email: 'billing@piedpiper.com', phone: '+1 (650) 555-0212', address: 'Palo Alto, CA', company: 'Pied Piper Inc.', status: 'Waiting on customer' },
+  { id: 'case-5340', name: 'Case #5340 — Feature Request', type: 'Case', owner: 'James Park', health: 'active', email: 'billing@acme.com', phone: '+1 (415) 555-0110', address: 'San Francisco, CA', company: 'Acme Corp', status: 'Under review' },
+  { id: 'case-5489', name: 'Case #5489 — Onboarding Block', type: 'Case', owner: 'Fatima Hassan', health: 'active', email: 'enterprise@stark.com', phone: '+1 (212) 555-0399', address: 'New York, NY', company: 'Stark Industries', status: 'Open' },
+  { id: 'case-5601', name: 'Case #5601 — Data Export', type: 'Case', owner: 'Alicia Moore', health: 'active', email: 'corp@wayne.com', phone: '+1 (212) 555-0488', address: 'Gotham, NJ', company: 'Wayne Enterprises', status: 'Resolved' },
 ]
 
 // Widget catalog — realistic for an enterprise BI workspace (dozens of widgets
