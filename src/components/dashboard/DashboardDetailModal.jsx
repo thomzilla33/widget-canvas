@@ -23,83 +23,102 @@ const SKELETON_META = {
   'AI Summary': { color: 'bg-aims-blue/10 text-aims-blue',                     border: 'border-aims-blue/20' },
 }
 
-// Skeleton-specific micro SVG mockup — gives each tile a visual hint of its chart type.
-function SkeletonMock({ skeleton, isLarge }) {
-  const h = isLarge ? 28 : 22
-  const fill = 'currentColor'
-  const bar = 'rounded-sm opacity-40'
+// Per-index varied KPI display values so tiles don't all look identical.
+const KPI_VALS  = ['$1.24M', '84%',   '12.4K', '91%',   '$48K',  '67%',   '3.2K',  '78%'  ]
+const KPI_DELTA = ['+8.2%',  '+2.1',  '+5.4K', '-3.1%', '+12%',  '+4.8%', '-0.8K', '+6.3%']
+// Bar-height patterns — two sets so adjacent chart tiles look different.
+const BARS_A = [40, 65, 45, 90, 60, 80, 55]
+const BARS_B = [70, 50, 85, 40, 75, 60, 90]
+
+function SkeletonMock({ skeleton, index }) {
+  const kpiVal   = KPI_VALS [index % KPI_VALS.length]
+  const kpiDelta = KPI_DELTA[index % KPI_DELTA.length]
+  const isNeg    = kpiDelta.startsWith('-')
+  const bars     = index % 2 === 0 ? BARS_A : BARS_B
 
   switch (skeleton) {
     case 'KPI':
       return (
-        <div className="flex items-end gap-1 opacity-40">
-          <span className="text-[15px] font-bold leading-none">84%</span>
-          <span className="mb-0.5 text-[9px] text-green-500">▲2.1</span>
+        <div className="flex flex-col gap-0.5 opacity-50">
+          <span className="text-[13px] font-bold leading-none">{kpiVal}</span>
+          <span className={`text-[9px] font-semibold ${isNeg ? 'text-red-400' : 'text-green-500'}`}>
+            {kpiDelta} vs last period
+          </span>
         </div>
       )
     case 'Chart':
+      // Div-based bars — no SVG stretching artefacts.
       return (
-        <svg width="100%" height={h} viewBox={`0 0 48 ${h}`} preserveAspectRatio="none" aria-hidden="true" className="opacity-40">
-          {[6,10,7,14,9,12,11].map((v, i) => (
-            <rect key={i} x={i * 7} y={h - v} width={5} height={v} rx={1.5} fill={fill} />
+        <div className="flex w-full items-end gap-[2px] opacity-45" style={{ height: 20 }}>
+          {bars.map((h, i) => (
+            <div key={i} className="flex-1 min-w-0 rounded-[1.5px] bg-current" style={{ height: `${h}%` }} />
           ))}
-        </svg>
+        </div>
       )
     case 'Donut':
     case 'Gauge': {
-      const r = 10, cx = 14, cy = 14
-      const arc = (pct) => {
-        const angle = pct * 2 * Math.PI - Math.PI / 2
-        return `${cx + r * Math.cos(angle)},${cy + r * Math.sin(angle)}`
-      }
+      // Centred arc that fills the available space better.
+      const r = 13, cx = 16, cy = 16
+      const pct = index % 2 === 0 ? 0.72 : 0.58
+      const angle = pct * 2 * Math.PI - Math.PI / 2
+      const ex = cx + r * Math.cos(angle)
+      const ey = cy + r * Math.sin(angle)
+      const large = pct > 0.5 ? 1 : 0
       return (
-        <svg width={28} height={28} viewBox="0 0 28 28" aria-hidden="true" className="opacity-40">
-          <circle cx={cx} cy={cy} r={r} fill="none" stroke={fill} strokeWidth={3} strokeOpacity={0.2} />
-          <path d={`M ${cx},${cy - r} A ${r} ${r} 0 1 1 ${arc(0.72)}`} fill="none" stroke={fill} strokeWidth={3} strokeLinecap="round" />
+        <svg width={36} height={36} viewBox="0 0 32 32" aria-hidden="true" className="opacity-45">
+          <circle cx={cx} cy={cy} r={r} fill="none" stroke="currentColor" strokeWidth={3} strokeOpacity={0.18} />
+          <path
+            d={`M ${cx},${cy - r} A ${r} ${r} 0 ${large} 1 ${ex},${ey}`}
+            fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round"
+          />
         </svg>
       )
     }
     case 'Table':
       return (
-        <div className="flex flex-col gap-1 opacity-35">
-          {[100, 80, 65].map((w, i) => (
-            <div key={i} className={`h-1.5 rounded-full bg-current`} style={{ width: `${w}%` }} />
+        <div className="flex flex-col gap-[3px] opacity-40">
+          <div className="flex gap-1">
+            {[35, 45, 20].map((w, i) => <div key={i} className="h-1.5 rounded-full bg-current opacity-30" style={{ width: `${w}%` }} />)}
+          </div>
+          {[100, 88, 72].map((w, i) => (
+            <div key={i} className="h-1 rounded-full bg-current" style={{ width: `${w}%` }} />
           ))}
         </div>
       )
     case 'List':
       return (
-        <div className="flex flex-col gap-1 opacity-35">
-          {[90, 70, 55].map((w, i) => (
+        <div className="flex flex-col gap-[3px] opacity-40">
+          {[92, 74, 58].map((w, i) => (
             <div key={i} className="flex items-center gap-1">
-              <div className="h-1 w-1 shrink-0 rounded-full bg-current opacity-60" />
-              <div className="h-1.5 rounded-full bg-current" style={{ width: `${w}%` }} />
+              <div className="h-1 w-1 shrink-0 rounded-full bg-current opacity-70" />
+              <div className="h-1 rounded-full bg-current" style={{ width: `${w}%` }} />
             </div>
           ))}
         </div>
       )
-    case 'Map':
+    case 'Map': {
+      // Dots as SVG but fixed viewBox — preserveAspectRatio="xMidYMid meet" keeps proportions.
+      const dots = [[8,5],[22,9],[36,4],[14,15],[30,13],[6,19],[40,17],[24,20]]
       return (
-        <svg width="100%" height={h} viewBox={`0 0 48 ${h}`} preserveAspectRatio="none" aria-hidden="true" className="opacity-30">
-          {[[8,6],[22,10],[36,5],[14,16],[30,14],[8,20],[40,18]].map(([x, y], i) => (
-            <circle key={i} cx={x} cy={y} r={2.5} fill={fill} />
-          ))}
+        <svg width="100%" height={20} viewBox="0 0 48 24" preserveAspectRatio="xMidYMid meet" aria-hidden="true" className="opacity-40">
+          {dots.map(([x, y], i) => <circle key={i} cx={x} cy={y} r={2.2} fill="currentColor" />)}
         </svg>
       )
-    case 'Timeline':
+    }
+    case 'Timeline': {
+      const dots = [4, 14, 26, 38, 46]
       return (
-        <svg width="100%" height={h} viewBox={`0 0 48 ${h}`} preserveAspectRatio="none" aria-hidden="true" className="opacity-35">
-          <line x1={0} y1={h / 2} x2={48} y2={h / 2} stroke={fill} strokeWidth={1.5} strokeOpacity={0.4} />
-          {[4, 14, 26, 38, 46].map((x, i) => (
-            <circle key={i} cx={x} cy={h / 2} r={2.5} fill={fill} />
-          ))}
+        <svg width="100%" height={16} viewBox="0 0 48 16" preserveAspectRatio="xMidYMid meet" aria-hidden="true" className="opacity-40">
+          <line x1={0} y1={8} x2={48} y2={8} stroke="currentColor" strokeWidth={1.5} strokeOpacity={0.35} />
+          {dots.map((x, i) => <circle key={i} cx={x} cy={8} r={2.5} fill="currentColor" />)}
         </svg>
       )
+    }
     case 'AI Summary':
       return (
-        <div className="flex flex-col gap-1 opacity-30">
-          {[95, 80, 60].map((w, i) => (
-            <div key={i} className="h-1.5 rounded-full bg-current" style={{ width: `${w}%` }} />
+        <div className="flex flex-col gap-[3px] opacity-35">
+          {[96, 82, 64, 50].map((w, i) => (
+            <div key={i} className="h-[3px] rounded-full bg-current" style={{ width: `${w}%` }} />
           ))}
         </div>
       )
@@ -272,7 +291,7 @@ export default function DashboardDetailModal({ dashboard, isAdmin, onClose, onOp
                       </div>
                       {/* Micro mockup */}
                       <div className={`flex-1 overflow-hidden ${meta.color.split(' ')[1] || 'text-gray-400'}`}>
-                        <SkeletonMock skeleton={w?.skeleton} isLarge={isLarge} />
+                        <SkeletonMock skeleton={w?.skeleton} index={i} />
                       </div>
                       {/* Widget name */}
                       <span className="truncate text-[10px] font-medium text-gray-600 dark:text-slate-300">
