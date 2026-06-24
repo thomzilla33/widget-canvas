@@ -10,6 +10,7 @@ import AIGenerateModal from '../components/ai/AIGenerateModal.jsx'
 import CreateLauncher from '../components/create/CreateLauncher.jsx'
 import DeleteDashboardDialog from '../components/dashboard/DeleteDashboardDialog.jsx'
 import DuplicateDashboardDialog from '../components/dashboard/DuplicateDashboardDialog.jsx'
+import DashboardDetailModal from '../components/dashboard/DashboardDetailModal.jsx'
 import { useStaggerReveal } from '../hooks/useReveal.js'
 import { audienceLabel } from '../data/audiences.js'
 import { useDashboards } from '../state/DashboardsContext.jsx'
@@ -39,6 +40,7 @@ export default function DashboardList() {
   const pendingPlace = location.state?.pendingPlace || null
   const { isAdmin } = useRole()
   const [menuId, setMenuId] = useState(null) // per-card ⋯ menu (by dashboard id)
+  const [detailDashboard, setDetailDashboard] = useState(null)
   const [deletingDashboard, setDeletingDashboard] = useState(null)
   const [duplicatingDashboard, setDuplicatingDashboard] = useState(null)
   const [search, setSearch] = useState('')
@@ -258,8 +260,8 @@ export default function DashboardList() {
                 key={d.id}
                 role="button"
                 tabIndex={0}
-                onClick={(e) => { if (!e.target.closest('button')) navigate(`/dashboard/${d.id}`) }}
-                onKeyDown={(e) => { if (e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); navigate(`/dashboard/${d.id}`) } }}
+                onClick={(e) => { if (!e.target.closest('button')) setDetailDashboard(d) }}
+                onKeyDown={(e) => { if (e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); setDetailDashboard(d) } }}
                 className={`catalog-card min-h-[152px] cursor-pointer text-left${menuId === d.id ? ' z-10' : ''}`}
               >
                 <div className="absolute top-3 right-3 flex items-center gap-1.5">
@@ -372,6 +374,16 @@ export default function DashboardList() {
       )}
 
       {aiOpen && <AIGenerateModal mode="dashboard" onClose={() => setAiOpen(false)} />}
+
+      {detailDashboard && (
+        <DashboardDetailModal
+          dashboard={detailDashboard}
+          isAdmin={isAdmin}
+          onClose={() => setDetailDashboard(null)}
+          onOpen={() => { setDetailDashboard(null); navigate(`/dashboard/${detailDashboard.id}`) }}
+          onEdit={() => { setDetailDashboard(null); navigate(`/dashboard/${detailDashboard.id}/canvas`) }}
+        />
+      )}
     </div>
   )
 }
