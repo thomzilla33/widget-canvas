@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import {
   Hash,
   LineChart,
@@ -219,38 +219,150 @@ function groupEntitiesByCategory(entities) {
 
 export function EntityPicker({ entityId, onSelect }) {
   const [editing, setEditing] = useState(false)
+  const [query, setQuery] = useState('')
+  const [focusedIdx, setFocusedIdx] = useState(-1)
+  const searchRef = useRef(null)
+  const listRef = useRef(null)
   const selected = MODEL_ENTITIES.find((e) => e.id === entityId) || null
 
+  // Auto-focus search when picker opens
+  useEffect(() => {
+    if (!selected || editing) {
+      searchRef.current?.focus()
+    }
+  }, [editing]) // eslint-disable-line react-hooks/exhaustive-deps
+
   if (selected && !editing) {
-    return <SelectedEntity entity={selected} onChange={() => setEditing(true)} />
+    return <SelectedEntity entity={selected} onChange={() => { setEditing(true); setQuery('') }} />
   }
 
-  const groups = groupEntitiesByCategory(MODEL_ENTITIES)
-  const pick = (id) => { onSelect(id); setEditing(false) }
+  const q = query.trim().toLowerCase()
+  const filtered = q
+    ? MODEL_ENTITIES.filter((e) =>
+        e.name.toLowerCase().includes(q) ||
+        e.label.toLowerCase().includes(q) ||
+        e.description.toLowerCase().includes(q) ||
+        e.poweredBy.some((p) => p.toLowerCase().includes(q))
+      )
+    : MODEL_ENTITIES
+
+  const groups = q ? null : groupEntitiesByCategory(MODEL_ENTITIES)
+
+  const pick = (id) => { onSelect(id); setEditing(false); setQuery('') }
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      setFocusedIdx((i) => Math.min(i + 1, filtered.length - 1))
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      setFocusedIdx((i) => Math.max(i - 1, 0))
+    } else if (e.key === 'Enter') {
+      e.preventDefault()
+      if (focusedIdx >= 0 && filtered[focusedIdx]) pick(filtered[focusedIdx].id)
+    } else if (e.key === 'Escape') {
+      if (selected) { setEditing(false); setQuery('') }
+    }
+  }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2" role="combobox" aria-expanded="true" aria-haspopup="listbox">
+      {/* Cancel / back link */}
       {selected && (
-        <button onClick={() => setEditing(false)} className="inline-flex items-center gap-1 text-xs font-medium text-gray-500 hover:text-aims-blue dark:text-slate-400">
+        <button
+          onClick={() => { setEditing(false); setQuery('') }}
+          className="inline-flex items-center gap-1 text-xs font-medium text-gray-500 hover:text-aims-blue dark:text-slate-400 dark:hover:text-aims-blue transition-colors"
+        >
           <ChevronLeft size={13} aria-hidden="true" /> Keep {selected.name}
         </button>
       )}
 
-      <div className="max-h-[380px] space-y-3 overflow-auto pr-1">
-        {groups.map(([cat, items]) => (
-          <div key={cat}>
-            <div className="mb-1.5 text-[10px] font-bold uppercase tracking-wide text-gray-500 dark:text-slate-400">{cat}</div>
-            <div className="space-y-1.5">
-              {items.map((e) => (
-                <EntityRow key={e.id} entity={e} selected={entityId === e.id} onSelect={pick} />
-              ))}
-            </div>
-          </div>
-        ))}
+      {/* Search bar */}
+      <div className="relative">
+        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500 pointer-events-none" aria-hidden="true" />
+        <input
+          ref={searchRef}
+          type="text"
+          value={query}
+          onChange={(e) => { setQuery(e.target.value); setFocusedIdx(-1) }}
+          onKeyDown={handleKeyDown}
+          placeholder="Search entities — customers, deals, tickets…"
+          aria-label="Search data entities"
+          aria-controls="entity-listbox"
+          aria-activedescendant={focusedIdx >= 0 && filtered[focusedIdx] ? `entity-opt-${filtered[focusedIdx].id}` : undefined}
+          autoComplete="off"
+          className="w-full rounded-lg border border-gray-200 bg-white py-2.5 pl-9 pr-3 text-sm text-gray-900 placeholder-gray-400 transition-colors focus:border-aims-blue focus:outline-none focus:ring-2 focus:ring-aims-blue/20 dark:border-white/10 dark:bg-white/5 dark:text-slate-100 dark:placeholder-slate-500 dark:focus:border-aims-blue/60"
+        />
+        {query && (
+          <button
+            onClick={() => { setQuery(''); setFocusedIdx(-1); searchRef.current?.focus() }}
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded p-0.5 text-gray-400 hover:text-gray-600 dark:text-slate-500 dark:hover:text-slate-300"
+            aria-label="Clear search"
+          >
+            ✕
+          </button>
+        )}
       </div>
 
-      <p className="text-[11px] text-gray-400 dark:text-slate-500">
-        Entities are pre-resolved models from Data Studio — ETL already done.
+      {/* Entity list */}
+      <div
+        id="entity-listbox"
+        ref={listRef}
+        role="listbox"
+        aria-label="Data entities"
+        className="max-h-[340px] overflow-auto pr-0.5 space-y-0.5"
+      >
+        {filtered.length === 0 ? (
+          <div className="py-10 text-center">
+            <p className="text-sm font-medium text-gray-700 dark:text-slate-200">No entities match "{query}"</p>
+            <p className="mt-1 text-xs text-gray-500 dark:text-slate-400">
+              Try "customers", "deals", "tickets", or "workflows"
+            </p>
+          </div>
+        ) : q ? (
+          // Flat filtered results
+          <div className="space-y-1.5 py-0.5">
+            <p className="px-1 text-[10px] text-gray-400 dark:text-slate-500">{filtered.length} result{filtered.length !== 1 ? 's' : ''}</p>
+            {filtered.map((e, i) => (
+              <EntityRow
+                key={e.id}
+                entity={e}
+                selected={entityId === e.id}
+                focused={focusedIdx === i}
+                optId={`entity-opt-${e.id}`}
+                onSelect={pick}
+                onHover={() => setFocusedIdx(i)}
+              />
+            ))}
+          </div>
+        ) : (
+          // Grouped by category
+          groups.map(([cat, items]) => (
+            <div key={cat} className="py-1">
+              <div className="mb-1.5 px-1 text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-slate-500">{cat}</div>
+              <div className="space-y-1">
+                {items.map((e) => {
+                  const globalIdx = filtered.indexOf(e)
+                  return (
+                    <EntityRow
+                      key={e.id}
+                      entity={e}
+                      selected={entityId === e.id}
+                      focused={focusedIdx === globalIdx}
+                      optId={`entity-opt-${e.id}`}
+                      onSelect={pick}
+                      onHover={() => setFocusedIdx(globalIdx)}
+                    />
+                  )
+                })}
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      <p className="text-[10px] text-gray-400 dark:text-slate-500">
+        Entities are pre-resolved models — ETL lives in Data Studio.
       </p>
     </div>
   )
@@ -259,50 +371,63 @@ export function EntityPicker({ entityId, onSelect }) {
 function SelectedEntity({ entity, onChange }) {
   const Icon = ENTITY_ICONS[entity.iconName] || Database
   return (
-    <div className="flex items-start gap-3 rounded-lg border border-aims-blue/40 bg-aims-blue/5 p-3 dark:bg-aims-blue/10">
-      <span className="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-lg text-white" style={{ background: entity.color }}>
+    <div className="flex items-center gap-3 rounded-lg border border-aims-blue/40 bg-aims-blue/5 p-3 dark:bg-aims-blue/10">
+      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg text-white" style={{ background: entity.color }}>
         <Icon size={16} aria-hidden="true" />
       </span>
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1.5">
           <span className="truncate text-sm font-semibold text-gray-900 dark:text-slate-100">{entity.name}</span>
           <Check size={13} className="shrink-0 text-aims-blue" aria-hidden="true" />
-          {entity.hasPII && <Lock size={11} className="shrink-0 text-gray-500 dark:text-slate-400" />}
+          {entity.hasPII && <Lock size={11} className="shrink-0 text-amber-500" title="Contains PII" />}
         </div>
-        <div className="truncate text-[11px] text-gray-500 dark:text-slate-400">{entity.label}</div>
-        <div className="mt-1 flex flex-wrap gap-1">
+        <div className="flex flex-wrap items-center gap-1 mt-0.5">
+          <span className="text-[11px] text-gray-500 dark:text-slate-400">{entity.label}</span>
+          <span className="text-[10px] text-gray-300 dark:text-slate-600">·</span>
           {entity.poweredBy.map((src) => (
             <span key={src} className="rounded-full border border-gray-200 bg-white px-1.5 py-0.5 text-[10px] text-gray-500 dark:border-white/10 dark:bg-white/5 dark:text-slate-400">{src}</span>
           ))}
         </div>
       </div>
-      <button onClick={onChange} className="btn-secondary !h-8 shrink-0 !px-3 text-xs">Change</button>
+      <button onClick={onChange} className="btn-secondary !h-7 shrink-0 !px-3 text-xs">Change</button>
     </div>
   )
 }
 
-function EntityRow({ entity, selected, onSelect }) {
+function EntityRow({ entity, selected, focused, optId, onSelect, onHover }) {
   const Icon = ENTITY_ICONS[entity.iconName] || Database
-  const totalFields = entity.metrics.length + entity.recordSets.length
+  const totalMetrics = entity.metrics.length
+  const totalRecords = entity.recordSets.length
   return (
     <button
+      id={optId}
+      role="option"
+      aria-selected={selected}
       onClick={() => onSelect(entity.id)}
-      className={`flex w-full cursor-pointer items-start gap-3 rounded-lg border p-3 text-left transition-shadow hover:bg-gray-50 hover:shadow-sm dark:hover:bg-white/5 ${
-        selected ? 'border-aims-blue ring-2 ring-aims-blue/30' : 'border-gray-200 dark:border-white/10'
-      }`}
+      onMouseEnter={onHover}
+      className={`flex w-full cursor-pointer items-start gap-3 rounded-lg border p-2.5 text-left transition-all duration-150
+        ${selected
+          ? 'border-aims-blue bg-aims-blue/5 ring-2 ring-aims-blue/20 dark:bg-aims-blue/10'
+          : focused
+            ? 'border-aims-blue/50 bg-gray-50 dark:border-aims-blue/30 dark:bg-white/5'
+            : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50/80 dark:border-white/8 dark:hover:border-white/15 dark:hover:bg-white/[0.04]'
+        }`}
     >
       <span className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-lg text-white" style={{ background: entity.color }}>
-        <Icon size={15} aria-hidden="true" />
+        <Icon size={14} aria-hidden="true" />
       </span>
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1.5">
           <span className="text-sm font-semibold text-gray-900 dark:text-slate-100">{entity.name}</span>
-          {entity.hasPII && <Lock size={11} className="shrink-0 text-gray-400 dark:text-slate-500" />}
+          {entity.hasPII && <Lock size={10} className="shrink-0 text-amber-500" title="Contains PII" />}
+          {selected && <Check size={11} className="shrink-0 text-aims-blue" />}
         </div>
         <div className="text-[11px] text-gray-500 dark:text-slate-400">{entity.label}</div>
-        <div className="mt-1.5 flex flex-wrap items-center gap-1">
-          <span className="text-[10px] text-gray-400 dark:text-slate-500">{totalFields} metrics</span>
-          <span className="text-[10px] text-gray-400 dark:text-slate-500">·</span>
+        <p className="mt-0.5 line-clamp-1 text-[10px] text-gray-400 dark:text-slate-500">{entity.description}</p>
+        <div className="mt-1.5 flex flex-wrap items-center gap-x-1.5 gap-y-1">
+          <span className="text-[10px] text-gray-400 dark:text-slate-500">
+            {totalMetrics}m · {totalRecords}r · {entity.recordCount.toLocaleString()} records
+          </span>
           {entity.poweredBy.map((src) => (
             <span key={src} className="rounded-full border border-gray-200 bg-white px-1.5 py-0.5 text-[10px] text-gray-500 dark:border-white/10 dark:bg-white/5 dark:text-slate-400">{src}</span>
           ))}
@@ -314,28 +439,73 @@ function EntityRow({ entity, selected, onSelect }) {
 
 /* ── 2. Metric / record picker — aggregate Metrics + row-level Record sets ── */
 export function MetricPicker({ source, metricId, onSelect }) {
+  const [query, setQuery] = useState('')
+  const searchRef = useRef(null)
+
   if (!source) {
     return <EmptyState icon="🔌" title="Pick an entity first" description="Choose a data entity above to see its available metrics and record sets." />
   }
   const { metrics, recordSets } = source
-  if (!metrics.length && !recordSets.length) {
-    return <EmptyState icon="📭" title="Nothing to map yet" description="This source doesn’t expose any metrics or records." />
+  const totalItems = metrics.length + recordSets.length
+  if (!totalItems) {
+    return <EmptyState icon="📭" title="Nothing to map yet" description="This source doesn't expose any metrics or records." />
   }
+
+  const q = query.trim().toLowerCase()
+  const filteredMetrics = q ? metrics.filter((m) => m.name.toLowerCase().includes(q)) : metrics
+  const filteredRecords = q ? recordSets.filter((r) => r.name.toLowerCase().includes(q)) : recordSets
+  const noResults = q && !filteredMetrics.length && !filteredRecords.length
+
   return (
-    <div className="space-y-4">
-      {metrics.length > 0 && (
-        <FieldSection title="Metrics" hint="Aggregated values">
-          {metrics.map((m) => (
-            <FieldButton key={m.id} field={m} selected={metricId === m.id} onSelect={onSelect} />
-          ))}
-        </FieldSection>
+    <div className="space-y-3">
+      {/* Search bar — only when there are enough items to warrant it */}
+      {totalItems > 5 && (
+        <div className="relative">
+          <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500 pointer-events-none" aria-hidden="true" />
+          <input
+            ref={searchRef}
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Filter metrics and record sets…"
+            aria-label="Filter available metrics"
+            autoComplete="off"
+            className="w-full rounded-lg border border-gray-200 bg-white py-2 pl-8 pr-8 text-sm text-gray-900 placeholder-gray-400 transition-colors focus:border-aims-blue focus:outline-none focus:ring-2 focus:ring-aims-blue/20 dark:border-white/10 dark:bg-white/5 dark:text-slate-100 dark:placeholder-slate-500 dark:focus:border-aims-blue/60"
+          />
+          {query && (
+            <button
+              onClick={() => { setQuery(''); searchRef.current?.focus() }}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded p-0.5 text-gray-400 hover:text-gray-600 dark:text-slate-500 dark:hover:text-slate-300 text-xs"
+              aria-label="Clear filter"
+            >
+              ✕
+            </button>
+          )}
+        </div>
       )}
-      {recordSets.length > 0 && (
-        <FieldSection title="Record sets" hint="Contacts & row-level data">
-          {recordSets.map((r) => (
-            <FieldButton key={r.id} field={r} selected={metricId === r.id} onSelect={onSelect} />
-          ))}
-        </FieldSection>
+
+      {noResults ? (
+        <div className="py-8 text-center">
+          <p className="text-sm font-medium text-gray-700 dark:text-slate-200">No results for "{query}"</p>
+          <p className="mt-1 text-xs text-gray-500 dark:text-slate-400">Try a shorter keyword</p>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {filteredMetrics.length > 0 && (
+            <FieldSection title="Metrics" hint={`${filteredMetrics.length} aggregated`}>
+              {filteredMetrics.map((m) => (
+                <FieldButton key={m.id} field={m} selected={metricId === m.id} onSelect={onSelect} />
+              ))}
+            </FieldSection>
+          )}
+          {filteredRecords.length > 0 && (
+            <FieldSection title="Record sets" hint={`${filteredRecords.length} row-level`}>
+              {filteredRecords.map((r) => (
+                <FieldButton key={r.id} field={r} selected={metricId === r.id} onSelect={onSelect} />
+              ))}
+            </FieldSection>
+          )}
+        </div>
       )}
     </div>
   )
@@ -613,7 +783,7 @@ export function FormatPanel({ format, setFormat, goal, setGoal, showGoal = true 
         </div>
       </div>
 
-      {/* Currency already adds “$” and Percent adds “%”, so hide the matching field to avoid double symbols. */}
+      {/* Currency already adds "$" and Percent adds "%", so hide the matching field to avoid double symbols. */}
       <div className="grid grid-cols-2 gap-3">
         {f.style !== 'currency' && (
           <Field label="Prefix">
