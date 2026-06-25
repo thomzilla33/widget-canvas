@@ -209,23 +209,20 @@ function SourceRow({ source, selected, onSelect }) {
   )
 }
 
-/* ── 1b. Entity picker — model entities from the semantic layer (replaces SourcePicker in builder) ── */
+/* ── 1b. Entity picker — modal marketplace for data model entities ── */
 
-export function EntityPicker({ entityId, onSelect }) {
-  const [editing, setEditing] = useState(false)
+function EntityPickerModal({ entityId, onSelect, onClose }) {
   const [query, setQuery] = useState('')
   const [activeCat, setActiveCat] = useState('All')
   const [focusedIdx, setFocusedIdx] = useState(-1)
   const searchRef = useRef(null)
-  const selected = MODEL_ENTITIES.find((e) => e.id === entityId) || null
 
   useEffect(() => {
-    if (!selected || editing) searchRef.current?.focus()
-  }, [editing]) // eslint-disable-line react-hooks/exhaustive-deps
-
-  if (selected && !editing) {
-    return <SelectedEntity entity={selected} onChange={() => { setEditing(true); setQuery('') }} />
-  }
+    searchRef.current?.focus()
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => { document.body.style.overflow = prev }
+  }, [])
 
   const q = query.trim().toLowerCase()
   const filtered = q
@@ -239,123 +236,215 @@ export function EntityPicker({ entityId, onSelect }) {
       ? MODEL_ENTITIES
       : MODEL_ENTITIES.filter((e) => e.category === activeCat)
 
-  const pick = (id) => { onSelect(id); setEditing(false); setQuery('') }
-
   const handleKeyDown = (e) => {
     if (e.key === 'ArrowDown') {
-      e.preventDefault()
-      setFocusedIdx((i) => Math.min(i + 1, filtered.length - 1))
+      e.preventDefault(); setFocusedIdx((i) => Math.min(i + 1, filtered.length - 1))
     } else if (e.key === 'ArrowUp') {
-      e.preventDefault()
-      setFocusedIdx((i) => Math.max(i - 1, 0))
+      e.preventDefault(); setFocusedIdx((i) => Math.max(i - 1, 0))
     } else if (e.key === 'Enter') {
       e.preventDefault()
-      if (focusedIdx >= 0 && filtered[focusedIdx]) pick(filtered[focusedIdx].id)
+      if (focusedIdx >= 0 && filtered[focusedIdx]) onSelect(filtered[focusedIdx].id)
     } else if (e.key === 'Escape') {
-      if (selected) { setEditing(false); setQuery('') }
+      onClose()
     }
   }
 
   const cats = ['All', ...ENTITY_CATEGORIES]
 
   return (
-    <div className="space-y-2" role="combobox" aria-expanded="true" aria-haspopup="listbox">
-      {/* Search + Cancel */}
-      <div className="flex items-center gap-2">
-        <div className="relative flex-1">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500 pointer-events-none" aria-hidden="true" />
-          <input
-            ref={searchRef}
-            type="text"
-            value={query}
-            onChange={(e) => { setQuery(e.target.value); setFocusedIdx(-1) }}
-            onKeyDown={handleKeyDown}
-            placeholder="Search entities…"
-            aria-label="Search data entities"
-            aria-controls="entity-listbox"
-            aria-activedescendant={focusedIdx >= 0 && filtered[focusedIdx] ? `entity-opt-${filtered[focusedIdx].id}` : undefined}
-            autoComplete="off"
-            className="w-full rounded-lg border border-gray-200 bg-white py-2 pl-9 pr-3 text-sm text-gray-900 placeholder-gray-400 transition-colors focus:border-aims-blue focus:outline-none focus:ring-2 focus:ring-aims-blue/20 dark:border-white/10 dark:bg-white/5 dark:text-slate-100 dark:placeholder-slate-500 dark:focus:border-aims-blue/60"
-          />
-          {query && (
-            <button
-              onClick={() => { setQuery(''); setFocusedIdx(-1); searchRef.current?.focus() }}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:text-slate-500 dark:hover:text-slate-300"
-              aria-label="Clear search"
-            >
-              ✕
-            </button>
+    <div
+      className="fixed inset-0 z-[200] flex items-center justify-center p-4"
+      onKeyDown={handleKeyDown}
+    >
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} aria-hidden="true" />
+
+      {/* Dialog */}
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Choose an entity"
+        className="relative z-10 flex w-full max-w-[620px] flex-col rounded-2xl overflow-hidden shadow-2xl"
+        style={{ background: 'var(--canvas)', border: '1px solid var(--border)', maxHeight: 'min(600px, 90vh)' }}
+      >
+        {/* Header */}
+        <div className="flex shrink-0 items-start justify-between px-5 pt-5 pb-4" style={{ borderBottom: '1px solid var(--border)' }}>
+          <div>
+            <h2 className="text-sm font-semibold text-gray-900 dark:text-slate-100">Choose an entity</h2>
+            <p className="mt-0.5 text-xs text-gray-500 dark:text-slate-400">Select the data model this widget reads from</p>
+          </div>
+          <button
+            type="button" onClick={onClose} aria-label="Close"
+            className="ml-4 grid h-7 w-7 shrink-0 place-items-center rounded-lg text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-white/8 dark:hover:text-slate-200"
+          >
+            ✕
+          </button>
+        </div>
+
+        {/* Search */}
+        <div className="shrink-0 px-5 pt-4 pb-3">
+          <div className="relative">
+            <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500 pointer-events-none" aria-hidden="true" />
+            <input
+              ref={searchRef}
+              type="text"
+              value={query}
+              onChange={(e) => { setQuery(e.target.value); setFocusedIdx(-1) }}
+              placeholder="Search entities — customers, deals, tickets, workflows…"
+              aria-label="Search data entities"
+              aria-controls="entity-modal-listbox"
+              aria-activedescendant={focusedIdx >= 0 && filtered[focusedIdx] ? `em-opt-${filtered[focusedIdx].id}` : undefined}
+              autoComplete="off"
+              className="w-full rounded-xl border border-gray-200 bg-white py-2.5 pl-10 pr-9 text-sm text-gray-900 placeholder-gray-400 transition-colors focus:border-aims-blue focus:outline-none focus:ring-2 focus:ring-aims-blue/20 dark:border-white/10 dark:bg-white/5 dark:text-slate-100 dark:placeholder-slate-500 dark:focus:border-aims-blue/60"
+            />
+            {query && (
+              <button
+                type="button"
+                onClick={() => { setQuery(''); setFocusedIdx(-1); searchRef.current?.focus() }}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 transition-colors hover:text-gray-600 dark:text-slate-500 dark:hover:text-slate-300"
+                aria-label="Clear search"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Category pills */}
+        {!q && (
+          <div className="shrink-0 flex flex-wrap gap-1.5 px-5 pb-3">
+            {cats.map((cat) => (
+              <button
+                key={cat} type="button"
+                onClick={() => { setActiveCat(cat); setFocusedIdx(-1) }}
+                className={`cursor-pointer rounded-full border px-3 py-1 text-[11px] font-medium transition-colors ${
+                  activeCat === cat
+                    ? 'border-aims-blue bg-aims-blue text-white'
+                    : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:bg-gray-50 dark:border-white/10 dark:bg-white/5 dark:text-slate-400 dark:hover:border-white/20'
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Entity cards — scrollable */}
+        <div
+          id="entity-modal-listbox"
+          role="listbox"
+          aria-label="Data entities"
+          className="min-h-0 flex-1 overflow-auto px-5 pb-4 space-y-2"
+        >
+          {q && filtered.length > 0 && (
+            <p className="pb-0.5 text-[11px] text-gray-400 dark:text-slate-500">
+              {filtered.length} result{filtered.length !== 1 ? 's' : ''} for &ldquo;{query}&rdquo;
+            </p>
+          )}
+          {filtered.length === 0 ? (
+            <div className="py-10 text-center">
+              <p className="text-sm font-medium text-gray-700 dark:text-slate-200">No entities match &ldquo;{query}&rdquo;</p>
+              <p className="mt-1 text-xs text-gray-500 dark:text-slate-400">Try &ldquo;customers&rdquo;, &ldquo;deals&rdquo;, or &ldquo;workflows&rdquo;</p>
+            </div>
+          ) : (
+            filtered.map((e, i) => (
+              <EntityCard
+                key={e.id} entity={e}
+                selected={entityId === e.id}
+                focused={focusedIdx === i}
+                optId={`em-opt-${e.id}`}
+                onSelect={onSelect}
+                onHover={() => setFocusedIdx(i)}
+              />
+            ))
           )}
         </div>
-        {selected && (
-          <button
-            type="button"
-            onClick={() => { setEditing(false); setQuery('') }}
-            className="shrink-0 text-xs font-medium text-gray-500 hover:text-aims-blue dark:text-slate-400 dark:hover:text-aims-blue transition-colors"
-          >
-            Cancel
-          </button>
-        )}
-      </div>
 
-      {/* Category pill strip — hidden while searching */}
-      {!q && (
-        <div className="flex flex-wrap gap-1">
-          {cats.map((cat) => (
-            <button
-              key={cat}
-              type="button"
-              onClick={() => { setActiveCat(cat); setFocusedIdx(-1) }}
-              className={`rounded-full border px-2.5 py-0.5 text-[11px] font-medium transition-colors ${
-                activeCat === cat
-                  ? 'border-aims-blue bg-aims-blue text-white'
-                  : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:bg-gray-50 dark:border-white/10 dark:bg-white/5 dark:text-slate-400 dark:hover:border-white/20 dark:hover:bg-white/8'
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
+        {/* Footer */}
+        <div className="shrink-0 flex items-center justify-between px-5 py-3" style={{ borderTop: '1px solid var(--border)' }}>
+          <p className="text-[11px] text-gray-400 dark:text-slate-500">
+            {filtered.length} of {MODEL_ENTITIES.length} entities · Pre-resolved in Data Studio
+          </p>
+          <p className="hidden text-[11px] text-gray-400 dark:text-slate-500 sm:block">
+            ↑↓ navigate &nbsp;·&nbsp; Enter select &nbsp;·&nbsp; Esc close
+          </p>
         </div>
-      )}
-
-      {/* Entity list */}
-      <div
-        id="entity-listbox"
-        role="listbox"
-        aria-label="Data entities"
-        className="max-h-[260px] overflow-auto space-y-0.5"
-      >
-        {filtered.length === 0 ? (
-          <div className="py-8 text-center">
-            <p className="text-sm font-medium text-gray-700 dark:text-slate-200">No entities match &ldquo;{query}&rdquo;</p>
-            <p className="mt-1 text-xs text-gray-500 dark:text-slate-400">
-              Try &ldquo;customers&rdquo;, &ldquo;deals&rdquo;, &ldquo;tickets&rdquo;, or &ldquo;workflows&rdquo;
-            </p>
-          </div>
-        ) : (
-          filtered.map((e, i) => (
-            <EntityRow
-              key={e.id}
-              entity={e}
-              selected={entityId === e.id}
-              focused={focusedIdx === i}
-              optId={`entity-opt-${e.id}`}
-              onSelect={pick}
-              onHover={() => setFocusedIdx(i)}
-            />
-          ))
-        )}
-      </div>
-
-      <div className="flex items-center justify-between">
-        <p className="text-[10px] text-gray-400 dark:text-slate-500">
-          Pre-resolved models — ETL lives in Data Studio.
-        </p>
-        <p className="text-[10px] text-gray-400 dark:text-slate-500">
-          {filtered.length} of {MODEL_ENTITIES.length}
-        </p>
       </div>
     </div>
+  )
+}
+
+function EntityCard({ entity, selected, focused, optId, onSelect, onHover }) {
+  const Icon = ENTITY_ICONS[entity.iconName] || Database
+  const ref = useRef(null)
+
+  useEffect(() => {
+    if (focused) ref.current?.scrollIntoView({ block: 'nearest' })
+  }, [focused])
+
+  return (
+    <button
+      id={optId} ref={ref}
+      role="option" aria-selected={selected}
+      onClick={() => onSelect(entity.id)}
+      onMouseEnter={onHover}
+      className={`group flex w-full cursor-pointer items-start gap-3.5 rounded-xl border p-3.5 text-left transition-all duration-150 ${
+        selected
+          ? 'border-aims-blue bg-aims-blue/5 dark:bg-aims-blue/10'
+          : focused
+            ? 'border-gray-300 bg-gray-50 dark:border-white/15 dark:bg-white/5'
+            : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50/60 dark:border-white/8 dark:hover:border-white/15 dark:hover:bg-white/[0.04]'
+      }`}
+    >
+      <span className="mt-0.5 grid h-10 w-10 shrink-0 place-items-center rounded-xl text-white" style={{ background: entity.color }}>
+        <Icon size={17} aria-hidden="true" />
+      </span>
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-semibold text-gray-900 dark:text-slate-100">{entity.name}</span>
+          {entity.hasPII && <Lock size={11} className="shrink-0 text-amber-500" title="Contains PII" />}
+          {selected && <Check size={12} className="shrink-0 text-aims-blue" aria-hidden="true" />}
+        </div>
+        <div className="mt-0.5 text-[11px] font-medium text-gray-500 dark:text-slate-400">{entity.label}</div>
+        <p className="mt-1.5 line-clamp-2 text-[11px] leading-relaxed text-gray-400 dark:text-slate-500">{entity.description}</p>
+        <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1">
+          <span className="tabular-nums text-[10px] text-gray-400 dark:text-slate-500">{entity.recordCount.toLocaleString()} records</span>
+          {entity.poweredBy.length > 0 && <span className="text-[10px] text-gray-300 dark:text-slate-600">·</span>}
+          {entity.poweredBy.map((src) => (
+            <span key={src} className="rounded-full border border-gray-200 bg-white px-2 py-0.5 text-[10px] text-gray-500 dark:border-white/10 dark:bg-white/5 dark:text-slate-400">{src}</span>
+          ))}
+        </div>
+      </div>
+    </button>
+  )
+}
+
+export function EntityPicker({ entityId, onSelect }) {
+  const [modalOpen, setModalOpen] = useState(!entityId)
+  const selected = MODEL_ENTITIES.find((e) => e.id === entityId) || null
+
+  return (
+    <>
+      {selected ? (
+        <SelectedEntity entity={selected} onChange={() => setModalOpen(true)} />
+      ) : (
+        <button
+          type="button"
+          onClick={() => setModalOpen(true)}
+          className="flex w-full cursor-pointer items-center gap-2 rounded-xl border border-dashed border-gray-300 px-3.5 py-3 text-sm text-gray-500 transition-colors hover:border-aims-blue hover:text-aims-blue dark:border-white/15 dark:text-slate-400 dark:hover:border-aims-blue dark:hover:text-aims-blue"
+        >
+          <Search size={14} aria-hidden="true" />
+          Browse entity catalog…
+        </button>
+      )}
+      {modalOpen && (
+        <EntityPickerModal
+          entityId={entityId}
+          onSelect={(id) => { onSelect(id); setModalOpen(false) }}
+          onClose={() => setModalOpen(false)}
+        />
+      )}
+    </>
   )
 }
 
@@ -382,48 +471,6 @@ function SelectedEntity({ entity, onChange }) {
       </div>
       <Button variant="secondary" size="sm" onClick={onChange} className="shrink-0">Change</Button>
     </div>
-  )
-}
-
-function EntityRow({ entity, selected, focused, optId, onSelect, onHover }) {
-  const Icon = ENTITY_ICONS[entity.iconName] || Database
-  const ref = useRef(null)
-
-  useEffect(() => {
-    if (focused) ref.current?.scrollIntoView({ block: 'nearest' })
-  }, [focused])
-
-  return (
-    <button
-      id={optId}
-      ref={ref}
-      role="option"
-      aria-selected={selected}
-      onClick={() => onSelect(entity.id)}
-      onMouseEnter={onHover}
-      className={`flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-2 text-left transition-colors select-none ${
-        selected
-          ? 'bg-aims-blue/10 ring-1 ring-inset ring-aims-blue/30 dark:bg-aims-blue/15'
-          : focused
-            ? 'bg-gray-100 dark:bg-white/8'
-            : 'hover:bg-gray-50 dark:hover:bg-white/5'
-      }`}
-    >
-      <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg text-white" style={{ background: entity.color }}>
-        <Icon size={13} aria-hidden="true" />
-      </span>
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-1.5">
-          <span className="truncate text-sm font-medium text-gray-900 dark:text-slate-100">{entity.name}</span>
-          {entity.hasPII && <Lock size={10} className="shrink-0 text-amber-500" title="Contains PII" />}
-          {selected && <Check size={10} className="shrink-0 text-aims-blue" aria-hidden="true" />}
-        </div>
-        <div className="truncate text-[11px] text-gray-500 dark:text-slate-400">{entity.label}</div>
-      </div>
-      <span className="shrink-0 text-[10px] tabular-nums text-gray-400 dark:text-slate-500">
-        {entity.recordCount.toLocaleString()}
-      </span>
-    </button>
   )
 }
 
