@@ -120,6 +120,14 @@ export default function WidgetBuilder() {
   const source = resolveSource(sourceId)
   const metric = source ? sourceFields(source).find((f) => f.id === metricId) || null : null
 
+  // When using the new DatasetStep flow, derive synthetic source+metric for preview
+  const previewSource = source || (datasetConfig?.sourceId
+    ? { id: datasetConfig.sourceId, name: datasetConfig.sourceId, governed: false, hasPII: false }
+    : null)
+  const previewMetric = metric || (datasetConfig?.sourceId
+    ? { id: 'dataset', name: datasetConfig.aggregation?.column || datasetConfig.sourceId || 'Value' }
+    : null)
+
   function resetShape() {
     setDimensionId('none')
     setTransform('none')
@@ -456,8 +464,8 @@ export default function WidgetBuilder() {
               <div className={`mx-auto transition-all ${PREVIEW_WIDTH[previewSize]}`}>
                 <WidgetPreview
                   typeId={typeId}
-                  metric={metric}
-                  source={source}
+                  metric={previewMetric}
+                  source={previewSource}
                   name={name}
                   subtitle={subtitle}
                   freshness={FRESHNESS_STATUS[freshness] || 'fresh'}
