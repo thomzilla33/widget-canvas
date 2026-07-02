@@ -10,9 +10,6 @@ import { dimensionById, recommendTile } from '../data/fields.js'
 import { describeWidget } from '../data/describe.js'
 import { DescribeComposer } from '../components/common/DescribeComposer.jsx'
 import {
-  EntityPicker,
-  MetricPicker,
-  DimensionPicker,
   SlotPanel,
   TransformPanel,
   TypeGallery,
@@ -23,8 +20,10 @@ import {
   AckBox,
   FRESHNESS_OPTIONS,
 } from '../components/playground/BuilderPanels.jsx'
+import DatasetStep from '../components/playground/DatasetStep.jsx'
 import WidgetPreview from '../components/playground/WidgetPreview.jsx'
 import DataSourceMarketplace from '../components/datasources/DataSourceMarketplace.jsx'
+import { COMPATIBLE_SKELETONS } from '../data/datasets.js'
 
 const FRESHNESS_STATUS = { realtime: 'live', '15m': 'fresh', '1h': 'fresh', '24h': 'aging' }
 const PREVIEW_WIDTH = { sm: 'max-w-[240px]', md: 'max-w-md', lg: 'max-w-full' }
@@ -83,6 +82,9 @@ export default function WidgetBuilder() {
   // Tab: 'data' | 'widget' | 'appearance'
   const [tab, setTab] = useState('data')
 
+  // Dataset config (replaces sourceId + metricId + dimensionId + transform)
+  const [datasetConfig, setDatasetConfig] = useState(null)
+
   const [sourceId, setSourceId] = useState(null)
   const [metricId, setMetricId] = useState(null)
   const [dimensionId, setDimensionId] = useState('none')
@@ -117,6 +119,14 @@ export default function WidgetBuilder() {
 
   const source = resolveSource(sourceId)
   const metric = source ? sourceFields(source).find((f) => f.id === metricId) || null : null
+
+  // When using the new DatasetStep flow, derive synthetic source+metric for preview
+  const previewSource = source || (datasetConfig?.sourceId
+    ? { id: datasetConfig.sourceId, name: datasetConfig.sourceId, governed: false, hasPII: false }
+    : null)
+  const previewMetric = metric || (datasetConfig?.sourceId
+    ? { id: 'dataset', name: datasetConfig.aggregation?.column || datasetConfig.sourceId || 'Value' }
+    : null)
 
   function resetShape() {
     setDimensionId('none')
@@ -171,27 +181,31 @@ export default function WidgetBuilder() {
     if (seed) { seededRef.current = true; applyDescription(seed) }
   }, [location.state]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const canSave =
-    !!source &&
-    !!metric &&
-    !!typeId &&
-    name.trim().length > 0 &&
-    (!source.hasPII || piiAck) &&
-    (source.governed || ungovernedAck)
+  // Must be declared before canSave to avoid temporal dead zone
+  const dataComplete = Boolean(
+    datasetConfig?.sourceId &&
+    datasetConfig?.operationType &&
+    (
+      datasetConfig.operationType === 'record_set'
+        ? datasetConfig.exposedColumns?.length > 0
+        : datasetConfig.aggregation?.fn && datasetConfig.aggregation?.column
+    )
+  )
 
-  const saveHint = !source
-    ? 'Pick an entity on the Data tab to begin.'
-    : !metric
-      ? 'Choose a metric on the Data tab.'
+  const canSave =
+    dataComplete &&
+    !!typeId &&
+    name.trim().length > 0
+
+  const saveHint = !datasetConfig?.sourceId
+    ? 'Configure a dataset on the Data tab to begin.'
+    : !dataComplete
+      ? 'Complete the dataset configuration on the Data tab.'
       : !typeId
         ? 'Pick a widget type on the Widget tab.'
         : name.trim().length === 0
           ? 'Name your widget on the Widget tab.'
-          : source.hasPII && !piiAck
-            ? 'Acknowledge the PII notice on the Widget tab.'
-            : !source.governed && !ungovernedAck
-              ? 'Acknowledge the ungoverned source on the Widget tab.'
-              : ''
+          : ''
 
   function handleSave() {
     const wid = `w-${name.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now().toString(36)}`
@@ -199,16 +213,13 @@ export default function WidgetBuilder() {
       id: wid,
       name: name.trim(),
       subtitle: subtitle.trim() || undefined,
-      skeleton: TYPE_LABEL[typeId],
-      metric: metric.name,
-      governed: source.governed,
+      skeleton: TYPE_LABEL[typeId] || typeId,
+      governed: false,
       freshness: FRESHNESS_STATUS[freshness] || 'fresh',
       health: 'unused',
       usedIn: 0,
-      source: source.name,
-      dimension: dimensionId !== 'none' ? dimensionId : undefined,
-      transform: transform !== 'none' ? transform : undefined,
-      aggregation: aggregation !== 'sum' ? aggregation : undefined,
+      source: datasetConfig?.sourceId || '',
+      dataset: datasetConfig,
       format: format.style === 'auto' ? undefined : format,
       goal: goal.value != null ? goal : undefined,
       accentColor: accentColor || undefined,
@@ -249,8 +260,6 @@ export default function WidgetBuilder() {
   const galleryMetric = metric ? { ...metric, recommendedType: recommendTile(metric, dimension) } : metric
   const shape = { dimension, transform }
 
-  // Tab completion status for visual cues
-  const dataComplete = !!source && !!metric
   const widgetComplete = !!typeId && name.trim().length > 0
 
   return (
@@ -284,30 +293,20 @@ export default function WidgetBuilder() {
             {/* ── Tab 1: Data ── */}
             {tab === 'data' && (
               <div className="space-y-7">
-                <section>
-                  <SectionHeading
-                    n={1}
-                    title="Entity"
-                    sub="The data model entity this widget reads from — resolved in Data Studio."
-                  />
-                  <EntityPicker entityId={sourceId} onSelect={selectSource} />
-                </section>
-                <section>
-                  <SectionHeading
-                    n={2}
-                    title={source ? `Available metrics for ${source.name}` : 'Available metrics'}
-                    sub="Pre-calculated queries from your Data Studio model — not raw connector fields."
-                  />
-                  <MetricPicker source={source} metricId={metricId} onSelect={selectMetric} />
-                </section>
-                <section>
-                  <SectionHeading n={3} title="Slice by" sub="Break the metric down by a dimension — drives the chart axis or segments." />
-                  <DimensionPicker source={source} measure={metric} dimensionId={dimensionId} onSelect={selectDimension} />
-                </section>
-                <section>
-                  <SectionHeading n={4} title="Transform" sub="Reshape the metric — Δ vs prior, % of total, top-N, running total." />
-                  <TransformPanel transform={transform} setTransform={setTransform} aggregation={aggregation} setAggregation={setAggregation} />
-                </section>
+                <DatasetStep
+                  value={datasetConfig}
+                  onChange={(cfg) => {
+                    setDatasetConfig(cfg)
+                    // If active skeleton is incompatible with new shape, reset it
+                    const shape = cfg?._shape
+                    if (shape && COMPATIBLE_SKELETONS[shape] && typeId) {
+                      if (!COMPATIBLE_SKELETONS[shape].includes(typeId)) {
+                        setTypeId(null)
+                        setTypeTouched(false)
+                      }
+                    }
+                  }}
+                />
 
                 {dataComplete && (
                   <Button
@@ -326,7 +325,12 @@ export default function WidgetBuilder() {
               <div className="space-y-7">
                 <section>
                   <SectionHeading n={1} title="Widget type" sub="How to visualize the data — recommended type is pre-selected." />
-                  <TypeGallery typeId={typeId} metric={galleryMetric} onSelect={selectType} />
+                  <TypeGallery
+                    typeId={typeId}
+                    metric={galleryMetric}
+                    onSelect={selectType}
+                    compatibleSkeletons={datasetConfig?._shape ? COMPATIBLE_SKELETONS[datasetConfig._shape] : null}
+                  />
                   {typeId && metric && (
                     <div className="mt-3">
                       <div className="mb-1.5 text-[11px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-500">Slots</div>
@@ -460,8 +464,8 @@ export default function WidgetBuilder() {
               <div className={`mx-auto transition-all ${PREVIEW_WIDTH[previewSize]}`}>
                 <WidgetPreview
                   typeId={typeId}
-                  metric={metric}
-                  source={source}
+                  metric={previewMetric}
+                  source={previewSource}
                   name={name}
                   subtitle={subtitle}
                   freshness={FRESHNESS_STATUS[freshness] || 'fresh'}

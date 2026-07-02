@@ -636,22 +636,27 @@ const STATISTICAL_CATS = new Set(['Metric', 'Trend', 'Breakdown', 'Relationship'
 const DATA_DISPLAY_CATS = new Set(['Records', 'Status', 'Activity'])
 const CONSUMPTION_CATS = new Set(['Consumption'])
 
-function TypeTile({ t, typeId, metric, onSelect }) {
+function TypeTile({ t, typeId, metric, onSelect, compatible }) {
   const Icon = TYPE_ICONS[t.iconName] || Hash
   const recommended = metric && metric.recommendedType === t.id
   const poor = metric && fitScore(metric.kind, t.id) === 'poor'
+  // compatible=null means no filter applied; compatible=false means incompatible with current dataset shape
+  const incompatible = compatible === false
   return (
     <button
       key={t.id}
-      onClick={() => onSelect(t.id)}
-      title={t.label}
+      onClick={() => !incompatible && onSelect(t.id)}
+      disabled={incompatible}
+      title={incompatible ? `Not available for this dataset shape` : t.label}
       className={`relative flex flex-col items-center gap-1.5 rounded-lg border p-2.5 text-center transition-all ${
-        typeId === t.id
-          ? 'border-aims-blue bg-aims-blue/10 text-aims-blue'
-          : 'border-gray-200 text-gray-600 hover:border-aims-blue/40 dark:border-white/10 dark:text-slate-300'
-      } ${poor && typeId !== t.id ? 'opacity-45' : ''}`}
+        incompatible
+          ? 'cursor-not-allowed border-gray-100 opacity-30 dark:border-white/5'
+          : typeId === t.id
+            ? 'border-aims-blue bg-aims-blue/10 text-aims-blue'
+            : 'border-gray-200 text-gray-600 hover:border-aims-blue/40 dark:border-white/10 dark:text-slate-300'
+      } ${poor && typeId !== t.id && !incompatible ? 'opacity-45' : ''}`}
     >
-      {recommended && (
+      {recommended && !incompatible && (
         <span className="absolute -right-1 -top-1 grid h-4 w-4 place-items-center rounded-full bg-aims-governed text-white" title="Recommended">
           <Check size={11} />
         </span>
@@ -662,10 +667,13 @@ function TypeTile({ t, typeId, metric, onSelect }) {
   )
 }
 
-export function TypeGallery({ typeId, metric, onSelect }) {
+export function TypeGallery({ typeId, metric, onSelect, compatibleSkeletons = null }) {
   const statistical = WIDGET_TYPES.filter((t) => STATISTICAL_CATS.has(t.category))
   const dataDisplay = WIDGET_TYPES.filter((t) => DATA_DISPLAY_CATS.has(t.category))
   const consumption = WIDGET_TYPES.filter((t) => CONSUMPTION_CATS.has(t.category))
+
+  // compatible(t): null if no filter, true/false based on compatibleSkeletons
+  const compat = (t) => compatibleSkeletons === null ? null : compatibleSkeletons.includes(t.id)
 
   return (
     <div className="space-y-4">
@@ -675,7 +683,7 @@ export function TypeGallery({ typeId, metric, onSelect }) {
           <span className="text-[10px] text-gray-400 dark:text-slate-500">Charts, KPIs, gauges</span>
         </div>
         <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5">
-          {statistical.map((t) => <TypeTile key={t.id} t={t} typeId={typeId} metric={metric} onSelect={onSelect} />)}
+          {statistical.map((t) => <TypeTile key={t.id} t={t} typeId={typeId} metric={metric} onSelect={onSelect} compatible={compat(t)} />)}
         </div>
       </div>
 
@@ -685,7 +693,7 @@ export function TypeGallery({ typeId, metric, onSelect }) {
           <span className="text-[10px] text-gray-400 dark:text-slate-500">Record lists, profile cards, tables</span>
         </div>
         <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5">
-          {dataDisplay.map((t) => <TypeTile key={t.id} t={t} typeId={typeId} metric={metric} onSelect={onSelect} />)}
+          {dataDisplay.map((t) => <TypeTile key={t.id} t={t} typeId={typeId} metric={metric} onSelect={onSelect} compatible={compat(t)} />)}
         </div>
       </div>
 
@@ -696,7 +704,7 @@ export function TypeGallery({ typeId, metric, onSelect }) {
             <span className="text-[10px] text-gray-400 dark:text-slate-500">Credits, tokens, cost</span>
           </div>
           <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5">
-            {consumption.map((t) => <TypeTile key={t.id} t={t} typeId={typeId} metric={metric} onSelect={onSelect} />)}
+            {consumption.map((t) => <TypeTile key={t.id} t={t} typeId={typeId} metric={metric} onSelect={onSelect} compatible={compat(t)} />)}
           </div>
         </div>
       )}

@@ -17,6 +17,7 @@ import EditWidgetModal from '../components/widgets/EditWidgetModal.jsx'
 import DeleteWidgetDialog from '../components/widgets/DeleteWidgetDialog.jsx'
 import WidgetMarketplace from '../components/widgets/WidgetMarketplace.jsx'
 import AIGenerateModal from '../components/ai/AIGenerateModal.jsx'
+import WidgetMarketplaceHeader from '../components/widgets/WidgetMarketplaceHeader.jsx'
 import { useStaggerReveal } from '../hooks/useReveal.js'
 import SourceTemplatesBanner from '../components/widgets/SourceTemplatesBanner.jsx'
 import StudioWelcome from '../components/common/StudioWelcome.jsx'
@@ -137,6 +138,11 @@ export default function WidgetLibrary() {
       />
 
       <div className="px-6 py-4">
+        {/* Marketplace-first: anchored Create + AI cards always visible at top */}
+        {isAdmin && (
+          <WidgetMarketplaceHeader onScratch={() => navigate('/widgets/new')} />
+        )}
+
         {/* U4 — per-source templates from connected integrations (admin installs) */}
         {isAdmin && <SourceTemplatesBanner />}
         {/* S121 — Needs Attention (flags from end users) */}
