@@ -225,7 +225,7 @@ export default function DashboardCanvas() {
 
           {placements.length === 0 ? (
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              <AddWidgetCard onClick={() => setAddOpen(true)} onCreateNew={() => navigate('/widgets/new', { state: { fromDashboard: id } })} />
+              <AddWidgetCard onClick={() => setAddOpen(true)} />
               <div className="flex items-center sm:col-span-1 lg:col-span-2">
                 <Button variant="secondary" onClick={() => setSuggestOpen(true)}>
                   <Sparkles size={15} aria-hidden="true" /> Suggest widgets
@@ -264,7 +264,7 @@ export default function DashboardCanvas() {
                   onDropOn={() => { reorder(dragPid, p.pid); setDragPid(null) }}
                 />
               ))}
-              <AddWidgetCard onClick={() => setAddOpen(true)} onCreateNew={() => navigate('/widgets/new', { state: { fromDashboard: id } })} />
+              <AddWidgetCard onClick={() => setAddOpen(true)} />
             </div>
             </>
           )}
@@ -275,10 +275,6 @@ export default function DashboardCanvas() {
           <WidgetLibraryModal
             onAdd={(w, size) => placeWidget(w, size)}
             onClose={() => setAddOpen(false)}
-            onCreateNew={() => {
-              setAddOpen(false)
-              navigate('/widgets/new', { state: { fromDashboard: id } })
-            }}
           />
         )}
 
@@ -420,10 +416,10 @@ function MenuItem({ icon: Icon, onClick, children }) {
   )
 }
 
-/* ── A dashed "Add widget" tile — browse existing or create a new one ── */
-function AddWidgetCard({ onClick, onCreateNew }) {
+/* ── A dashed "Add widget" tile — browse library only ── */
+function AddWidgetCard({ onClick }) {
   return (
-    <div className="flex min-h-[180px] flex-col items-center justify-center gap-4 rounded-lg border-2 border-dashed border-gray-300 px-4 py-6 dark:border-white/15">
+    <div className="flex min-h-[180px] flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 px-4 py-6 dark:border-white/15">
       <button
         onClick={onClick}
         className="flex w-full items-center gap-3 rounded-lg border border-gray-200 bg-white px-4 py-3 text-left text-gray-700 transition-all hover:border-aims-blue/50 hover:text-aims-blue hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aims-blue/40 dark:border-white/10 dark:bg-white/5 dark:text-slate-300 dark:hover:border-aims-blue/40 dark:hover:text-aims-blue"
@@ -434,18 +430,6 @@ function AddWidgetCard({ onClick, onCreateNew }) {
         <span>
           <span className="block text-sm font-medium">Browse library</span>
           <span className="block text-[11px] text-gray-400 dark:text-slate-500">Pick from your existing widgets</span>
-        </span>
-      </button>
-      <button
-        onClick={onCreateNew}
-        className="flex w-full items-center gap-3 rounded-lg border border-aims-blue/30 bg-aims-blue/5 px-4 py-3 text-left text-aims-blue transition-all hover:border-aims-blue/60 hover:bg-aims-blue/10 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aims-blue/40 dark:bg-aims-blue/10 dark:hover:bg-aims-blue/15"
-      >
-        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-aims-blue/10">
-          <Pencil size={15} aria-hidden="true" />
-        </span>
-        <span>
-          <span className="block text-sm font-medium">Create new widget</span>
-          <span className="block text-[11px] text-aims-blue/60">Build one in ~2 min, placed here automatically</span>
         </span>
       </button>
     </div>
