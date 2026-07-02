@@ -13,19 +13,30 @@ export const DATASET_SHAPE = {
 }
 
 export const ENTITY_SOURCES = [
-  { id: 'contacts',   label: 'Contacts',   columns: ['name','email','phone','city','state','tier','score','source','created_at'] },
-  { id: 'accounts',   label: 'Accounts',   columns: ['name','industry','employees','mrr','tier','owner','created_at'] },
-  { id: 'deals',      label: 'Deals',      columns: ['name','stage','value','close_date','owner','account_id','created_at'] },
-  { id: 'activities', label: 'Activities', columns: ['type','subject','contact_id','account_id','date','duration','outcome'] },
-  { id: 'vehicles',   label: 'Vehicles',   columns: ['make','model','year','vin','customer_id','status','purchase_date'] },
+  // Contacts — two integrations
+  { id: 'contacts_salesforce', label: 'Contacts', integration: 'Salesforce', columns: ['name','email','phone','city','state','tier','score','lead_source','created_at'] },
+  { id: 'contacts_hubspot',    label: 'Contacts', integration: 'HubSpot',    columns: ['name','email','phone','city','lifecycle_stage','score','original_source','created_at'] },
+  // Accounts — two integrations
+  { id: 'accounts_salesforce', label: 'Accounts', integration: 'Salesforce', columns: ['name','industry','employees','mrr','tier','owner','created_at'] },
+  { id: 'accounts_hubspot',    label: 'Accounts', integration: 'HubSpot',    columns: ['name','industry','employees','annual_revenue','owner','created_at'] },
+  // Deals — two integrations
+  { id: 'deals_salesforce',    label: 'Deals',    integration: 'Salesforce', columns: ['name','stage','amount','close_date','owner','account_id','created_at'] },
+  { id: 'deals_hubspot',       label: 'Deals',    integration: 'HubSpot',    columns: ['name','deal_stage','amount','close_date','owner','created_at'] },
+  // Activities — internal only
+  { id: 'activities_aims',     label: 'Activities', integration: 'AIMS-OS',  columns: ['type','subject','contact_id','account_id','date','duration','outcome'] },
+  // Vehicles — internal only
+  { id: 'vehicles_aims',       label: 'Vehicles',   integration: 'AIMS-OS',  columns: ['make','model','year','vin','customer_id','status','purchase_date'] },
 ]
 
 export const COLUMN_TYPES = {
-  contacts:   { name:'string', email:'string', phone:'string', city:'string', state:'string', tier:'string', score:'number', source:'string', created_at:'date' },
-  accounts:   { name:'string', industry:'string', employees:'number', mrr:'number', tier:'string', owner:'string', created_at:'date' },
-  deals:      { name:'string', stage:'string', value:'number', close_date:'date', owner:'string', account_id:'string', created_at:'date' },
-  activities: { type:'string', subject:'string', contact_id:'string', account_id:'string', date:'date', duration:'number', outcome:'string' },
-  vehicles:   { make:'string', model:'string', year:'number', vin:'string', customer_id:'string', status:'string', purchase_date:'date' },
+  contacts_salesforce: { name:'string', email:'string', phone:'string', city:'string', state:'string', tier:'string', score:'number', lead_source:'string', created_at:'date' },
+  contacts_hubspot:    { name:'string', email:'string', phone:'string', city:'string', lifecycle_stage:'string', score:'number', original_source:'string', created_at:'date' },
+  accounts_salesforce: { name:'string', industry:'string', employees:'number', mrr:'number', tier:'string', owner:'string', created_at:'date' },
+  accounts_hubspot:    { name:'string', industry:'string', employees:'number', annual_revenue:'number', owner:'string', created_at:'date' },
+  deals_salesforce:    { name:'string', stage:'string', amount:'number', close_date:'date', owner:'string', account_id:'string', created_at:'date' },
+  deals_hubspot:       { name:'string', deal_stage:'string', amount:'number', close_date:'date', owner:'string', created_at:'date' },
+  activities_aims:     { type:'string', subject:'string', contact_id:'string', account_id:'string', date:'date', duration:'number', outcome:'string' },
+  vehicles_aims:       { make:'string', model:'string', year:'number', vin:'string', customer_id:'string', status:'string', purchase_date:'date' },
 }
 
 export const OPERATORS_BY_TYPE = {

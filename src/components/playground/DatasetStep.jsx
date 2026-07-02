@@ -178,24 +178,39 @@ export default function DatasetStep({ value, onChange }) {
             </div>
           )}
 
-          {config.sourceType === 'entity' && (
-            <div className="grid grid-cols-2 gap-2">
-              {ENTITY_SOURCES.map((en) => (
-                <button
-                  key={en.id}
-                  onClick={() => resetSourceId(en.id)}
-                  className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-left text-xs transition-all ${
-                    config.sourceId === en.id
-                      ? 'border-blue-500/40 bg-blue-500/10 font-semibold text-slate-100'
-                      : 'border-white/10 bg-white/5 text-slate-300 hover:border-white/20 hover:bg-white/[0.08]'
-                  }`}
-                >
-                  <Table2 size={12} className="shrink-0 text-slate-400" />
-                  {en.label}
-                </button>
-              ))}
-            </div>
-          )}
+          {config.sourceType === 'entity' && (() => {
+            // Group sources by entity label
+            const groups = ENTITY_SOURCES.reduce((acc, en) => {
+              if (!acc[en.label]) acc[en.label] = []
+              acc[en.label].push(en)
+              return acc
+            }, {})
+            return (
+              <div className="space-y-3">
+                {Object.entries(groups).map(([label, sources]) => (
+                  <div key={label}>
+                    <p className="mb-1.5 text-[11px] font-semibold text-slate-500 uppercase tracking-wide">{label}</p>
+                    <div className="flex flex-wrap gap-2">
+                      {sources.map((en) => (
+                        <button
+                          key={en.id}
+                          onClick={() => resetSourceId(en.id)}
+                          className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-left text-xs transition-all ${
+                            config.sourceId === en.id
+                              ? 'border-blue-500/40 bg-blue-500/10 font-semibold text-slate-100'
+                              : 'border-white/10 bg-white/5 text-slate-300 hover:border-white/20 hover:bg-white/[0.08]'
+                          }`}
+                        >
+                          <Table2 size={12} className="shrink-0 text-slate-400" />
+                          <span>{en.integration}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )
+          })()}
         </section>
       )}
 
