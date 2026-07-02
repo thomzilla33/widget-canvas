@@ -249,6 +249,7 @@ export default function DashboardCanvas() {
               className="grid auto-rows-min grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3"
               onDragOver={(e) => e.preventDefault()}
             >
+              <AddWidgetCard onClick={() => setAddOpen(true)} />
               {placements.map((p) => (
                 <CanvasTile
                   key={p.pid}
@@ -264,7 +265,6 @@ export default function DashboardCanvas() {
                   onDropOn={() => { reorder(dragPid, p.pid); setDragPid(null) }}
                 />
               ))}
-              <AddWidgetCard onClick={() => setAddOpen(true)} />
             </div>
             </>
           )}
