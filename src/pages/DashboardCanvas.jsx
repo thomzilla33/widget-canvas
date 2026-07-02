@@ -275,6 +275,7 @@ export default function DashboardCanvas() {
           <WidgetLibraryModal
             onAdd={(w, size) => placeWidget(w, size)}
             onClose={() => setAddOpen(false)}
+            onCreateNew={() => { setAddOpen(false); navigate('/widgets/new', { state: { fromDashboard: id } }) }}
           />
         )}
 

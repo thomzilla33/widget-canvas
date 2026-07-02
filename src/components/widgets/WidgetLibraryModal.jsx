@@ -100,6 +100,23 @@ export default function WidgetLibraryModal({ zoneLabel, onAdd, onClose, onCreate
                   </div>
                 </div>
                 <div className="flex-1 overflow-auto p-6">
+                  {/* Anchored create CTA — always visible at top */}
+                  {onCreateNew && (
+                    <button
+                      onClick={onCreateNew}
+                      className="group mb-5 flex w-full items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-left transition-all hover:border-white/20 hover:bg-white/[0.08]"
+                    >
+                      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-white/10 text-slate-300">
+                        <Pencil size={16} aria-hidden="true" />
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block text-xs font-semibold text-slate-100">Create new widget</span>
+                        <span className="block text-[11px] text-slate-400">Build one from scratch — takes about 2 min.</span>
+                      </span>
+                      <X size={0} className="hidden" />{/* spacer trick */}
+                      <span className="text-[11px] font-medium text-aims-blue group-hover:underline">Start →</span>
+                    </button>
+                  )}
                   {widgets.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-16 text-center">
                       <div className="mb-3 grid h-14 w-14 place-items-center rounded-2xl border border-gray-200 bg-gray-50 dark:border-white/10 dark:bg-white/5">
@@ -109,11 +126,6 @@ export default function WidgetLibraryModal({ zoneLabel, onAdd, onClose, onCreate
                       <p className="mt-1 max-w-xs text-xs text-gray-500 dark:text-slate-400">
                         Build your first widget in the playground — it takes about 2 minutes.
                       </p>
-                      {onCreateNew && (
-                        <Button variant="primary" size="default" onClick={onCreateNew} className="mt-4">
-                          <Pencil size={14} aria-hidden="true" /> Create a widget
-                        </Button>
-                      )}
                     </div>
                   ) : list.length === 0 ? (
                     <EmptyState icon="🔍" title="No widgets match" description="Try a different search or clear filters." action={<Button variant="secondary" size="default" onClick={clearAll}>Clear filters</Button>} />
