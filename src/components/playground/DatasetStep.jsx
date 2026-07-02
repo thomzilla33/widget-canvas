@@ -77,8 +77,27 @@ export default function DatasetStep({ value, onChange }) {
   const resetSource = (sourceType) =>
     set({ sourceType, sourceId: '', filters: [], operationType: null, aggregation: null, groupers: [], exposedColumns: [] })
 
-  const resetSourceId = (sourceId) =>
-    set({ sourceId, filters: [], operationType: null, aggregation: null, groupers: [], exposedColumns: [] })
+  const resetSourceId = (sourceId) => {
+    // For preset datasets, shape is pre-defined — derive operationType automatically
+    if (config.sourceType === 'dataset') {
+      const preset = PRESET_DATASETS.find((d) => d.id === sourceId)
+      const opType = preset?.shape === DATASET_SHAPE.FULL ? 'record_set' : 'summarize'
+      const presetShape = preset?.shape || null
+      const updated = {
+        ...config,
+        sourceId,
+        filters: [],
+        operationType: opType,
+        aggregation: preset?.aggregation || null,
+        groupers: (preset?.groupBy || []).map((col) => ({ column: col })),
+        exposedColumns: preset?.columns || [],
+        _shape: presetShape,
+      }
+      onChange(updated)
+    } else {
+      set({ sourceId, filters: [], operationType: null, aggregation: null, groupers: [], exposedColumns: [] })
+    }
+  }
 
   const addFilter    = () => set({ filters: [...config.filters, { column: '', operator: '', value: '' }] })
   const updateFilter = (i, f) => set({ filters: config.filters.map((x, idx) => idx === i ? f : x) })
@@ -245,8 +264,8 @@ export default function DatasetStep({ value, onChange }) {
         </section>
       )}
 
-      {/* ── 4. OPERATION TYPE ──────────────────────────────────────────── */}
-      {config.sourceId && (
+      {/* ── 4. OPERATION TYPE — only for entity sources (presets have shape pre-defined) */}
+      {config.sourceId && config.sourceType === 'entity' && (
         <section>
           <SectionLabel>What do you want to show?</SectionLabel>
           <div className="grid grid-cols-2 gap-2">
@@ -271,8 +290,8 @@ export default function DatasetStep({ value, onChange }) {
         </section>
       )}
 
-      {/* ── 5a. SUMMARIZE: aggregation + groupers ──────────────────────── */}
-      {config.operationType === 'summarize' && (
+      {/* ── 5a. SUMMARIZE: aggregation + groupers — entity sources only ── */}
+      {config.sourceType === 'entity' && config.operationType === 'summarize' && (
         <section className="space-y-5">
 
           {/* Aggregation */}
@@ -347,8 +366,8 @@ export default function DatasetStep({ value, onChange }) {
         </section>
       )}
 
-      {/* ── 5b. RECORD SET: column picker ──────────────────────────────── */}
-      {config.operationType === 'record_set' && availableColumns.length > 0 && (
+      {/* ── 5b. RECORD SET: column picker — entity sources only ────────── */}
+      {config.sourceType === 'entity' && config.operationType === 'record_set' && availableColumns.length > 0 && (
         <section>
           <SectionLabel>Columns to expose</SectionLabel>
           <p className="mb-3 text-[11px] text-slate-400">
