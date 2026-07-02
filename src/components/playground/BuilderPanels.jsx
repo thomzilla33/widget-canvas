@@ -211,6 +211,8 @@ function SourceRow({ source, selected, onSelect }) {
 
 /* ── 1b. Entity picker — modal marketplace for data model entities ── */
 
+const RECENTLY_USED_IDS = ['ent-customers', 'ent-contacts', 'ent-deals']
+
 function EntityPickerModal({ entityId, onSelect, onClose }) {
   const [query, setQuery] = useState('')
   const [activeCat, setActiveCat] = useState('All')
@@ -235,6 +237,11 @@ function EntityPickerModal({ entityId, onSelect, onClose }) {
     : activeCat === 'All'
       ? MODEL_ENTITIES
       : MODEL_ENTITIES.filter((e) => e.category === activeCat)
+
+  const showRecent = !q && activeCat === 'All'
+  const recentEntities = showRecent
+    ? RECENTLY_USED_IDS.map((id) => MODEL_ENTITIES.find((e) => e.id === id)).filter(Boolean)
+    : []
 
   const handleKeyDown = (e) => {
     if (e.key === 'ArrowDown') {
@@ -264,27 +271,27 @@ function EntityPickerModal({ entityId, onSelect, onClose }) {
         role="dialog"
         aria-modal="true"
         aria-label="Choose an entity"
-        className="relative z-10 flex w-full max-w-[620px] flex-col rounded-2xl overflow-hidden shadow-2xl"
-        style={{ background: 'var(--canvas)', border: '1px solid var(--border)', maxHeight: 'min(600px, 90vh)' }}
+        className="relative z-10 flex w-full max-w-[820px] flex-col rounded-2xl overflow-hidden shadow-2xl"
+        style={{ background: 'var(--canvas)', border: '1px solid var(--border)', maxHeight: 'min(780px, 92vh)' }}
       >
         {/* Header */}
-        <div className="flex shrink-0 items-start justify-between px-5 pt-5 pb-4" style={{ borderBottom: '1px solid var(--border)' }}>
+        <div className="flex shrink-0 items-start justify-between px-6 pt-6 pb-5" style={{ borderBottom: '1px solid var(--border)' }}>
           <div>
-            <h2 className="text-sm font-semibold text-gray-900 dark:text-slate-100">Choose an entity</h2>
-            <p className="mt-0.5 text-xs text-gray-500 dark:text-slate-400">Select the data model this widget reads from</p>
+            <h2 className="text-base font-semibold text-gray-900 dark:text-slate-100">Choose an entity</h2>
+            <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">Select the data model this widget reads from</p>
           </div>
           <button
             type="button" onClick={onClose} aria-label="Close"
-            className="ml-4 grid h-7 w-7 shrink-0 place-items-center rounded-lg text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-white/8 dark:hover:text-slate-200"
+            className="ml-4 grid h-8 w-8 shrink-0 place-items-center rounded-lg text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-white/8 dark:hover:text-slate-200"
           >
             ✕
           </button>
         </div>
 
         {/* Search */}
-        <div className="shrink-0 px-5 pt-4 pb-3">
+        <div className="shrink-0 px-6 pt-5 pb-3">
           <div className="relative">
-            <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500 pointer-events-none" aria-hidden="true" />
+            <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500 pointer-events-none" aria-hidden="true" />
             <input
               ref={searchRef}
               type="text"
@@ -295,7 +302,7 @@ function EntityPickerModal({ entityId, onSelect, onClose }) {
               aria-controls="entity-modal-listbox"
               aria-activedescendant={focusedIdx >= 0 && filtered[focusedIdx] ? `em-opt-${filtered[focusedIdx].id}` : undefined}
               autoComplete="off"
-              className="w-full rounded-xl border border-gray-200 bg-white py-2.5 pl-10 pr-9 text-sm text-gray-900 placeholder-gray-400 transition-colors focus:border-aims-blue focus:outline-none focus:ring-2 focus:ring-aims-blue/20 dark:border-white/10 dark:bg-white/5 dark:text-slate-100 dark:placeholder-slate-500 dark:focus:border-aims-blue/60"
+              className="w-full rounded-xl border border-gray-200 bg-white py-3 pl-11 pr-10 text-sm text-gray-900 placeholder-gray-400 transition-colors focus:border-aims-blue focus:outline-none focus:ring-2 focus:ring-aims-blue/20 dark:border-white/10 dark:bg-white/5 dark:text-slate-100 dark:placeholder-slate-500 dark:focus:border-aims-blue/60"
             />
             {query && (
               <button
@@ -312,12 +319,12 @@ function EntityPickerModal({ entityId, onSelect, onClose }) {
 
         {/* Category pills */}
         {!q && (
-          <div className="shrink-0 flex flex-wrap gap-1.5 px-5 pb-3">
+          <div className="shrink-0 flex flex-wrap gap-2 px-6 pb-4">
             {cats.map((cat) => (
               <button
                 key={cat} type="button"
                 onClick={() => { setActiveCat(cat); setFocusedIdx(-1) }}
-                className={`cursor-pointer rounded-full border px-3 py-1 text-[11px] font-medium transition-colors ${
+                className={`cursor-pointer rounded-full border px-3.5 py-1.5 text-xs font-medium transition-colors ${
                   activeCat === cat
                     ? 'border-aims-blue bg-aims-blue text-white'
                     : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:bg-gray-50 dark:border-white/10 dark:bg-white/5 dark:text-slate-400 dark:hover:border-white/20'
@@ -329,15 +336,31 @@ function EntityPickerModal({ entityId, onSelect, onClose }) {
           </div>
         )}
 
-        {/* Entity cards — scrollable */}
+        {/* Recently used strip */}
+        {recentEntities.length > 0 && (
+          <div className="shrink-0 px-6 pb-4">
+            <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-slate-500">Recently used</p>
+            <div className="grid grid-cols-3 gap-2">
+              {recentEntities.map((e) => (
+                <QuickPickCard key={e.id} entity={e} selected={entityId === e.id} onSelect={onSelect} />
+              ))}
+            </div>
+            <div className="mt-4" style={{ borderTop: '1px solid var(--border)' }} />
+          </div>
+        )}
+
+        {/* Entity cards — scrollable 2-col grid */}
         <div
           id="entity-modal-listbox"
           role="listbox"
           aria-label="Data entities"
-          className="min-h-0 flex-1 overflow-auto px-5 pb-4 space-y-2"
+          className="min-h-0 flex-1 overflow-auto px-6 pb-5"
         >
+          {showRecent && recentEntities.length > 0 && (
+            <p className="mb-2.5 text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-slate-500">All entities</p>
+          )}
           {q && filtered.length > 0 && (
-            <p className="pb-0.5 text-[11px] text-gray-400 dark:text-slate-500">
+            <p className="mb-2 text-[11px] text-gray-400 dark:text-slate-500">
               {filtered.length} result{filtered.length !== 1 ? 's' : ''} for &ldquo;{query}&rdquo;
             </p>
           )}
@@ -347,21 +370,23 @@ function EntityPickerModal({ entityId, onSelect, onClose }) {
               <p className="mt-1 text-xs text-gray-500 dark:text-slate-400">Try &ldquo;customers&rdquo;, &ldquo;deals&rdquo;, or &ldquo;workflows&rdquo;</p>
             </div>
           ) : (
-            filtered.map((e, i) => (
-              <EntityCard
-                key={e.id} entity={e}
-                selected={entityId === e.id}
-                focused={focusedIdx === i}
-                optId={`em-opt-${e.id}`}
-                onSelect={onSelect}
-                onHover={() => setFocusedIdx(i)}
-              />
-            ))
+            <div className="grid grid-cols-2 gap-2.5">
+              {filtered.map((e, i) => (
+                <EntityCard
+                  key={e.id} entity={e}
+                  selected={entityId === e.id}
+                  focused={focusedIdx === i}
+                  optId={`em-opt-${e.id}`}
+                  onSelect={onSelect}
+                  onHover={() => setFocusedIdx(i)}
+                />
+              ))}
+            </div>
           )}
         </div>
 
         {/* Footer */}
-        <div className="shrink-0 flex items-center justify-between px-5 py-3" style={{ borderTop: '1px solid var(--border)' }}>
+        <div className="shrink-0 flex items-center justify-between px-6 py-4" style={{ borderTop: '1px solid var(--border)' }}>
           <p className="text-[11px] text-gray-400 dark:text-slate-500">
             {filtered.length} of {MODEL_ENTITIES.length} entities · Pre-resolved in Data Studio
           </p>
@@ -371,6 +396,30 @@ function EntityPickerModal({ entityId, onSelect, onClose }) {
         </div>
       </div>
     </div>
+  )
+}
+
+function QuickPickCard({ entity, selected, onSelect }) {
+  const Icon = ENTITY_ICONS[entity.iconName] || Database
+  return (
+    <button
+      type="button"
+      onClick={() => onSelect(entity.id)}
+      className={`flex items-center gap-2.5 rounded-xl border p-3 text-left transition-all duration-150 cursor-pointer ${
+        selected
+          ? 'border-aims-blue bg-aims-blue/5 dark:bg-aims-blue/10'
+          : 'border-gray-200 bg-white hover:border-aims-blue/50 hover:bg-aims-blue/[0.03] dark:border-white/10 dark:bg-white/5 dark:hover:border-aims-blue/40'
+      }`}
+    >
+      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg text-white" style={{ background: entity.color }}>
+        <Icon size={15} aria-hidden="true" />
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-xs font-semibold text-gray-900 dark:text-slate-100">{entity.name}</p>
+        <p className="truncate text-[10px] text-gray-400 dark:text-slate-500">{entity.recordCount.toLocaleString()} records</p>
+      </div>
+      {selected && <Check size={12} className="shrink-0 text-aims-blue" aria-hidden="true" />}
+    </button>
   )
 }
 
@@ -388,7 +437,7 @@ function EntityCard({ entity, selected, focused, optId, onSelect, onHover }) {
       role="option" aria-selected={selected}
       onClick={() => onSelect(entity.id)}
       onMouseEnter={onHover}
-      className={`group flex w-full cursor-pointer items-start gap-3.5 rounded-xl border p-3.5 text-left transition-all duration-150 ${
+      className={`group flex w-full cursor-pointer items-start gap-4 rounded-xl border p-4 text-left transition-all duration-150 ${
         selected
           ? 'border-aims-blue bg-aims-blue/5 dark:bg-aims-blue/10'
           : focused
@@ -400,14 +449,14 @@ function EntityCard({ entity, selected, focused, optId, onSelect, onHover }) {
         <Icon size={17} aria-hidden="true" />
       </span>
       <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-semibold text-gray-900 dark:text-slate-100">{entity.name}</span>
+        <div className="flex items-center gap-1.5">
+          <span className="truncate text-sm font-semibold text-gray-900 dark:text-slate-100">{entity.name}</span>
           {entity.hasPII && <Lock size={11} className="shrink-0 text-amber-500" title="Contains PII" />}
           {selected && <Check size={12} className="shrink-0 text-aims-blue" aria-hidden="true" />}
         </div>
-        <div className="mt-0.5 text-[11px] font-medium text-gray-500 dark:text-slate-400">{entity.label}</div>
-        <p className="mt-1.5 line-clamp-2 text-[11px] leading-relaxed text-gray-400 dark:text-slate-500">{entity.description}</p>
-        <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1">
+        <div className="mt-0.5 truncate text-[11px] font-medium text-gray-500 dark:text-slate-400">{entity.label}</div>
+        <p className="mt-1.5 line-clamp-1 text-[11px] leading-relaxed text-gray-400 dark:text-slate-500">{entity.description}</p>
+        <div className="mt-2 flex flex-wrap items-center gap-x-1.5 gap-y-1">
           <span className="tabular-nums text-[10px] text-gray-400 dark:text-slate-500">{entity.recordCount.toLocaleString()} records</span>
           {entity.poweredBy.length > 0 && <span className="text-[10px] text-gray-300 dark:text-slate-600">·</span>}
           {entity.poweredBy.map((src) => (
