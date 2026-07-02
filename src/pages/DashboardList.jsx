@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useLoadMore } from '../hooks/useLoadMore.js'
-import { MapPin, UserX, RotateCcw, FileBarChart, ArrowRight, Sparkles, MoreHorizontal, Eye, Pencil, Trash2, Copy, Plus } from 'lucide-react'
+import { MapPin, UserX, RotateCcw, FileBarChart, ArrowRight, Sparkles, MoreHorizontal, Eye, Pencil, Trash2, Copy, Plus, LayoutGrid } from 'lucide-react'
 import { PageHeader, Badge, EmptyState } from '../components/common/index.jsx'
 import { Tag } from '@/components/ui/Tag'
 import { Button } from '@/components/ui/Button'
@@ -153,6 +153,23 @@ export default function DashboardList() {
           ) : null
         }
       />
+
+      {/* Browse Library — anchored card always at top */}
+      <div className="px-6 pt-2 pb-1">
+        <button
+          onClick={() => navigate('/widgets')}
+          className="group flex w-full items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-left transition-all hover:border-white/20 hover:bg-white/[0.08]"
+        >
+          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-white/10 text-slate-300">
+            <LayoutGrid size={17} aria-hidden="true" />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-xs font-semibold text-slate-100">Browse widget library</span>
+            <span className="block text-[11px] text-slate-400">Find and install widgets to build your dashboards.</span>
+          </span>
+          <ArrowRight size={14} className="shrink-0 text-slate-600 transition-transform group-hover:translate-x-0.5 group-hover:text-slate-400" />
+        </button>
+      </div>
 
       <FilterToolbar
         searchValue={search}
