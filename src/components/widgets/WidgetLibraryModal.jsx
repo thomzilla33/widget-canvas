@@ -100,24 +100,7 @@ export default function WidgetLibraryModal({ zoneLabel, onAdd, onClose, onCreate
                   </div>
                 </div>
                 <div className="flex-1 overflow-auto p-6">
-                  {/* Anchored create CTA — always visible at top */}
-                  {onCreateNew && (
-                    <button
-                      onClick={onCreateNew}
-                      className="group mb-5 flex w-full items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-left transition-all hover:border-white/20 hover:bg-white/[0.08]"
-                    >
-                      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-white/10 text-slate-300">
-                        <Pencil size={16} aria-hidden="true" />
-                      </span>
-                      <span className="min-w-0 flex-1">
-                        <span className="block text-xs font-semibold text-slate-100">Create new widget</span>
-                        <span className="block text-[11px] text-slate-400">Build one from scratch — takes about 2 min.</span>
-                      </span>
-                      <X size={0} className="hidden" />{/* spacer trick */}
-                      <span className="text-[11px] font-medium text-aims-blue group-hover:underline">Start →</span>
-                    </button>
-                  )}
-                  {widgets.length === 0 ? (
+                  {widgets.length === 0 && !onCreateNew ? (
                     <div className="flex flex-col items-center justify-center py-16 text-center">
                       <div className="mb-3 grid h-14 w-14 place-items-center rounded-2xl border border-gray-200 bg-gray-50 dark:border-white/10 dark:bg-white/5">
                         <LayoutGrid size={24} className="text-gray-400 dark:text-slate-500" />
@@ -127,10 +110,34 @@ export default function WidgetLibraryModal({ zoneLabel, onAdd, onClose, onCreate
                         Build your first widget in the playground — it takes about 2 minutes.
                       </p>
                     </div>
-                  ) : list.length === 0 ? (
+                  ) : list.length === 0 && !onCreateNew ? (
                     <EmptyState icon="🔍" title="No widgets match" description="Try a different search or clear filters." action={<Button variant="secondary" size="default" onClick={clearAll}>Clear filters</Button>} />
                   ) : (
                     <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill,minmax(min(280px,100%),1fr))' }}>
+                      {/* Create new widget — premium empty-state card */}
+                      {onCreateNew && (
+                        <button
+                          onClick={onCreateNew}
+                          className="group relative flex min-h-[210px] w-full cursor-pointer flex-col items-center justify-center gap-3 overflow-hidden rounded-xl border border-dashed border-white/10 bg-white/[0.02] px-6 py-8 text-center transition-all duration-200 hover:border-aims-blue/40 hover:bg-aims-blue/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aims-blue/40 dark:bg-[#0d1424]/60"
+                        >
+                          <span
+                            className="pointer-events-none absolute inset-0 rounded-xl opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                            style={{ background: 'radial-gradient(ellipse 60% 50% at 50% 100%, rgba(43,127,255,0.08) 0%, transparent 70%)' }}
+                            aria-hidden="true"
+                          />
+                          <span className="relative grid h-10 w-10 place-items-center rounded-xl border border-white/10 bg-white/5 text-slate-400 transition-all duration-200 group-hover:border-aims-blue/30 group-hover:bg-aims-blue/10 group-hover:text-aims-blue">
+                            <Pencil size={16} strokeWidth={1.5} aria-hidden="true" />
+                          </span>
+                          <span className="relative flex flex-col items-center gap-0.5">
+                            <span className="text-[13px] font-semibold text-slate-300 transition-colors group-hover:text-slate-100">
+                              Create new widget
+                            </span>
+                            <span className="text-[11px] text-slate-500 transition-colors group-hover:text-slate-400">
+                              Build one from scratch — ~2 min
+                            </span>
+                          </span>
+                        </button>
+                      )}
                       {list.map((w) => (
                         <Card key={w.id} widget={w} onOpen={() => setSelected(w)} onAdd={() => onAdd(w, 'md')} />
                       ))}

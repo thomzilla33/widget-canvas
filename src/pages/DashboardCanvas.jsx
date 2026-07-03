@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from 'react'
 import { useParams, Navigate, useNavigate, useLocation } from 'react-router-dom'
-import { Plus, X, Lock, Unlock, Trash2, Sparkles, RotateCcw, SlidersHorizontal, GripVertical, Move, Check, RefreshCw, MoreHorizontal, Flag, Info, Pencil } from 'lucide-react'
+import { Plus, X, Lock, Unlock, Trash2, Sparkles, RotateCcw, SlidersHorizontal, GripVertical, Move, Check, RefreshCw, MoreHorizontal, Flag, Info, Pencil, LayoutGrid } from 'lucide-react'
 import { PageHeader, GovernedBadge, FreshnessBadge, Badge, EmptyState } from '../components/common/index.jsx'
 import { Button } from '@/components/ui/Button'
+import { CardContainer } from '@/components/ui/CardContainer'
 import { PopoverPanel } from '../components/common/Popover.jsx'
 import WidgetRender from '../components/widgets/WidgetRender.jsx'
 import WidgetLibraryModal from '../components/widgets/WidgetLibraryModal.jsx'
@@ -417,23 +418,35 @@ function MenuItem({ icon: Icon, onClick, children }) {
   )
 }
 
-/* ── A dashed "Add widget" tile — browse library only ── */
+/* ── A premium "Add widget" empty-state tile ── */
 function AddWidgetCard({ onClick }) {
   return (
-    <div className="flex min-h-[180px] flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 px-4 py-6 dark:border-white/15">
-      <button
-        onClick={onClick}
-        className="flex w-full items-center gap-3 rounded-lg border border-gray-200 bg-white px-4 py-3 text-left text-gray-700 transition-all hover:border-aims-blue/50 hover:text-aims-blue hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aims-blue/40 dark:border-white/10 dark:bg-white/5 dark:text-slate-300 dark:hover:border-aims-blue/40 dark:hover:text-aims-blue"
-      >
-        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-gray-100 dark:bg-white/10">
-          <Plus size={16} aria-hidden="true" />
+    <button
+      onClick={onClick}
+      className="group relative flex min-h-[180px] w-full cursor-pointer flex-col items-center justify-center gap-3 overflow-hidden rounded-xl border border-dashed border-white/10 bg-white/[0.02] px-6 py-8 text-center transition-all duration-200 hover:border-aims-blue/40 hover:bg-aims-blue/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aims-blue/40 dark:bg-[#0d1424]/60"
+    >
+      {/* Subtle radial glow on hover */}
+      <span
+        className="pointer-events-none absolute inset-0 rounded-xl opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+        style={{ background: 'radial-gradient(ellipse 60% 50% at 50% 100%, rgba(43,127,255,0.08) 0%, transparent 70%)' }}
+        aria-hidden="true"
+      />
+
+      {/* Icon */}
+      <span className="relative grid h-10 w-10 place-items-center rounded-xl border border-white/10 bg-white/5 text-slate-400 transition-all duration-200 group-hover:border-aims-blue/30 group-hover:bg-aims-blue/10 group-hover:text-aims-blue">
+        <Plus size={18} strokeWidth={1.5} aria-hidden="true" />
+      </span>
+
+      {/* Label */}
+      <span className="relative flex flex-col items-center gap-0.5">
+        <span className="text-[13px] font-semibold text-slate-300 transition-colors group-hover:text-slate-100">
+          Add widget
         </span>
-        <span>
-          <span className="block text-sm font-medium">Browse library</span>
-          <span className="block text-[11px] text-gray-400 dark:text-slate-500">Pick from your existing widgets</span>
+        <span className="text-[11px] text-slate-500 transition-colors group-hover:text-slate-400">
+          Browse the library
         </span>
-      </button>
-    </div>
+      </span>
+    </button>
   )
 }
 
