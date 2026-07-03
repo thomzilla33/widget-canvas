@@ -1,5 +1,6 @@
 import { scopeMult } from './governance.js'
 import { dimensionCats, applyTransform, dimensionById } from './fields.js'
+import { entityDataset, entityKindFor } from './mockDatasets.js'
 
 // Canned preview datasets for the Widget Playground. A single bundle is returned
 // so any (metric, widget-type) pair can render something sensible.
@@ -301,7 +302,8 @@ function glOverrides(name = '') {
   return o
 }
 
-function metricBundle(name, { h = 0, m = 1, filterCount = 0, dimensionId, transform } = {}) {
+function metricBundle(name, { h = 0, m = 1, filterCount = 0, dimensionId, transform, entityKind } = {}) {
+  const entDs = entityDataset(entityKind)
   const unit = metricUnit(name)
   const additive = unit === 'currency' || unit === 'count'
   const fixedKpi = KPI_OVERRIDE[name] || null
@@ -323,7 +325,8 @@ function metricBundle(name, { h = 0, m = 1, filterCount = 0, dimensionId, transf
 
   // Breakdown by the metric's natural categories. Additive units distribute the
   // KPI across categories (Σ ≈ KPI); ratio units carry a per-category rate/score.
-  const cats = breakdownCats(name)
+  // When an entity kind is known (DatasetStep flow), use its domain-specific labels.
+  const cats = (entDs?.breakdownCats && !dimensionId) ? entDs.breakdownCats : breakdownCats(name)
   const weights = cats.map((_, i) => SAMPLE.breakdown[i % SAMPLE.breakdown.length].value)
   const wsum = weights.reduce((a, b) => a + b, 0) || 1
   const maxw = Math.max(...weights) || 1
@@ -344,14 +347,23 @@ function metricBundle(name, { h = 0, m = 1, filterCount = 0, dimensionId, transf
     y: Math.max(0, Math.round(seriesBase * (0.7 + 0.45 * Math.sin(i / 1.6) + i * 0.05) + ((h >> i) % 7) - 3)),
   }))
 
-  // Records: the breakdown AS a table — Dimension | Metric | Share (no fake owners).
-  const dimLabel = dimensionId && dimensionId !== 'none' ? dimensionById(dimensionId)?.name || dimLabelOf(name) : dimLabelOf(name)
-  const records = breakdown.map((b) => ({
+  // Records: prefer entity row-level data (multi-column cells[]); fall back to
+  // breakdown-as-table (Dimension | Metric | Share) for metric-only sources.
+  const dimLabel = (entDs?.dimLabel && !dimensionId)
+    ? entDs.dimLabel
+    : dimensionId && dimensionId !== 'none'
+      ? dimensionById(dimensionId)?.name || dimLabelOf(name)
+      : dimLabelOf(name)
+  const breakdownRecords = breakdown.map((b) => ({
     name: b.label,
     value: transformed ? `${b.value}` : formatMetric(b.value, unit),
     share: additive && !transformed ? `${Math.round((b.value / total) * 100)}%` : '—',
   }))
-  const recordHeaders = additive && !transformed ? [dimLabel, name, 'Share'] : [dimLabel, name]
+  const records = entDs?.records || breakdownRecords
+  const recordHeaders = entDs?.records
+    ? entDs.recordHeaders
+    : additive && !transformed ? [dimLabel, name, 'Share'] : [dimLabel, name]
+  const recordTotal = entDs?.records ? entDs.recordTotal : records.length
 
   // Geo: the metric by region, scaled the same way.
   const geoMax = Math.max(...SAMPLE.geo.map((g) => g.value))
@@ -390,10 +402,13 @@ function metricBundle(name, { h = 0, m = 1, filterCount = 0, dimensionId, transf
     matrix: { ...SAMPLE.matrix, cells },
     records,
     recordHeaders,
-    recordTotal: records.length,
+    recordTotal,
     narrative,
     gauge: { value: gaugeVal, label: 'of target' },
     calendar: buildCalendar(h),
+    ...(entDs?.board   && { board:  entDs.board  }),
+    ...(entDs?.feed    && { feed:   entDs.feed   }),
+    ...(entDs?.alerts  && { alerts: entDs.alerts }),
     ...glOverrides(name),
   }
 }
@@ -407,7 +422,7 @@ export function previewData(metric, opts) {
   const rangeMult = (opts && RANGE_MULT[opts.range]) || 1
   const filterScale = 1 - Math.min(0.4, (opts?.filterCount || 0) * 0.15)
   const m = additive ? rangeMult * filterScale : 1
-  return { ...SAMPLE, ...metricBundle(name, { h: hashId(name), m, filterCount: opts?.filterCount || 0, dimensionId: opts?.dimension?.id, transform: opts?.transform }) }
+  return { ...SAMPLE, ...metricBundle(name, { h: hashId(name), m, filterCount: opts?.filterCount || 0, dimensionId: opts?.dimension?.id, transform: opts?.transform, entityKind: opts?.entityKind }) }
 }
 
 // Dashboard/library render: the SAME metricBundle as the builder preview (so a
@@ -427,7 +442,8 @@ export function widgetSample(widget, scope) {
   const rollupMult = scope?.rollup ? scopeMult(scope.rollup) : 1 // broader PBAC scope → larger aggregates
   const m = rangeMult * filterScale * rollupMult
 
-  const bundle = metricBundle(name, { h: hStable, m, filterCount: filterVals.length, dimensionId: widget?.dimension, transform: widget?.transform })
+  const widgetEntityKind = entityKindFor({ source: { id: widget?.source || '' }, datasetConfig: widget?.dataset })
+  const bundle = metricBundle(name, { h: hStable, m, filterCount: filterVals.length, dimensionId: widget?.dimension, transform: widget?.transform, entityKind: widgetEntityKind })
 
   // Live tiles wobble the headline each tick (count/currency only; the salt folds
   // in the tick so the jitter actually changes between intervals). Build the

@@ -23,7 +23,7 @@ import {
 import DatasetStep from '../components/playground/DatasetStep.jsx'
 import WidgetPreview from '../components/playground/WidgetPreview.jsx'
 import DataSourceMarketplace from '../components/datasources/DataSourceMarketplace.jsx'
-import { COMPATIBLE_SKELETONS } from '../data/datasets.js'
+import { COMPATIBLE_SKELETONS, ENTITY_SOURCES } from '../data/datasets.js'
 
 const FRESHNESS_STATUS = { realtime: 'live', '15m': 'fresh', '1h': 'fresh', '24h': 'aging' }
 const PREVIEW_WIDTH = { sm: 'max-w-[240px]', md: 'max-w-md', lg: 'max-w-full' }
@@ -120,12 +120,15 @@ export default function WidgetBuilder() {
   const source = resolveSource(sourceId)
   const metric = source ? sourceFields(source).find((f) => f.id === metricId) || null : null
 
-  // When using the new DatasetStep flow, derive synthetic source+metric for preview
+  // When using the new DatasetStep flow, derive synthetic source+metric for preview.
+  // Use the ENTITY_SOURCES label (e.g. "Contacts") instead of the raw id ("contacts_hubspot")
+  // so the preview header shows a readable name and entityKindFor resolves correctly.
+  const dsEntry = datasetConfig?.sourceId ? ENTITY_SOURCES.find((s) => s.id === datasetConfig.sourceId) : null
   const previewSource = source || (datasetConfig?.sourceId
-    ? { id: datasetConfig.sourceId, name: datasetConfig.sourceId, governed: false, hasPII: false }
+    ? { id: datasetConfig.sourceId, name: dsEntry ? `${dsEntry.label} · ${dsEntry.integration}` : datasetConfig.sourceId, governed: false, hasPII: false }
     : null)
   const previewMetric = metric || (datasetConfig?.sourceId
-    ? { id: 'dataset', name: datasetConfig.aggregation?.column || datasetConfig.sourceId || 'Value' }
+    ? { id: 'dataset', name: dsEntry?.label || datasetConfig.aggregation?.column || datasetConfig.sourceId || 'Value' }
     : null)
 
   function resetShape() {
@@ -471,6 +474,7 @@ export default function WidgetBuilder() {
                   freshness={FRESHNESS_STATUS[freshness] || 'fresh'}
                   display={{ format, goal, accentColor, styleVariant, displayOptions }}
                   shape={shape}
+                  datasetConfig={datasetConfig}
                 />
               </div>
               {typeId && (

@@ -4,6 +4,7 @@ import { GovernedBadge, FreshnessBadge, DataPlaneBadge } from '../common/index.j
 import { dataPlaneOf } from '../../data/governance.js'
 import { dimensionsFor } from '../../data/fields.js'
 import { previewData, formatValue } from '../../data/preview.js'
+import { entityKindFor } from '../../data/mockDatasets.js'
 import { TYPE_LABEL } from '../../data/mock.js'
 import { CostKpiMini, UsageHeatmapMini, SpendBreakdownMini, CompositeStatMini } from '../widgets/WidgetRender.jsx'
 import { SERIES, LineHC, BarHC, PieHC, ScatterHC, GaugeHC, FunnelHC, HeatmapHC } from '../charts/hc.jsx'
@@ -26,7 +27,7 @@ function goalMet(raw, goal) {
 const H = 220
 
 // ── Trust header + type switcher ─────────────────────────────
-export default function WidgetPreview({ typeId, metric, source, name, subtitle, freshness, display, shape }) {
+export default function WidgetPreview({ typeId, metric, source, name, subtitle, freshness, display, shape, datasetConfig }) {
   const ready = source && metric && typeId
   // Applicable filters for THIS metric (Issue A): the date range (time is always
   // filterable) + the categorical dimensions dimensionsFor() says apply to this
@@ -48,8 +49,11 @@ export default function WidgetPreview({ typeId, metric, source, name, subtitle, 
       next.has(id) ? next.delete(id) : next.add(id)
       return next
     })
+  // Resolve entity kind from DatasetStep sourceId or legacy source+metric so the
+  // preview shows domain-specific records/categories rather than "Segment A/B/C/D".
+  const entityKind = entityKindFor({ source, metric, datasetConfig })
   // Merge the interactive filters into the preview opts (alongside dimension/transform).
-  const previewOpts = { ...(shape || {}), range, filterCount: activeDims.size }
+  const previewOpts = { ...(shape || {}), range, filterCount: activeDims.size, entityKind }
 
   const accentColor = display?.accentColor || ''
   const styleVariant = display?.styleVariant || ''
@@ -286,10 +290,10 @@ function KpiView({ data, display }) {
 }
 
 function TableView({ data }) {
-  // Metric preview → the breakdown as a table (Dimension | Metric | Share), tied to
-  // the SAME data the bar/pie/list show.
   const headers = data.recordHeaders || ['Segment', 'Value']
-  const withShare = headers.length >= 3
+  // Entity datasets supply records[].cells (multi-column); metric datasets use name/value/share.
+  const multiCol = data.records[0]?.cells != null
+  const withShare = !multiCol && headers.length >= 3
   return (
     <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-white/10">
       <table className="w-full text-left text-xs">
@@ -301,12 +305,25 @@ function TableView({ data }) {
           </tr>
         </thead>
         <tbody>
-          {data.records.slice(0, 7).map((r) => (
-            <tr key={r.name} className="border-t border-gray-100 dark:border-white/5">
-              <td className="px-3 py-2 font-medium text-gray-900 dark:text-slate-100">{r.name}</td>
-              <td className="num px-3 py-2 text-right text-gray-700 dark:text-slate-200">{r.value}</td>
-              {withShare && <td className="num px-3 py-2 text-right text-gray-500 dark:text-slate-400">{r.share}</td>}
-            </tr>
+          {data.records.slice(0, 7).map((r, ri) => (
+            multiCol ? (
+              <tr key={ri} className="border-t border-gray-100 dark:border-white/5">
+                {r.cells.map((cell, ci) => (
+                  <td
+                    key={ci}
+                    className={`px-3 py-2 ${ci === 0 ? 'font-medium text-gray-900 dark:text-slate-100' : 'text-right text-gray-600 dark:text-slate-300'}`}
+                  >
+                    {cell}
+                  </td>
+                ))}
+              </tr>
+            ) : (
+              <tr key={r.name} className="border-t border-gray-100 dark:border-white/5">
+                <td className="px-3 py-2 font-medium text-gray-900 dark:text-slate-100">{r.name}</td>
+                <td className="num px-3 py-2 text-right text-gray-700 dark:text-slate-200">{r.value}</td>
+                {withShare && <td className="num px-3 py-2 text-right text-gray-500 dark:text-slate-400">{r.share}</td>}
+              </tr>
+            )
           ))}
         </tbody>
       </table>
@@ -345,6 +362,11 @@ function CarouselView({ data }) {
   const items = data.records
   const r = items[i % items.length]
   const dimLabel = data.recordHeaders?.[0] || 'Segment'
+  // Entity datasets supply cells[]; legacy breakdown records supply name/value/share.
+  const multiCol = r?.cells != null
+  const title  = multiCol ? r.cells[0] : r.name
+  const metric = multiCol ? r.cells[1] : r.value
+  const detail = multiCol ? (r.cells[2] || null) : (r.share && r.share !== '—' ? r.share : null)
   return (
     <div className="flex items-center gap-2">
       <button onClick={() => setI((x) => (x - 1 + items.length) % items.length)} className="grid h-7 w-7 shrink-0 place-items-center rounded-md border border-gray-200 text-gray-500 hover:text-aims-blue dark:border-white/15 dark:text-slate-400" aria-label="Previous">
@@ -352,9 +374,9 @@ function CarouselView({ data }) {
       </button>
       <div className="flex-1 rounded-lg border border-gray-200 p-4 dark:border-white/10">
         <div className="text-[10px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-500">{dimLabel}</div>
-        <div className="text-sm font-semibold text-gray-900 dark:text-slate-100">{r.name}</div>
-        <div className="num mt-3 text-2xl font-bold text-gray-900 dark:text-slate-100">{r.value}</div>
-        {r.share && r.share !== '—' && <div className="mt-1 text-xs text-gray-500 dark:text-slate-400">{r.share} of total</div>}
+        <div className="text-sm font-semibold text-gray-900 dark:text-slate-100">{title}</div>
+        <div className="num mt-3 text-2xl font-bold text-gray-900 dark:text-slate-100">{metric}</div>
+        {detail && <div className="mt-1 text-xs text-gray-500 dark:text-slate-400">{detail}</div>}
         <div className="mt-3 flex justify-center gap-1">
           {items.map((_, d) => (
             <span key={d} className={`h-1.5 w-1.5 rounded-full ${d === i ? 'bg-aims-blue' : 'bg-gray-300 dark:bg-white/20'}`} />
