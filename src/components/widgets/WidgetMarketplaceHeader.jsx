@@ -1,16 +1,17 @@
-import { PencilRuler, Sparkles, ChevronRight } from 'lucide-react'
+import { PencilRuler, Sparkles, ChevronRight, Store } from 'lucide-react'
 
-// Two pinned cards at the top of the Widget Library:
+// Three pinned cards at the top of the Widget Library:
 //   1. Start from scratch → onScratch()
-//   2. AI Assistant       → disabled, "Coming soon"
-export default function WidgetMarketplaceHeader({ onScratch }) {
+//   2. Browse marketplace → onBrowse()
+//   3. AI Assistant       → disabled, "Coming soon"
+export default function WidgetMarketplaceHeader({ onScratch, onBrowse }) {
   return (
     <div className="mb-6">
       <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-slate-500">
         Create new
       </p>
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
 
         {/* Start from scratch */}
         <button
@@ -23,6 +24,21 @@ export default function WidgetMarketplaceHeader({ onScratch }) {
           <span className="min-w-0 flex-1">
             <span className="block text-xs font-semibold text-gray-900 dark:text-slate-100">Start from scratch</span>
             <span className="block truncate text-[11px] text-gray-500 dark:text-slate-400">Configure a dataset and widget manually</span>
+          </span>
+          <ChevronRight size={14} aria-hidden="true" className="shrink-0 text-gray-300 transition-transform group-hover:translate-x-0.5 group-hover:text-gray-500 dark:text-slate-600" />
+        </button>
+
+        {/* Browse marketplace */}
+        <button
+          onClick={onBrowse}
+          className="group flex items-center gap-3 rounded-xl border border-gray-200 bg-white p-3.5 text-left transition-all hover:border-gray-300 hover:shadow-sm dark:border-white/10 dark:bg-white/5 dark:hover:border-white/20 dark:hover:bg-white/[0.08]"
+        >
+          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-aims-blue/10 text-aims-blue">
+            <Store size={17} aria-hidden="true" />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-xs font-semibold text-gray-900 dark:text-slate-100">Browse marketplace</span>
+            <span className="block truncate text-[11px] text-gray-500 dark:text-slate-400">Find an existing widget to reuse</span>
           </span>
           <ChevronRight size={14} aria-hidden="true" className="shrink-0 text-gray-300 transition-transform group-hover:translate-x-0.5 group-hover:text-gray-500 dark:text-slate-600" />
         </button>

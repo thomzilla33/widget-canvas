@@ -9,6 +9,7 @@ import ReportsPage from './pages/ReportsPage.jsx'
 import HomePage from './pages/HomePage.jsx'
 import WidgetLibrary from './pages/WidgetLibrary.jsx'
 import WidgetBuilder from './pages/WidgetBuilder.jsx'
+import WidgetMarketplacePage from './pages/WidgetMarketplacePage.jsx'
 import ProfilesPage from './pages/ProfilesPage.jsx'
 import UCPView from './pages/UCPView.jsx'
 
@@ -30,6 +31,7 @@ export default function App() {
         <Route path="/dashboard/:id/canvas" element={<DashboardCanvas />} />
         <Route path="/dashboard/:id" element={<DashboardViewPage />} />
         <Route path="/widgets" element={<WidgetLibrary />} />
+        <Route path="/widgets/marketplace" element={<AdminRoute><WidgetMarketplacePage /></AdminRoute>} />
         <Route path="/widgets/new" element={<AdminRoute><WidgetBuilder /></AdminRoute>} />
         <Route path="/profiles" element={<ProfilesPage />} />
         <Route path="/ucp/:entityId" element={<UCPView />} />

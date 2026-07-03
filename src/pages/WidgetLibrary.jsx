@@ -15,7 +15,6 @@ import FlagDetailModal from '../components/widgets/FlagDetailModal.jsx'
 import WidgetDetailModal from '../components/widgets/WidgetDetailModal.jsx'
 import EditWidgetModal from '../components/widgets/EditWidgetModal.jsx'
 import DeleteWidgetDialog from '../components/widgets/DeleteWidgetDialog.jsx'
-import WidgetMarketplace from '../components/widgets/WidgetMarketplace.jsx'
 import AIGenerateModal from '../components/ai/AIGenerateModal.jsx'
 import WidgetMarketplaceHeader from '../components/widgets/WidgetMarketplaceHeader.jsx'
 import { useStaggerReveal } from '../hooks/useReveal.js'
@@ -69,7 +68,6 @@ export default function WidgetLibrary() {
   const [editWidget, setEditWidget] = useState(null) // CRUD U — edit safe fields
   const [deletingWidget, setDeletingWidget] = useState(null) // CRUD D — staged delete dialog
   const [menuId, setMenuId] = useState(null) // per-card ⋯ actions menu (by widget id)
-  const [marketplace, setMarketplace] = useState(false)
   const [aiOpen, setAiOpen] = useState(false)
   const gridReveal = useStaggerReveal('widgets')
 
@@ -140,7 +138,10 @@ export default function WidgetLibrary() {
       <div className="px-6 py-4">
         {/* Marketplace-first: anchored Create + AI cards always visible at top */}
         {isAdmin && (
-          <WidgetMarketplaceHeader onScratch={() => navigate('/widgets/new')} />
+          <WidgetMarketplaceHeader
+            onScratch={() => navigate('/widgets/new')}
+            onBrowse={() => navigate('/widgets/marketplace')}
+          />
         )}
 
         {/* U4 — per-source templates from connected integrations (admin installs) */}
@@ -344,7 +345,6 @@ export default function WidgetLibrary() {
         />
       )}
 
-      {marketplace && <WidgetMarketplace onClose={() => setMarketplace(false)} />}
 
 
       {aiOpen && <AIGenerateModal mode="widget" onClose={() => setAiOpen(false)} />}
