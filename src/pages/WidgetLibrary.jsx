@@ -61,7 +61,7 @@ export default function WidgetLibrary() {
   const [search, setSearch] = useState('')
   const [sortBy, setSortBy] = useState('name')
   const [sortDir, setSortDir] = useState('asc')
-  const [repinWidget, setRepinWidget] = useState(null)
+  const [repinTarget, setRepinTarget] = useState(null) // { widget, flagId }
   const [detailFlag, setDetailFlag] = useState(null)
   const [detailWidget, setDetailWidget] = useState(null) // Tier 2 — widget detail (not the builder)
   const [editWidget, setEditWidget] = useState(null) // CRUD U — edit safe fields
@@ -198,7 +198,7 @@ export default function WidgetLibrary() {
                       </div>
                     </div>
                     {canRepin ? (
-                      <Button variant="primary" size="sm" className="shrink-0" onClick={() => setRepinWidget(w)}>
+                      <Button variant="primary" size="sm" className="shrink-0" onClick={() => setRepinTarget({ widget: w, flagId: f.id })}>
                         Remap widget
                       </Button>
                     ) : (
@@ -309,11 +309,15 @@ export default function WidgetLibrary() {
         )}
       </div>
 
-      {repinWidget && (
+      {repinTarget && (
         <RepinModal
-          widget={repinWidget}
-          onClose={() => setRepinWidget(null)}
-          onComplete={() => updateWidget(repinWidget.id, { health: 'active' })}
+          widget={repinTarget.widget}
+          onClose={() => setRepinTarget(null)}
+          onComplete={() => {
+            updateWidget(repinTarget.widget.id, { health: 'active' })
+            resolveFlag(repinTarget.flagId)
+            setRepinTarget(null)
+          }}
         />
       )}
 
