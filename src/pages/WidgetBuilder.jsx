@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { Check, ExternalLink, RefreshCw, PenLine, LayoutTemplate, Sparkles, BarChart3, LineChart, Hash, Gauge, PieChart, Table2, List, ArrowLeft } from 'lucide-react'
+import { Check, ExternalLink, RefreshCw } from 'lucide-react'
 import { PageHeader } from '../components/common/index.jsx'
 import { Button } from '@/components/ui/Button'
 import { useWidgets } from '../state/WidgetsContext.jsx'
@@ -51,19 +51,6 @@ const TYPE_INFO = {
   compositestat: { about: 'A headline total broken into the components that make it up.', bestFor: 'Showing a total and its mix in one tile.' },
 }
 
-const WIDGET_TEMPLATES = [
-  { id: 'tpl-mrr', name: 'MRR Trend', description: 'Monthly recurring revenue over time — the heartbeat of your subscription business.', entityId: 'ent-customers', metricId: 'cust-mrr', typeId: 'line', category: 'Revenue', Icon: LineChart },
-  { id: 'tpl-pipeline', name: 'Pipeline Value', description: 'Total open opportunity value — your forward-looking revenue signal.', entityId: 'ent-deals', metricId: 'deal-pipeline', typeId: 'kpi', category: 'Revenue', Icon: Hash },
-  { id: 'tpl-win-rate', name: 'Win Rate', description: 'Closed-won as % of all closed — your team\'s effectiveness at a glance.', entityId: 'ent-deals', metricId: 'deal-win-rate', typeId: 'gauge', category: 'Revenue', Icon: Gauge },
-  { id: 'tpl-deal-stage', name: 'Deals by Stage', description: 'Pipeline breakdown by stage — see where deals are getting stuck.', entityId: 'ent-deals', metricId: 'deal-by-stage', typeId: 'bar', category: 'Revenue', Icon: BarChart3 },
-  { id: 'tpl-open-tickets', name: 'Open Tickets', description: 'Live count of open support cases — track backlog and triage pressure.', entityId: 'ent-tickets', metricId: 'tkt-open', typeId: 'kpi', category: 'Support', Icon: Hash },
-  { id: 'tpl-sla', name: 'SLA Compliance', description: 'Percentage of tickets resolved within SLA — your support promise.', entityId: 'ent-tickets', metricId: 'tkt-sla', typeId: 'gauge', category: 'Support', Icon: Gauge },
-  { id: 'tpl-churn', name: 'Churn Rate', description: 'Monthly customer churn — the rate at which customers leave your platform.', entityId: 'ent-customers', metricId: 'cust-churn', typeId: 'gauge', category: 'Customer Data', Icon: Gauge },
-  { id: 'tpl-cust-tier', name: 'Customers by Tier', description: 'Breakdown of your customer base by subscription tier or plan.', entityId: 'ent-customers', metricId: 'cust-by-tier', typeId: 'pie', category: 'Customer Data', Icon: PieChart },
-  { id: 'tpl-open-deals', name: 'Open Deals', description: 'Row-level view of every active opportunity with owner and close date.', entityId: 'ent-deals', metricId: 'deal-rs-open', typeId: 'table', category: 'Revenue', Icon: Table2 },
-  { id: 'tpl-recent-contacts', name: 'Recently Active Contacts', description: 'Contacts ranked by last engagement — see who needs follow-up.', entityId: 'ent-contacts', metricId: 'cnt-rs-recent', typeId: 'list', category: 'Customer Data', Icon: List },
-]
-
 // Resolve a source from either the entity model or EXTERNAL_SOURCES (legacy / describe flow)
 function resolveSource(sourceId) {
   if (!sourceId) return null
@@ -74,10 +61,6 @@ export default function WidgetBuilder() {
   const navigate = useNavigate()
   const location = useLocation()
   const { addWidget } = useWidgets()
-
-  // Entry mode: null = entry screen, 'scratch' | 'template' | 'ai' = builder open
-  // Skip entry if arriving with a seed description (from DescribeIt on another page)
-  const [entryMode, setEntryMode] = useState(() => location.state?.describe ? 'ai' : null)
 
   // Tab: 'data' | 'widget' | 'appearance'
   const [tab, setTab] = useState('data')
@@ -236,26 +219,6 @@ export default function WidgetBuilder() {
     }
   }
 
-  function applyTemplate(tpl) {
-    setSourceId(tpl.entityId)
-    setMetricId(tpl.metricId)
-    setTypeId(tpl.typeId)
-    setTypeTouched(true)
-    setName(tpl.name)
-    setTab('widget')
-    setEntryMode('scratch')
-  }
-
-  if (!entryMode) {
-    return (
-      <EntryScreen
-        onScratch={() => setEntryMode('scratch')}
-        onAI={() => setEntryMode('ai')}
-        onTemplate={applyTemplate}
-        onBack={() => navigate('/widgets')}
-      />
-    )
-  }
 
   if (saved) return <SavedConfirmation name={name} widgetId={saved} navigate={navigate} />
 
@@ -501,138 +464,6 @@ export default function WidgetBuilder() {
               )}
             </div>
           </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-/* ── Entry screen ── */
-const TEMPLATE_CATEGORIES = ['Revenue', 'Support', 'Customer Data']
-
-function EntryScreen({ onScratch, onAI, onTemplate, onBack }) {
-  const [showTemplates, setShowTemplates] = useState(false)
-  const [activeCategory, setActiveCategory] = useState('Revenue')
-
-  const filtered = WIDGET_TEMPLATES.filter((t) => t.category === activeCategory)
-
-  return (
-    <div className="h-full flex flex-col">
-      <PageHeader
-        title="Create a widget"
-        description="Choose how you'd like to start building."
-        actions={
-          <Button variant="secondary" onClick={onBack}>
-            <ArrowLeft size={15} /> Back to library
-          </Button>
-        }
-      />
-      <div className="flex-1 overflow-auto">
-        <div className="mx-auto w-full max-w-2xl px-6 py-10 space-y-8">
-
-          {/* 3 mode cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {/* Scratch */}
-            <button
-              onClick={onScratch}
-              className="flex flex-col items-start gap-3 rounded-xl border border-gray-200 bg-white p-5 text-left transition-all hover:border-aims-blue/50 hover:shadow-md dark:border-white/10 dark:bg-white/[0.03] dark:hover:border-aims-blue/40"
-            >
-              <span className="grid h-10 w-10 place-items-center rounded-xl bg-gray-100 text-gray-700 dark:bg-white/10 dark:text-slate-200">
-                <PenLine size={20} />
-              </span>
-              <div>
-                <div className="text-sm font-semibold text-gray-900 dark:text-slate-100">From scratch</div>
-                <p className="mt-0.5 text-xs text-gray-500 dark:text-slate-400">Pick an entity, metric, and visualization manually.</p>
-              </div>
-            </button>
-
-            {/* Template */}
-            <button
-              onClick={() => setShowTemplates((v) => !v)}
-              className={`flex flex-col items-start gap-3 rounded-xl border p-5 text-left transition-all hover:shadow-md ${
-                showTemplates
-                  ? 'border-aims-blue bg-aims-blue/5 dark:bg-aims-blue/10'
-                  : 'border-gray-200 bg-white hover:border-aims-blue/50 dark:border-white/10 dark:bg-white/[0.03] dark:hover:border-aims-blue/40'
-              }`}
-            >
-              <span className={`grid h-10 w-10 place-items-center rounded-xl transition-colors ${
-                showTemplates ? 'bg-aims-blue text-white' : 'bg-gray-100 text-gray-700 dark:bg-white/10 dark:text-slate-200'
-              }`}>
-                <LayoutTemplate size={20} />
-              </span>
-              <div>
-                <div className="text-sm font-semibold text-gray-900 dark:text-slate-100">From a template</div>
-                <p className="mt-0.5 text-xs text-gray-500 dark:text-slate-400">Start from a pre-built config — customize after.</p>
-              </div>
-            </button>
-
-            {/* AI-assisted */}
-            <button
-              onClick={onAI}
-              className="flex flex-col items-start gap-3 rounded-xl border border-gray-200 bg-white p-5 text-left transition-all hover:border-aims-blue/50 hover:shadow-md dark:border-white/10 dark:bg-white/[0.03] dark:hover:border-aims-blue/40"
-            >
-              <span className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-violet-500 to-aims-blue text-white">
-                <Sparkles size={20} />
-              </span>
-              <div>
-                <div className="text-sm font-semibold text-gray-900 dark:text-slate-100">AI-assisted</div>
-                <p className="mt-0.5 text-xs text-gray-500 dark:text-slate-400">Describe what you want and let AI configure it.</p>
-              </div>
-            </button>
-          </div>
-
-          {/* Template picker — expands inline */}
-          {showTemplates && (
-            <div className="space-y-4 rounded-xl border border-aims-blue/20 bg-aims-blue/[0.03] p-5 dark:bg-aims-blue/[0.06]">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-semibold text-gray-900 dark:text-slate-100">Choose a template</span>
-                <span className="text-xs text-gray-500 dark:text-slate-400">{WIDGET_TEMPLATES.length} templates</span>
-              </div>
-
-              {/* Category tabs */}
-              <div className="flex gap-1 flex-wrap">
-                {TEMPLATE_CATEGORIES.map((cat) => (
-                  <button
-                    key={cat}
-                    onClick={() => setActiveCategory(cat)}
-                    className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-                      activeCategory === cat
-                        ? 'bg-aims-blue text-white'
-                        : 'bg-white text-gray-600 hover:bg-gray-100 dark:bg-white/10 dark:text-slate-300 dark:hover:bg-white/15'
-                    }`}
-                  >
-                    {cat}
-                  </button>
-                ))}
-              </div>
-
-              {/* Template grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {filtered.map((tpl) => {
-                  const Icon = tpl.Icon
-                  return (
-                    <button
-                      key={tpl.id}
-                      onClick={() => onTemplate(tpl)}
-                      className="flex items-start gap-3 rounded-lg border border-gray-200 bg-white p-3 text-left transition-all hover:border-aims-blue/50 hover:shadow-sm dark:border-white/10 dark:bg-white/[0.04] dark:hover:border-aims-blue/30"
-                    >
-                      <span className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-gray-100 text-gray-600 dark:bg-white/10 dark:text-slate-300">
-                        <Icon size={15} />
-                      </span>
-                      <div className="min-w-0">
-                        <div className="text-sm font-semibold text-gray-900 dark:text-slate-100">{tpl.name}</div>
-                        <p className="mt-0.5 line-clamp-2 text-[11px] text-gray-500 dark:text-slate-400">{tpl.description}</p>
-                      </div>
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-          )}
-
-          <p className="text-center text-xs text-gray-400 dark:text-slate-500">
-            You can change everything after — nothing is locked in at this step.
-          </p>
         </div>
       </div>
     </div>
