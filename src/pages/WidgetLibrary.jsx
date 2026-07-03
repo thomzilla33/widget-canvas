@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useLoadMore } from '../hooks/useLoadMore.js'
-import { Flag, Sparkles, MoreHorizontal, Plus, Pencil, Trash2 } from 'lucide-react'
+import { Flag, Sparkles, MoreHorizontal, Plus, Pencil, Trash2, PenLine, ChevronDown } from 'lucide-react'
 import { PopoverPanel } from '../components/common/Popover.jsx'
 import { PageHeader, HealthBadge, FreshnessBadge, EmptyState, DataPlaneBadge } from '../components/common/index.jsx'
 import { Tag } from '@/components/ui/Tag'
@@ -16,7 +16,6 @@ import WidgetDetailModal from '../components/widgets/WidgetDetailModal.jsx'
 import EditWidgetModal from '../components/widgets/EditWidgetModal.jsx'
 import DeleteWidgetDialog from '../components/widgets/DeleteWidgetDialog.jsx'
 import AIGenerateModal from '../components/ai/AIGenerateModal.jsx'
-import WidgetMarketplaceHeader from '../components/widgets/WidgetMarketplaceHeader.jsx'
 import { useStaggerReveal } from '../hooks/useReveal.js'
 import SourceTemplatesBanner from '../components/widgets/SourceTemplatesBanner.jsx'
 import StudioWelcome from '../components/common/StudioWelcome.jsx'
@@ -69,6 +68,7 @@ export default function WidgetLibrary() {
   const [deletingWidget, setDeletingWidget] = useState(null) // CRUD D — staged delete dialog
   const [menuId, setMenuId] = useState(null) // per-card ⋯ actions menu (by widget id)
   const [aiOpen, setAiOpen] = useState(false)
+  const [createMenuOpen, setCreateMenuOpen] = useState(false)
   const gridReveal = useStaggerReveal('widgets')
 
   const catOptions = [{ value: 'All', label: 'All categories' }, ...CATALOG_CATEGORIES.map((c) => ({ value: c, label: c }))]
@@ -110,9 +110,34 @@ export default function WidgetLibrary() {
         description={`${widgets.length} widgets · ${governedCount} governed`}
         actions={
           isAdmin ? (
-            <Button variant="primary" onClick={() => navigate('/widgets/new')}>
-              <Sparkles size={15} /> Create widget
-            </Button>
+            <div className="relative">
+              <Button
+                variant="primary"
+                onClick={() => setCreateMenuOpen((v) => !v)}
+                aria-haspopup="menu"
+                aria-expanded={createMenuOpen}
+              >
+                <Sparkles size={15} aria-hidden="true" />
+                Create widget
+                <ChevronDown size={14} aria-hidden="true" className={`transition-transform duration-150 ${createMenuOpen ? 'rotate-180' : ''}`} />
+              </Button>
+              {createMenuOpen && (
+                <PopoverPanel onClose={() => setCreateMenuOpen(false)} align="right" className="w-52 p-1.5">
+                  <CardMenuItem
+                    icon={PenLine}
+                    onClick={() => { setCreateMenuOpen(false); navigate('/widgets/new') }}
+                  >
+                    Start from scratch
+                  </CardMenuItem>
+                  <CardMenuItem
+                    icon={Sparkles}
+                    onClick={() => { setCreateMenuOpen(false); setAiOpen(true) }}
+                  >
+                    AI assistant
+                  </CardMenuItem>
+                </PopoverPanel>
+              )}
+            </div>
           ) : null
         }
       />
@@ -136,14 +161,6 @@ export default function WidgetLibrary() {
       />
 
       <div className="px-6 py-4">
-        {/* Marketplace-first: anchored Create + AI cards always visible at top */}
-        {isAdmin && (
-          <WidgetMarketplaceHeader
-            onScratch={() => navigate('/widgets/new')}
-            onBrowse={() => navigate('/widgets/marketplace')}
-          />
-        )}
-
         {/* U4 — per-source templates from connected integrations (admin installs) */}
         {isAdmin && <SourceTemplatesBanner />}
         {/* S121 — Needs Attention (flags from end users) */}
