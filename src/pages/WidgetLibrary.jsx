@@ -17,7 +17,7 @@ import EditWidgetModal from '../components/widgets/EditWidgetModal.jsx'
 import DeleteWidgetDialog from '../components/widgets/DeleteWidgetDialog.jsx'
 import AIGenerateModal from '../components/ai/AIGenerateModal.jsx'
 import { useStaggerReveal } from '../hooks/useReveal.js'
-import SourceTemplatesBanner from '../components/widgets/SourceTemplatesBanner.jsx'
+
 import StudioWelcome from '../components/common/StudioWelcome.jsx'
 import FilterToolbar from '../components/common/FilterToolbar.jsx'
 import { useWidgets } from '../state/WidgetsContext.jsx'
@@ -162,7 +162,6 @@ export default function WidgetLibrary() {
 
       <div className="px-6 py-4">
         {/* U4 — per-source templates from connected integrations (admin installs) */}
-        {isAdmin && <SourceTemplatesBanner />}
         {/* S121 — Needs Attention (flags from end users) */}
         {openFlags.length > 0 && (
           <div className="mb-5 rounded-xl border border-aims-stale/30 bg-red-50/60 p-4 dark:bg-red-500/5">
