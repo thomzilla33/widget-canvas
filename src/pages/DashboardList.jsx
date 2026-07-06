@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useLoadMore } from '../hooks/useLoadMore.js'
-import { MapPin, UserX, RotateCcw, FileBarChart, ArrowRight, Sparkles, MoreHorizontal, Eye, Pencil, Trash2, Copy, Plus, LayoutGrid } from 'lucide-react'
+import { MapPin, FileBarChart, ArrowRight, Sparkles, MoreHorizontal, Eye, Pencil, Trash2, Copy, Plus, LayoutGrid } from 'lucide-react'
 import { PageHeader, Badge, EmptyState } from '../components/common/index.jsx'
 import { Tag } from '@/components/ui/Tag'
 import { Button } from '@/components/ui/Button'
@@ -18,7 +18,7 @@ import { useStaggerReveal } from '../hooks/useReveal.js'
 import { audienceLabel } from '../data/audiences.js'
 import { useDashboards } from '../state/DashboardsContext.jsx'
 import { useRole } from '../state/RoleContext.jsx'
-import { placementLabel, DEACTIVATED_OWNERS, dashboardKind, SHARE_PEOPLE } from '../data/mock.js'
+import { placementLabel, DEACTIVATED_OWNERS, dashboardKind } from '../data/mock.js'
 import { widgetCount } from '../data/layout.js'
 
 const STATUS_OPTIONS = [
@@ -53,16 +53,6 @@ export default function DashboardList() {
   const [sortBy, setSortBy] = useState('recent')
   const [sortDir, setSortDir] = useState('desc')
 
-  // Governance recovery: dashboards owned by an offboarded user need reassigning.
-  // Group them BY the departed owner (one person usually owns several), so an admin
-  // can reassign the whole batch to the right person in one action.
-  const orphaned = dashboards.filter((d) => DEACTIVATED_OWNERS.includes(d.owner))
-  const orphanGroups = DEACTIVATED_OWNERS
-    .map((name) => ({ owner: name, items: orphaned.filter((d) => d.owner === name) }))
-    .filter((g) => g.items.length > 0)
-  // Who you can reassign TO: yourself, or any active teammate.
-  const reassignTargets = ['You (admin)', ...SHARE_PEOPLE.filter((p) => p.status === 'active').map((p) => p.name)]
-  const [reassignTo, setReassignTo] = useState({}) // per departed-owner → chosen new owner
   const [aiOpen, setAiOpen] = useState(false)
   const [launcher, setLauncher] = useState(false)
   const gridReveal = useStaggerReveal('dashboards') // reveal the card grid once on entry
@@ -78,13 +68,6 @@ export default function DashboardList() {
       else navigate('/dashboard/new')
     }, 0)
   }
-  const targetFor = (owner) => reassignTo[owner] || 'You (admin)'
-  const reassignOne = (id, owner) => updateDashboard(id, { owner: targetFor(owner) })
-  const reassignAll = (group) => {
-    const to = targetFor(group.owner)
-    group.items.forEach((d) => updateDashboard(d.id, { owner: to }))
-  }
-
   // Owner filter — distinct owners across the catalog (enterprise scale).
   const ownerOptions = [
     { value: 'All', label: 'All owners' },
@@ -197,65 +180,6 @@ export default function DashboardList() {
             <FileBarChart size={13} aria-hidden="true" /> Standalone dashboards are also grouped by collection in Reports
             <ArrowRight size={12} aria-hidden="true" />
           </button>
-        )}
-        {isAdmin && orphaned.length > 0 && (
-          <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-3 dark:border-amber-500/25 dark:bg-amber-500/10">
-            <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-slate-100">
-              <UserX size={15} className="text-aims-ungoverned" />
-              Needs attention · {orphaned.length} dashboard{orphaned.length > 1 ? 's' : ''} with an offboarded owner
-            </div>
-            <div className="space-y-3">
-              {orphanGroups.map((group) => (
-                <div key={group.owner} className="rounded-lg border border-amber-200/70 bg-white p-2.5 dark:border-white/10 dark:bg-[#131a2c]">
-                  {/* group header: who left + reassign-all control */}
-                  <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:items-center">
-                    <div className="min-w-0 flex-1 text-sm">
-                      <span className="font-semibold text-gray-900 dark:text-slate-100">{group.owner}</span>
-                      <span className="text-gray-500 dark:text-slate-400"> was offboarded · owns {group.items.length} dashboard{group.items.length > 1 ? 's' : ''}</span>
-                    </div>
-                    <div className="flex shrink-0 items-center gap-2">
-                      <label className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-slate-400">
-                        <span className="hidden sm:inline">Reassign to</span>
-                        <select
-                          className="input !h-8 !w-auto !py-1 !pl-2 !pr-7 text-xs"
-                          value={targetFor(group.owner)}
-                          onChange={(e) => setReassignTo((m) => ({ ...m, [group.owner]: e.target.value }))}
-                          aria-label={`New owner for ${group.owner}'s dashboards`}
-                        >
-                          {reassignTargets.map((t) => (
-                            <option key={t} value={t}>{t}</option>
-                          ))}
-                        </select>
-                      </label>
-                      <Button size="sm" onClick={() => reassignAll(group)} icon={<RotateCcw size={13} />}>
-                        Reassign all
-                      </Button>
-                    </div>
-                  </div>
-                  {/* the dashboards this person owns — each reassignable on its own */}
-                  <div className="space-y-1">
-                    {group.items.map((d) => (
-                      <div key={d.id} className="flex items-center gap-2 rounded-md border border-gray-100 px-2.5 py-1.5 dark:border-white/10">
-                        <div className="min-w-0 flex-1">
-                          <button onClick={() => navigate(`/dashboard/${d.id}/canvas`)} className="block max-w-full truncate text-left text-sm font-medium text-gray-900 hover:text-aims-blue dark:text-slate-100">
-                            {d.name}
-                          </button>
-                          <div className="truncate text-[11px] text-gray-500 dark:text-slate-400">{placementLabel(d.placement)}</div>
-                        </div>
-                        <button
-                          className="shrink-0 rounded-md border border-gray-200 px-2 py-1 text-[11px] font-medium text-gray-600 hover:border-aims-blue/40 hover:text-aims-blue dark:border-white/15 dark:text-slate-300"
-                          onClick={() => reassignOne(d.id, group.owner)}
-                          aria-label={`Reassign ${d.name} to ${targetFor(group.owner)}`}
-                        >
-                          Reassign
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
         )}
         {shown.length === 0 ? (
           dashboards.length === 0 ? (
