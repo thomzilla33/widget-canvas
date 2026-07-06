@@ -12,6 +12,7 @@ import WidgetBuilder from './pages/WidgetBuilder.jsx'
 import WidgetMarketplacePage from './pages/WidgetMarketplacePage.jsx'
 import ProfilesPage from './pages/ProfilesPage.jsx'
 import UCPView from './pages/UCPView.jsx'
+import ModelsPage from './pages/ModelsPage.jsx'
 
 // U7.2 — builder routes are admin-only; viewers are redirected to the read-only list.
 function AdminRoute({ children }) {
@@ -35,6 +36,7 @@ export default function App() {
         <Route path="/widgets/new" element={<AdminRoute><WidgetBuilder /></AdminRoute>} />
         <Route path="/profiles" element={<ProfilesPage />} />
         <Route path="/ucp/:entityId" element={<UCPView />} />
+        <Route path="/models" element={<ModelsPage />} />
         <Route path="*" element={<Navigate to="/dashboards" replace />} />
       </Route>
     </Routes>

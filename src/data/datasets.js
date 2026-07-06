@@ -26,6 +26,11 @@ export const ENTITY_SOURCES = [
   { id: 'activities_aims',     label: 'Activities', integration: 'AIMS-OS',  columns: ['type','subject','contact_id','account_id','date','duration','outcome'] },
   // Vehicles — internal only
   { id: 'vehicles_aims',       label: 'Vehicles',   integration: 'AIMS-OS',  columns: ['make','model','year','vin','customer_id','status','purchase_date'] },
+  // Automotive model entities
+  { id: 'vehicles_auto',   label: 'Vehicles',       integration: 'Automotive Model', columns: ['make','model','year','vin','price','status','mileage','days_in_lot','lot'],   modelId: 'automotive' },
+  { id: 'deals_auto',      label: 'Deals',          integration: 'Automotive Model', columns: ['deal_id','vehicle','contact','stage','value','owner','close_date','source'],  modelId: 'automotive' },
+  { id: 'contacts_auto',   label: 'Contacts',       integration: 'Automotive Model', columns: ['name','email','phone','type','source','last_visit','status'],                  modelId: 'automotive' },
+  { id: 'service_auto',    label: 'Service Orders', integration: 'Automotive Model', columns: ['order_id','vehicle','type','status','technician','cost','scheduled'],          modelId: 'automotive' },
 ]
 
 export const COLUMN_TYPES = {
@@ -37,6 +42,10 @@ export const COLUMN_TYPES = {
   deals_hubspot:       { name:'string', deal_stage:'string', amount:'number', close_date:'date', owner:'string', created_at:'date' },
   activities_aims:     { type:'string', subject:'string', contact_id:'string', account_id:'string', date:'date', duration:'number', outcome:'string' },
   vehicles_aims:       { make:'string', model:'string', year:'number', vin:'string', customer_id:'string', status:'string', purchase_date:'date' },
+  vehicles_auto:   { make:'string', model:'string', year:'number', vin:'string', price:'number', status:'string', mileage:'number', days_in_lot:'number', lot:'string' },
+  deals_auto:      { deal_id:'string', vehicle:'string', contact:'string', stage:'string', value:'number', owner:'string', close_date:'date', source:'string' },
+  contacts_auto:   { name:'string', email:'string', phone:'string', type:'string', source:'string', last_visit:'date', status:'string' },
+  service_auto:    { order_id:'string', vehicle:'string', type:'string', status:'string', technician:'string', cost:'number', scheduled:'date' },
 }
 
 export const OPERATORS_BY_TYPE = {

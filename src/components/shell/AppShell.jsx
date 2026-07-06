@@ -16,6 +16,7 @@ const NAV_ITEMS = [
   { id: 'reports',    label: 'Reports',    icon: 'FileBarChart' },
   { id: 'widgets',    label: 'Widgets',    icon: 'Boxes' },
   { id: 'profiles',   label: 'Profiles',   icon: 'UserRound' },
+  { id: 'models',     label: 'Models',     icon: 'Package2' },
 ]
 
 const ID_TO_PATH = {
@@ -24,6 +25,7 @@ const ID_TO_PATH = {
   reports:    '/reports',
   widgets:    '/widgets',
   profiles:   '/profiles',
+  models:     '/models',
 }
 
 const WORKSPACES = [

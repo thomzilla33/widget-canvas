@@ -12,6 +12,7 @@ import { ProfileConfigProvider } from './state/ProfileConfigContext.jsx'
 import { RoleProvider } from './state/RoleContext.jsx'
 import { ActivityProvider } from './state/ActivityContext.jsx'
 import { WorkQueueProvider } from './state/WorkQueueContext.jsx'
+import { ModelsProvider } from './state/ModelsContext.jsx'
 import './index.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
@@ -27,7 +28,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                     <RoleProvider>
                       <ActivityProvider>
                         <WorkQueueProvider>
-                          <App />
+                          <ModelsProvider>
+                            <App />
+                          </ModelsProvider>
                         </WorkQueueProvider>
                       </ActivityProvider>
                     </RoleProvider>

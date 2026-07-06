@@ -1,9 +1,10 @@
-import { X, Plus, Database, Table2 } from 'lucide-react'
+import { X, Plus, Database, Table2, PackagePlus } from 'lucide-react'
 import {
   ENTITY_SOURCES, PRESET_DATASETS, COLUMN_TYPES, AGG_FUNCTIONS,
   DATASET_SHAPE, OPERATORS_BY_TYPE,
 } from '../../data/datasets.js'
 import DatasetFilterRow from './DatasetFilterRow.jsx'
+import { useModels } from '../../state/ModelsContext.jsx'
 
 const SOURCE_TYPES = [
   { id: 'dataset', label: 'Existing Dataset', icon: Database, desc: 'Use a pre-built query as your starting point.' },
@@ -43,6 +44,11 @@ const EMPTY_CONFIG = {
 //   onChange – (updatedConfig) => void  — always includes _shape for parent
 export default function DatasetStep({ value, onChange }) {
   const config = value || EMPTY_CONFIG
+  const { installed } = useModels()
+
+  // Only show model-specific entity sources when that model is installed
+  const visibleEntitySources = ENTITY_SOURCES.filter((s) => !s.modelId || installed.has(s.modelId))
+  const hasLockedModelSources = ENTITY_SOURCES.some((s) => s.modelId && !installed.has(s.modelId))
 
   const set = (patch) => {
     const updated = { ...config, ...patch }
@@ -198,8 +204,7 @@ export default function DatasetStep({ value, onChange }) {
           )}
 
           {config.sourceType === 'entity' && (() => {
-            // Group sources by entity label
-            const groups = ENTITY_SOURCES.reduce((acc, en) => {
+            const groups = visibleEntitySources.reduce((acc, en) => {
               if (!acc[en.label]) acc[en.label] = []
               acc[en.label].push(en)
               return acc
@@ -227,6 +232,12 @@ export default function DatasetStep({ value, onChange }) {
                     </div>
                   </div>
                 ))}
+                {hasLockedModelSources && (
+                  <div className="flex items-center gap-2 rounded-lg border border-dashed border-white/10 bg-white/[0.03] px-3 py-2.5 text-[11px] text-slate-500">
+                    <PackagePlus size={13} className="shrink-0 text-slate-500" />
+                    More entities available — install a model from the Models page to unlock them.
+                  </div>
+                )}
               </div>
             )
           })()}

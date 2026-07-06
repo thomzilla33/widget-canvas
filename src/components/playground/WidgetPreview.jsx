@@ -8,6 +8,8 @@ import { entityKindFor } from '../../data/mockDatasets.js'
 import { TYPE_LABEL } from '../../data/mock.js'
 import { CostKpiMini, UsageHeatmapMini, SpendBreakdownMini, CompositeStatMini } from '../widgets/WidgetRender.jsx'
 import { SERIES, LineHC, BarHC, PieHC, ScatterHC, GaugeHC, FunnelHC, HeatmapHC } from '../charts/hc.jsx'
+import { ENTITY_SOURCES, COLUMN_TYPES } from '../../data/datasets.js'
+import { useModels } from '../../state/ModelsContext.jsx'
 
 // The date ranges a metric can be filtered to (time is always an applicable filter).
 const PREVIEW_RANGES = [
@@ -55,6 +57,13 @@ export default function WidgetPreview({ typeId, metric, source, name, subtitle, 
   // Merge the interactive filters into the preview opts (alongside dimension/transform).
   const previewOpts = { ...(shape || {}), range, filterCount: activeDims.size, entityKind }
 
+  // Entity table detection — model entity record sets bypass the metric-based flow
+  const { getRecords } = useModels()
+  const sourceEntry = ENTITY_SOURCES.find((s) => s.id === datasetConfig?.sourceId)
+  const isEntityTable = datasetConfig?._shape === 'full' && !!sourceEntry?.modelId
+  const entityRecords = isEntityTable ? (getRecords(datasetConfig.sourceId) || []) : null
+  const entityPreviewReady = isEntityTable && entityRecords?.length > 0
+
   const accentColor = display?.accentColor || ''
   const styleVariant = display?.styleVariant || ''
 
@@ -74,7 +83,12 @@ export default function WidgetPreview({ typeId, metric, source, name, subtitle, 
           {subtitle?.trim() && (
             <div className="truncate text-[11px] text-gray-600 dark:text-slate-300">{subtitle.trim()}</div>
           )}
-          {ready && (
+          {entityPreviewReady && (
+            <div className="truncate text-[11px] text-gray-500 dark:text-slate-400">
+              Table · {sourceEntry.label} · {sourceEntry.integration} · {entityRecords.length.toLocaleString()} records
+            </div>
+          )}
+          {ready && !entityPreviewReady && (
             <div className="truncate text-[11px] text-gray-500 dark:text-slate-400">
               {TYPE_LABEL[typeId]} · {source.name} · {metric.name}
             </div>
@@ -131,7 +145,13 @@ export default function WidgetPreview({ typeId, metric, source, name, subtitle, 
       )}
 
       <div className="mt-3 flex-1">
-        {ready ? (
+        {entityPreviewReady ? (
+          <EntityTableView
+            records={entityRecords}
+            sourceId={datasetConfig.sourceId}
+            exposedColumns={datasetConfig.exposedColumns}
+          />
+        ) : ready ? (
           // Key on type AND data identity so a prior render error clears when the metric changes.
           <ChartBoundary key={`${typeId}|${metric.id}|${previewOpts.dimension?.id || ''}|${previewOpts.transform || ''}|${previewOpts.range || ''}|${previewOpts.filterCount || 0}`}>
             <Renderer typeId={typeId} metric={metric} display={display} shape={previewOpts} typeConfig={typeConfig} />
@@ -631,6 +651,95 @@ function AlertsView({ data }) {
         </li>
       ))}
     </ul>
+  )
+}
+
+// ── EntityTableView ─────────────────────────────────────────────────────────
+// Renders real model entity records (from ModelsContext.getRecords).
+// Used when datasetConfig._shape === 'full' and source is a model entity.
+const STATUS_COLORS = {
+  Active: 'bg-emerald-500', New: 'bg-blue-500', Used: 'bg-slate-400',
+  Sold: 'bg-slate-500', Certified: 'bg-purple-500',
+  Lead: 'bg-slate-400', Qualified: 'bg-blue-400', Proposal: 'bg-amber-400',
+  Negotiation: 'bg-orange-400', 'Closed Won': 'bg-emerald-500', 'Closed Lost': 'bg-red-400',
+  Pending: 'bg-amber-400', 'In Progress': 'bg-blue-500', Completed: 'bg-emerald-500',
+  'Waiting on Parts': 'bg-orange-400',
+  Inactive: 'bg-slate-400', Cold: 'bg-slate-500',
+}
+
+function fmtHeader(col) {
+  return col.replace(/_/g, ' ')
+    .replace(/\b\w/g, (c) => c.toUpperCase())
+    .replace(/\bVin\b/, 'VIN')
+    .replace(/\bId\b/, 'ID')
+}
+
+function fmtCell(col, val, colTypes) {
+  if (val == null) return '—'
+  const type = colTypes[col]
+  if (type === 'number') {
+    if (col === 'year') return String(val)
+    if (['price', 'value', 'cost'].includes(col)) return '$' + Number(val).toLocaleString()
+    return Number(val).toLocaleString()
+  }
+  return String(val)
+}
+
+function EntityTableView({ records, sourceId, exposedColumns }) {
+  const colTypes = COLUMN_TYPES[sourceId] || {}
+  const allCols = Object.keys(records[0] || {}).filter((k) => k !== 'id')
+  const cols = exposedColumns?.length > 0
+    ? exposedColumns.filter((c) => allCols.includes(c))
+    : allCols.slice(0, 6)
+  const rows = records.slice(0, 8)
+
+  return (
+    <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-white/10">
+      <div className="overflow-x-auto">
+        <table className="w-full text-left text-xs">
+          <thead className="bg-gray-50 text-gray-500 dark:bg-white/5 dark:text-slate-400">
+            <tr>
+              {cols.map((col) => (
+                <th
+                  key={col}
+                  className={`whitespace-nowrap px-3 py-2 font-semibold ${colTypes[col] === 'number' ? 'text-right' : ''}`}
+                >
+                  {fmtHeader(col)}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((record, ri) => (
+              <tr key={record.id || ri} className="border-t border-gray-100 dark:border-white/5">
+                {cols.map((col) => {
+                  const isStatus = col === 'status' || col === 'stage'
+                  const isNum = colTypes[col] === 'number'
+                  return (
+                    <td
+                      key={col}
+                      className={`whitespace-nowrap px-3 py-2 ${isNum ? 'num text-right text-gray-700 dark:text-slate-200' : 'text-gray-900 dark:text-slate-100'}`}
+                    >
+                      {isStatus ? (
+                        <span className="flex items-center gap-1.5">
+                          <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${STATUS_COLORS[record[col]] || 'bg-gray-400'}`} />
+                          {record[col]}
+                        </span>
+                      ) : (
+                        fmtCell(col, record[col], colTypes)
+                      )}
+                    </td>
+                  )
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <div className="border-t border-gray-100 px-3 py-1.5 text-[11px] text-gray-400 dark:border-white/5 dark:text-slate-500">
+        Showing {rows.length} of {records.length.toLocaleString()} records
+      </div>
+    </div>
   )
 }
 

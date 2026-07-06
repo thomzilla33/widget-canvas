@@ -522,14 +522,18 @@ function SavedConfirmation({ name, widgetId, navigate }) {
         <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">
           "{name || 'Untitled widget'}" is now in the Widget Library. Add it to a dashboard to make it visible to your team.
         </p>
-        <div className="mt-5 flex items-center justify-center gap-2">
-          <Button variant="secondary" onClick={() => navigate('/widgets')}>Back to library</Button>
+        <div className="mt-5 flex flex-col items-center gap-2">
           <Button
             variant="primary"
+            className="w-full"
             onClick={() => navigate('/dashboards', { state: { pendingPlace: { id: widgetId, name: name || 'Untitled widget' } } })}
           >
             Add to a dashboard
           </Button>
+          <div className="flex w-full gap-2">
+            <Button variant="secondary" className="flex-1" onClick={() => navigate('/widgets/new')}>Create new widget</Button>
+            <Button variant="secondary" className="flex-1" onClick={() => navigate('/widgets')}>Back to library</Button>
+          </div>
         </div>
       </div>
     </div>
