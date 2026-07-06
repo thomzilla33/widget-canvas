@@ -114,6 +114,34 @@ export default function WidgetBuilder() {
     ? { id: 'dataset', name: dsEntry?.label || datasetConfig.aggregation?.column || datasetConfig.sourceId || 'Value' }
     : null)
 
+  function resetAll() {
+    setTab('data')
+    setDatasetConfig(null)
+    setSourceId(null)
+    setMetricId(null)
+    setDimensionId('none')
+    setTransform('none')
+    setAggregation('sum')
+    setTypeId(null)
+    setTypeTouched(false)
+    setName('')
+    setSubtitle('')
+    setFreshness('15m')
+    setInteractiveFilters(true)
+    setPiiAck(false)
+    setUngovernedAck(false)
+    setSaved(null)
+    setPreviewSize('lg')
+    setFormatState({ style: 'auto', decimals: 0, abbreviate: true, prefix: '', suffix: '' })
+    setGoalState({ value: null, direction: 'higher' })
+    setAccentColor('')
+    setStyleVariant('')
+    setDisplayOptions({})
+    setTableConfig({ sortField: '', sortDir: 'desc', pageSize: 25, searchable: true, hiddenColumns: [] })
+    setListConfig({ sortField: '', maxItems: 10, showTimestamp: true })
+    setCardConfig({ titleField: '', subtitleField: '', contentField: '', badge1: '', badge2: '', action1: '', action2: '' })
+  }
+
   function resetShape() {
     setDimensionId('none')
     setTransform('none')
@@ -220,7 +248,7 @@ export default function WidgetBuilder() {
   }
 
 
-  if (saved) return <SavedConfirmation name={name} widgetId={saved} navigate={navigate} />
+  if (saved) return <SavedConfirmation name={name} widgetId={saved} navigate={navigate} onReset={resetAll} />
 
   const dimension = dimensionById(dimensionId)
   const galleryMetric = metric ? { ...metric, recommendedType: recommendTile(metric, dimension) } : metric
@@ -511,7 +539,7 @@ function BuilderTabs({ tab, setTab, dataComplete, widgetComplete }) {
   )
 }
 
-function SavedConfirmation({ name, widgetId, navigate }) {
+function SavedConfirmation({ name, widgetId, navigate, onReset }) {
   return (
     <div className="h-full grid place-items-center px-6">
       <div className="max-w-sm text-center">
@@ -531,7 +559,7 @@ function SavedConfirmation({ name, widgetId, navigate }) {
             Add to a dashboard
           </Button>
           <div className="flex w-full gap-2">
-            <Button variant="secondary" className="flex-1" onClick={() => navigate('/widgets/new')}>Create new widget</Button>
+            <Button variant="secondary" className="flex-1" onClick={onReset}>Create new widget</Button>
             <Button variant="secondary" className="flex-1" onClick={() => navigate('/widgets')}>Back to library</Button>
           </div>
         </div>
