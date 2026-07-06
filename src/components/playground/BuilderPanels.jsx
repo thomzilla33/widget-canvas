@@ -979,7 +979,14 @@ function TableAppearance({ config, onChange, entity }) {
   const { sortField = '', sortDir = 'desc', pageSize = 25, searchable = true } = config
   return (
     <div className="space-y-4">
-      <Field label="Columns to display">
+      <Field label={
+        <span className="flex items-center gap-2">
+          Columns to display
+          <span className="rounded-full bg-gray-100 px-1.5 py-0.5 text-[10px] font-semibold text-gray-500 dark:bg-white/10 dark:text-slate-400">
+            {fields.filter((f) => !config.hiddenColumns?.includes(f)).length} of {fields.length}
+          </span>
+        </span>
+      }>
         <div className="max-h-[160px] overflow-auto rounded-lg border border-gray-200 dark:border-white/10">
           {fields.map((f) => (
             <label key={f} className="flex cursor-pointer items-center gap-2.5 border-b border-gray-100 px-3 py-2 last:border-0 text-sm text-gray-700 hover:bg-gray-50 dark:border-white/5 dark:text-slate-200 dark:hover:bg-white/5">
@@ -1161,35 +1168,118 @@ const ACCENT_COLORS = [
 
 // ── Style variants per widget type ─────────────────────────────────────────
 const STYLE_VARIANTS = {
-  kpi:           [{ id: 'minimal', label: 'Minimal' }, { id: 'card', label: 'Card' }, { id: 'featured', label: 'Featured' }],
-  gauge:         [{ id: 'arc', label: 'Arc' }, { id: 'ring', label: 'Ring' }],
-  statrow:       [{ id: 'row', label: 'Row' }, { id: 'grid', label: 'Grid' }],
-  costkpi:       [{ id: 'minimal', label: 'Minimal' }, { id: 'card', label: 'Card' }],
-  line:          [{ id: 'line', label: 'Lines' }, { id: 'area', label: 'Filled' }, { id: 'smooth', label: 'Smooth' }],
-  bar:           [{ id: 'vertical', label: 'Vertical' }, { id: 'horizontal', label: 'Horizontal' }, { id: 'stacked', label: 'Stacked' }],
-  pie:           [{ id: 'pie', label: 'Pie' }, { id: 'donut', label: 'Donut' }],
-  scatter:       [{ id: 'dots', label: 'Dots' }, { id: 'bubbles', label: 'Bubbles' }],
-  heatmap:       [{ id: 'sequential', label: 'Sequential' }, { id: 'diverging', label: 'Diverging' }],
-  table:         [{ id: 'comfortable', label: 'Comfortable' }, { id: 'compact', label: 'Compact' }, { id: 'striped', label: 'Striped' }],
-  list:          [{ id: 'feed', label: 'Feed' }, { id: 'cards', label: 'Cards' }, { id: 'dense', label: 'Dense' }],
-  'record-card': [{ id: 'portrait', label: 'Portrait' }, { id: 'landscape', label: 'Landscape' }, { id: 'minimal', label: 'Minimal' }],
-  carousel:      [{ id: 'slides', label: 'Slides' }, { id: 'stack', label: 'Stack' }],
+  kpi: [
+    { id: 'minimal',  label: 'Minimal',    desc: 'Value + label only — maximum focus, no chrome.' },
+    { id: 'card',     label: 'Card',       desc: 'Adds a subtle background card and border around the metric.' },
+    { id: 'featured', label: 'Featured',   desc: 'Large hero number with accent color fill — ideal for top-line KPIs.' },
+  ],
+  gauge: [
+    { id: 'arc',  label: 'Arc',  desc: 'Semi-circle from left to right — shows progress along a 180° track.' },
+    { id: 'ring', label: 'Ring', desc: 'Full 360° ring — compact, works well at small sizes.' },
+  ],
+  statrow: [
+    { id: 'row',  label: 'Row',  desc: 'All metrics in a single horizontal strip.' },
+    { id: 'grid', label: 'Grid', desc: 'Metrics arranged in a 2-column grid — better for 4+ items.' },
+  ],
+  costkpi: [
+    { id: 'minimal', label: 'Minimal', desc: 'Value + label only — clean, no background.' },
+    { id: 'card',    label: 'Card',    desc: 'Adds a card container with a budget-usage indicator.' },
+  ],
+  line: [
+    { id: 'line',   label: 'Lines',  desc: 'Crisp lines with no fill — good for multiple overlapping series.' },
+    { id: 'area',   label: 'Filled', desc: 'Fills the area under each series — highlights volume and cumulative change.' },
+    { id: 'smooth', label: 'Smooth', desc: 'Curved (bezier) lines — softer look, best for 1–2 series.' },
+  ],
+  bar: [
+    { id: 'vertical',   label: 'Vertical',   desc: 'Bars grow upward — standard for comparing values across categories.' },
+    { id: 'horizontal', label: 'Horizontal', desc: 'Bars grow rightward — better when category labels are long.' },
+    { id: 'stacked',    label: 'Stacked',    desc: 'Bars are stacked — shows both total and part-to-whole composition.' },
+  ],
+  pie: [
+    { id: 'pie',   label: 'Pie',   desc: 'Classic filled wedges — use for ≤5 categories.' },
+    { id: 'donut', label: 'Donut', desc: 'Hollow center — room for a total or label inside the ring.' },
+  ],
+  scatter: [
+    { id: 'dots',    label: 'Dots',    desc: 'Equal-size dots — plots two numeric dimensions against each other.' },
+    { id: 'bubbles', label: 'Bubbles', desc: 'Dot size encodes a third numeric dimension.' },
+  ],
+  heatmap: [
+    { id: 'sequential', label: 'Sequential', desc: 'Single-hue gradient from low (light) to high (dark).' },
+    { id: 'diverging',  label: 'Diverging',  desc: 'Two-hue gradient through a neutral midpoint — ideal for deviation from a target.' },
+  ],
+  table: [
+    { id: 'comfortable', label: 'Comfortable', desc: 'Standard row height with generous padding — easy to scan.' },
+    { id: 'compact',     label: 'Compact',     desc: 'Reduced row height — fits more rows without scrolling.' },
+    { id: 'striped',     label: 'Striped',     desc: 'Alternating row shading — helps the eye track across wide tables.' },
+  ],
+  list: [
+    { id: 'feed',  label: 'Feed',  desc: 'Timeline-style rows — each item is a full-width event card.' },
+    { id: 'cards', label: 'Cards', desc: 'Items rendered as individual cards in a grid layout.' },
+    { id: 'dense', label: 'Dense', desc: 'Tight single-line rows — maximizes the number of items visible.' },
+  ],
+  'record-card': [
+    { id: 'portrait',  label: 'Portrait',  desc: 'Tall card — field stack flows top to bottom.' },
+    { id: 'landscape', label: 'Landscape', desc: 'Wide card — fields laid out side by side.' },
+    { id: 'minimal',   label: 'Minimal',   desc: 'Name + status only — no secondary fields, very compact.' },
+  ],
+  carousel: [
+    { id: 'slides', label: 'Slides', desc: 'One card visible at a time — animated slide-in transition.' },
+    { id: 'stack',  label: 'Stack',  desc: 'Cards overlap in a deck — tap to advance.' },
+  ],
 }
 
 // ── Display toggles per widget type ────────────────────────────────────────
 const DISPLAY_OPTIONS = {
-  kpi:           [{ id: 'showTrend', label: 'Show trend vs prior period', def: true }, { id: 'showSparkline', label: 'Show sparkline', def: false }, { id: 'showTarget', label: 'Show target progress bar', def: false }],
-  gauge:         [{ id: 'showLabel', label: 'Show center label', def: true }, { id: 'showScale', label: 'Show scale markers', def: true }],
-  statrow:       [{ id: 'showTrend', label: 'Show trend arrows', def: true }],
-  costkpi:       [{ id: 'showBreakdown', label: 'Show cost breakdown', def: false }],
-  line:          [{ id: 'showLegend', label: 'Show legend', def: true }, { id: 'showLabels', label: 'Show data labels', def: false }, { id: 'showDots', label: 'Show data points', def: false }],
-  bar:           [{ id: 'showLegend', label: 'Show legend', def: true }, { id: 'showLabels', label: 'Show value labels', def: false }, { id: 'showGrid', label: 'Show grid lines', def: true }],
-  pie:           [{ id: 'showLegend', label: 'Show legend', def: true }, { id: 'showLabels', label: 'Show slice labels', def: true }, { id: 'showTotal', label: 'Show total in center', def: false }],
-  table:         [{ id: 'showFooter', label: 'Show row count footer', def: false }, { id: 'showBanding', label: 'Highlight alternate rows', def: false }],
-  list:          [{ id: 'showAvatar', label: 'Show avatars / icons', def: true }, { id: 'showTimestamp', label: 'Show timestamps', def: true }],
-  'record-card': [{ id: 'showBadges', label: 'Show status badges', def: true }, { id: 'showActions', label: 'Show quick actions', def: true }],
-  carousel:      [{ id: 'showDots', label: 'Show navigation dots', def: true }, { id: 'showArrows', label: 'Show prev/next arrows', def: true }],
-  map:           [{ id: 'showLegend', label: 'Show color legend', def: true }, { id: 'showLabels', label: 'Show region labels', def: false }],
+  kpi: [
+    { id: 'showTrend',     label: 'Show trend vs prior period', hint: 'Adds a ↑/↓ percentage line below the main value comparing to the previous period.', def: true },
+    { id: 'showSparkline', label: 'Show sparkline',             hint: 'Renders a small line chart to the right of the value showing the recent trend.',    def: false },
+    { id: 'showTarget',    label: 'Show target progress bar',   hint: 'Adds a thin progress bar at the bottom of the card indicating % of goal reached.',  def: false },
+  ],
+  gauge: [
+    { id: 'showLabel', label: 'Show center label',  hint: 'Displays the numeric value inside the gauge arc or ring.',             def: true },
+    { id: 'showScale', label: 'Show scale markers', hint: 'Adds tick marks and min/max labels along the outer edge of the gauge.', def: true },
+  ],
+  statrow: [
+    { id: 'showTrend', label: 'Show trend arrows', hint: 'Appends a ↑/↓ arrow and delta % next to each metric value.', def: true },
+  ],
+  costkpi: [
+    { id: 'showBreakdown', label: 'Show cost breakdown', hint: 'Expands the widget to show a spend-by-category bar chart below the headline figure.', def: false },
+  ],
+  line: [
+    { id: 'showLegend', label: 'Show legend',      hint: 'Shows a color key below the chart mapping each line to its series name.',         def: true },
+    { id: 'showLabels', label: 'Show data labels', hint: 'Renders the value at each data point directly on the chart.',                      def: false },
+    { id: 'showDots',   label: 'Show data points', hint: 'Draws a dot at every data point — helps distinguish values on a crowded series.',  def: false },
+  ],
+  bar: [
+    { id: 'showLegend', label: 'Show legend',       hint: 'Shows a color key below the chart mapping each bar series to its name.',      def: true },
+    { id: 'showLabels', label: 'Show value labels', hint: 'Prints the numeric value on top of (or inside) each bar.',                    def: false },
+    { id: 'showGrid',   label: 'Show grid lines',   hint: 'Draws horizontal reference lines across the plot area at each Y-axis tick.',  def: true },
+  ],
+  pie: [
+    { id: 'showLegend', label: 'Show legend',          hint: 'Adds a color key below the chart mapping each wedge to its label.',        def: true },
+    { id: 'showLabels', label: 'Show slice labels',    hint: 'Prints the category name and/or percentage on each wedge.',               def: true },
+    { id: 'showTotal',  label: 'Show total in center', hint: 'Displays the sum of all values in the hollow center (donut style only).', def: false },
+  ],
+  table: [
+    { id: 'showFooter',  label: 'Show row count footer',    hint: 'Adds a footer row showing the total number of records returned.',   def: false },
+    { id: 'showBanding', label: 'Highlight alternate rows', hint: 'Applies a subtle background tint to every other row for readability.', def: false },
+  ],
+  list: [
+    { id: 'showAvatar',    label: 'Show avatars / icons', hint: 'Renders an avatar image or entity icon at the start of each row.', def: true },
+    { id: 'showTimestamp', label: 'Show timestamps',      hint: 'Appends a relative time (e.g. "2 hours ago") to each list item.',   def: true },
+  ],
+  'record-card': [
+    { id: 'showBadges',  label: 'Show status badges',  hint: 'Renders colored status pills (e.g. Open, Closed) on each card.',         def: true },
+    { id: 'showActions', label: 'Show quick actions',  hint: 'Adds inline action buttons (Edit, View) in the bottom-right of each card.', def: true },
+  ],
+  carousel: [
+    { id: 'showDots',   label: 'Show navigation dots',      hint: 'Renders pagination dots below the carousel to indicate total slides and current position.', def: true },
+    { id: 'showArrows', label: 'Show prev/next arrows',     hint: 'Adds left/right arrow buttons on the sides of the carousel for manual navigation.',         def: true },
+  ],
+  map: [
+    { id: 'showLegend', label: 'Show color legend',  hint: 'Displays a gradient scale bar mapping color intensity to data values.', def: true },
+    { id: 'showLabels', label: 'Show region labels', hint: 'Prints the region name over each geographic area on the map.',          def: false },
+  ],
 }
 
 // Sub-section label
@@ -1320,6 +1410,13 @@ export function AppearancePanel({
                 </button>
               ))}
             </div>
+            {/* Selected variant description */}
+            {(() => {
+              const activeDesc = variants.find((v) => v.id === effectiveVariant)?.desc
+              return activeDesc ? (
+                <p className="mt-1.5 text-[11px] leading-snug text-gray-400 dark:text-slate-500">{activeDesc}</p>
+              ) : null
+            })()}
           </div>
         )}
       </div>
@@ -1331,14 +1428,19 @@ export function AppearancePanel({
           <div className="space-y-3">
             <AppearanceSectionLabel>Display</AppearanceSectionLabel>
             {displayOpts.map((opt) => (
-              <label key={opt.id} className="flex cursor-pointer items-center gap-2.5 text-sm text-gray-700 dark:text-slate-200">
+              <label key={opt.id} className="flex cursor-pointer items-start gap-2.5">
                 <input
                   type="checkbox"
-                  className="checkbox"
+                  className="checkbox mt-0.5 shrink-0"
                   checked={!!effectiveOpts[opt.id]}
                   onChange={(e) => toggleOpt(opt.id, e.target.checked)}
                 />
-                {opt.label}
+                <span>
+                  <span className="text-sm text-gray-700 dark:text-slate-200">{opt.label}</span>
+                  {opt.hint && (
+                    <span className="mt-0.5 block text-[11px] leading-snug text-gray-400 dark:text-slate-500">{opt.hint}</span>
+                  )}
+                </span>
               </label>
             ))}
           </div>
