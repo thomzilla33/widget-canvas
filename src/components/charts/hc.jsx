@@ -86,19 +86,34 @@ export function useDark() {
 }
 
 // ── Trend ───────────────────────────────────────────────────────────────────
-export function LineHC({ series = [], label, height = 150, axes = true, color = SERIES[0] }) {
+export function LineHC({ series = [], label, height = 150, axes = true, color = SERIES[0], styleVariant = 'area', displayOptions = {} }) {
   const dark = useDark()
-  const options = useMemo(() => ({
-    ...base(dark, height),
-    chart: { ...base(dark, height).chart, type: 'areaspline' },
-    xAxis: { ...base(dark, height).xAxis, categories: series.map((d) => d.x), visible: axes, tickLength: 0 },
-    yAxis: { ...base(dark, height).yAxis, visible: axes },
-    series: [{
-      name: label, data: series.map((d) => d.y), color, lineWidth: 2.5,
-      marker: { enabled: false, states: { hover: { enabled: true, radius: 4 } } },
-      fillColor: { linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 }, stops: [[0, rgba(color, 0.26)], [1, rgba(color, 0)]] },
-    }],
-  }), [dark, series, label, height, axes, color])
+  const options = useMemo(() => {
+    const isSmooth  = styleVariant === 'smooth'
+    const isArea    = styleVariant === 'area' || styleVariant === ''
+    const chartType = isSmooth ? 'spline' : isArea ? 'areaspline' : 'line'
+    const withFill  = isArea || isSmooth ? isArea : false
+    const showDots    = !!displayOptions.showDots
+    const showLabels  = !!displayOptions.showLabels
+    const showLegend  = displayOptions.showLegend !== false
+    return {
+      ...base(dark, height),
+      chart: { ...base(dark, height).chart, type: chartType },
+      xAxis: { ...base(dark, height).xAxis, categories: series.map((d) => d.x), visible: axes, tickLength: 0 },
+      yAxis: { ...base(dark, height).yAxis, visible: axes },
+      legend: showLegend
+        ? { enabled: true, align: 'center', verticalAlign: 'bottom', itemStyle: { color: dark ? '#cbd5e1' : '#475569', fontSize: '11px' } }
+        : { enabled: false },
+      series: [{
+        name: label, data: series.map((d) => d.y), color, lineWidth: 2.5,
+        marker: { enabled: showDots, radius: 4, states: { hover: { enabled: true, radius: 5 } } },
+        dataLabels: showLabels ? { enabled: true, style: { fontSize: '10px', fontWeight: '600', textOutline: 'none', color: dark ? '#cbd5e1' : '#374151' } } : { enabled: false },
+        fillColor: withFill
+          ? { linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 }, stops: [[0, rgba(color, 0.26)], [1, rgba(color, 0)]] }
+          : 'transparent',
+      }],
+    }
+  }, [dark, series, label, height, axes, color, styleVariant, displayOptions])
   return <HC options={options} />
 }
 
@@ -117,29 +132,63 @@ export function SparklineHC({ series = [], height = 48, color = SERIES[0] }) {
 }
 
 // ── Breakdown ────────────────────────────────────────────────────────────────
-export function BarHC({ breakdown = [], label, height = 150, axes = true }) {
+export function BarHC({ breakdown = [], label, height = 150, axes = true, styleVariant = 'vertical', displayOptions = {}, accentColor }) {
   const dark = useDark()
-  const options = useMemo(() => ({
-    ...base(dark, height),
-    chart: { ...base(dark, height).chart, type: 'column' },
-    xAxis: { ...base(dark, height).xAxis, categories: breakdown.map((b) => b.label), visible: axes, labels: { ...base(dark, height).xAxis.labels, style: { color: dark ? '#94a3b8' : '#64748b', fontSize: '9px' } } },
-    yAxis: { ...base(dark, height).yAxis, visible: axes },
-    plotOptions: { column: { colorByPoint: true, borderWidth: 0, borderRadius: 3, pointPadding: 0.08, groupPadding: 0.12 } },
-    series: [{ name: label, data: breakdown.map((b) => b.value) }],
-  }), [dark, breakdown, label, height, axes])
+  const options = useMemo(() => {
+    const isHorizontal = styleVariant === 'horizontal'
+    const isStacked    = styleVariant === 'stacked'
+    const chartType    = isHorizontal ? 'bar' : 'column'
+    const showGrid     = displayOptions.showGrid !== false
+    const showLabels   = !!displayOptions.showLabels
+    const showLegend   = displayOptions.showLegend !== false
+    // Stacked preview: split each bar into two artificial series (60/40) so stacking is visible.
+    const series = isStacked
+      ? [
+        { name: 'Primary',   data: breakdown.map((b) => Math.round(b.value * 0.62)), color: accentColor || SERIES[0] },
+        { name: 'Secondary', data: breakdown.map((b) => Math.round(b.value * 0.38)), color: accentColor ? rgba(accentColor, 0.55) : SERIES[1] },
+      ]
+      : [{ name: label, data: breakdown.map((b) => b.value) }]
+    return {
+      ...base(dark, height),
+      chart: { ...base(dark, height).chart, type: chartType },
+      xAxis: { ...base(dark, height).xAxis, categories: breakdown.map((b) => b.label), visible: axes, labels: { ...base(dark, height).xAxis.labels, style: { color: dark ? '#94a3b8' : '#64748b', fontSize: '9px' } } },
+      yAxis: { ...base(dark, height).yAxis, visible: axes, gridLineWidth: showGrid ? undefined : 0 },
+      legend: isStacked && showLegend
+        ? { enabled: true, align: 'center', verticalAlign: 'bottom', itemStyle: { color: dark ? '#cbd5e1' : '#475569', fontSize: '11px' } }
+        : { enabled: false },
+      plotOptions: {
+        [chartType]: {
+          colorByPoint: !accentColor && !isStacked,
+          color: !isStacked ? (accentColor || undefined) : undefined,
+          stacking: isStacked ? 'normal' : undefined,
+          borderWidth: 0,
+          borderRadius: isHorizontal ? 2 : 3,
+          pointPadding: 0.08,
+          groupPadding: 0.12,
+          dataLabels: { enabled: showLabels, style: { fontSize: '10px', fontWeight: '600', textOutline: 'none', color: dark ? '#cbd5e1' : '#374151' } },
+        },
+      },
+      series,
+    }
+  }, [dark, breakdown, label, height, axes, styleVariant, displayOptions, accentColor])
   return <HC options={options} />
 }
 
-export function PieHC({ breakdown = [], height = 150, inner = '64%', withLegend = false }) {
+export function PieHC({ breakdown = [], height = 150, inner = '64%', withLegend = false, styleVariant, displayOptions = {} }) {
   const dark = useDark()
-  const options = useMemo(() => ({
-    ...base(dark, height),
-    chart: { ...base(dark, height).chart, type: 'pie' },
-    legend: withLegend ? { enabled: true, align: 'right', verticalAlign: 'middle', layout: 'vertical', itemStyle: { color: dark ? '#cbd5e1' : '#475569', fontSize: '11px', fontWeight: '500' }, itemHoverStyle: { color: dark ? '#fff' : '#0f172a' }, symbolRadius: 6 } : { enabled: false },
-    tooltip: { ...base(dark, height).tooltip, pointFormat: '<b>{point.y}</b> ({point.percentage:.0f}%)' },
-    plotOptions: { pie: { innerSize: inner, borderWidth: 2, borderColor: dark ? '#0c1322' : '#ffffff', dataLabels: { enabled: false }, showInLegend: withLegend, states: { hover: { brightness: 0.08, halo: { size: 6, opacity: 0.18 } } } } },
-    series: [{ data: breakdown.map((b, i) => ({ name: b.label, y: b.value, color: SERIES[i % SERIES.length] })) }],
-  }), [dark, breakdown, height, inner, withLegend])
+  const options = useMemo(() => {
+    const effectiveInner  = styleVariant === 'pie' ? '0%' : styleVariant === 'donut' ? '58%' : inner
+    const effectiveLegend = displayOptions.showLegend !== undefined ? !!displayOptions.showLegend : withLegend
+    const showDataLabels  = displayOptions.showLabels !== false
+    return {
+      ...base(dark, height),
+      chart: { ...base(dark, height).chart, type: 'pie' },
+      legend: effectiveLegend ? { enabled: true, align: 'right', verticalAlign: 'middle', layout: 'vertical', itemStyle: { color: dark ? '#cbd5e1' : '#475569', fontSize: '11px', fontWeight: '500' }, itemHoverStyle: { color: dark ? '#fff' : '#0f172a' }, symbolRadius: 6 } : { enabled: false },
+      tooltip: { ...base(dark, height).tooltip, pointFormat: '<b>{point.y}</b> ({point.percentage:.0f}%)' },
+      plotOptions: { pie: { innerSize: effectiveInner, borderWidth: 2, borderColor: dark ? '#0c1322' : '#ffffff', dataLabels: { enabled: showDataLabels, format: '{point.name}: {point.percentage:.0f}%', style: { fontSize: '10px', fontWeight: '500', textOutline: 'none', color: dark ? '#cbd5e1' : '#374151' } }, showInLegend: effectiveLegend, states: { hover: { brightness: 0.08, halo: { size: 6, opacity: 0.18 } } } } },
+      series: [{ data: breakdown.map((b, i) => ({ name: b.label, y: b.value, color: SERIES[i % SERIES.length] })) }],
+    }
+  }, [dark, breakdown, height, inner, withLegend, styleVariant, displayOptions])
   return <HC options={options} />
 }
 

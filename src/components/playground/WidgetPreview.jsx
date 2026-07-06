@@ -27,7 +27,7 @@ function goalMet(raw, goal) {
 const H = 220
 
 // ── Trust header + type switcher ─────────────────────────────
-export default function WidgetPreview({ typeId, metric, source, name, subtitle, freshness, display, shape, datasetConfig }) {
+export default function WidgetPreview({ typeId, metric, source, name, subtitle, freshness, display, shape, datasetConfig, typeConfig }) {
   const ready = source && metric && typeId
   // Applicable filters for THIS metric (Issue A): the date range (time is always
   // filterable) + the categorical dimensions dimensionsFor() says apply to this
@@ -134,7 +134,7 @@ export default function WidgetPreview({ typeId, metric, source, name, subtitle, 
         {ready ? (
           // Key on type AND data identity so a prior render error clears when the metric changes.
           <ChartBoundary key={`${typeId}|${metric.id}|${previewOpts.dimension?.id || ''}|${previewOpts.transform || ''}|${previewOpts.range || ''}|${previewOpts.filterCount || 0}`}>
-            <Renderer typeId={typeId} metric={metric} display={display} shape={previewOpts} />
+            <Renderer typeId={typeId} metric={metric} display={display} shape={previewOpts} typeConfig={typeConfig} />
           </ChartBoundary>
         ) : (
           <div className="grid h-full min-h-[220px] place-items-center rounded-lg border-2 border-dashed border-gray-200 text-center text-sm text-gray-400 dark:border-white/10 dark:text-slate-500">
@@ -158,19 +158,19 @@ export default function WidgetPreview({ typeId, metric, source, name, subtitle, 
 }
 
 // Renders only the selected view, so an unused view can't throw or do work.
-function Renderer({ typeId, metric, display, shape }) {
+function Renderer({ typeId, metric, display, shape, typeConfig }) {
   // The canned sample, sliced by the chosen dimension + transform when set (Phase 1).
   const data = previewData(metric, shape)
   switch (typeId) {
-    case 'line': return <LineView data={data} />
-    case 'bar': return <BarView data={data} />
-    case 'pie': return <PieView data={data} />
-    case 'table': return <TableView data={data} />
+    case 'line': return <LineView data={data} display={display} />
+    case 'bar': return <BarView data={data} display={display} />
+    case 'pie': return <PieView data={data} display={display} />
+    case 'table': return <TableView data={data} display={display} tableConfig={typeConfig?.tableConfig} />
     case 'heatmap': return <HeatmapView data={data} />
     case 'scatter': return <ScatterView data={data} />
     case 'carousel': return <CarouselView data={data} />
     case 'gauge': return <GaugeView data={data} display={display} />
-    case 'list': return <ListView data={data} />
+    case 'list': return <ListView data={data} display={display} listConfig={typeConfig?.listConfig} />
     case 'summary': return <SummaryView data={data} />
     case 'map': return <MapView data={data} />
     case 'funnel': return <FunnelView data={data} />
@@ -206,16 +206,58 @@ class ChartBoundary extends Component {
 }
 
 /* ── Highcharts views (shared engine with the placed tile) ── */
-function LineView({ data }) {
-  return <LineHC series={data.series} label={data.label} height={H} axes />
+function LineView({ data, display }) {
+  return (
+    <LineHC
+      series={data.series}
+      label={data.label}
+      height={H}
+      axes
+      color={display?.accentColor || SERIES[0]}
+      styleVariant={display?.styleVariant || 'area'}
+      displayOptions={display?.displayOptions || {}}
+    />
+  )
 }
 
-function BarView({ data }) {
-  return <BarHC breakdown={data.breakdown} label={data.label} height={H} axes />
+function BarView({ data, display }) {
+  return (
+    <BarHC
+      breakdown={data.breakdown}
+      label={data.label}
+      height={H}
+      axes
+      styleVariant={display?.styleVariant || 'vertical'}
+      displayOptions={display?.displayOptions || {}}
+      accentColor={display?.accentColor || undefined}
+    />
+  )
 }
 
-function PieView({ data }) {
-  return <PieHC breakdown={data.breakdown} height={H} inner="58%" withLegend />
+function PieView({ data, display }) {
+  const styleVariant  = display?.styleVariant || 'donut'
+  const displayOptions = display?.displayOptions || {}
+  const showTotal     = styleVariant === 'donut' && displayOptions.showTotal
+  const total         = showTotal ? data.breakdown.reduce((s, b) => s + b.value, 0) : null
+  return (
+    <div className="relative">
+      <PieHC
+        breakdown={data.breakdown}
+        height={H}
+        inner="58%"
+        withLegend
+        styleVariant={styleVariant}
+        displayOptions={displayOptions}
+      />
+      {showTotal && (
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+          <span className="num text-xl font-bold text-gray-900 dark:text-slate-100">
+            {total.toLocaleString()}
+          </span>
+        </div>
+      )}
+    </div>
+  )
 }
 
 function ScatterView({ data }) {
@@ -289,64 +331,137 @@ function KpiView({ data, display }) {
   )
 }
 
-function TableView({ data }) {
-  const headers = data.recordHeaders || ['Segment', 'Value']
-  // Entity datasets supply records[].cells (multi-column); metric datasets use name/value/share.
-  const multiCol = data.records[0]?.cells != null
-  const withShare = !multiCol && headers.length >= 3
+function TableView({ data, display, tableConfig }) {
+  const styleVariant   = display?.styleVariant || 'comfortable'
+  const displayOptions = display?.displayOptions || {}
+  const hiddenCols     = tableConfig?.hiddenColumns || []
+
+  const allHeaders = data.recordHeaders || ['Segment', 'Value']
+  const headers    = allHeaders.filter((h) => !hiddenCols.includes(h))
+  // Indices of visible columns (used for multicol row rendering)
+  const visibleIdx = allHeaders.map((h, i) => ({ h, i })).filter(({ h }) => !hiddenCols.includes(h)).map(({ i }) => i)
+
+  const multiCol   = data.records[0]?.cells != null
+  const withShare  = !multiCol && headers.length >= 3
+
+  const isCompact  = styleVariant === 'compact'
+  const isStriped  = styleVariant === 'striped'
+  const showBanding = !!displayOptions.showBanding
+  const showFooter  = !!displayOptions.showFooter
+  const cellPad    = isCompact ? 'px-3 py-1' : 'px-3 py-2'
+
+  const rowBg = (ri) => {
+    if (isStriped || showBanding) return ri % 2 === 1 ? 'bg-gray-50 dark:bg-white/[0.03]' : ''
+    return ''
+  }
+
   return (
     <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-white/10">
       <table className="w-full text-left text-xs">
         <thead className="bg-gray-50 text-gray-500 dark:bg-white/5 dark:text-slate-400">
           <tr>
             {headers.map((h, i) => (
-              <th key={h} className={`px-3 py-2 font-semibold ${i > 0 ? 'text-right' : ''}`}>{h}</th>
+              <th key={h} className={`${cellPad} font-semibold ${i > 0 ? 'text-right' : ''}`}>{h}</th>
             ))}
           </tr>
         </thead>
         <tbody>
           {data.records.slice(0, 7).map((r, ri) => (
             multiCol ? (
-              <tr key={ri} className="border-t border-gray-100 dark:border-white/5">
-                {r.cells.map((cell, ci) => (
+              <tr key={ri} className={`border-t border-gray-100 dark:border-white/5 ${rowBg(ri)}`}>
+                {visibleIdx.map((ci) => (
                   <td
                     key={ci}
-                    className={`px-3 py-2 ${ci === 0 ? 'font-medium text-gray-900 dark:text-slate-100' : 'text-right text-gray-600 dark:text-slate-300'}`}
+                    className={`${cellPad} ${ci === 0 ? 'font-medium text-gray-900 dark:text-slate-100' : 'text-right text-gray-600 dark:text-slate-300'}`}
                   >
-                    {cell}
+                    {r.cells[ci]}
                   </td>
                 ))}
               </tr>
             ) : (
-              <tr key={r.name} className="border-t border-gray-100 dark:border-white/5">
-                <td className="px-3 py-2 font-medium text-gray-900 dark:text-slate-100">{r.name}</td>
-                <td className="num px-3 py-2 text-right text-gray-700 dark:text-slate-200">{r.value}</td>
-                {withShare && <td className="num px-3 py-2 text-right text-gray-500 dark:text-slate-400">{r.share}</td>}
+              <tr key={r.name} className={`border-t border-gray-100 dark:border-white/5 ${rowBg(ri)}`}>
+                {!hiddenCols.includes(allHeaders[0]) && (
+                  <td className={`${cellPad} font-medium text-gray-900 dark:text-slate-100`}>{r.name}</td>
+                )}
+                {!hiddenCols.includes(allHeaders[1]) && (
+                  <td className={`num ${cellPad} text-right text-gray-700 dark:text-slate-200`}>{r.value}</td>
+                )}
+                {withShare && !hiddenCols.includes(allHeaders[2]) && (
+                  <td className={`num ${cellPad} text-right text-gray-500 dark:text-slate-400`}>{r.share}</td>
+                )}
               </tr>
             )
           ))}
         </tbody>
       </table>
-      {data.recordTotal > 7 && (
+      {(data.recordTotal > 7 || showFooter) && (
         <div className="border-t border-gray-100 px-3 py-1.5 text-[11px] text-gray-400 dark:border-white/5 dark:text-slate-500">
-          Showing 7 of {data.recordTotal.toLocaleString()} rows
+          {showFooter
+            ? `${data.recordTotal.toLocaleString()} rows total`
+            : `Showing 7 of ${data.recordTotal.toLocaleString()} rows`}
         </div>
       )}
     </div>
   )
 }
 
-function ListView({ data }) {
+const MOCK_TIMESTAMPS = ['2m ago', '14m ago', '1h ago', '3h ago', '1d ago', '2d ago', '4d ago']
+
+function ListView({ data, display }) {
+  const styleVariant   = display?.styleVariant || 'feed'
+  const displayOptions = display?.displayOptions || {}
+  const showAvatar     = displayOptions.showAvatar !== false
+  const showTimestamp  = displayOptions.showTimestamp !== false
   const max = Math.max(0, ...data.breakdown.map((b) => b.value))
+
+  if (styleVariant === 'dense') {
+    return (
+      <ul className="divide-y divide-gray-100 dark:divide-white/5">
+        {data.breakdown.map((b, i) => (
+          <li key={b.label} className="flex items-center gap-2 py-1 text-xs">
+            {showAvatar && (
+              <span className="h-4 w-4 shrink-0 rounded-full" style={{ background: SERIES[i % SERIES.length] }} />
+            )}
+            <span className="flex-1 truncate text-gray-700 dark:text-slate-200">{b.label}</span>
+            {showTimestamp && <span className="shrink-0 text-[10px] text-gray-400 dark:text-slate-500">{MOCK_TIMESTAMPS[i % MOCK_TIMESTAMPS.length]}</span>}
+            <span className="w-8 shrink-0 text-right font-semibold text-gray-900 dark:text-slate-100">{b.value}</span>
+          </li>
+        ))}
+      </ul>
+    )
+  }
+
+  if (styleVariant === 'cards') {
+    return (
+      <div className="grid grid-cols-2 gap-2">
+        {data.breakdown.map((b, i) => (
+          <div key={b.label} className="rounded-lg border border-gray-200 p-2.5 dark:border-white/10">
+            {showAvatar && (
+              <span className="mb-1.5 block h-5 w-5 rounded-full" style={{ background: SERIES[i % SERIES.length] }} />
+            )}
+            <div className="truncate text-xs font-medium text-gray-900 dark:text-slate-100">{b.label}</div>
+            <div className="num mt-0.5 text-sm font-bold text-gray-700 dark:text-slate-200">{b.value}</div>
+            {showTimestamp && <div className="mt-0.5 text-[10px] text-gray-400 dark:text-slate-500">{MOCK_TIMESTAMPS[i % MOCK_TIMESTAMPS.length]}</div>}
+          </div>
+        ))}
+      </div>
+    )
+  }
+
+  // Default: 'feed' — bar-style list
   return (
     <ul className="space-y-2">
       {data.breakdown.map((b, i) => (
         <li key={b.label} className="flex items-center gap-2 text-xs">
-          <span className="w-24 shrink-0 truncate text-gray-700 dark:text-slate-200">{b.label}</span>
+          {showAvatar && (
+            <span className="h-4 w-4 shrink-0 rounded-full" style={{ background: SERIES[i % SERIES.length] }} />
+          )}
+          <span className="w-20 shrink-0 truncate text-gray-700 dark:text-slate-200">{b.label}</span>
           <span className="h-2 flex-1 overflow-hidden rounded-full bg-gray-100 dark:bg-white/10">
             <span className="block h-full rounded-full" style={{ width: `${max > 0 ? (b.value / max) * 100 : 0}%`, background: SERIES[i % SERIES.length] }} />
           </span>
           <span className="w-8 shrink-0 text-right font-semibold text-gray-900 dark:text-slate-100">{b.value}</span>
+          {showTimestamp && <span className="shrink-0 text-[10px] text-gray-400 dark:text-slate-500">{MOCK_TIMESTAMPS[i % MOCK_TIMESTAMPS.length]}</span>}
         </li>
       ))}
     </ul>

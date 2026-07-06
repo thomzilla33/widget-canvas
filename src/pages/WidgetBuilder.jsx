@@ -438,6 +438,7 @@ export default function WidgetBuilder() {
                   display={{ format, goal, accentColor, styleVariant, displayOptions }}
                   shape={shape}
                   datasetConfig={datasetConfig}
+                  typeConfig={{ tableConfig, listConfig, cardConfig }}
                 />
               </div>
               {typeId && (
