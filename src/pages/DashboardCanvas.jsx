@@ -350,7 +350,7 @@ export default function DashboardCanvas() {
           widget={detailWidget}
           isAdmin
           onClose={() => setDetailWidget(null)}
-          onPlace={() => { setDetailWidget(null); navigate('/dashboards') }}
+          onPlace={() => { const w = detailWidget; setDetailWidget(null); navigate('/dashboards', { state: { pendingPlace: { id: w.id, name: w.name } } }) }}
           onRemap={() => { const w = detailWidget; setDetailWidget(null); setRemapWidget(w) }}
         />
       )}

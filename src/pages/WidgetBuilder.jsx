@@ -213,7 +213,7 @@ export default function WidgetBuilder() {
       displayOptions: Object.keys(displayOptions).length ? displayOptions : undefined,
     })
     if (fromDashboard) {
-      navigate(`/canvas/${fromDashboard}`, { state: { autoAdd: wid }, replace: true })
+      navigate(`/dashboard/${fromDashboard}/canvas`, { state: { autoAdd: wid }, replace: true })
     } else {
       setSaved(wid)
     }

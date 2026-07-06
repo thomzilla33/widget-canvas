@@ -265,7 +265,7 @@ export default function DashboardList() {
                     <button
                       onClick={(e) => {
                         e.stopPropagation()
-                        navigate(`/canvas/${d.id}`, { state: { autoAdd: pendingPlace.id } })
+                        navigate(`/dashboard/${d.id}/canvas`, { state: { autoAdd: pendingPlace.id } })
                       }}
                       className="shrink-0 rounded-md bg-aims-blue px-2.5 py-1 text-[11px] font-semibold text-white hover:bg-aims-blue/90 transition-colors"
                     >

@@ -336,7 +336,7 @@ export default function WidgetLibrary() {
           widget={detailWidget}
           isAdmin={isAdmin}
           onClose={() => setDetailWidget(null)}
-          onPlace={() => { setDetailWidget(null); navigate('/dashboards') }}
+          onPlace={() => { const w = detailWidget; setDetailWidget(null); navigate('/dashboards', { state: { pendingPlace: { id: w.id, name: w.name } } }) }}
           onRemap={() => { const w = detailWidget; setDetailWidget(null); setRepinWidget(w) }}
           onDelete={(w) => { setDetailWidget(null); setDeletingWidget(w) }}
           onEdit={() => { const w = detailWidget; setDetailWidget(null); setEditWidget(w) }}
