@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { X, Plus, Database, Table2, PackagePlus, Search, ChevronRight, Check, SlidersHorizontal } from 'lucide-react'
+import { X, Plus, Trash2, Database, Table2, PackagePlus, Search, ChevronRight, Check, SlidersHorizontal } from 'lucide-react'
 import {
   ENTITY_SOURCES, PRESET_DATASETS, COLUMN_TYPES, AGG_FUNCTIONS,
   DATASET_SHAPE, OPERATORS_BY_TYPE,
@@ -61,147 +61,73 @@ function ShapeBadge({ shape }) {
   )
 }
 
-// ── Shape card accent config ───────────────────────────────────────────────────
-const SHAPE_STYLE = {
-  [DATASET_SHAPE.GROUPED]: { label: 'Grouped',      pill: 'bg-cyan-500/15 text-cyan-400 border-cyan-500/20',   accent: 'bg-cyan-500',   icon: 'text-cyan-400' },
-  [DATASET_SHAPE.SINGLE]:  { label: 'Single value', pill: 'bg-amber-500/15 text-amber-400 border-amber-500/20', accent: 'bg-amber-500', icon: 'text-amber-400' },
-  [DATASET_SHAPE.FULL]:    { label: 'Record set',   pill: 'bg-purple-500/15 text-purple-400 border-purple-500/20', accent: 'bg-purple-500', icon: 'text-purple-400' },
-}
-
-// ── Integration color dots ─────────────────────────────────────────────────────
-const INTEGRATION_COLOR = {
-  Salesforce: 'bg-blue-500',
-  HubSpot:    'bg-orange-400',
-  'AIMS OS':  'bg-violet-500',
-  default:    'bg-slate-500',
-}
-
-// ── Dataset card ───────────────────────────────────────────────────────────────
-function DatasetCard({ ds, selected, onSelect }) {
-  const style = SHAPE_STYLE[ds.shape] || {}
+// ── Library modal card ─────────────────────────────────────────────────────────
+function LibraryCard({ icon: Icon, iconColor, name, description, badge, selected, onAdd, onRemove }) {
   return (
-    <button
-      onClick={onSelect}
-      className={`group relative flex flex-col rounded-xl border text-left transition-all duration-150 overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 ${
-        selected
-          ? 'border-blue-500/50 bg-blue-500/10 shadow-lg shadow-blue-500/5'
-          : 'border-white/[0.08] bg-white/[0.03] hover:border-white/20 hover:bg-white/[0.07]'
-      }`}
-    >
-      {/* Top accent bar */}
-      <div className={`h-0.5 w-full ${style.accent || 'bg-slate-600'} opacity-70`} />
-
-      <div className="flex flex-col gap-2 p-3.5">
-        {/* Icon + shape pill */}
-        <div className="flex items-start justify-between gap-2">
-          <div className={`grid h-8 w-8 shrink-0 place-items-center rounded-lg border ${
-            selected ? 'border-blue-500/30 bg-blue-500/15' : 'border-white/10 bg-white/5'
-          }`}>
-            {selected
-              ? <Check size={14} className="text-blue-400" />
-              : <Database size={14} className={style.icon || 'text-slate-400'} />
-            }
-          </div>
-          <span className={`rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${style.pill || ''}`}>
-            {style.label}
+    <div className={`flex flex-col rounded-xl border p-3.5 transition-all duration-150 ${
+      selected
+        ? 'border-blue-500/50 bg-blue-500/[0.06]'
+        : 'border-white/[0.08] bg-white/[0.02] hover:border-white/15 hover:bg-white/[0.05]'
+    }`}>
+      {/* Icon row + selected badge */}
+      <div className="mb-2.5 flex items-start justify-between">
+        <div className={`grid h-8 w-8 place-items-center rounded-lg border ${
+          selected ? 'border-blue-500/30 bg-blue-500/15' : 'border-white/10 bg-white/5'
+        }`}>
+          <Icon size={14} className={selected ? 'text-blue-400' : iconColor || 'text-slate-400'} />
+        </div>
+        {selected && (
+          <span className="flex items-center gap-1 text-[10px] font-semibold text-blue-400">
+            <Check size={10} /> Selected
           </span>
-        </div>
-
-        {/* Name + description */}
-        <div>
-          <p className="text-xs font-semibold leading-snug text-slate-100">{ds.name}</p>
-          <p className="mt-0.5 text-[11px] leading-snug text-slate-400 line-clamp-2">{ds.description}</p>
-        </div>
-      </div>
-    </button>
-  )
-}
-
-// ── Entity card ────────────────────────────────────────────────────────────────
-function EntityCard({ en, selected, onSelect }) {
-  const dotColor = INTEGRATION_COLOR[en.integration] || INTEGRATION_COLOR.default
-  return (
-    <button
-      onClick={onSelect}
-      className={`group relative flex flex-col rounded-xl border text-left transition-all duration-150 overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 ${
-        selected
-          ? 'border-blue-500/50 bg-blue-500/10 shadow-lg shadow-blue-500/5'
-          : 'border-white/[0.08] bg-white/[0.03] hover:border-white/20 hover:bg-white/[0.07]'
-      }`}
-    >
-      {/* Top accent bar — uses integration color */}
-      <div className={`h-0.5 w-full ${dotColor} opacity-70`} />
-
-      <div className="flex flex-col gap-2 p-3.5">
-        {/* Icon + columns badge */}
-        <div className="flex items-start justify-between gap-2">
-          <div className={`grid h-8 w-8 shrink-0 place-items-center rounded-lg border ${
-            selected ? 'border-blue-500/30 bg-blue-500/15' : 'border-white/10 bg-white/5'
-          }`}>
-            {selected
-              ? <Check size={14} className="text-blue-400" />
-              : <Table2 size={14} className="text-slate-400" />
-            }
-          </div>
-          <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] font-semibold text-slate-400">
-            {en.columns?.length ?? 0} cols
-          </span>
-        </div>
-
-        {/* Name + integration */}
-        <div>
-          <p className="text-xs font-semibold leading-snug text-slate-100">{en.label}</p>
-          <div className="mt-1 flex items-center gap-1.5">
-            <span className={`h-1.5 w-1.5 rounded-full shrink-0 ${dotColor}`} />
-            <span className="text-[11px] text-slate-400">{en.integration}</span>
-          </div>
-        </div>
-      </div>
-    </button>
-  )
-}
-
-// ── Shared search + filter bar ─────────────────────────────────────────────────
-function PickerSearchBar({ value, onChange, placeholder, children }) {
-  return (
-    <div className="flex flex-col gap-2 border-b border-white/[0.07] px-5 pb-3 pt-1">
-      <div className="relative">
-        <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-        <input
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={placeholder}
-          className="h-8 w-full rounded-lg border border-white/10 bg-white/5 pl-8 pr-3 text-xs text-slate-200 placeholder-slate-500 focus:border-blue-500/40 focus:outline-none focus:ring-1 focus:ring-blue-500/30"
-          autoFocus
-        />
-        {value && (
-          <button onClick={() => onChange('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300">
-            <X size={12} />
-          </button>
         )}
       </div>
-      {children}
+
+      {/* Name */}
+      <p className="mb-1 text-[11px] font-semibold leading-snug text-slate-100">{name}</p>
+
+      {/* Description */}
+      <p className="mb-3 flex-1 text-[10px] leading-snug text-slate-500 line-clamp-2">{description}</p>
+
+      {/* Action button */}
+      {selected ? (
+        <button
+          onClick={onRemove}
+          className="flex h-7 w-full items-center justify-center gap-1.5 rounded-lg border border-white/10 bg-white/5 text-[11px] font-medium text-slate-400 transition-colors hover:border-red-500/30 hover:bg-red-500/[0.06] hover:text-red-400"
+        >
+          <Trash2 size={11} /> Remove
+        </button>
+      ) : (
+        <button
+          onClick={onAdd}
+          className="flex h-7 w-full items-center justify-center gap-1.5 rounded-lg border border-white/10 bg-white/5 text-[11px] font-medium text-slate-400 transition-colors hover:border-blue-500/30 hover:bg-blue-500/[0.06] hover:text-blue-400"
+        >
+          <Plus size={11} /> Add
+        </button>
+      )}
     </div>
   )
 }
 
-function FilterChips({ options, active, onSelect }) {
+// ── Sidebar category list ──────────────────────────────────────────────────────
+function SidebarCategory({ label, count, active, onClick }) {
   return (
-    <div className="flex flex-wrap gap-1.5">
-      {options.map((o) => (
-        <button
-          key={o.id}
-          onClick={() => onSelect(o.id)}
-          className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold transition-all ${
-            active === o.id
-              ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
-              : 'bg-white/5 text-slate-400 border border-white/10 hover:border-white/20 hover:text-slate-300'
-          }`}
-        >
-          {o.label}
-        </button>
-      ))}
-    </div>
+    <button
+      onClick={onClick}
+      className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-[12px] font-medium transition-colors ${
+        active
+          ? 'bg-blue-500/15 text-blue-300'
+          : 'text-slate-400 hover:bg-white/5 hover:text-slate-200'
+      }`}
+    >
+      <span>{label}</span>
+      <div className="flex items-center gap-1.5">
+        {count !== undefined && (
+          <span className={`text-[10px] ${active ? 'text-blue-400/70' : 'text-slate-600'}`}>{count}</span>
+        )}
+        <ChevronRight size={11} className={active ? 'text-blue-400' : 'text-slate-600'} />
+      </div>
+    </button>
   )
 }
 
@@ -209,6 +135,7 @@ function FilterChips({ options, active, onSelect }) {
 function DatasetPickerModal({ currentId, onSelect, onClose }) {
   const [query, setQuery] = useState('')
   const [shapeFilter, setShapeFilter] = useState('all')
+  const [localId, setLocalId] = useState(currentId)
 
   useEffect(() => {
     const onKey = (e) => { if (e.key === 'Escape') onClose() }
@@ -216,43 +143,113 @@ function DatasetPickerModal({ currentId, onSelect, onClose }) {
     return () => window.removeEventListener('keydown', onKey)
   }, [onClose])
 
+  const counts = {
+    all: PRESET_DATASETS.length,
+    [DATASET_SHAPE.GROUPED]: PRESET_DATASETS.filter(d => d.shape === DATASET_SHAPE.GROUPED).length,
+    [DATASET_SHAPE.SINGLE]:  PRESET_DATASETS.filter(d => d.shape === DATASET_SHAPE.SINGLE).length,
+    [DATASET_SHAPE.FULL]:    PRESET_DATASETS.filter(d => d.shape === DATASET_SHAPE.FULL).length,
+  }
+
   const filtered = PRESET_DATASETS.filter((ds) => {
     const matchShape = shapeFilter === 'all' || ds.shape === shapeFilter
     const q = query.toLowerCase()
-    return (shapeFilter === 'all' || matchShape) && (!q || ds.name.toLowerCase().includes(q) || ds.description?.toLowerCase().includes(q))
+    return matchShape && (!q || ds.name.toLowerCase().includes(q) || ds.description?.toLowerCase().includes(q))
   })
 
-  return (
-    <MarketplaceModal
-      title="Dataset library"
-      count={`${filtered.length} of ${PRESET_DATASETS.length}`}
-      onClose={onClose}
-    >
-      <PickerSearchBar value={query} onChange={setQuery} placeholder="Search datasets…">
-        <FilterChips options={SHAPE_FILTERS} active={shapeFilter} onSelect={setShapeFilter} />
-      </PickerSearchBar>
+  const selectedDs = PRESET_DATASETS.find(d => d.id === localId)
 
-      <div className="flex-1 overflow-y-auto px-5 py-4">
-        {filtered.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-14 text-center">
-            <Database size={28} className="mb-3 text-slate-600" />
-            <p className="text-sm font-medium text-slate-400">No datasets found</p>
-            <p className="mt-1 text-xs text-slate-500">Try a different search or filter</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 gap-3">
-            {filtered.map((ds) => (
-              <DatasetCard
-                key={ds.id}
-                ds={ds}
-                selected={currentId === ds.id}
-                onSelect={() => { onSelect(ds.id); onClose() }}
-              />
-            ))}
-          </div>
-        )}
+  const sidebarItems = [
+    { id: 'all', label: 'All' },
+    { id: DATASET_SHAPE.GROUPED, label: 'Grouped' },
+    { id: DATASET_SHAPE.SINGLE,  label: 'Single value' },
+    { id: DATASET_SHAPE.FULL,    label: 'Record set' },
+  ]
+
+  return (
+    <LibraryModal title="Widgets library" subtitle="Browse and add widgets to customize your overview." onClose={onClose}>
+      {/* Sidebar */}
+      <div className="flex w-44 shrink-0 flex-col border-r border-white/[0.07] py-3 px-2">
+        <p className="mb-1.5 px-2 text-[10px] font-bold uppercase tracking-widest text-slate-600">Categories</p>
+        {sidebarItems.map((item) => (
+          <SidebarCategory
+            key={item.id}
+            label={item.label}
+            count={counts[item.id]}
+            active={shapeFilter === item.id}
+            onClick={() => setShapeFilter(item.id)}
+          />
+        ))}
       </div>
-    </MarketplaceModal>
+
+      {/* Main panel */}
+      <div className="flex min-w-0 flex-1 flex-col">
+        {/* Search */}
+        <div className="border-b border-white/[0.07] px-4 py-3">
+          <div className="relative">
+            <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search"
+              autoFocus
+              className="h-8 w-full rounded-lg border border-white/10 bg-white/5 pl-8 pr-3 text-xs text-slate-200 placeholder-slate-500 focus:border-blue-500/40 focus:outline-none focus:ring-1 focus:ring-blue-500/30"
+            />
+            {query && (
+              <button onClick={() => setQuery('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300">
+                <X size={12} />
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Grid */}
+        <div className="flex-1 overflow-y-auto p-4">
+          {filtered.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-14 text-center">
+              <Database size={28} className="mb-3 text-slate-700" />
+              <p className="text-sm font-medium text-slate-400">No datasets found</p>
+              <p className="mt-1 text-xs text-slate-500">Try a different search or category</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-3 gap-3">
+              {filtered.map((ds) => (
+                <LibraryCard
+                  key={ds.id}
+                  icon={Database}
+                  iconColor="text-blue-400"
+                  name={ds.name}
+                  description={ds.description}
+                  selected={localId === ds.id}
+                  onAdd={() => setLocalId(ds.id)}
+                  onRemove={() => setLocalId(null)}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Selection strip */}
+        <div className="flex items-center gap-3 border-t border-white/[0.07] bg-blue-500/[0.04] px-4 py-2.5">
+          <div className="flex min-w-0 flex-1 items-center gap-2 text-[11px]">
+            <span className="rounded-full bg-blue-500/20 px-2 py-0.5 font-semibold text-blue-400">{localId ? '1' : '0'}</span>
+            <span className="text-slate-400">Dataset selected</span>
+            {selectedDs && <span className="truncate font-medium text-slate-300">· {selectedDs.name}</span>}
+          </div>
+          <div className="flex items-center gap-2">
+            <button onClick={onClose} className="h-8 rounded-lg border border-white/10 bg-white/5 px-4 text-xs font-medium text-slate-400 hover:bg-white/10 hover:text-slate-200 transition-colors">
+              Cancel
+            </button>
+            <button
+              disabled={!localId}
+              onClick={() => { if (localId) { onSelect(localId); onClose() } }}
+              className="h-8 rounded-lg bg-blue-600 px-4 text-xs font-semibold text-white transition-colors hover:bg-blue-500 disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              Add
+            </button>
+          </div>
+        </div>
+      </div>
+    </LibraryModal>
   )
 }
 
@@ -260,9 +257,13 @@ function DatasetPickerModal({ currentId, onSelect, onClose }) {
 function EntityPickerModal({ currentId, visibleSources, hasLocked, onSelect, onClose }) {
   const [query, setQuery] = useState('')
   const [activeIntegration, setActiveIntegration] = useState('all')
+  const [localId, setLocalId] = useState(currentId)
 
   const integrations = ['all', ...Array.from(new Set(visibleSources.map((s) => s.integration)))]
-  const intgOptions = integrations.map((i) => ({ id: i, label: i === 'all' ? 'All' : i }))
+  const intgCounts = integrations.reduce((acc, i) => {
+    acc[i] = i === 'all' ? visibleSources.length : visibleSources.filter(s => s.integration === i).length
+    return acc
+  }, {})
 
   useEffect(() => {
     const onKey = (e) => { if (e.key === 'Escape') onClose() }
@@ -276,60 +277,116 @@ function EntityPickerModal({ currentId, visibleSources, hasLocked, onSelect, onC
     return matchIntg && (!q || en.label.toLowerCase().includes(q) || en.integration.toLowerCase().includes(q))
   })
 
-  return (
-    <MarketplaceModal
-      title="Entity library"
-      count={`${filtered.length} of ${visibleSources.length}`}
-      onClose={onClose}
-    >
-      <PickerSearchBar value={query} onChange={setQuery} placeholder="Search entities…">
-        <FilterChips options={intgOptions} active={activeIntegration} onSelect={setActiveIntegration} />
-      </PickerSearchBar>
+  const selectedEn = visibleSources.find(e => e.id === localId)
 
-      <div className="flex-1 overflow-y-auto px-5 py-4">
-        {filtered.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-14 text-center">
-            <Table2 size={28} className="mb-3 text-slate-600" />
-            <p className="text-sm font-medium text-slate-400">No entities found</p>
-            <p className="mt-1 text-xs text-slate-500">Try a different search or filter</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 gap-3">
-            {filtered.map((en) => (
-              <EntityCard
-                key={en.id}
-                en={en}
-                selected={currentId === en.id}
-                onSelect={() => { onSelect(en.id); onClose() }}
-              />
-            ))}
-          </div>
-        )}
-        {hasLocked && (
-          <div className="mt-4 flex items-center gap-2 rounded-xl border border-dashed border-white/10 bg-white/[0.02] px-4 py-3 text-[11px] text-slate-500">
-            <PackagePlus size={14} className="shrink-0" />
-            More entities available — install a model from the Models page to unlock them.
-          </div>
-        )}
+  return (
+    <LibraryModal title="Widgets library" subtitle="Browse and add widgets to customize your overview." onClose={onClose}>
+      {/* Sidebar */}
+      <div className="flex w-44 shrink-0 flex-col border-r border-white/[0.07] py-3 px-2">
+        <p className="mb-1.5 px-2 text-[10px] font-bold uppercase tracking-widest text-slate-600">Categories</p>
+        {integrations.map((intg) => (
+          <SidebarCategory
+            key={intg}
+            label={intg === 'all' ? 'All' : intg}
+            count={intgCounts[intg]}
+            active={activeIntegration === intg}
+            onClick={() => setActiveIntegration(intg)}
+          />
+        ))}
       </div>
-    </MarketplaceModal>
+
+      {/* Main panel */}
+      <div className="flex min-w-0 flex-1 flex-col">
+        {/* Search */}
+        <div className="border-b border-white/[0.07] px-4 py-3">
+          <div className="relative">
+            <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search"
+              autoFocus
+              className="h-8 w-full rounded-lg border border-white/10 bg-white/5 pl-8 pr-3 text-xs text-slate-200 placeholder-slate-500 focus:border-blue-500/40 focus:outline-none focus:ring-1 focus:ring-blue-500/30"
+            />
+            {query && (
+              <button onClick={() => setQuery('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300">
+                <X size={12} />
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Grid */}
+        <div className="flex-1 overflow-y-auto p-4">
+          {filtered.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-14 text-center">
+              <Table2 size={28} className="mb-3 text-slate-700" />
+              <p className="text-sm font-medium text-slate-400">No entities found</p>
+              <p className="mt-1 text-xs text-slate-500">Try a different search or category</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-3 gap-3">
+              {filtered.map((en) => (
+                <LibraryCard
+                  key={en.id}
+                  icon={Table2}
+                  iconColor="text-violet-400"
+                  name={en.label}
+                  description={`${en.integration} · ${en.columns?.length ?? 0} columns`}
+                  selected={localId === en.id}
+                  onAdd={() => setLocalId(en.id)}
+                  onRemove={() => setLocalId(null)}
+                />
+              ))}
+            </div>
+          )}
+          {hasLocked && (
+            <div className="mt-4 flex items-center gap-2 rounded-xl border border-dashed border-white/10 bg-white/[0.02] px-4 py-3 text-[11px] text-slate-500">
+              <PackagePlus size={14} className="shrink-0" />
+              More entities available — install a model from the Models page to unlock them.
+            </div>
+          )}
+        </div>
+
+        {/* Selection strip */}
+        <div className="flex items-center gap-3 border-t border-white/[0.07] bg-blue-500/[0.04] px-4 py-2.5">
+          <div className="flex min-w-0 flex-1 items-center gap-2 text-[11px]">
+            <span className="rounded-full bg-blue-500/20 px-2 py-0.5 font-semibold text-blue-400">{localId ? '1' : '0'}</span>
+            <span className="text-slate-400">Entity selected</span>
+            {selectedEn && <span className="truncate font-medium text-slate-300">· {selectedEn.label}</span>}
+          </div>
+          <div className="flex items-center gap-2">
+            <button onClick={onClose} className="h-8 rounded-lg border border-white/10 bg-white/5 px-4 text-xs font-medium text-slate-400 hover:bg-white/10 hover:text-slate-200 transition-colors">
+              Cancel
+            </button>
+            <button
+              disabled={!localId}
+              onClick={() => { if (localId) { onSelect(localId); onClose() } }}
+              className="h-8 rounded-lg bg-blue-600 px-4 text-xs font-semibold text-white transition-colors hover:bg-blue-500 disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              Add
+            </button>
+          </div>
+        </div>
+      </div>
+    </LibraryModal>
   )
 }
 
-// ── Shared marketplace modal shell ────────────────────────────────────────────
-function MarketplaceModal({ title, count, onClose, children }) {
+// ── Shared library modal shell ────────────────────────────────────────────────
+function LibraryModal({ title, subtitle, onClose, children }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center px-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
       <div
-        className="relative z-10 flex w-full max-w-xl flex-col rounded-2xl border border-white/[0.08] bg-[#0d0f14] shadow-2xl overflow-hidden"
-        style={{ maxHeight: 'min(640px, 88dvh)' }}
+        className="relative z-10 flex w-full max-w-3xl flex-col rounded-2xl border border-white/[0.08] bg-[#0d0f14] shadow-2xl overflow-hidden"
+        style={{ height: 'min(580px, 88dvh)' }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4">
+        <div className="flex items-start justify-between border-b border-white/[0.07] px-5 py-4">
           <div>
             <h3 className="text-sm font-semibold text-slate-100">{title}</h3>
-            <p className="text-[11px] text-slate-500">{count} available</p>
+            <p className="mt-0.5 text-[11px] text-slate-500">{subtitle}</p>
           </div>
           <button
             onClick={onClose}
@@ -338,7 +395,11 @@ function MarketplaceModal({ title, count, onClose, children }) {
             <X size={15} />
           </button>
         </div>
-        {children}
+
+        {/* Body: sidebar + main side by side */}
+        <div className="flex min-h-0 flex-1">
+          {children}
+        </div>
       </div>
     </div>
   )
