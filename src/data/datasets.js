@@ -62,6 +62,65 @@ export const AGG_FUNCTIONS = [
   { id: 'max',   label: 'Max',   compatibleTypes: ['number','date'] },
 ]
 
+// Column metadata: maps internal_name → display_name, description, type.
+// The UI should always show display_name and never rely on the internal_name alone.
+export const COLUMN_META = {
+  // ── Identity & contact ──────────────────────────────────────────────────────
+  name:            { display_name: 'Name',           description: 'Full name of the record',                         type: 'string'  },
+  email:           { display_name: 'Email',           description: 'Primary email address',                           type: 'string'  },
+  phone:           { display_name: 'Phone',           description: 'Primary phone number',                            type: 'string'  },
+  city:            { display_name: 'City',            description: 'City from the billing or main address',           type: 'string'  },
+  state:           { display_name: 'State / Region',  description: 'State or region',                                 type: 'string'  },
+  // ── Lead & account attributes ────────────────────────────────────────────────
+  tier:            { display_name: 'Tier',            description: 'Account or contact tier (Gold, Silver, Bronze)',  type: 'string'  },
+  score:           { display_name: 'Score',           description: 'Lead or engagement score (0–100)',                type: 'number'  },
+  lead_source:     { display_name: 'Lead Source',     description: 'Channel where the lead originated',              type: 'string'  },
+  lifecycle_stage: { display_name: 'Lifecycle Stage', description: 'Current stage in the marketing lifecycle',       type: 'string'  },
+  original_source: { display_name: 'Original Source', description: 'First channel that brought the contact in',      type: 'string'  },
+  industry:        { display_name: 'Industry',        description: 'Industry vertical of the account',               type: 'string'  },
+  employees:       { display_name: 'Employees',       description: 'Headcount of the company',                       type: 'number'  },
+  mrr:             { display_name: 'MRR',             description: 'Monthly Recurring Revenue in USD',               type: 'number'  },
+  annual_revenue:  { display_name: 'Annual Revenue',  description: 'Reported annual revenue of the account',         type: 'number'  },
+  owner:           { display_name: 'Owner',           description: 'Team member responsible for this record',        type: 'string'  },
+  // ── Deals ────────────────────────────────────────────────────────────────────
+  stage:           { display_name: 'Stage',           description: 'Current pipeline stage',                         type: 'string'  },
+  deal_stage:      { display_name: 'Deal Stage',      description: 'HubSpot deal stage label',                       type: 'string'  },
+  amount:          { display_name: 'Amount',          description: 'Deal value in USD',                              type: 'number'  },
+  close_date:      { display_name: 'Close Date',      description: 'Expected or actual deal close date',             type: 'date'    },
+  account_id:      { display_name: 'Account',         description: 'Reference to the associated account',            type: 'string'  },
+  deal_id:         { display_name: 'Deal ID',         description: 'Unique identifier for this deal',                type: 'string'  },
+  value:           { display_name: 'Value',           description: 'Monetary value of the deal',                     type: 'number'  },
+  source:          { display_name: 'Source',          description: 'Channel or origin of this deal',                 type: 'string'  },
+  // ── Activities ───────────────────────────────────────────────────────────────
+  type:            { display_name: 'Type',            description: 'Classification or category of the record',       type: 'string'  },
+  subject:         { display_name: 'Subject',         description: 'Subject line or title of the activity',          type: 'string'  },
+  contact_id:      { display_name: 'Contact',         description: 'Reference to the associated contact',            type: 'string'  },
+  date:            { display_name: 'Date',            description: 'Date the activity took place',                   type: 'date'    },
+  duration:        { display_name: 'Duration (min)',  description: 'Length of the activity in minutes',              type: 'number'  },
+  outcome:         { display_name: 'Outcome',         description: 'Result or disposition of the activity',          type: 'string'  },
+  created_at:      { display_name: 'Created At',      description: 'Date and time the record was created',           type: 'date'    },
+  // ── Vehicles (AIMS-OS & Automotive model) ────────────────────────────────────
+  make:            { display_name: 'Make',            description: 'Vehicle manufacturer (e.g. Toyota, Ford)',       type: 'string'  },
+  model:           { display_name: 'Model',           description: 'Vehicle model name',                             type: 'string'  },
+  year:            { display_name: 'Year',            description: 'Model year of the vehicle',                      type: 'number'  },
+  vin:             { display_name: 'VIN',             description: 'Vehicle Identification Number',                  type: 'string'  },
+  customer_id:     { display_name: 'Customer',        description: 'Reference to the owning customer',               type: 'string'  },
+  status:          { display_name: 'Status',          description: 'Current status of the record',                   type: 'string'  },
+  purchase_date:   { display_name: 'Purchase Date',   description: 'Date the vehicle was purchased',                 type: 'date'    },
+  price:           { display_name: 'Price',           description: 'Listed or sale price of the vehicle',            type: 'number'  },
+  mileage:         { display_name: 'Mileage',         description: 'Current odometer reading in miles',              type: 'number'  },
+  days_in_lot:     { display_name: 'Days in Lot',     description: 'Number of days the vehicle has been on the lot', type: 'number'  },
+  lot:             { display_name: 'Lot',             description: 'Lot or location code',                           type: 'string'  },
+  vehicle:         { display_name: 'Vehicle',         description: 'Reference to the vehicle in this record',        type: 'string'  },
+  contact:         { display_name: 'Contact',         description: 'Reference to the customer contact',              type: 'string'  },
+  last_visit:      { display_name: 'Last Visit',      description: 'Most recent dealership visit date',              type: 'date'    },
+  // ── Service orders ───────────────────────────────────────────────────────────
+  order_id:        { display_name: 'Order ID',        description: 'Unique identifier for the service order',        type: 'string'  },
+  cost:            { display_name: 'Cost',            description: 'Total cost of the service order in USD',         type: 'number'  },
+  scheduled:       { display_name: 'Scheduled',       description: 'Appointment date and time',                      type: 'date'    },
+  technician:      { display_name: 'Technician',      description: 'Technician assigned to this service order',      type: 'string'  },
+}
+
 // Pre-built datasets available in the library as starting points
 export const PRESET_DATASETS = [
   {
