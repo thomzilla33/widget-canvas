@@ -1,5 +1,6 @@
 import { X } from 'lucide-react'
 import { COLUMN_TYPES, OPERATORS_BY_TYPE } from '../../data/datasets.js'
+import ColumnSelect from './ColumnSelect.jsx'
 
 // A single filter row: [Column ▾] [Operator ▾] [Value input] [×]
 // Props:
@@ -18,16 +19,12 @@ export default function DatasetFilterRow({ sourceId, columns: columnsProp, filte
   return (
     <div className="flex items-center gap-2">
       {/* Column */}
-      <select
+      <ColumnSelect
         value={filter.column}
-        onChange={(e) => onChange({ ...filter, column: e.target.value, operator: '', value: '' })}
-        className="h-8 flex-1 min-w-0 rounded-lg border border-white/10 bg-white/5 px-2 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500/50"
-      >
-        <option value="">Column…</option>
-        {columns.map((c) => (
-          <option key={c} value={c}>{c}</option>
-        ))}
-      </select>
+        onChange={(col) => onChange({ ...filter, column: col, operator: '', value: '' })}
+        columns={columns}
+        placeholder="Column…"
+      />
 
       {/* Operator */}
       <select
