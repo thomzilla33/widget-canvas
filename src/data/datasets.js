@@ -72,7 +72,7 @@ export const PRESET_DATASETS = [
     description: 'Count of contacts grouped by tier (Gold, Silver, Bronze)',
     columns: ['tier','count'],
     groupBy: ['tier'],
-    aggregation: { fn: 'count', column: 'name' },
+    calculations: [{ fn: 'count', column: 'name' }],
     filters: [],
   },
   {
@@ -83,7 +83,7 @@ export const PRESET_DATASETS = [
     description: 'Sum of deal value grouped by stage',
     columns: ['stage','total_value'],
     groupBy: ['stage'],
-    aggregation: { fn: 'sum', column: 'value' },
+    calculations: [{ fn: 'sum', column: 'value' }],
     filters: [],
   },
   {
@@ -94,7 +94,7 @@ export const PRESET_DATASETS = [
     description: 'Sum of MRR across all active accounts',
     columns: ['total_mrr'],
     groupBy: [],
-    aggregation: { fn: 'sum', column: 'mrr' },
+    calculations: [{ fn: 'sum', column: 'mrr' }],
     filters: [],
   },
   {
@@ -105,7 +105,7 @@ export const PRESET_DATASETS = [
     description: 'Full contact record set — name, email, city, tier',
     columns: ['name','email','city','tier'],
     groupBy: [],
-    aggregation: null,
+    calculations: [],
     filters: [],
   },
   {
@@ -116,7 +116,7 @@ export const PRESET_DATASETS = [
     description: 'Count of activities grouped by type for the current week',
     columns: ['type','count'],
     groupBy: ['type'],
-    aggregation: { fn: 'count', column: 'type' },
+    calculations: [{ fn: 'count', column: 'type' }],
     filters: [{ column: 'date', operator: 'is', value: 'this_week' }],
   },
   {
@@ -127,7 +127,7 @@ export const PRESET_DATASETS = [
     description: 'Total deal value grouped by owner — shows each rep\'s pipeline',
     columns: ['owner','total_value'],
     groupBy: ['owner'],
-    aggregation: { fn: 'sum', column: 'value' },
+    calculations: [{ fn: 'sum', column: 'value' }],
     filters: [],
   },
   {
@@ -138,7 +138,7 @@ export const PRESET_DATASETS = [
     description: 'Count of accounts created in the last 30 days',
     columns: ['count'],
     groupBy: [],
-    aggregation: { fn: 'count', column: 'name' },
+    calculations: [{ fn: 'count', column: 'name' }],
     filters: [{ column: 'created_at', operator: 'is after', value: '30_days_ago' }],
   },
 ]

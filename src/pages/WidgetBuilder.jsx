@@ -111,7 +111,7 @@ export default function WidgetBuilder() {
     ? { id: datasetConfig.sourceId, name: dsEntry ? `${dsEntry.label} · ${dsEntry.integration}` : datasetConfig.sourceId, governed: false, hasPII: false }
     : null)
   const previewMetric = metric || (datasetConfig?.sourceId
-    ? { id: 'dataset', name: dsEntry?.label || datasetConfig.aggregation?.column || datasetConfig.sourceId || 'Value' }
+    ? { id: 'dataset', name: dsEntry?.label || datasetConfig.calculations?.[0]?.column || datasetConfig.sourceId || 'Value' }
     : null)
 
   function resetAll() {
@@ -202,7 +202,7 @@ export default function WidgetBuilder() {
     (
       datasetConfig.operationType === 'record_set'
         ? datasetConfig.exposedColumns?.length > 0
-        : datasetConfig.aggregation?.fn && datasetConfig.aggregation?.column
+        : datasetConfig.calculations?.some((c) => c.fn && c.column)
     )
   )
 

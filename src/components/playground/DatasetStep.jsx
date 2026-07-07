@@ -39,7 +39,7 @@ const EMPTY_CONFIG = {
   sourceId: '',
   filters: [],
   operationType: null,
-  aggregation: null,
+  calculations: [],
   groupers: [],
   exposedColumns: [],
   _shape: null,
@@ -447,21 +447,25 @@ export default function DatasetStep({ value, onChange }) {
 
   const filterSourceId = config.sourceType === 'entity' ? config.sourceId : selectedPreset?.source || ''
 
-  const resetSource   = (sourceType) => set({ sourceType, sourceId: '', filters: [], operationType: null, aggregation: null, groupers: [], exposedColumns: [] })
+  const resetSource   = (sourceType) => set({ sourceType, sourceId: '', filters: [], operationType: null, calculations: [], groupers: [], exposedColumns: [] })
 
   const resetSourceId = useCallback((sourceId) => {
     if (config.sourceType === 'dataset') {
       const preset  = PRESET_DATASETS.find((d) => d.id === sourceId)
       const opType  = preset?.shape === DATASET_SHAPE.FULL ? 'record_set' : 'summarize'
-      onChange({ ...config, sourceId, filters: [], operationType: opType, aggregation: preset?.aggregation || null, groupers: (preset?.groupBy || []).map((col) => ({ column: col })), exposedColumns: preset?.columns || [], _shape: preset?.shape || null })
+      onChange({ ...config, sourceId, filters: [], operationType: opType, calculations: preset?.calculations || [], groupers: (preset?.groupBy || []).map((col) => ({ column: col })), exposedColumns: preset?.columns || [], _shape: preset?.shape || null })
     } else {
-      set({ sourceId, filters: [], operationType: null, aggregation: null, groupers: [], exposedColumns: [] })
+      set({ sourceId, filters: [], operationType: null, calculations: [], groupers: [], exposedColumns: [] })
     }
   }, [config, onChange])
 
   const addFilter    = () => set({ filters: [...config.filters, { column: '', operator: '', value: '' }] })
   const updateFilter = (i, f) => set({ filters: config.filters.map((x, idx) => idx === i ? f : x) })
   const removeFilter = (i)    => set({ filters: config.filters.filter((_, idx) => idx !== i) })
+
+  const addCalc       = () => set({ calculations: [...(config.calculations || []), { fn: '', column: '' }] })
+  const updateCalc    = (i, field, val) => set({ calculations: (config.calculations || []).map((c, idx) => idx === i ? { ...c, [field]: val, ...(field === 'fn' ? { column: '' } : {}) } : c) })
+  const removeCalc    = (i)             => set({ calculations: (config.calculations || []).filter((_, idx) => idx !== i) })
 
   const addGrouper    = () => set({ groupers: [...config.groupers, { column: '' }] })
   const updateGrouper = (i, col) => set({ groupers: config.groupers.map((g, idx) => idx === i ? { column: col } : g) })
@@ -475,7 +479,7 @@ export default function DatasetStep({ value, onChange }) {
   }
 
   const setOperationType = (opType) =>
-    set({ operationType: opType, aggregation: null, groupers: [], exposedColumns: opType === 'record_set' ? [...availableColumns] : [] })
+    set({ operationType: opType, calculations: [], groupers: [], exposedColumns: opType === 'record_set' ? [...availableColumns] : [] })
 
   // ── Inline dataset list (first N + selected always visible) ──────────────
   const inlineDatasets = (() => {
@@ -701,30 +705,49 @@ export default function DatasetStep({ value, onChange }) {
       {/* ── 5a. SUMMARIZE ────────────────────────────────────────────────── */}
       {config.sourceType === 'entity' && config.operationType === 'summarize' && (
         <section className="space-y-5">
+          {/* Calculations (multi) */}
           <div>
-            <SectionLabel>Aggregation</SectionLabel>
-            <div className="flex gap-2">
-              <select
-                value={config.aggregation?.fn || ''}
-                onChange={(e) => set({ aggregation: { ...config.aggregation, fn: e.target.value, column: '' } })}
-                className="h-8 flex-1 rounded-lg border border-white/10 bg-white/5 px-2 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500/50"
-              >
-                <option value="">Function…</option>
-                {AGG_FUNCTIONS.map((f) => <option key={f.id} value={f.id}>{f.label}</option>)}
-              </select>
-              <select
-                value={config.aggregation?.column || ''}
-                onChange={(e) => set({ aggregation: { ...config.aggregation, column: e.target.value } })}
-                disabled={!config.aggregation?.fn}
-                className="h-8 flex-1 rounded-lg border border-white/10 bg-white/5 px-2 text-xs text-slate-200 disabled:opacity-40 focus:outline-none focus:ring-1 focus:ring-blue-500/50"
-              >
-                <option value="">of column…</option>
-                {(config.aggregation?.fn === 'count' ? availableColumns : aggNumericColumns).map((c) => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
-              </select>
+            <div className="mb-3 flex items-center justify-between">
+              <SectionLabel className="mb-0">Calculations</SectionLabel>
+              <button onClick={addCalc} className="flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-semibold text-blue-400 hover:bg-blue-500/10 transition-colors">
+                <Plus size={11} /> Add calculation
+              </button>
             </div>
+            {(config.calculations || []).length === 0 ? (
+              <p className="text-[11px] text-slate-500">No calculations yet — add at least one to continue.</p>
+            ) : (
+              <div className="space-y-2">
+                {(config.calculations || []).map((calc, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <select
+                      value={calc.fn || ''}
+                      onChange={(e) => updateCalc(i, 'fn', e.target.value)}
+                      className="h-8 flex-1 rounded-lg border border-white/10 bg-white/5 px-2 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500/50"
+                    >
+                      <option value="">Function…</option>
+                      {AGG_FUNCTIONS.map((f) => <option key={f.id} value={f.id}>{f.label}</option>)}
+                    </select>
+                    <select
+                      value={calc.column || ''}
+                      onChange={(e) => updateCalc(i, 'column', e.target.value)}
+                      disabled={!calc.fn}
+                      className="h-8 flex-1 rounded-lg border border-white/10 bg-white/5 px-2 text-xs text-slate-200 disabled:opacity-40 focus:outline-none focus:ring-1 focus:ring-blue-500/50"
+                    >
+                      <option value="">of column…</option>
+                      {(calc.fn === 'count' ? availableColumns : aggNumericColumns).map((c) => (
+                        <option key={c} value={c}>{c}</option>
+                      ))}
+                    </select>
+                    <button onClick={() => removeCalc(i)} aria-label="Remove calculation" className="grid h-7 w-7 shrink-0 place-items-center rounded-md text-slate-500 hover:bg-white/10 hover:text-slate-200 transition-colors">
+                      <X size={13} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
+
+          {/* Group by (multi) */}
           <div>
             <div className="mb-3 flex items-center justify-between">
               <SectionLabel className="mb-0">Group by</SectionLabel>
