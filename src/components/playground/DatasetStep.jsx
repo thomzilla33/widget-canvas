@@ -61,14 +61,156 @@ function ShapeBadge({ shape }) {
   )
 }
 
+// ── Shape card accent config ───────────────────────────────────────────────────
+const SHAPE_STYLE = {
+  [DATASET_SHAPE.GROUPED]: { label: 'Grouped',      pill: 'bg-cyan-500/15 text-cyan-400 border-cyan-500/20',   accent: 'bg-cyan-500',   icon: 'text-cyan-400' },
+  [DATASET_SHAPE.SINGLE]:  { label: 'Single value', pill: 'bg-amber-500/15 text-amber-400 border-amber-500/20', accent: 'bg-amber-500', icon: 'text-amber-400' },
+  [DATASET_SHAPE.FULL]:    { label: 'Record set',   pill: 'bg-purple-500/15 text-purple-400 border-purple-500/20', accent: 'bg-purple-500', icon: 'text-purple-400' },
+}
+
+// ── Integration color dots ─────────────────────────────────────────────────────
+const INTEGRATION_COLOR = {
+  Salesforce: 'bg-blue-500',
+  HubSpot:    'bg-orange-400',
+  'AIMS OS':  'bg-violet-500',
+  default:    'bg-slate-500',
+}
+
+// ── Dataset card ───────────────────────────────────────────────────────────────
+function DatasetCard({ ds, selected, onSelect }) {
+  const style = SHAPE_STYLE[ds.shape] || {}
+  return (
+    <button
+      onClick={onSelect}
+      className={`group relative flex flex-col rounded-xl border text-left transition-all duration-150 overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 ${
+        selected
+          ? 'border-blue-500/50 bg-blue-500/10 shadow-lg shadow-blue-500/5'
+          : 'border-white/[0.08] bg-white/[0.03] hover:border-white/20 hover:bg-white/[0.07]'
+      }`}
+    >
+      {/* Top accent bar */}
+      <div className={`h-0.5 w-full ${style.accent || 'bg-slate-600'} opacity-70`} />
+
+      <div className="flex flex-col gap-2 p-3.5">
+        {/* Icon + shape pill */}
+        <div className="flex items-start justify-between gap-2">
+          <div className={`grid h-8 w-8 shrink-0 place-items-center rounded-lg border ${
+            selected ? 'border-blue-500/30 bg-blue-500/15' : 'border-white/10 bg-white/5'
+          }`}>
+            {selected
+              ? <Check size={14} className="text-blue-400" />
+              : <Database size={14} className={style.icon || 'text-slate-400'} />
+            }
+          </div>
+          <span className={`rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${style.pill || ''}`}>
+            {style.label}
+          </span>
+        </div>
+
+        {/* Name + description */}
+        <div>
+          <p className="text-xs font-semibold leading-snug text-slate-100">{ds.name}</p>
+          <p className="mt-0.5 text-[11px] leading-snug text-slate-400 line-clamp-2">{ds.description}</p>
+        </div>
+      </div>
+    </button>
+  )
+}
+
+// ── Entity card ────────────────────────────────────────────────────────────────
+function EntityCard({ en, selected, onSelect }) {
+  const dotColor = INTEGRATION_COLOR[en.integration] || INTEGRATION_COLOR.default
+  return (
+    <button
+      onClick={onSelect}
+      className={`group relative flex flex-col rounded-xl border text-left transition-all duration-150 overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 ${
+        selected
+          ? 'border-blue-500/50 bg-blue-500/10 shadow-lg shadow-blue-500/5'
+          : 'border-white/[0.08] bg-white/[0.03] hover:border-white/20 hover:bg-white/[0.07]'
+      }`}
+    >
+      {/* Top accent bar — uses integration color */}
+      <div className={`h-0.5 w-full ${dotColor} opacity-70`} />
+
+      <div className="flex flex-col gap-2 p-3.5">
+        {/* Icon + columns badge */}
+        <div className="flex items-start justify-between gap-2">
+          <div className={`grid h-8 w-8 shrink-0 place-items-center rounded-lg border ${
+            selected ? 'border-blue-500/30 bg-blue-500/15' : 'border-white/10 bg-white/5'
+          }`}>
+            {selected
+              ? <Check size={14} className="text-blue-400" />
+              : <Table2 size={14} className="text-slate-400" />
+            }
+          </div>
+          <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] font-semibold text-slate-400">
+            {en.columns?.length ?? 0} cols
+          </span>
+        </div>
+
+        {/* Name + integration */}
+        <div>
+          <p className="text-xs font-semibold leading-snug text-slate-100">{en.label}</p>
+          <div className="mt-1 flex items-center gap-1.5">
+            <span className={`h-1.5 w-1.5 rounded-full shrink-0 ${dotColor}`} />
+            <span className="text-[11px] text-slate-400">{en.integration}</span>
+          </div>
+        </div>
+      </div>
+    </button>
+  )
+}
+
+// ── Shared search + filter bar ─────────────────────────────────────────────────
+function PickerSearchBar({ value, onChange, placeholder, children }) {
+  return (
+    <div className="flex flex-col gap-2 border-b border-white/[0.07] px-5 pb-3 pt-1">
+      <div className="relative">
+        <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+        <input
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          className="h-8 w-full rounded-lg border border-white/10 bg-white/5 pl-8 pr-3 text-xs text-slate-200 placeholder-slate-500 focus:border-blue-500/40 focus:outline-none focus:ring-1 focus:ring-blue-500/30"
+          autoFocus
+        />
+        {value && (
+          <button onClick={() => onChange('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300">
+            <X size={12} />
+          </button>
+        )}
+      </div>
+      {children}
+    </div>
+  )
+}
+
+function FilterChips({ options, active, onSelect }) {
+  return (
+    <div className="flex flex-wrap gap-1.5">
+      {options.map((o) => (
+        <button
+          key={o.id}
+          onClick={() => onSelect(o.id)}
+          className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold transition-all ${
+            active === o.id
+              ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
+              : 'bg-white/5 text-slate-400 border border-white/10 hover:border-white/20 hover:text-slate-300'
+          }`}
+        >
+          {o.label}
+        </button>
+      ))}
+    </div>
+  )
+}
+
 // ── Dataset Picker Modal ───────────────────────────────────────────────────────
 function DatasetPickerModal({ currentId, onSelect, onClose }) {
   const [query, setQuery] = useState('')
   const [shapeFilter, setShapeFilter] = useState('all')
-  const inputRef = useRef(null)
 
   useEffect(() => {
-    inputRef.current?.focus()
     const onKey = (e) => { if (e.key === 'Escape') onClose() }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
@@ -77,105 +219,40 @@ function DatasetPickerModal({ currentId, onSelect, onClose }) {
   const filtered = PRESET_DATASETS.filter((ds) => {
     const matchShape = shapeFilter === 'all' || ds.shape === shapeFilter
     const q = query.toLowerCase()
-    const matchQuery = !q || ds.name.toLowerCase().includes(q) || ds.description?.toLowerCase().includes(q)
-    return matchShape && matchQuery
+    return (shapeFilter === 'all' || matchShape) && (!q || ds.name.toLowerCase().includes(q) || ds.description?.toLowerCase().includes(q))
   })
 
-  // Group by source integration label
-  const grouped = filtered.reduce((acc, ds) => {
-    const key = ds.integration || 'Other'
-    if (!acc[key]) acc[key] = []
-    acc[key].push(ds)
-    return acc
-  }, {})
-
   return (
-    <PickerModal title={`Datasets · ${PRESET_DATASETS.length} available`} onClose={onClose}>
-      {/* Search + filter bar */}
-      <div className="flex flex-col gap-2 border-b border-white/[0.07] px-4 pb-3 pt-1">
-        <div className="relative">
-          <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-          <input
-            ref={inputRef}
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search datasets…"
-            className="h-8 w-full rounded-lg border border-white/10 bg-white/5 pl-8 pr-3 text-xs text-slate-200 placeholder-slate-500 focus:border-blue-500/40 focus:outline-none focus:ring-1 focus:ring-blue-500/30"
-          />
-          {query && (
-            <button onClick={() => setQuery('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300">
-              <X size={12} />
-            </button>
-          )}
-        </div>
-        {/* Shape filter chips */}
-        <div className="flex gap-1.5">
-          {SHAPE_FILTERS.map((f) => (
-            <button
-              key={f.id}
-              onClick={() => setShapeFilter(f.id)}
-              className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold transition-all ${
-                shapeFilter === f.id
-                  ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
-                  : 'bg-white/5 text-slate-400 border border-white/10 hover:border-white/20 hover:text-slate-300'
-              }`}
-            >
-              {f.label}
-            </button>
-          ))}
-        </div>
-      </div>
+    <MarketplaceModal
+      title="Dataset library"
+      count={`${filtered.length} of ${PRESET_DATASETS.length}`}
+      onClose={onClose}
+    >
+      <PickerSearchBar value={query} onChange={setQuery} placeholder="Search datasets…">
+        <FilterChips options={SHAPE_FILTERS} active={shapeFilter} onSelect={setShapeFilter} />
+      </PickerSearchBar>
 
-      {/* Results */}
-      <div className="flex-1 overflow-y-auto px-4 py-3 space-y-4">
+      <div className="flex-1 overflow-y-auto px-5 py-4">
         {filtered.length === 0 ? (
-          <div className="py-10 text-center text-sm text-slate-500">No datasets match your search.</div>
-        ) : Object.keys(grouped).length > 1 ? (
-          Object.entries(grouped).map(([group, items]) => (
-            <div key={group}>
-              <p className="mb-1.5 text-[10px] font-bold uppercase tracking-widest text-slate-500">{group}</p>
-              <div className="space-y-1">
-                {items.map((ds) => (
-                  <DatasetRow key={ds.id} ds={ds} selected={currentId === ds.id} onSelect={() => { onSelect(ds.id); onClose() }} />
-                ))}
-              </div>
-            </div>
-          ))
+          <div className="flex flex-col items-center justify-center py-14 text-center">
+            <Database size={28} className="mb-3 text-slate-600" />
+            <p className="text-sm font-medium text-slate-400">No datasets found</p>
+            <p className="mt-1 text-xs text-slate-500">Try a different search or filter</p>
+          </div>
         ) : (
-          <div className="space-y-1">
+          <div className="grid grid-cols-2 gap-3">
             {filtered.map((ds) => (
-              <DatasetRow key={ds.id} ds={ds} selected={currentId === ds.id} onSelect={() => { onSelect(ds.id); onClose() }} />
+              <DatasetCard
+                key={ds.id}
+                ds={ds}
+                selected={currentId === ds.id}
+                onSelect={() => { onSelect(ds.id); onClose() }}
+              />
             ))}
           </div>
         )}
       </div>
-
-      <div className="border-t border-white/[0.07] px-4 py-2.5 text-[11px] text-slate-500">
-        {filtered.length} of {PRESET_DATASETS.length} datasets
-      </div>
-    </PickerModal>
-  )
-}
-
-function DatasetRow({ ds, selected, onSelect }) {
-  return (
-    <button
-      onClick={onSelect}
-      className={`group flex w-full items-center gap-3 rounded-lg border px-3 py-2.5 text-left transition-all ${
-        selected
-          ? 'border-blue-500/40 bg-blue-500/10'
-          : 'border-white/10 bg-white/[0.04] hover:border-white/20 hover:bg-white/[0.08]'
-      }`}
-    >
-      <div className={`grid h-7 w-7 shrink-0 place-items-center rounded-md ${selected ? 'bg-blue-500/20' : 'bg-white/5 group-hover:bg-white/10'}`}>
-        {selected ? <Check size={13} className="text-blue-400" /> : <Database size={13} className="text-slate-400" />}
-      </div>
-      <span className="min-w-0 flex-1">
-        <span className="block text-xs font-semibold text-slate-100">{ds.name}</span>
-        <span className="block truncate text-[11px] text-slate-400">{ds.description}</span>
-      </span>
-      <ShapeBadge shape={ds.shape} />
-    </button>
+    </MarketplaceModal>
   )
 }
 
@@ -183,137 +260,77 @@ function DatasetRow({ ds, selected, onSelect }) {
 function EntityPickerModal({ currentId, visibleSources, hasLocked, onSelect, onClose }) {
   const [query, setQuery] = useState('')
   const [activeIntegration, setActiveIntegration] = useState('all')
-  const inputRef = useRef(null)
 
-  // Derive integrations list
   const integrations = ['all', ...Array.from(new Set(visibleSources.map((s) => s.integration)))]
+  const intgOptions = integrations.map((i) => ({ id: i, label: i === 'all' ? 'All' : i }))
 
   useEffect(() => {
-    inputRef.current?.focus()
     const onKey = (e) => { if (e.key === 'Escape') onClose() }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [onClose])
 
   const filtered = visibleSources.filter((en) => {
-    const matchIntegration = activeIntegration === 'all' || en.integration === activeIntegration
+    const matchIntg = activeIntegration === 'all' || en.integration === activeIntegration
     const q = query.toLowerCase()
-    const matchQuery = !q || en.label.toLowerCase().includes(q) || en.integration.toLowerCase().includes(q)
-    return matchIntegration && matchQuery
+    return matchIntg && (!q || en.label.toLowerCase().includes(q) || en.integration.toLowerCase().includes(q))
   })
 
-  // Group by entity label (e.g. "Contacts", "Deals")
-  const grouped = filtered.reduce((acc, en) => {
-    if (!acc[en.label]) acc[en.label] = []
-    acc[en.label].push(en)
-    return acc
-  }, {})
-
   return (
-    <PickerModal title={`Entities · ${visibleSources.length} available`} onClose={onClose}>
-      {/* Search */}
-      <div className="flex flex-col gap-2 border-b border-white/[0.07] px-4 pb-3 pt-1">
-        <div className="relative">
-          <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-          <input
-            ref={inputRef}
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search entities…"
-            className="h-8 w-full rounded-lg border border-white/10 bg-white/5 pl-8 pr-3 text-xs text-slate-200 placeholder-slate-500 focus:border-blue-500/40 focus:outline-none focus:ring-1 focus:ring-blue-500/30"
-          />
-          {query && (
-            <button onClick={() => setQuery('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300">
-              <X size={12} />
-            </button>
-          )}
-        </div>
-        {/* Integration chips */}
-        <div className="flex flex-wrap gap-1.5">
-          {integrations.map((intg) => (
-            <button
-              key={intg}
-              onClick={() => setActiveIntegration(intg)}
-              className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold transition-all ${
-                activeIntegration === intg
-                  ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
-                  : 'bg-white/5 text-slate-400 border border-white/10 hover:border-white/20 hover:text-slate-300'
-              }`}
-            >
-              {intg === 'all' ? 'All integrations' : intg}
-            </button>
-          ))}
-        </div>
-      </div>
+    <MarketplaceModal
+      title="Entity library"
+      count={`${filtered.length} of ${visibleSources.length}`}
+      onClose={onClose}
+    >
+      <PickerSearchBar value={query} onChange={setQuery} placeholder="Search entities…">
+        <FilterChips options={intgOptions} active={activeIntegration} onSelect={setActiveIntegration} />
+      </PickerSearchBar>
 
-      {/* Results grouped by entity label */}
-      <div className="flex-1 overflow-y-auto px-4 py-3 space-y-4">
+      <div className="flex-1 overflow-y-auto px-5 py-4">
         {filtered.length === 0 ? (
-          <div className="py-10 text-center text-sm text-slate-500">No entities match your search.</div>
+          <div className="flex flex-col items-center justify-center py-14 text-center">
+            <Table2 size={28} className="mb-3 text-slate-600" />
+            <p className="text-sm font-medium text-slate-400">No entities found</p>
+            <p className="mt-1 text-xs text-slate-500">Try a different search or filter</p>
+          </div>
         ) : (
-          Object.entries(grouped).map(([entityLabel, sources]) => (
-            <div key={entityLabel}>
-              <p className="mb-1.5 text-[10px] font-bold uppercase tracking-widest text-slate-500">{entityLabel}</p>
-              <div className="space-y-1">
-                {sources.map((en) => (
-                  <EntityRow key={en.id} en={en} selected={currentId === en.id} onSelect={() => { onSelect(en.id); onClose() }} />
-                ))}
-              </div>
-            </div>
-          ))
+          <div className="grid grid-cols-2 gap-3">
+            {filtered.map((en) => (
+              <EntityCard
+                key={en.id}
+                en={en}
+                selected={currentId === en.id}
+                onSelect={() => { onSelect(en.id); onClose() }}
+              />
+            ))}
+          </div>
         )}
         {hasLocked && (
-          <div className="flex items-center gap-2 rounded-lg border border-dashed border-white/10 bg-white/[0.03] px-3 py-2.5 text-[11px] text-slate-500">
-            <PackagePlus size={13} className="shrink-0" />
+          <div className="mt-4 flex items-center gap-2 rounded-xl border border-dashed border-white/10 bg-white/[0.02] px-4 py-3 text-[11px] text-slate-500">
+            <PackagePlus size={14} className="shrink-0" />
             More entities available — install a model from the Models page to unlock them.
           </div>
         )}
       </div>
-
-      <div className="border-t border-white/[0.07] px-4 py-2.5 text-[11px] text-slate-500">
-        {filtered.length} of {visibleSources.length} entities shown
-      </div>
-    </PickerModal>
+    </MarketplaceModal>
   )
 }
 
-function EntityRow({ en, selected, onSelect }) {
+// ── Shared marketplace modal shell ────────────────────────────────────────────
+function MarketplaceModal({ title, count, onClose, children }) {
   return (
-    <button
-      onClick={onSelect}
-      className={`group flex w-full items-center gap-3 rounded-lg border px-3 py-2.5 text-left transition-all ${
-        selected
-          ? 'border-blue-500/40 bg-blue-500/10'
-          : 'border-white/10 bg-white/[0.04] hover:border-white/20 hover:bg-white/[0.08]'
-      }`}
-    >
-      <div className={`grid h-7 w-7 shrink-0 place-items-center rounded-md ${selected ? 'bg-blue-500/20' : 'bg-white/5 group-hover:bg-white/10'}`}>
-        {selected ? <Check size={13} className="text-blue-400" /> : <Table2 size={13} className="text-slate-400" />}
-      </div>
-      <span className="min-w-0 flex-1">
-        <span className="block text-xs font-semibold text-slate-100">{en.label}</span>
-        <span className="block text-[11px] text-slate-400">{en.integration} · {en.columns?.length ?? 0} columns</span>
-      </span>
-    </button>
-  )
-}
-
-// ── Shared modal shell ────────────────────────────────────────────────────────
-function PickerModal({ title, onClose, children }) {
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-end justify-center sm:items-center"
-      onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
-    >
-      {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-
-      {/* Panel */}
-      <div className="relative z-10 flex w-full max-w-lg flex-col rounded-2xl border border-white/[0.08] bg-[#0f1117] shadow-2xl overflow-hidden"
-           style={{ maxHeight: 'min(600px, 85dvh)' }}>
+    <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center px-4">
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
+      <div
+        className="relative z-10 flex w-full max-w-xl flex-col rounded-2xl border border-white/[0.08] bg-[#0d0f14] shadow-2xl overflow-hidden"
+        style={{ maxHeight: 'min(640px, 88dvh)' }}
+      >
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-white/[0.07] px-4 py-3">
-          <span className="text-sm font-semibold text-slate-100">{title}</span>
+        <div className="flex items-center justify-between px-5 py-4">
+          <div>
+            <h3 className="text-sm font-semibold text-slate-100">{title}</h3>
+            <p className="text-[11px] text-slate-500">{count} available</p>
+          </div>
           <button
             onClick={onClose}
             className="grid h-7 w-7 place-items-center rounded-lg text-slate-500 hover:bg-white/10 hover:text-slate-200 transition-colors"
