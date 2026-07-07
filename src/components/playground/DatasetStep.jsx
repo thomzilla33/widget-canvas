@@ -95,14 +95,14 @@ function LibraryCard({ icon: Icon, iconColor, name, description, badge, selected
           onClick={onRemove}
           className="flex h-7 w-full items-center justify-center gap-1.5 rounded-lg border border-white/10 bg-white/5 text-[11px] font-medium text-slate-400 transition-colors hover:border-red-500/30 hover:bg-red-500/[0.06] hover:text-red-400"
         >
-          <Trash2 size={11} /> Remove
+          <Trash2 size={11} /> Deselect
         </button>
       ) : (
         <button
           onClick={onAdd}
           className="flex h-7 w-full items-center justify-center gap-1.5 rounded-lg border border-white/10 bg-white/5 text-[11px] font-medium text-slate-400 transition-colors hover:border-blue-500/30 hover:bg-blue-500/[0.06] hover:text-blue-400"
         >
-          <Plus size={11} /> Add
+          <Plus size={11} /> Select
         </button>
       )}
     </div>
@@ -166,10 +166,10 @@ function DatasetPickerModal({ currentId, onSelect, onClose }) {
   ]
 
   return (
-    <LibraryModal title="Widgets library" subtitle="Browse and add widgets to customize your overview." onClose={onClose}>
+    <LibraryModal title="Choose a dataset" subtitle="Pick a pre-built query to power your widget." onClose={onClose}>
       {/* Sidebar */}
       <div className="flex w-44 shrink-0 flex-col border-r border-white/[0.07] py-3 px-2">
-        <p className="mb-1.5 px-2 text-[10px] font-bold uppercase tracking-widest text-slate-600">Categories</p>
+        <p className="mb-1.5 px-2 text-[10px] font-bold uppercase tracking-widest text-slate-600">Shape</p>
         {sidebarItems.map((item) => (
           <SidebarCategory
             key={item.id}
@@ -190,7 +190,7 @@ function DatasetPickerModal({ currentId, onSelect, onClose }) {
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search"
+              placeholder="Search datasets…"
               autoFocus
               className="h-8 w-full rounded-lg border border-white/10 bg-white/5 pl-8 pr-3 text-xs text-slate-200 placeholder-slate-500 focus:border-blue-500/40 focus:outline-none focus:ring-1 focus:ring-blue-500/30"
             />
@@ -207,8 +207,8 @@ function DatasetPickerModal({ currentId, onSelect, onClose }) {
           {filtered.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-14 text-center">
               <Database size={28} className="mb-3 text-slate-700" />
-              <p className="text-sm font-medium text-slate-400">No datasets found</p>
-              <p className="mt-1 text-xs text-slate-500">Try a different search or category</p>
+              <p className="text-sm font-medium text-slate-400">No datasets match</p>
+              <p className="mt-1 text-xs text-slate-500">Try a different search or shape</p>
             </div>
           ) : (
             <div className="grid grid-cols-3 gap-3">
@@ -231,9 +231,15 @@ function DatasetPickerModal({ currentId, onSelect, onClose }) {
         {/* Selection strip */}
         <div className="flex items-center gap-3 border-t border-white/[0.07] bg-blue-500/[0.04] px-4 py-2.5">
           <div className="flex min-w-0 flex-1 items-center gap-2 text-[11px]">
-            <span className="rounded-full bg-blue-500/20 px-2 py-0.5 font-semibold text-blue-400">{localId ? '1' : '0'}</span>
-            <span className="text-slate-400">Dataset selected</span>
-            {selectedDs && <span className="truncate font-medium text-slate-300">· {selectedDs.name}</span>}
+            {selectedDs ? (
+              <>
+                <Check size={13} className="shrink-0 text-blue-400" />
+                <span className="truncate font-medium text-slate-200">{selectedDs.name}</span>
+                <span className="shrink-0 text-slate-500">selected as data source</span>
+              </>
+            ) : (
+              <span className="text-slate-500">Select a dataset to continue</span>
+            )}
           </div>
           <div className="flex items-center gap-2">
             <button onClick={onClose} className="h-8 rounded-lg border border-white/10 bg-white/5 px-4 text-xs font-medium text-slate-400 hover:bg-white/10 hover:text-slate-200 transition-colors">
@@ -244,7 +250,7 @@ function DatasetPickerModal({ currentId, onSelect, onClose }) {
               onClick={() => { if (localId) { onSelect(localId); onClose() } }}
               className="h-8 rounded-lg bg-blue-600 px-4 text-xs font-semibold text-white transition-colors hover:bg-blue-500 disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              Add
+              Use dataset
             </button>
           </div>
         </div>
@@ -280,10 +286,10 @@ function EntityPickerModal({ currentId, visibleSources, hasLocked, onSelect, onC
   const selectedEn = visibleSources.find(e => e.id === localId)
 
   return (
-    <LibraryModal title="Widgets library" subtitle="Browse and add widgets to customize your overview." onClose={onClose}>
+    <LibraryModal title="Choose an entity" subtitle="Pick a raw entity to build your widget from scratch." onClose={onClose}>
       {/* Sidebar */}
       <div className="flex w-44 shrink-0 flex-col border-r border-white/[0.07] py-3 px-2">
-        <p className="mb-1.5 px-2 text-[10px] font-bold uppercase tracking-widest text-slate-600">Categories</p>
+        <p className="mb-1.5 px-2 text-[10px] font-bold uppercase tracking-widest text-slate-600">Integration</p>
         {integrations.map((intg) => (
           <SidebarCategory
             key={intg}
@@ -304,7 +310,7 @@ function EntityPickerModal({ currentId, visibleSources, hasLocked, onSelect, onC
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search"
+              placeholder="Search entities…"
               autoFocus
               className="h-8 w-full rounded-lg border border-white/10 bg-white/5 pl-8 pr-3 text-xs text-slate-200 placeholder-slate-500 focus:border-blue-500/40 focus:outline-none focus:ring-1 focus:ring-blue-500/30"
             />
@@ -321,8 +327,8 @@ function EntityPickerModal({ currentId, visibleSources, hasLocked, onSelect, onC
           {filtered.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-14 text-center">
               <Table2 size={28} className="mb-3 text-slate-700" />
-              <p className="text-sm font-medium text-slate-400">No entities found</p>
-              <p className="mt-1 text-xs text-slate-500">Try a different search or category</p>
+              <p className="text-sm font-medium text-slate-400">No entities match</p>
+              <p className="mt-1 text-xs text-slate-500">Try a different search or integration</p>
             </div>
           ) : (
             <div className="grid grid-cols-3 gap-3">
@@ -343,7 +349,7 @@ function EntityPickerModal({ currentId, visibleSources, hasLocked, onSelect, onC
           {hasLocked && (
             <div className="mt-4 flex items-center gap-2 rounded-xl border border-dashed border-white/10 bg-white/[0.02] px-4 py-3 text-[11px] text-slate-500">
               <PackagePlus size={14} className="shrink-0" />
-              More entities available — install a model from the Models page to unlock them.
+              More entities available — connect an integration to unlock them.
             </div>
           )}
         </div>
@@ -351,9 +357,15 @@ function EntityPickerModal({ currentId, visibleSources, hasLocked, onSelect, onC
         {/* Selection strip */}
         <div className="flex items-center gap-3 border-t border-white/[0.07] bg-blue-500/[0.04] px-4 py-2.5">
           <div className="flex min-w-0 flex-1 items-center gap-2 text-[11px]">
-            <span className="rounded-full bg-blue-500/20 px-2 py-0.5 font-semibold text-blue-400">{localId ? '1' : '0'}</span>
-            <span className="text-slate-400">Entity selected</span>
-            {selectedEn && <span className="truncate font-medium text-slate-300">· {selectedEn.label}</span>}
+            {selectedEn ? (
+              <>
+                <Check size={13} className="shrink-0 text-blue-400" />
+                <span className="truncate font-medium text-slate-200">{selectedEn.label}</span>
+                <span className="shrink-0 text-slate-500">selected as data source</span>
+              </>
+            ) : (
+              <span className="text-slate-500">Select an entity to continue</span>
+            )}
           </div>
           <div className="flex items-center gap-2">
             <button onClick={onClose} className="h-8 rounded-lg border border-white/10 bg-white/5 px-4 text-xs font-medium text-slate-400 hover:bg-white/10 hover:text-slate-200 transition-colors">
@@ -364,7 +376,7 @@ function EntityPickerModal({ currentId, visibleSources, hasLocked, onSelect, onC
               onClick={() => { if (localId) { onSelect(localId); onClose() } }}
               className="h-8 rounded-lg bg-blue-600 px-4 text-xs font-semibold text-white transition-colors hover:bg-blue-500 disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              Add
+              Use entity
             </button>
           </div>
         </div>
