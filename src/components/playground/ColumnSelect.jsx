@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { Search, ChevronDown, Check, Hash, Calendar, Type as TypeIcon } from 'lucide-react'
+import { Search, ChevronDown, Check, Hash, Calendar, Type as TypeIcon, X } from 'lucide-react'
 import { COLUMN_META } from '../../data/datasets.js'
 
 export const TYPE_LABELS = { string: 'Text', number: 'Number', date: 'Date' }
@@ -48,6 +48,126 @@ export function ColumnChip({ col, active, onClick }) {
           </div>
         </div>
       )}
+    </div>
+  )
+}
+
+// ── ColumnLibrary — scrollable column picker panel (for large column sets) ──────
+function ColumnRow({ col, active, onToggle }) {
+  const meta = getColMeta(col)
+  const Icon = TYPE_ICON[meta.type] ?? TypeIcon
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      className={`flex w-full cursor-pointer items-start gap-3 px-4 py-2.5 text-left transition-colors duration-150 hover:bg-white/[0.04] ${
+        active ? 'bg-blue-500/[0.07]' : ''
+      }`}
+    >
+      {/* Checkbox */}
+      <div className={`mt-[1px] flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-all duration-150 ${
+        active ? 'border-blue-500 bg-blue-500' : 'border-white/20 bg-transparent'
+      }`}>
+        {active && <Check size={9} className="text-white" strokeWidth={3} />}
+      </div>
+
+      {/* Main content */}
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-2">
+          <span className={`text-xs font-semibold leading-snug ${active ? 'text-slate-100' : 'text-slate-200'}`}>
+            {meta.display_name}
+          </span>
+          {meta.type && (
+            <span className="flex items-center gap-1 rounded-full border border-white/[0.07] bg-white/[0.05] px-1.5 py-px text-[10px] text-slate-400">
+              <Icon size={9} className="shrink-0" />
+              {TYPE_LABELS[meta.type] ?? meta.type}
+            </span>
+          )}
+        </div>
+        {meta.description && (
+          <p className="mt-0.5 line-clamp-1 text-[11px] leading-snug text-slate-500">{meta.description}</p>
+        )}
+        <code className="mt-0.5 block font-mono text-[10px] text-slate-600">{col}</code>
+      </div>
+    </button>
+  )
+}
+
+export function ColumnLibrary({ columns = [], selected = [], onToggle }) {
+  const [query, setQuery] = useState('')
+
+  const filtered = query
+    ? columns.filter((col) => {
+        const m = getColMeta(col)
+        const q = query.toLowerCase()
+        return (
+          m.display_name.toLowerCase().includes(q) ||
+          col.toLowerCase().includes(q) ||
+          (m.description ?? '').toLowerCase().includes(q)
+        )
+      })
+    : columns
+
+  const selectedCount = selected.length
+  const allSelected = columns.length > 0 && columns.every((c) => selected.includes(c))
+  const toggleAll = () => {
+    if (allSelected) {
+      columns.forEach((c) => { if (selected.includes(c)) onToggle(c) })
+    } else {
+      columns.forEach((c) => { if (!selected.includes(c)) onToggle(c) })
+    }
+  }
+
+  return (
+    <div className="overflow-hidden rounded-xl border border-white/10 bg-[#0a0c11]">
+      {/* Header */}
+      <div className="flex items-center gap-2 border-b border-white/[0.07] px-3 py-2.5">
+        {/* Search */}
+        <div className="relative flex-1">
+          <Search size={11} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-500" />
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search columns…"
+            className="h-7 w-full rounded-lg bg-white/5 pl-7 pr-7 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-blue-500/40"
+          />
+          {query && (
+            <button type="button" onClick={() => setQuery('')} className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300">
+              <X size={11} />
+            </button>
+          )}
+        </div>
+
+        {/* Count + select-all */}
+        <span className="shrink-0 text-[11px] text-slate-500">
+          <span className="font-semibold text-slate-300">{selectedCount}</span> / {columns.length}
+        </span>
+        <button
+          type="button"
+          onClick={toggleAll}
+          className="shrink-0 rounded-md px-2 py-1 text-[11px] font-medium text-slate-400 transition-colors hover:bg-white/5 hover:text-slate-200"
+        >
+          {allSelected ? 'None' : 'All'}
+        </button>
+      </div>
+
+      {/* Column rows */}
+      <div className="max-h-[272px] overflow-y-auto divide-y divide-white/[0.04]">
+        {filtered.length === 0 ? (
+          <p className="px-4 py-5 text-[11px] text-slate-500">
+            {query ? 'No columns match your search.' : 'No columns available.'}
+          </p>
+        ) : (
+          filtered.map((col) => (
+            <ColumnRow
+              key={col}
+              col={col}
+              active={selected.includes(col)}
+              onToggle={() => onToggle(col)}
+            />
+          ))
+        )}
+      </div>
     </div>
   )
 }

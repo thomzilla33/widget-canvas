@@ -5,7 +5,7 @@ import {
   DATASET_SHAPE, OPERATORS_BY_TYPE,
 } from '../../data/datasets.js'
 import DatasetFilterRow from './DatasetFilterRow.jsx'
-import ColumnSelect, { getColMeta, ColumnChip } from './ColumnSelect.jsx'
+import ColumnSelect, { getColMeta, ColumnChip, ColumnLibrary } from './ColumnSelect.jsx'
 import { useModels } from '../../state/ModelsContext.jsx'
 
 const SOURCE_TYPES = [
@@ -779,19 +779,11 @@ export default function DatasetStep({ value, onChange }) {
       {config.sourceType === 'entity' && config.operationType === 'record_set' && availableColumns.length > 0 && (
         <section>
           <SectionLabel>Columns to expose</SectionLabel>
-          <p className="mb-3 text-[11px] text-slate-400">
-            Choose which columns are available in this dataset. Users can hide individual columns in the widget later.
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {availableColumns.map((col) => (
-              <ColumnChip
-                key={col}
-                col={col}
-                active={config.exposedColumns.includes(col)}
-                onClick={() => toggleColumn(col)}
-              />
-            ))}
-          </div>
+          <ColumnLibrary
+            columns={availableColumns}
+            selected={config.exposedColumns}
+            onToggle={toggleColumn}
+          />
         </section>
       )}
 
