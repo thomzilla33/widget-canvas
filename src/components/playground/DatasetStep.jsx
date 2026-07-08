@@ -782,7 +782,7 @@ export default function DatasetStep({ value, onChange }) {
           <ColumnLibrary
             columns={availableColumns}
             selected={config.exposedColumns}
-            onToggle={toggleColumn}
+            onChange={(cols) => set({ exposedColumns: cols })}
           />
         </section>
       )}
