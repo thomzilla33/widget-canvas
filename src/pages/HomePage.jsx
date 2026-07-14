@@ -3,60 +3,42 @@ import { PageHeader } from '../components/common/index.jsx'
 import FilterToolbar from '../components/common/FilterToolbar.jsx'
 import StudioWelcome from '../components/common/StudioWelcome.jsx'
 import DashboardCards from '../components/dashboard/DashboardCards.jsx'
-import DashboardZones from '../components/dashboard/DashboardZones.jsx'
-import { DEFAULT_SCOPE } from '../components/dashboard/DashboardControls.jsx'
+import { HomeControlCenter } from '../components/home/HomeControlCenter.jsx'
 import { useDashboards } from '../state/DashboardsContext.jsx'
-import { useLive } from '../state/LiveContext.jsx'
 
-// The board behind the "needs you" hero — the standardized Inbox · HITL · Tasks triage
-// board (also reachable as its own dashboard). Rendered here so Home and the Workspace
-// Home dashboard stay one and the same surface.
-const WORKSPACE_BOARD_ID = 'd-workspace-home'
-
-// Workspace home: the standardized work board (Inbox, Tasks, HITL) + home dashboards.
-// The board is the hero; the filter toolbar scopes only the landing dashboards.
 export default function HomePage() {
   const { dashboards } = useDashboards()
-  const { tick, paused } = useLive()
-  const [search, setSearch] = useState('')
-  const [scope, setScope] = useState('All')
-  const [sortBy, setSortBy] = useState('name')
+  const [search, setSearch]   = useState('')
+  const [scope, setScope]     = useState('All')
+  const [sortBy, setSortBy]   = useState('name')
   const [sortDir, setSortDir] = useState('asc')
-
-  const board = dashboards.find((d) => d.id === WORKSPACE_BOARD_ID)
-  const boardScope = { ...DEFAULT_SCOPE, tick, paused }
 
   const homes = dashboards
     .filter((d) => d.placement?.surface === 'home')
-    .filter((d) => d.id !== WORKSPACE_BOARD_ID) // shown as the hero board above — don't list it twice
+    .filter((d) => d.id !== 'd-workspace-home')
     .filter((d) => scope === 'All' || d.placement.homeScope === scope)
     .filter((d) => !search || d.name.toLowerCase().includes(search.toLowerCase()))
     .sort((a, b) => {
-      const d = a.name.localeCompare(b.name)
-      return sortDir === 'asc' ? d : -d
+      const delta = a.name.localeCompare(b.name)
+      return sortDir === 'asc' ? delta : -delta
     })
-  const hasAnyHome = dashboards.some((d) => d.placement?.surface === 'home')
+  const hasAnyHome = dashboards.some((d) => d.placement?.surface === 'home' && d.id !== 'd-workspace-home')
 
   return (
     <div className="flex h-full flex-col">
-      <PageHeader title="Home" description="What needs you, your tasks, and your landing dashboards" />
+      <PageHeader title="Home" description="Your control center — work, schedule, AI, and automation." />
       <div className="flex-1 overflow-auto">
         <div className="mx-auto w-full max-w-[1800px] space-y-6 px-6 py-5 lg:px-8 2xl:px-12">
           <StudioWelcome studioId="home" built={{ count: homes.length, label: 'home dashboards' }} />
 
-          {board && (
-            <section>
-              <div className="mb-2 flex flex-wrap items-center gap-3">
-                <span className="text-[11px] font-bold uppercase tracking-wide text-gray-500 dark:text-slate-400">Needs you</span>
-              </div>
-              <DashboardZones dashboard={board} scope={boardScope} />
-            </section>
-          )}
+          <HomeControlCenter />
 
           {hasAnyHome && (
             <section>
               <div className="mb-2 flex flex-wrap items-center gap-3">
-                <span className="text-[11px] font-bold uppercase tracking-wide text-gray-500 dark:text-slate-400">Your dashboards</span>
+                <span className="text-[11px] font-bold uppercase tracking-wide text-gray-500 dark:text-slate-400">
+                  Your dashboards
+                </span>
               </div>
               <div className="mb-3">
                 <FilterToolbar
@@ -71,9 +53,9 @@ export default function HomePage() {
                       value: scope,
                       onChange: setScope,
                       options: [
-                        { value: 'All', label: 'All' },
+                        { value: 'All',      label: 'All'     },
                         { value: 'personal', label: 'Just me' },
-                        { value: 'team', label: 'My team' },
+                        { value: 'team',     label: 'My team' },
                       ],
                     },
                   ]}
