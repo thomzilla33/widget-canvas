@@ -1,4 +1,5 @@
-// src/components/home/MyDayCard.jsx
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Calendar, Video, Flag, Bell } from 'lucide-react'
 import { CardHeader } from './CardHeader.jsx'
 import { MY_DAY_EVENTS } from '../../data/home.js'
@@ -15,13 +16,21 @@ const URGENCY_TEXT = {
 }
 
 export function MyDayCard() {
-  const now = new Date()
-  const currentHour = now.getHours()
-  const currentMin  = now.getMinutes()
+  const navigate = useNavigate()
+  const [joining, setJoining] = useState(null)
 
-  function isPast(timeStr) {
-    const [h, m] = timeStr.split(':').map(Number)
-    return h < currentHour || (h === currentHour && m < currentMin)
+  const now        = new Date()
+  const currentH   = now.getHours()
+  const currentM   = now.getMinutes()
+
+  function isPast(t) {
+    const [h, m] = t.split(':').map(Number)
+    return h < currentH || (h === currentH && m < currentM)
+  }
+
+  function join(ev) {
+    setJoining(ev.id)
+    setTimeout(() => setJoining(null), 2500)
   }
 
   return (
@@ -30,7 +39,7 @@ export function MyDayCard() {
         icon={<Calendar size={14} />}
         title="My Day"
         badge={MY_DAY_EVENTS.filter((e) => !isPast(e.time)).length}
-        action={{ label: 'Open calendar', onClick: () => {} }}
+        action={{ label: 'Open calendar', onClick: () => navigate('/dashboards') }}
       />
       <div className="flex-1 divide-y divide-gray-100 dark:divide-white/[0.05]">
         {MY_DAY_EVENTS.map((ev) => {
@@ -42,7 +51,7 @@ export function MyDayCard() {
               className={`flex items-start gap-3 px-4 py-2.5 transition-opacity ${past ? 'opacity-40' : ''}`}
             >
               <div className="flex flex-col items-center pt-0.5">
-                <span className="num text-[10px] font-semibold text-gray-400 dark:text-slate-500 whitespace-nowrap">
+                <span className="num whitespace-nowrap text-[10px] font-semibold text-gray-400 dark:text-slate-500">
                   {ev.time}
                 </span>
                 {ev.duration > 0 && (
@@ -54,7 +63,7 @@ export function MyDayCard() {
                 <p className={`truncate text-xs font-medium ${past ? 'text-gray-400 dark:text-slate-500' : 'text-gray-800 dark:text-slate-200'}`}>
                   {ev.title}
                 </p>
-                <div className="flex items-center gap-2 mt-0.5">
+                <div className="mt-0.5 flex items-center gap-2">
                   <span className="text-[10px] text-gray-400 dark:text-slate-500">{meta.label}</span>
                   {ev.attendees && (
                     <span className="text-[10px] text-gray-400 dark:text-slate-500">{ev.attendees} people</span>
@@ -69,9 +78,10 @@ export function MyDayCard() {
               {ev.link && !past && (
                 <button
                   type="button"
-                  className="shrink-0 rounded-md bg-blue-500/10 px-2 py-0.5 text-[10px] font-semibold text-blue-500 hover:bg-blue-500/20 dark:text-blue-400 transition-colors"
+                  onClick={() => join(ev)}
+                  className="shrink-0 rounded-md bg-blue-500/10 px-2 py-0.5 text-[10px] font-semibold text-blue-500 transition-colors hover:bg-blue-500/20 dark:text-blue-400"
                 >
-                  Join
+                  {joining === ev.id ? 'Opening…' : 'Join'}
                 </button>
               )}
             </div>

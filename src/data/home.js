@@ -5,6 +5,41 @@
 
 export { HOME_INBOX, HOME_TASKS, HTL_ITEMS } from './mock.js'
 
+// ── Governance events ────────────────────────────────────────────────────────
+// HITL pauses and policy approvals that block active workflows/agents.
+export const GOV_EVENTS = [
+  {
+    id: 'gov-1',
+    title: 'Financial Policy PDF requires approval',
+    context: 'DIAN Intake workflow paused — document requires your sign-off before it can be ingested and forwarded.',
+    statusLabel: 'Due now',
+    blocking: true,
+    impact: { workflows: 14, agents: 3 },
+    action: 'Approve',
+    when: '12m ago',
+  },
+  {
+    id: 'gov-2',
+    title: 'SalesForecastPA about to send external email',
+    context: 'Agent paused at a Human in the Loop checkpoint. Review the draft message before allowing send.',
+    statusLabel: 'Paused',
+    blocking: true,
+    impact: { workflows: 8, agents: 2 },
+    action: 'Allow send',
+    when: '23m ago',
+  },
+  {
+    id: 'gov-3',
+    title: 'Temp PII partition access request',
+    context: 'Break Glass access requested for the Finance PII partition. A second approval is required to proceed.',
+    statusLabel: 'Awaiting 2nd approval',
+    blocking: false,
+    impact: { workflows: 5, agents: 1 },
+    action: 'Authorize',
+    when: '47m ago',
+  },
+]
+
 // ── My Day ────────────────────────────────────────────────────────────
 // Today's schedule items in chronological order.
 export const MY_DAY_EVENTS = [
@@ -114,6 +149,186 @@ export const HOME_WORKFLOWS = [
     lastRun: 'Just now',
     runsToday: 17,
     source: 'Salesforce',
+  },
+]
+
+// ── AI Advisor insights ───────────────────────────────────────────────
+// AI-surfaced action items rendered in the AIMS-OS Advisor card.
+// type: 'warning' | 'action' | 'success' | 'info'
+// icon: lucide-react component name (looked up in AiAdvisorCard)
+export const HOME_ADVISOR_INSIGHTS = [
+  {
+    id: 'adv-1',
+    type: 'warning',
+    icon: 'AlertTriangle',
+    stat: '4×',
+    statLabel: 'failures today',
+    title: 'Lead ingestion workflow failing',
+    description: 'Webhook timeout from HubSpot — 142 leads may be stuck in queue.',
+    cta: 'Review workflow',
+  },
+  {
+    id: 'adv-2',
+    type: 'action',
+    icon: 'TrendingDown',
+    stat: '3',
+    statLabel: 'stalled deals',
+    title: 'Sales Copilot flagged stalled deals',
+    description: 'Acme Corp, TechFlow, Vertex — no activity in 5+ days. Recommend follow-up.',
+    cta: 'View deals',
+  },
+  {
+    id: 'adv-3',
+    type: 'success',
+    icon: 'Sparkles',
+    stat: '+12%',
+    statLabel: 'forecast accuracy',
+    title: 'RevOps Analyst completed Q2 pipeline report',
+    description: 'Forecast accuracy improved vs last quarter. Report is ready to share.',
+    cta: 'Open report',
+  },
+  {
+    id: 'adv-4',
+    type: 'info',
+    icon: 'Bot',
+    stat: '23%',
+    statLabel: 'above SLA',
+    title: 'Support Copilot response time above SLA',
+    description: '14 tickets breached the 4h SLA threshold this week. Consider scaling capacity.',
+    cta: 'Review SLA',
+  },
+  {
+    id: 'adv-5',
+    type: 'action',
+    icon: 'AlertTriangle',
+    stat: '7',
+    statLabel: 'datasets drifted',
+    title: 'Schema drift detected across 7 datasets',
+    description: 'NPS Trend, CS Health, and 5 others changed structure since last governance review.',
+    cta: 'Review drift',
+  },
+  {
+    id: 'adv-6',
+    type: 'success',
+    icon: 'Sparkles',
+    stat: '94%',
+    statLabel: 'CSAT this week',
+    title: 'Support CSAT at 94% — 3-month high',
+    description: 'Ticket resolution time dropped 18% after last week\'s escalation rule update.',
+    cta: 'Open report',
+  },
+]
+
+// ── Studio Health ─────────────────────────────────────────────────────
+// Per-studio partition health scores, deltas, and path-to-100% action plans.
+export const STUDIO_HEALTH = [
+  {
+    id: 'gov',
+    label: 'GOV',
+    short: 'Gov',
+    name: 'Governance Studio',
+    color: '#7C3AED',
+    partitions: [
+      {
+        id: 'gov-p1',
+        name: 'Finance Controls',
+        score: 85,
+        status: 'healthy',
+        delta: 3,
+        summary: 'Policy refresh pending, connector token healthy.',
+        gapPts: 15,
+        actions: [
+          { id: 'ga1', title: 'Extend Return Policy TTL (6d)',             linkedIssue: 'E-2002', lift: 8,  cta: { label: 'Extend now',  icon: 'RefreshCw',    variant: 'primary'   } },
+          { id: 'ga2', title: 'Review quarterly compliance report',                                lift: 4,  cta: { label: 'Open in Gov', icon: 'ExternalLink', variant: 'secondary' } },
+          { id: 'ga3', title: 'Verify attestation signatures on 3 certs',                          lift: 3,  cta: { label: 'Open in Gov', icon: 'ExternalLink', variant: 'secondary' } },
+        ],
+      },
+      {
+        id: 'gov-p2',
+        name: 'Legal & Compliance',
+        score: 72,
+        status: 'watch',
+        delta: -1,
+        summary: 'Contract review backlog growing. Two KBUs near expiry.',
+        gapPts: 28,
+        actions: [
+          { id: 'gb1', title: 'Approve contract amendment — vendor MSA',   linkedIssue: 'E-3001', lift: 12, cta: { label: 'Open in Gov', icon: 'ExternalLink', variant: 'secondary' } },
+          { id: 'gb2', title: 'Refresh KBU: Legal Terms v2.1',                                    lift: 4,  cta: { label: 'Open in Gov', icon: 'ExternalLink', variant: 'secondary' } },
+          { id: 'gb3', title: 'Audit data retention policy adherence',                             lift: 12, cta: { label: 'Open in Gov', icon: 'ExternalLink', variant: 'secondary' } },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'data',
+    label: 'DATA',
+    short: 'Data',
+    name: 'Data Studio',
+    color: '#0284C7',
+    partitions: [
+      {
+        id: 'dat-p1',
+        name: 'CRM Ingestion',
+        score: 88,
+        status: 'healthy',
+        delta: 5,
+        summary: 'Salesforce rotation pending but otherwise strong.',
+        gapPts: 12,
+        actions: [
+          { id: 'da1', title: 'Rotate Salesforce OAuth token (4d)',         linkedIssue: 'E-2001', lift: 10, cta: { label: 'Rotate now',  icon: 'RefreshCw',    variant: 'primary'   } },
+          { id: 'da2', title: 'Close HubSpot schema drift warning',                                lift: 2,  cta: { label: 'Open in Data', icon: 'ExternalLink', variant: 'secondary' } },
+        ],
+      },
+      {
+        id: 'dat-p2',
+        name: 'Trading System Feeds',
+        score: 95,
+        status: 'healthy',
+        delta: 1,
+        summary: 'All feeds green.',
+        gapPts: 5,
+        actions: [
+          { id: 'db1', title: 'Schedule monthly embedding index refresh',   linkedIssue: 'E-4001', lift: 3,  cta: { label: 'Schedule',     icon: 'Calendar',     variant: 'secondary' } },
+          { id: 'db2', title: 'Verify exchange cut-off times for DST',                             lift: 2,  cta: { label: 'Open in Data', icon: 'ExternalLink', variant: 'secondary' } },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'agnt',
+    label: 'AGNT',
+    short: 'Agentic',
+    name: 'Agentic Studio',
+    color: '#059669',
+    partitions: [
+      {
+        id: 'agt-p1',
+        name: 'Agent Orchestration',
+        score: 91,
+        status: 'healthy',
+        delta: 2,
+        summary: 'All orchestration pipelines healthy. One model pin expiring.',
+        gapPts: 9,
+        actions: [
+          { id: 'aa1', title: 'Update workflow spec pin from Truth v3.1',   linkedIssue: 'E-4002', lift: 5,  cta: { label: 'Open in Agentic', icon: 'ExternalLink', variant: 'secondary' } },
+          { id: 'aa2', title: 'Review SalesForecastPA confidence thresholds',                      lift: 4,  cta: { label: 'Open in Agentic', icon: 'ExternalLink', variant: 'secondary' } },
+        ],
+      },
+      {
+        id: 'agt-p2',
+        name: 'Model Routing',
+        score: 78,
+        status: 'watch',
+        delta: 1,
+        summary: 'Two routes using deprecated model endpoints.',
+        gapPts: 22,
+        actions: [
+          { id: 'ab1', title: 'Migrate deprecated model routes to current versions',               lift: 12, cta: { label: 'Open in Agentic', icon: 'ExternalLink', variant: 'secondary' } },
+          { id: 'ab2', title: 'Validate confidence routing logic post-migration',                  lift: 5,  cta: { label: 'Schedule',         icon: 'Calendar',     variant: 'secondary' } },
+          { id: 'ab3', title: 'Update fallback route thresholds',                                  lift: 5,  cta: { label: 'Open in Agentic', icon: 'ExternalLink', variant: 'secondary' } },
+        ],
+      },
+    ],
   },
 ]
 

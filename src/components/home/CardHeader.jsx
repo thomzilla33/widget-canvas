@@ -1,13 +1,11 @@
-// src/components/home/CardHeader.jsx
-// Shared panel header used by every home control-center card.
 export function CardHeader({ icon, title, badge, action }) {
   return (
-    <div className="flex items-center justify-between px-4 pt-4 pb-3">
+    <div className="flex items-center justify-between px-5 pt-5 pb-3.5">
       <div className="flex items-center gap-2.5">
-        <span className="text-slate-400 dark:text-slate-500">{icon}</span>
-        <span className="text-sm font-semibold text-gray-900 dark:text-slate-100">{title}</span>
+        <span className="text-gray-300 dark:text-slate-600">{icon}</span>
+        <span className="text-[13px] font-semibold tracking-[-0.01em] text-gray-800 dark:text-slate-200">{title}</span>
         {badge != null && badge > 0 && (
-          <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-blue-500/15 px-1.5 text-[10px] font-bold text-blue-500 dark:bg-blue-500/20 dark:text-blue-400">
+          <span className="flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-aims-blue/10 px-1.5 text-[10px] font-bold tabular-nums text-aims-blue dark:bg-aims-blue/20 dark:text-blue-400">
             {badge > 99 ? '99+' : badge}
           </span>
         )}
@@ -16,7 +14,7 @@ export function CardHeader({ icon, title, badge, action }) {
         <button
           type="button"
           onClick={action.onClick}
-          className="text-[11px] font-medium text-gray-400 hover:text-gray-700 dark:text-slate-500 dark:hover:text-slate-300 transition-colors"
+          className="text-[11px] font-medium text-gray-300 transition-colors hover:text-gray-600 dark:text-slate-600 dark:hover:text-slate-400"
         >
           {action.label}
         </button>

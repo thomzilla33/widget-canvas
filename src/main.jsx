@@ -13,6 +13,7 @@ import { RoleProvider } from './state/RoleContext.jsx'
 import { ActivityProvider } from './state/ActivityContext.jsx'
 import { WorkQueueProvider } from './state/WorkQueueContext.jsx'
 import { ModelsProvider } from './state/ModelsContext.jsx'
+import { ScopeProvider } from './state/ScopeContext.jsx'
 import './index.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
@@ -29,7 +30,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                       <ActivityProvider>
                         <WorkQueueProvider>
                           <ModelsProvider>
-                            <App />
+                            <ScopeProvider>
+                              <App />
+                            </ScopeProvider>
                           </ModelsProvider>
                         </WorkQueueProvider>
                       </ActivityProvider>

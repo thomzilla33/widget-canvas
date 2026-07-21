@@ -214,4 +214,96 @@
   .sidebar-item.active {
     @apply bg-aims-nav text-white;
   }
+
+  /* ── Liquid Glass material (iOS 26 CSS approximation) ──────────────────
+     .glass              Static surface: backdrop blur + top specular rim
+     .glass-interactive  Same + hover lift and active press states
+     Light-mode overrides under .light (project uses .light/.dark class swap)
+  ─────────────────────────────────────────────────────────────────────── */
+  .glass {
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.22),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+      0 2px 16px rgba(0, 0, 0, 0.14);
+  }
+  .glass-interactive {
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.20),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.05),
+      0 2px 12px rgba(0, 0, 0, 0.10);
+  }
+  .glass-interactive:hover {
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.32),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.12),
+      0 6px 20px rgba(0, 0, 0, 0.20);
+    transform: translateY(-1.5px) scale(1.015);
+  }
+  .glass-interactive:active {
+    box-shadow:
+      inset 0 2px 4px rgba(0, 0, 0, 0.12),
+      inset 0 1px 0 rgba(255, 255, 255, 0.14),
+      0 1px 4px rgba(0, 0, 0, 0.06);
+    transform: translateY(0) scale(0.97);
+  }
+
+  /* Light-mode: specular is already near-white, outer shadow is softer */
+  .light .glass,
+  .light .glass-interactive {
+    box-shadow:
+      inset 0 1.5px 0 rgba(255, 255, 255, 0.95),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.55),
+      0 2px 10px rgba(0, 0, 0, 0.05);
+  }
+  .light .glass-interactive:hover {
+    box-shadow:
+      inset 0 1.5px 0 rgba(255, 255, 255, 1),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.75),
+      0 4px 16px rgba(0, 0, 0, 0.08);
+    transform: translateY(-1.5px) scale(1.015);
+  }
+  .light .glass-interactive:active {
+    box-shadow:
+      inset 0 1.5px 4px rgba(0, 0, 0, 0.05),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.45),
+      0 1px 4px rgba(0, 0, 0, 0.04);
+    transform: translateY(0) scale(0.97);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glass-interactive:hover,
+  .glass-interactive:active {
+    transform: none;
+  }
+}
+
+/* ── Bento-grid: Liquid Glass card surface ──────────────────────────────────
+   Scoped to .bento-grid so only home-page cards get the glass treatment.
+   CSS outside @layer always wins over @layer utilities, so no !important needed.
+   Dark (default): near-transparent with top specular rim.
+   Light: translucent white glass.
+─────────────────────────────────────────────────────────────────────────── */
+.bento-grid .card {
+  background: rgba(255, 255, 255, 0.025);
+  border-color: rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.04),
+    0 4px 32px rgba(0, 0, 0, 0.24);
+}
+
+.light .bento-grid .card {
+  background: rgba(255, 255, 255, 0.68);
+  border-color: rgba(255, 255, 255, 0.55);
+  box-shadow:
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.92),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.55),
+    0 2px 12px rgba(0, 0, 0, 0.06);
 }

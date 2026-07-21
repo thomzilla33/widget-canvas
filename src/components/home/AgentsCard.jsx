@@ -1,4 +1,4 @@
-// src/components/home/AgentsCard.jsx
+import { useNavigate } from 'react-router-dom'
 import { Bot, ExternalLink } from 'lucide-react'
 import { CardHeader } from './CardHeader.jsx'
 import { HOME_AGENTS } from '../../data/home.js'
@@ -15,14 +15,16 @@ const STATUS_LABEL = {
 }
 
 export function AgentsCard() {
-  const active = HOME_AGENTS.filter((a) => a.status === 'active').length
+  const navigate = useNavigate()
+  const active   = HOME_AGENTS.filter((a) => a.status === 'active').length
+
   return (
-    <div className="card flex flex-col">
+    <div className="card flex flex-col" id="home-agents">
       <CardHeader
         icon={<Bot size={14} />}
         title="Agents"
         badge={active}
-        action={{ label: 'Manage', onClick: () => {} }}
+        action={{ label: 'Manage', onClick: () => navigate('/dashboards') }}
       />
       <div className="flex-1 divide-y divide-gray-100 dark:divide-white/[0.05]">
         {HOME_AGENTS.map((ag) => (
@@ -40,7 +42,7 @@ export function AgentsCard() {
                 <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${STATUS_DOT[ag.status]}`} aria-hidden="true" />
               </div>
               <div className="flex items-center gap-2 text-[10px] text-gray-400 dark:text-slate-500">
-                <span className={`font-medium ${STATUS_LABEL[ag.status]} capitalize`}>{ag.status}</span>
+                <span className={`font-medium capitalize ${STATUS_LABEL[ag.status]}`}>{ag.status}</span>
                 <span>·</span>
                 <span className="num">{ag.conversationsToday} convos today</span>
                 {ag.handoffs > 0 && (
@@ -53,7 +55,8 @@ export function AgentsCard() {
             </div>
             <button
               type="button"
-              className="shrink-0 text-gray-300 hover:text-gray-600 dark:text-slate-600 dark:hover:text-slate-300 transition-colors"
+              onClick={() => navigate('/dashboards')}
+              className="shrink-0 text-gray-300 transition-colors hover:text-gray-600 dark:text-slate-600 dark:hover:text-slate-300"
               aria-label={`Open ${ag.name}`}
             >
               <ExternalLink size={12} />
