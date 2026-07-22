@@ -8,6 +8,7 @@ import { Topbar } from './Topbar.jsx'
 import { Sidebar } from './Sidebar.jsx'
 import NotificationsMenu from './NotificationsMenu.jsx'
 import CommandPalette from './CommandPalette.jsx'
+import ScopeToggle from '../common/ScopeToggle.jsx'
 import './shell.css'
 
 const NAV_ITEMS = [
@@ -118,6 +119,7 @@ export default function AppShell() {
       )}
 
       {cmdOpen && <CommandPalette onClose={() => setCmdOpen(false)} />}
+      <ScopeToggle />
 
       {/* ── Body: sidebar + main ── */}
       <div style={{ display: 'flex', flex: 1, paddingTop: 36, overflow: 'hidden' }}>

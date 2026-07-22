@@ -1,6 +1,6 @@
 import { createContext, useContext, useState } from 'react'
 
-const TIERS = ['v1', 'v1.5', 'v2']
+export const TIERS = ['v1', 'v1.5', 'v2']
 
 const ScopeContext = createContext({ scope: 'v1', setScope: () => {}, tiers: TIERS })
 

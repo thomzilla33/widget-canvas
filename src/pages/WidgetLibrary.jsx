@@ -17,6 +17,7 @@ import WidgetDetailPanel from '../components/widgets/WidgetDetailPanel.jsx'
 import DeleteWidgetDialog from '../components/widgets/DeleteWidgetDialog.jsx'
 import AIGenerateModal from '../components/ai/AIGenerateModal.jsx'
 import { useStaggerReveal } from '../hooks/useReveal.js'
+import { useScope, scopeAtLeast } from '../state/ScopeContext.jsx'
 
 import StudioWelcome from '../components/common/StudioWelcome.jsx'
 import FilterToolbar from '../components/common/FilterToolbar.jsx'
@@ -69,6 +70,8 @@ export default function WidgetLibrary() {
   const [aiOpen, setAiOpen] = useState(false)
   const [createMenuOpen, setCreateMenuOpen] = useState(false)
   const gridReveal = useStaggerReveal('widgets')
+  const { scope } = useScope()
+  const showV15 = scopeAtLeast(scope, 'v1.5')
 
   const catOptions = [{ value: 'All', label: 'All categories' }, ...CATALOG_CATEGORIES.map((c) => ({ value: c, label: c }))]
   const typeOptions = [{ value: 'All', label: 'All types' }, ...Array.from(new Set(widgets.map((w) => w.skeleton))).map((t) => ({ value: t, label: t }))]
@@ -161,8 +164,8 @@ export default function WidgetLibrary() {
 
       <div className="px-6 py-4">
         {/* U4 — per-source templates from connected integrations (admin installs) */}
-        {/* S121 — Needs Attention (flags from end users) */}
-        {openFlags.length > 0 && (
+        {/* S121 — Needs Attention (flags from end users) · V1.5 */}
+        {showV15 && openFlags.length > 0 && (
           <div className="mb-5 rounded-xl border border-aims-stale/30 bg-red-50/60 p-4 dark:bg-red-500/5">
             <div className="mb-2.5 flex items-center gap-2">
               <Flag size={15} className="text-aims-stale" />

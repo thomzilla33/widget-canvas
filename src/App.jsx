@@ -1,4 +1,5 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
+import { ScopeProvider } from './state/ScopeContext.jsx'
 import { useRole } from './state/RoleContext.jsx'
 import AppShell from './components/shell/AppShell.jsx'
 import DashboardList from './pages/DashboardList.jsx'
@@ -23,6 +24,7 @@ function AdminRoute({ children }) {
 
 export default function App() {
   return (
+    <ScopeProvider>
     <Routes>
       <Route element={<AppShell />}>
         <Route index element={<Navigate to="/dashboards" replace />} />
@@ -43,5 +45,6 @@ export default function App() {
         <Route path="*" element={<Navigate to="/dashboards" replace />} />
       </Route>
     </Routes>
+    </ScopeProvider>
   )
 }
