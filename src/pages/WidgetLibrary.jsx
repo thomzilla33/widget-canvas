@@ -13,7 +13,7 @@ import WidgetRender from '../components/widgets/WidgetRender.jsx'
 import RepinModal from '../components/widgets/RepinModal.jsx'
 import FlagDetailModal from '../components/widgets/FlagDetailModal.jsx'
 import WidgetDetailModal from '../components/widgets/WidgetDetailModal.jsx'
-import EditWidgetModal from '../components/widgets/EditWidgetModal.jsx'
+import WidgetDetailPanel from '../components/widgets/WidgetDetailPanel.jsx'
 import DeleteWidgetDialog from '../components/widgets/DeleteWidgetDialog.jsx'
 import AIGenerateModal from '../components/ai/AIGenerateModal.jsx'
 import { useStaggerReveal } from '../hooks/useReveal.js'
@@ -64,7 +64,6 @@ export default function WidgetLibrary() {
   const [repinTarget, setRepinTarget] = useState(null) // { widget, flagId }
   const [detailFlag, setDetailFlag] = useState(null)
   const [detailWidget, setDetailWidget] = useState(null) // Tier 2 — widget detail (not the builder)
-  const [editWidget, setEditWidget] = useState(null) // CRUD U — edit safe fields
   const [deletingWidget, setDeletingWidget] = useState(null) // CRUD D — staged delete dialog
   const [menuId, setMenuId] = useState(null) // per-card ⋯ actions menu (by widget id)
   const [aiOpen, setAiOpen] = useState(false)
@@ -223,7 +222,7 @@ export default function WidgetLibrary() {
         <>
         <div ref={gridReveal} className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill,minmax(min(264px,100%),1fr))' }}>
           {shownPage.map((w) => {
-            const open = () => (w.health === 'review' ? setRepinWidget(w) : setDetailWidget(w))
+            const open = () => (w.health === 'review' ? setRepinTarget({ widget: w, flagId: null }) : setDetailWidget(w))
             return (
             // Not a <button>: the live preview renders interactive system widgets whose
             // own buttons can't legally nest inside one. role=button + keydown keeps it
@@ -251,7 +250,7 @@ export default function WidgetLibrary() {
                       <PopoverPanel onClose={() => setMenuId(null)} align="right" className="w-44 p-1.5">
                         <CardMenuItem icon={Plus} onClick={(e) => { e.stopPropagation(); setMenuId(null); navigate('/dashboards') }}>Add to a dashboard</CardMenuItem>
                         {!w.system && (
-                          <CardMenuItem icon={Pencil} onClick={(e) => { e.stopPropagation(); setMenuId(null); setEditWidget(w) }}>Edit</CardMenuItem>
+                          <CardMenuItem icon={Pencil} onClick={(e) => { e.stopPropagation(); setMenuId(null); navigate(`/widgets/${w.id}/edit`) }}>Edit</CardMenuItem>
                         )}
                         {!w.system && (
                           <CardMenuItem icon={Trash2} danger onClick={(e) => { e.stopPropagation(); setMenuId(null); setDeletingWidget(w) }}>Delete</CardMenuItem>
@@ -332,19 +331,17 @@ export default function WidgetLibrary() {
       )}
 
       {detailWidget && (
-        <WidgetDetailModal
+        <WidgetDetailPanel
           widget={detailWidget}
           isAdmin={isAdmin}
           onClose={() => setDetailWidget(null)}
+          onEditFull={() => { const w = detailWidget; setDetailWidget(null); navigate(`/widgets/${w.id}/edit`) }}
           onPlace={() => { const w = detailWidget; setDetailWidget(null); navigate('/dashboards', { state: { pendingPlace: { id: w.id, name: w.name } } }) }}
-          onRemap={() => { const w = detailWidget; setDetailWidget(null); setRepinWidget(w) }}
+          onRemap={() => { const w = detailWidget; setDetailWidget(null); setRepinTarget({ widget: w, flagId: null }) }}
           onDelete={(w) => { setDetailWidget(null); setDeletingWidget(w) }}
-          onEdit={() => { const w = detailWidget; setDetailWidget(null); setEditWidget(w) }}
           onOpenDashboard={(id) => { setDetailWidget(null); navigate(`/dashboard/${id}`) }}
         />
       )}
-
-      {editWidget && <EditWidgetModal widget={editWidget} onClose={() => setEditWidget(null)} />}
 
       {deletingWidget && (
         <DeleteWidgetDialog

@@ -20,15 +20,13 @@ import { useWidgets } from '../state/WidgetsContext.jsx'
 import { useDashboards } from '../state/DashboardsContext.jsx'
 import { useRole } from '../state/RoleContext.jsx'
 import { WIDGET_SIZES, dashboardKindLabel } from '../data/mock.js'
-import { dashboardLayout } from '../data/layout.js'
+import { dashboardLayout, placementDims, colsToDetail, SIZE_PRESETS } from '../data/layout.js'
 import { vizRecommendation, vizInterchangeable } from '../data/preview.js'
 import { AUDIENCE_ROLES, placementAudiences, audienceSummary, audienceLabel } from '../data/audiences.js'
 
-// A widget's size IS its width — free grid, 1/2/3 columns by size (capped per breakpoint).
-const SIZE_SPAN_CLASS = { sm: '', md: 'sm:col-span-2', lg: 'sm:col-span-2 lg:col-span-3' }
-// Drag-resize maps a target column span (1/2/3) to a size, and back.
-const SIZE_FOR_SPAN = { 1: 'sm', 2: 'md', 3: 'lg' }
-const SIZE_ORDER = ['sm', 'md', 'lg'] // index = span-1; used by keyboard resize stepping
+// Column-span classes for 1/2/3 column widths.
+const COL_SPAN = { 1: '', 2: 'sm:col-span-2', 3: 'sm:col-span-2 lg:col-span-3' }
+const CLAMP_COLS = (n) => Math.max(1, Math.min(3, n))
 const GRID_GAP = 12 // gap-3
 // Columns the grid actually renders at the current viewport (Tailwind sm=640, lg=1024).
 const gridColsAtViewport = () => (window.innerWidth >= 1024 ? 3 : window.innerWidth >= 640 ? 2 : 1)
@@ -102,8 +100,9 @@ export default function DashboardCanvas() {
     updateDashboard(id, patch)
     flashSaved()
   }
-  function placeWidget(widget, size = 'md') {
-    commit((prev) => [...prev, { pid: newPid(id, prev), widgetId: widget.id, fixed: false, size, audiences: [], quickActions: [] }])
+  function placeWidget(widget, dims = SIZE_PRESETS.md) {
+    const { cols, rows } = dims
+    commit((prev) => [...prev, { pid: newPid(id, prev), widgetId: widget.id, fixed: false, cols, rows, audiences: [], quickActions: [] }])
     setAddOpen(false)
   }
   function updatePlacement(pid, patch) {
@@ -274,7 +273,7 @@ export default function DashboardCanvas() {
         {/* Library browser — marketplace-style picker over the widget library */}
         {addOpen && (
           <WidgetLibraryModal
-            onAdd={(w, size) => placeWidget(w, size)}
+            onAdd={(w, dims) => placeWidget(w, dims)}
             onClose={() => setAddOpen(false)}
             onCreateNew={() => { setAddOpen(false); navigate('/widgets/new', { state: { fromDashboard: id } }) }}
           />
@@ -452,8 +451,8 @@ function AddWidgetCard({ onClick }) {
 
 /* ── One editable widget tile in the free grid ── */
 function CanvasTile({ placement: p, widget: w, selected, dragging, onSelect, onUpdate, onMove, onDragStart, onDragEnd, onDropOn }) {
-  // ?? not || — SIZE_SPAN_CLASS.sm is '' (falsy), so || would wrongly widen small tiles to md.
-  const span = SIZE_SPAN_CLASS[p.size] ?? SIZE_SPAN_CLASS.md
+  const { cols, rows } = placementDims(p)
+  const span = COL_SPAN[cols] ?? COL_SPAN[2]
   const current = p.viewAs || w?.skeleton
   const rec = w ? vizRecommendation(w) : null
   const suggest = rec && rec.best && rec.best !== current && !vizInterchangeable(rec.best, current) ? rec.best : null
@@ -475,13 +474,12 @@ function CanvasTile({ placement: p, widget: w, selected, dragging, onSelect, onU
     const gridWidth = grid.getBoundingClientRect().width
     const colWidth = (gridWidth - GRID_GAP * (cols - 1)) / cols
     const left = tile.getBoundingClientRect().left
-    let lastSize = p.size
+    let lastCols = placementDims(p).cols
     const onMove = (ev) => {
       const desired = ev.clientX - left
       const rawSpan = Math.round((desired + GRID_GAP) / (colWidth + GRID_GAP))
-      const targetSpan = Math.max(1, Math.min(cols, rawSpan))
-      const size = SIZE_FOR_SPAN[targetSpan]
-      if (size && size !== lastSize) { lastSize = size; onUpdate(p.pid, { size }) }
+      const targetCols = Math.max(1, Math.min(cols, rawSpan))
+      if (targetCols !== lastCols) { lastCols = targetCols; onUpdate(p.pid, { cols: targetCols, rows: placementDims(p).rows }) }
     }
     const onUp = () => {
       resizingRef.current = false
@@ -495,15 +493,13 @@ function CanvasTile({ placement: p, widget: w, selected, dragging, onSelect, onU
     document.body.style.cursor = 'nwse-resize'
   }
 
-  // Keyboard resize: step the size up/down, clamped to the columns this viewport renders.
+  // Keyboard resize: step cols up/down, clamped to the columns this viewport renders.
   function stepSize(delta) {
     if (p.fixed) return
-    const maxIdx = Math.min(SIZE_ORDER.length, gridColsAtViewport()) - 1
-    const idx = Math.max(0, Math.min(maxIdx, SIZE_ORDER.indexOf(p.size) + delta))
-    const next = SIZE_ORDER[idx]
-    if (next && next !== p.size) onUpdate(p.pid, { size: next })
+    const maxCols = gridColsAtViewport()
+    const next = Math.max(1, Math.min(maxCols, cols + delta))
+    if (next !== cols) onUpdate(p.pid, { cols: next, rows })
   }
-  const sizeIdx = SIZE_ORDER.indexOf(p.size)
 
   return (
     <div
@@ -528,10 +524,10 @@ function CanvasTile({ placement: p, widget: w, selected, dragging, onSelect, onU
           role="slider"
           tabIndex={0}
           aria-label={`Resize ${w?.name || 'widget'}`}
-          aria-valuemin={0}
-          aria-valuemax={Math.min(SIZE_ORDER.length, gridColsAtViewport()) - 1}
-          aria-valuenow={sizeIdx}
-          aria-valuetext={WIDGET_SIZES.find((s) => s.id === p.size)?.label || p.size}
+          aria-valuemin={1}
+          aria-valuemax={gridColsAtViewport()}
+          aria-valuenow={cols}
+          aria-valuetext={cols === 1 ? 'Small' : cols === 2 ? 'Medium' : cols >= 3 ? 'Large' : `${cols} columns`}
           title="Drag, or focus and use arrow keys, to resize"
           draggable={false}
           onPointerDown={startResize}
@@ -577,7 +573,7 @@ function CanvasTile({ placement: p, widget: w, selected, dragging, onSelect, onU
         )}
       </div>
       <div className="mt-2">
-        <WidgetRender widget={w} size={p.size} viewAs={p.viewAs} />
+        <WidgetRender widget={w} size={colsToDetail(cols)} rows={rows} viewAs={p.viewAs} />
       </div>
       {suggest && (
         <button
@@ -631,22 +627,56 @@ function ConfigPanel({ placement, widget, onChange, onDetail, onRemap, onFeedbac
       <div>
         <div className="mb-1.5 text-sm font-medium text-gray-700 dark:text-slate-200">Size</div>
         <div className="surface-sunken rounded-lg p-3">
-          <WidgetRender widget={widget} size={placement.size} viewAs={placement.viewAs} />
+          <WidgetRender widget={widget} size={colsToDetail(placementDims(placement).cols)} rows={placementDims(placement).rows} viewAs={placement.viewAs} />
         </div>
-        <div className="mt-2 flex overflow-hidden rounded-lg border border-gray-300 text-sm dark:border-white/15">
-          {WIDGET_SIZES.map((s) => (
-            <button
-              key={s.id}
-              onClick={() => onChange({ size: s.id })}
-              className={`flex-1 px-2 py-1.5 font-medium ${placement.size === s.id ? 'bg-aims-blue text-white' : 'bg-white text-gray-600 dark:bg-white/5 dark:text-slate-300'}`}
-            >
-              {s.label}
-            </button>
-          ))}
+        {/* Preset chips */}
+        <div className="mt-2 flex gap-1.5">
+          {Object.entries(SIZE_PRESETS).map(([key, preset]) => {
+            const { cols: pc, rows: pr } = preset
+            const { cols: cc, rows: cr } = placementDims(placement)
+            const active = cc === pc && cr === pr
+            return (
+              <button
+                key={key}
+                onClick={() => onChange({ cols: pc, rows: pr })}
+                className={`flex-1 rounded-lg border px-2 py-1.5 text-sm font-medium transition-colors ${active ? 'border-aims-blue bg-aims-blue text-white' : 'border-gray-300 bg-white text-gray-600 hover:border-aims-blue/50 dark:border-white/15 dark:bg-white/5 dark:text-slate-300'}`}
+              >
+                {key === 'sm' ? 'S' : key === 'md' ? 'M' : 'L'}
+              </button>
+            )
+          })}
         </div>
-        <p className="mt-1 text-xs text-gray-500 dark:text-slate-400">
-          {WIDGET_SIZES.find((s) => s.id === placement.size)?.width} · {WIDGET_SIZES.find((s) => s.id === placement.size)?.detail}
-        </p>
+        {/* Independent col/row spinners */}
+        <div className="mt-2 grid grid-cols-2 gap-2">
+          <div>
+            <div className="mb-0.5 text-[10px] font-medium uppercase tracking-wide text-gray-500 dark:text-slate-500">Width (cols)</div>
+            <div className="flex items-center overflow-hidden rounded-lg border border-gray-300 dark:border-white/15">
+              <button
+                onClick={() => { const { cols: c, rows: r } = placementDims(placement); onChange({ cols: Math.max(1, c - 1), rows: r }) }}
+                className="w-8 py-1.5 text-center text-gray-600 hover:bg-gray-100 dark:text-slate-300 dark:hover:bg-white/10"
+              >−</button>
+              <span className="flex-1 py-1.5 text-center text-sm font-semibold text-gray-900 dark:text-slate-100">{placementDims(placement).cols}</span>
+              <button
+                onClick={() => { const { cols: c, rows: r } = placementDims(placement); onChange({ cols: CLAMP_COLS(c + 1), rows: r }) }}
+                className="w-8 py-1.5 text-center text-gray-600 hover:bg-gray-100 dark:text-slate-300 dark:hover:bg-white/10"
+              >+</button>
+            </div>
+          </div>
+          <div>
+            <div className="mb-0.5 text-[10px] font-medium uppercase tracking-wide text-gray-500 dark:text-slate-500">Height (rows)</div>
+            <div className="flex items-center overflow-hidden rounded-lg border border-gray-300 dark:border-white/15">
+              <button
+                onClick={() => { const { cols: c, rows: r } = placementDims(placement); onChange({ cols: c, rows: Math.max(1, r - 1) }) }}
+                className="w-8 py-1.5 text-center text-gray-600 hover:bg-gray-100 dark:text-slate-300 dark:hover:bg-white/10"
+              >−</button>
+              <span className="flex-1 py-1.5 text-center text-sm font-semibold text-gray-900 dark:text-slate-100">{placementDims(placement).rows}</span>
+              <button
+                onClick={() => { const { cols: c, rows: r } = placementDims(placement); onChange({ cols: c, rows: Math.min(3, r + 1) }) }}
+                className="w-8 py-1.5 text-center text-gray-600 hover:bg-gray-100 dark:text-slate-300 dark:hover:bg-white/10"
+              >+</button>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div>

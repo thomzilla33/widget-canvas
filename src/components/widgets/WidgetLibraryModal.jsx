@@ -7,6 +7,7 @@ import { Tag } from '@/components/ui/Tag'
 import { Button } from '@/components/ui/Button'
 import { CardContainer } from '@/components/ui/CardContainer'
 import { widgets, CATALOG_CATEGORIES, WIDGET_SIZES, SKELETON_ABOUT, SKELETON_BESTFOR } from '../../data/mock.js'
+import { SIZE_PRESETS, colsToDetail } from '../../data/layout.js'
 
 const PREVIEW_WIDTH = { sm: 'max-w-[240px]', md: 'max-w-md', lg: 'max-w-2xl' }
 
@@ -70,7 +71,7 @@ export default function WidgetLibraryModal({ zoneLabel, onAdd, onClose, onCreate
             <Detail
               widget={selected}
               onBack={() => setSelected(null)}
-              onAdd={(size) => onAdd(selected, size)}
+              onAdd={(dims) => onAdd(selected, dims)}
             />
           ) : (
             <>
@@ -139,7 +140,7 @@ export default function WidgetLibraryModal({ zoneLabel, onAdd, onClose, onCreate
                         </button>
                       )}
                       {list.map((w) => (
-                        <Card key={w.id} widget={w} onOpen={() => setSelected(w)} onAdd={() => onAdd(w, 'md')} />
+                        <Card key={w.id} widget={w} onOpen={() => setSelected(w)} onAdd={() => onAdd(w, SIZE_PRESETS.md)} />
                       ))}
                     </div>
                   )}
@@ -190,8 +191,7 @@ function Card({ widget, onOpen, onAdd }) {
 }
 
 function Detail({ widget, onBack, onAdd }) {
-  const [size, setSize] = useState('lg')
-  const sizeMeta = WIDGET_SIZES.find((s) => s.id === size)
+  const [dims, setDims] = useState(SIZE_PRESETS.lg)
   return (
     <div className="flex-1 overflow-auto">
       <div className="flex items-center gap-2 border-b border-gray-200 px-6 py-2.5 dark:border-white/10">
@@ -225,21 +225,24 @@ function Detail({ widget, onBack, onAdd }) {
         <div>
           <div className="mb-2 flex items-center justify-between">
             <span className="text-sm font-semibold text-gray-900 dark:text-slate-100">Preview</span>
-            <div className="flex overflow-hidden rounded-lg border border-gray-300 text-sm dark:border-white/15">
-              {WIDGET_SIZES.map((s) => (
-                <button key={s.id} onClick={() => setSize(s.id)} className={`px-3 py-1 font-medium transition-colors ${size === s.id ? 'bg-aims-blue text-white' : 'text-gray-600 dark:text-slate-300'}`}>
-                  {s.label}
-                </button>
-              ))}
+            <div className="flex gap-1">
+              {Object.entries(SIZE_PRESETS).map(([key, preset]) => {
+                const active = dims.cols === preset.cols && dims.rows === preset.rows
+                return (
+                  <button key={key} onClick={() => setDims(preset)} className={`rounded-lg border px-3 py-1 text-sm font-medium transition-colors ${active ? 'border-aims-blue bg-aims-blue text-white' : 'border-gray-300 text-gray-600 hover:border-aims-blue/40 dark:border-white/15 dark:text-slate-300'}`}>
+                    {key === 'sm' ? 'S' : key === 'md' ? 'M' : 'L'}
+                  </button>
+                )
+              })}
             </div>
           </div>
           <div className="rounded-xl border border-gray-200 bg-gray-50/60 p-6 dark:border-white/10 dark:bg-white/[0.02]">
-            <div className={`pointer-events-none mx-auto rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition-all dark:border-white/10 dark:bg-[#131a2c] ${PREVIEW_WIDTH[size]}`}>
+            <div className={`pointer-events-none mx-auto rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition-all dark:border-white/10 dark:bg-[#131a2c] ${PREVIEW_WIDTH[colsToDetail(dims.cols)]}`}>
               <div className="mb-2 text-[10px] font-bold uppercase tracking-wide text-gray-500 dark:text-slate-400">{widget.name}</div>
-              <WidgetRender widget={widget} size={size} />
+              <WidgetRender widget={widget} size={colsToDetail(dims.cols)} rows={dims.rows} />
             </div>
           </div>
-          <p className="mt-2 text-center text-xs text-gray-500 dark:text-slate-400">{sizeMeta?.width} · {sizeMeta?.detail}</p>
+          <p className="mt-2 text-center text-xs text-gray-500 dark:text-slate-400">{dims.cols} col{dims.cols !== 1 ? 's' : ''} × {dims.rows} row{dims.rows !== 1 ? 's' : ''}</p>
         </div>
 
         <div className="flex flex-wrap items-center gap-1.5">
@@ -248,7 +251,7 @@ function Detail({ widget, onBack, onAdd }) {
           <FreshnessBadge status={widget.freshness} label={widget.freshness} />
         </div>
         <div className="flex justify-end border-t border-gray-100 pt-4 dark:border-white/10">
-          <Button variant="primary" size="default" onClick={() => onAdd(size)}>
+          <Button variant="primary" size="default" onClick={() => onAdd(dims)}>
             <Plus size={16} /> Add to dashboard
           </Button>
         </div>

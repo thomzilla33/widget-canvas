@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate, useLocation, useParams } from 'react-router-dom'
 import { Check, ExternalLink, RefreshCw } from 'lucide-react'
 import { PageHeader } from '../components/common/index.jsx'
 import { Button } from '@/components/ui/Button'
@@ -60,7 +60,10 @@ function resolveSource(sourceId) {
 export default function WidgetBuilder() {
   const navigate = useNavigate()
   const location = useLocation()
-  const { addWidget } = useWidgets()
+  const { widgets, addWidget, updateWidget } = useWidgets()
+  const { id: editId } = useParams()
+  const editingWidget = editId ? widgets.find((w) => w.id === editId) ?? null : null
+  const isEditMode = !!editingWidget
 
   // Tab: 'data' | 'widget' | 'appearance'
   const [tab, setTab] = useState('data')
@@ -195,6 +198,30 @@ export default function WidgetBuilder() {
     if (seed) { seededRef.current = true; applyDescription(seed) }
   }, [location.state]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Prefill all state from the existing widget when in edit mode.
+  const prefillRef = useRef(false)
+  useEffect(() => {
+    if (prefillRef.current || !editingWidget) return
+    prefillRef.current = true
+    if (editingWidget.source) setSourceId(editingWidget.source)
+    if (editingWidget.dataset) setDatasetConfig(editingWidget.dataset)
+    if (editingWidget.skeleton) {
+      const typeEntry = Object.entries(TYPE_LABEL).find(([, v]) => v === editingWidget.skeleton)
+      if (typeEntry) { setTypeId(typeEntry[0]); setTypeTouched(true) }
+    }
+    setName(editingWidget.name || '')
+    setSubtitle(editingWidget.subtitle || '')
+    if (editingWidget.freshness) {
+      const fEntry = Object.entries(FRESHNESS_STATUS).find(([, v]) => v === editingWidget.freshness)
+      if (fEntry) setFreshness(fEntry[0])
+    }
+    if (editingWidget.format) setFormatState((f) => ({ ...f, ...editingWidget.format }))
+    if (editingWidget.goal) setGoalState((g) => ({ ...g, ...editingWidget.goal }))
+    if (editingWidget.accentColor) setAccentColor(editingWidget.accentColor)
+    if (editingWidget.styleVariant) setStyleVariant(editingWidget.styleVariant)
+    if (editingWidget.displayOptions) setDisplayOptions(editingWidget.displayOptions)
+  }, [editingWidget]) // eslint-disable-line react-hooks/exhaustive-deps
+
   // Must be declared before canSave to avoid temporal dead zone
   const dataComplete = Boolean(
     datasetConfig?.sourceId &&
@@ -222,16 +249,11 @@ export default function WidgetBuilder() {
           : ''
 
   function handleSave() {
-    const wid = `w-${name.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now().toString(36)}`
-    addWidget({
-      id: wid,
+    const patch = {
       name: name.trim(),
       subtitle: subtitle.trim() || undefined,
       skeleton: TYPE_LABEL[typeId] || typeId,
-      governed: false,
       freshness: FRESHNESS_STATUS[freshness] || 'fresh',
-      health: 'unused',
-      usedIn: 0,
       source: datasetConfig?.sourceId || '',
       dataset: datasetConfig,
       format: format.style === 'auto' ? undefined : format,
@@ -239,11 +261,18 @@ export default function WidgetBuilder() {
       accentColor: accentColor || undefined,
       styleVariant: styleVariant || undefined,
       displayOptions: Object.keys(displayOptions).length ? displayOptions : undefined,
-    })
-    if (fromDashboard) {
-      navigate(`/dashboard/${fromDashboard}/canvas`, { state: { autoAdd: wid }, replace: true })
+    }
+    if (isEditMode) {
+      updateWidget(editId, patch)
+      navigate('/widgets', { replace: true })
     } else {
-      setSaved(wid)
+      const wid = `w-${name.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now().toString(36)}`
+      addWidget({ id: wid, governed: false, health: 'unused', usedIn: 0, ...patch })
+      if (fromDashboard) {
+        navigate(`/dashboard/${fromDashboard}/canvas`, { state: { autoAdd: wid }, replace: true })
+      } else {
+        setSaved(wid)
+      }
     }
   }
 
@@ -259,13 +288,13 @@ export default function WidgetBuilder() {
   return (
     <div className="h-full flex flex-col">
       <PageHeader
-        title="Widget Playground"
-        description="Map an entity and metric, pick a widget type, and preview it live."
+        title={isEditMode ? `Edit: ${editingWidget?.name || 'Widget'}` : 'Widget Playground'}
+        description={isEditMode ? 'Update the data source, type, and appearance.' : 'Map an entity and metric, pick a widget type, and preview it live.'}
         actions={
           <>
             <Button variant="secondary" onClick={() => navigate('/widgets')}>Cancel</Button>
             <Button variant="primary" disabled={!canSave} onClick={handleSave}>
-              <Check size={16} /> Save to catalog
+              <Check size={16} /> {isEditMode ? 'Save changes' : 'Save to catalog'}
             </Button>
           </>
         }

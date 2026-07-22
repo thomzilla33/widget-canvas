@@ -4,13 +4,13 @@ import { EmptyState, FreshnessBadge, DataPlaneBadge, EnvironmentBadge, LiveBadge
 import WidgetRender from '../widgets/WidgetRender.jsx'
 import { SystemCountBadge } from '../widgets/SystemWidget.jsx'
 import { useWidgets } from '../../state/WidgetsContext.jsx'
-import { dashboardLayout } from '../../data/layout.js'
+import { dashboardLayout, placementDims, colsToDetail } from '../../data/layout.js'
 import { audienceVisibleTo, ALL_AUDIENCES } from '../../data/audiences.js'
 import { dataPlaneOf, freshnessState } from '../../data/governance.js'
 import { useStaggerReveal } from '../../hooks/useReveal.js'
 
-// Per-size column span — a widget's size IS its width in the free grid (no overflow).
-const SIZE_SPAN_CLASS = { sm: '', md: 'sm:col-span-2', lg: 'sm:col-span-2 lg:col-span-3' }
+// Per-col-count column span class.
+const COL_SPAN = { 1: '', 2: 'sm:col-span-2', 3: 'sm:col-span-2 lg:col-span-3' }
 
 // Read-only render of a dashboard's free-form widget grid. Used by the dashboard
 // view page and inside the profile (UCP) tabs — the consumption side of placement.
@@ -56,7 +56,8 @@ export default function DashboardZones({ dashboard, scope, onDrill, viewerRole }
         const w = byId(p.widgetId)
         // Live tiles get the ticking scope; everything else gets the stable one (memo bails).
         const cardScope = w?.freshness === 'live' ? scope : staticScope
-        return <WidgetCard key={p.pid ?? i} placement={p} widget={w} span={SIZE_SPAN_CLASS[p.size] ?? ''} scope={cardScope} onDrill={onDrill} />
+        const { cols: pc } = placementDims(p)
+        return <WidgetCard key={p.pid ?? i} placement={p} widget={w} span={COL_SPAN[pc] ?? ''} scope={cardScope} onDrill={onDrill} />
       })}
     </div>
   )
@@ -94,7 +95,7 @@ const WidgetCard = memo(function WidgetCard({ placement: p, widget: w, span, sco
         </div>
       </div>
       <div className={`mt-2 flex flex-1 flex-col ${w.system ? 'justify-start' : 'justify-center'}`}>
-        <WidgetRender widget={w} size={p.size} scope={scope} viewAs={p.viewAs} />
+        <WidgetRender widget={w} size={colsToDetail(placementDims(p).cols)} rows={placementDims(p).rows} scope={scope} viewAs={p.viewAs} />
       </div>
       <div className="mt-2 flex flex-wrap items-center gap-1.5 border-t border-gray-100 pt-1.5 dark:border-white/5">
         {fresh.tone === 'live' ? <LiveBadge paused={scope?.paused} /> : <FreshnessBadge status={fresh.tone} label={fresh.label} />}

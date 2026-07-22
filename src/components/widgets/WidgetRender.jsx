@@ -3,6 +3,7 @@ import { Sparkles, TrendingUp, TrendingDown } from 'lucide-react'
 import { SERIES, LineHC, BarHC, PieHC, GaugeHC, FunnelHC, HeatmapHC, SparklineHC } from '../charts/hc.jsx'
 import { widgetSample, formatValue } from '../../data/preview.js'
 import { isBillingWidget, creditBreakdown } from '../../data/governance.js'
+import { rowsToHeight } from '../../data/layout.js'
 import SystemWidget from './SystemWidget.jsx'
 
 // Chart heights per size — small is a sparkline, large gets axis room.
@@ -10,7 +11,7 @@ const H = { sm: 52, md: 84, lg: 150 }
 
 // Compact, real mini-visualization of a catalog widget, rendered by its
 // `skeleton` AND `size` (sm/md/lg) so the detail level scales with the widget.
-export default function WidgetRender({ widget, size = 'md', scope, viewAs }) {
+export default function WidgetRender({ widget, size = 'md', rows, scope, viewAs }) {
   // Tick only re-keys live widgets, so static tiles don't re-render every interval.
   const liveTick = widget?.freshness === 'live' && scope?.tick ? scope.tick : ''
   const scopeKey = scope
@@ -36,7 +37,7 @@ export default function WidgetRender({ widget, size = 'md', scope, viewAs }) {
   if (sysId) {
     return <SystemWidget id={widget.id} size={size} />
   }
-  const props = { data, size, format: widget.format, goal: widget.goal }
+  const props = { data, size, format: widget.format, goal: widget.goal, height: rows != null ? rowsToHeight(rows) : undefined }
   const skel = viewAs || widget.skeleton
   // Billing single-value tiles show the UNIFIED credit pool with its GE/TP split (never the legacy GE-COMM/FIN/COMP).
   if (isBillingWidget(widget) && (skel === 'KPI' || skel === 'Stat Row')) {
@@ -139,23 +140,23 @@ function CreditsMini({ widget, size }) {
   )
 }
 
-function LineMini({ data, size }) {
+function LineMini({ data, size, height }) {
   const ys = data.series.map((d) => d.y)
   const label = ys.length
     ? `Trend line — ${ys.length} points, latest ${ys[ys.length - 1]}, range ${Math.min(...ys)} to ${Math.max(...ys)}.`
     : 'Trend line — no data.'
   return (
     <div role="img" aria-label={label}>
-      <LineHC series={data.series} height={H[size]} axes={size === 'lg'} />
+      <LineHC series={data.series} height={height ?? H[size]} axes={size === 'lg'} />
     </div>
   )
 }
 
-function BarMini({ data, size }) {
+function BarMini({ data, size, height }) {
   const label = `Bar chart — ${data.breakdown.map((b) => `${b.label} ${b.value}`).join(', ')}.`
   return (
     <div role="img" aria-label={label}>
-      <BarHC breakdown={data.breakdown} height={H[size]} axes={size === 'lg'} />
+      <BarHC breakdown={data.breakdown} height={height ?? H[size]} axes={size === 'lg'} />
     </div>
   )
 }
@@ -451,7 +452,7 @@ function MapMini({ data, size }) {
   )
 }
 
-function HeatMini({ data, size }) {
+function HeatMini({ data, size, height }) {
   const rowCount = size === 'sm' ? 2 : size === 'lg' ? 4 : 3
   const colCount = 4
   const m = {
@@ -459,7 +460,7 @@ function HeatMini({ data, size }) {
     cols: data.matrix.cols.slice(0, colCount),
     cells: data.matrix.cells.slice(0, rowCount).map((row) => row.slice(0, colCount)),
   }
-  return <HeatmapHC matrix={m} height={H[size]} labels={size === 'lg'} />
+  return <HeatmapHC matrix={m} height={height ?? H[size]} labels={size === 'lg'} />
 }
 
 function SummaryMini({ data, size }) {
@@ -509,8 +510,8 @@ function DonutMini({ data, size }) {
   )
 }
 
-function FunnelMini({ data, size }) {
-  return <FunnelHC breakdown={data.breakdown} height={H[size]} labels={size === 'lg'} />
+function FunnelMini({ data, size, height }) {
+  return <FunnelHC breakdown={data.breakdown} height={height ?? H[size]} labels={size === 'lg'} />
 }
 
 // Status → dark-aware accent classes for the board view.

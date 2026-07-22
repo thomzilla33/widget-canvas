@@ -35,6 +35,7 @@ export default function App() {
         <Route path="/widgets" element={<WidgetLibrary />} />
         <Route path="/widgets/marketplace" element={<AdminRoute><WidgetMarketplacePage /></AdminRoute>} />
         <Route path="/widgets/new" element={<AdminRoute><WidgetBuilder /></AdminRoute>} />
+        <Route path="/widgets/:id/edit" element={<AdminRoute><WidgetBuilder /></AdminRoute>} />
         <Route path="/profiles" element={<ProfilesPage />} />
         <Route path="/ucp/:entityId" element={<UCPView />} />
         <Route path="/models" element={<ModelsPage />} />

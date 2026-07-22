@@ -13,6 +13,27 @@ export function widgetCount(dashboard) {
   return dashboardLayout(dashboard).length
 }
 
+// ── Custom size model: S/M/L are presets; cols×rows are independently adjustable ──
+export const SIZE_PRESETS = {
+  sm: { cols: 1, rows: 1 },
+  md: { cols: 2, rows: 1 },
+  lg: { cols: 3, rows: 1 },
+}
+// Resolve {cols,rows} from a placement — migrates legacy `size` field transparently.
+export function placementDims(p) {
+  if (p && Number.isInteger(p.cols) && Number.isInteger(p.rows)) return { cols: p.cols, rows: p.rows }
+  return SIZE_PRESETS[p?.size] || SIZE_PRESETS.md
+}
+// Width (cols) maps to the WidgetRender detail level (keeps its existing sm/md/lg API).
+export function colsToDetail(cols) {
+  return cols >= 3 ? 'lg' : cols === 2 ? 'md' : 'sm'
+}
+// Chart mini pixel heights per row count (rows=1 matches the current sm baseline).
+export function rowsToHeight(rows) {
+  const r = Math.max(1, Math.min(3, rows || 1))
+  return r === 1 ? 52 : r === 2 ? 120 : 196
+}
+
 export function dashboardLayout(dashboard) {
   const l = dashboard?.layout
   if (Array.isArray(l)) return l // new flat model
