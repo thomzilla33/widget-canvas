@@ -6,6 +6,7 @@ const KIND_LABEL = {
   htl:   { label: 'Human in the Loop',   color: 'bg-purple-500/10 text-purple-600 dark:text-purple-400' },
   task:  { label: 'Task',                color: 'bg-gray-100 text-gray-600 dark:bg-white/[0.07] dark:text-slate-400' },
   inbox: { label: 'Message',             color: 'bg-gray-100 text-gray-600 dark:bg-white/[0.07] dark:text-slate-400' },
+  wq:    { label: 'My Day · Work Queue', color: 'bg-amber-500/10 text-amber-600 dark:text-amber-400' },
 }
 
 function enrichItem(item) {
@@ -78,6 +79,22 @@ function enrichItem(item) {
       secondaryLabel:  'Skip for now',
       history: [
         { label: 'Same task type · 1 month ago', decision: 'Completed', by: 'You' },
+      ],
+    }
+  }
+
+  if (item._kind === 'wq') {
+    const studioNames = { GOV: 'Governance', AGNT: 'Agentic Studio', DATA: 'Data Studio', TASK: 'Tasks' }
+    const tierLabel = { critical: 'Critical', action: 'Action needed', headsup: 'Heads-up' }
+    return {
+      ...base,
+      triggerLabel:    item.type ?? 'Work Queue',
+      triggerName:     item.source ?? studioNames[item.studio] ?? item.studio,
+      triggerReason:   item.dueLabel ?? '',
+      primaryLabel:    item.primaryAction ?? 'Take action',
+      secondaryLabel:  'Skip for now',
+      history: [
+        { label: `Priority: ${tierLabel[item.tier] ?? item.tier}`, decision: item.studio, by: 'AI queue' },
       ],
     }
   }

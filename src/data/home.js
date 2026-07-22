@@ -40,7 +40,93 @@ export const GOV_EVENTS = [
   },
 ]
 
-// ── My Day ────────────────────────────────────────────────────────────
+// ── My Day — Work Queue ───────────────────────────────────────────────
+// AI-assembled prioritized work list for the current persona.
+// tier: 'critical' | 'action' | 'headsup'
+export const MY_DAY_MANAGER_MSG = {
+  from: 'Priya Nair',
+  role: 'Head of Revenue Operations',
+  message: 'Focus on the DIAN approval and the Acme escalation first — both are blocking the pipeline review scheduled for 3 PM.',
+  time: '7:45 AM',
+}
+
+export const MY_DAY_QUEUE = [
+  {
+    id: 'mdq-1',
+    title: 'Financial Policy PDF requires approval',
+    studio: 'GOV',
+    studioColor: '#7C3AED',
+    type: 'Approval',
+    tier: 'critical',
+    dueLabel: 'Blocking · 14 workflows',
+    estimatedMinutes: 10,
+    primaryAction: 'Approve',
+    source: 'DIAN Intake',
+    startHere: true,
+  },
+  {
+    id: 'mdq-2',
+    title: 'SalesForecastPA about to send external email',
+    studio: 'AGNT',
+    studioColor: '#059669',
+    type: 'Review',
+    tier: 'critical',
+    dueLabel: 'Paused · awaiting your review',
+    estimatedMinutes: 5,
+    primaryAction: 'Allow send',
+    source: 'SalesForecastPA',
+  },
+  {
+    id: 'mdq-3',
+    title: 'Acme Corp — NPS Trend widget remap',
+    studio: 'DATA',
+    studioColor: '#0284C7',
+    type: 'Remap',
+    tier: 'critical',
+    dueLabel: 'Stale · 2 days blocked',
+    estimatedMinutes: 8,
+    primaryAction: 'Remap widget',
+    source: 'Survey Data View',
+  },
+  {
+    id: 'mdq-4',
+    title: 'Submit Q3 revenue forecast',
+    studio: 'TASK',
+    studioColor: '#D97706',
+    type: 'Task',
+    tier: 'action',
+    dueLabel: 'Due today · 12:00 PM',
+    estimatedMinutes: 20,
+    primaryAction: 'Open task',
+    source: 'RevOps',
+  },
+  {
+    id: 'mdq-5',
+    title: 'Temp PII partition access — 2nd approval',
+    studio: 'GOV',
+    studioColor: '#7C3AED',
+    type: 'Approval',
+    tier: 'action',
+    dueLabel: 'Awaiting 2nd sign-off',
+    estimatedMinutes: 5,
+    primaryAction: 'Authorize',
+    source: 'Finance PII',
+  },
+  {
+    id: 'mdq-6',
+    title: 'Model routing routes using deprecated endpoints',
+    studio: 'AGNT',
+    studioColor: '#059669',
+    type: 'Review',
+    tier: 'headsup',
+    dueLabel: 'No deadline · low urgency',
+    estimatedMinutes: 15,
+    primaryAction: 'Open in Agentic',
+    source: 'Model Routing',
+  },
+]
+
+// ── My Day — Calendar (legacy) ────────────────────────────────────────
 // Today's schedule items in chronological order.
 export const MY_DAY_EVENTS = [
   { id: 'ev1', time: '09:00', duration: 30, title: 'Standup — Sales Team', type: 'meeting', attendees: 6, link: '#' },

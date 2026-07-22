@@ -1,19 +1,25 @@
 import { useState, useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { ScanEye, ArrowLeft, CheckCircle2 } from 'lucide-react'
 import { buildItems, rank, totalUrgent } from '../components/home/attention/attentionModel.js'
 import { AttentionQueue } from '../components/attention/AttentionQueue.jsx'
 import { AttentionDetail } from '../components/attention/AttentionDetail.jsx'
+import { getResolved, markResolved, unmarkResolved } from '../state/resolvedStore.js'
 import UndoToast from '../components/home/UndoToast.jsx'
 
 export default function AttentionRoom() {
-  const navigate = useNavigate()
+  const navigate  = useNavigate()
+  const location  = useLocation()
 
-  const [done,     setDone]     = useState(new Set())
+  // Pre-resolve any wq items already actioned from Today's Focus
+  const [done,     setDone]     = useState(() => getResolved())
   const [declined, setDeclined] = useState(new Set())
   const [archived, setArchived] = useState(new Set())
   const [read,     setRead]     = useState(new Set())
-  const [selected, setSelected] = useState(null)
+  // Deep-link: /home/attention navigated from Today's Focus "Review in full" passes selectId
+  const [selected, setSelected] = useState(
+    location.state?.selectId ? { id: location.state.selectId } : null,
+  )
   const [toast,    setToast]    = useState(null)
 
   const allItems = useMemo(
@@ -35,10 +41,14 @@ export default function AttentionRoom() {
 
   function handleApprove(item) {
     setDone(p => new Set([...p, item.id]))
+    if (item._kind === 'wq') markResolved(item.id)
     setSelected(null)
     showToast(
       `Approved: "${(item.title ?? item.subject ?? '').slice(0, 40)}".`,
-      () => setDone(p => { const n = new Set(p); n.delete(item.id); return n }),
+      () => {
+        setDone(p => { const n = new Set(p); n.delete(item.id); return n })
+        if (item._kind === 'wq') unmarkResolved(item.id)
+      },
     )
   }
 

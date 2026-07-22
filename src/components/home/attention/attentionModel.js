@@ -1,4 +1,4 @@
-import { HOME_TASKS, HTL_ITEMS, HOME_INBOX, HOME_WORKFLOWS, GOV_EVENTS } from '../../../data/home.js'
+import { HOME_TASKS, HTL_ITEMS, HOME_INBOX, HOME_WORKFLOWS, GOV_EVENTS, MY_DAY_QUEUE } from '../../../data/home.js'
 
 export const URGENCY_CLASS = {
   overdue:  'text-red-500 dark:text-red-400',
@@ -30,7 +30,13 @@ export function buildItems({ done, declined, archived }) {
     .filter(m => !archived.has(m.id) && !declined.has(m.id))
     .map(m => ({ ...m, _kind: 'inbox', _cat: 'messages' }))
 
-  return [...gov, ...tasks, ...htl, ...inbox]
+  // My Day work queue items — deduplicated against GOV_EVENTS by title
+  const govTitles = new Set(GOV_EVENTS.map(g => g.title))
+  const wq = MY_DAY_QUEUE
+    .filter(i => !done.has(i.id) && !declined.has(i.id) && !govTitles.has(i.title))
+    .map(i => ({ ...i, _kind: 'wq', _cat: 'work' }))
+
+  return [...gov, ...tasks, ...htl, ...inbox, ...wq]
 }
 
 // Sort priority for the "All" tab (lower = shown first).
@@ -39,11 +45,14 @@ export function rank(item) {
   if (item._kind === 'gov'   && item.blocking)               return -1
   if (item.status === 'error')                               return 0
   if (item._kind === 'gov')                                  return 0.5
+  if (item._kind === 'wq'    && item.tier === 'critical')    return 1.5
   if (item._kind === 'task'  && item.due === 'Overdue')      return 1
   if (item._kind === 'htl')                                  return 2
   if (item._kind === 'inbox' && item.unread && item.action)  return 3
+  if (item._kind === 'wq'    && item.tier === 'action')      return 3.5
   if (item._kind === 'task'  && item.due === 'Today')        return 4
   if (item._kind === 'inbox' && item.unread)                 return 4.5
+  if (item._kind === 'wq')                                   return 5.5
   return 5
 }
 
@@ -64,7 +73,8 @@ export function totalUrgent(allItems, read) {
     i.status === 'error' ||
     (i._kind === 'task' && i.due === 'Overdue' && i.status !== 'error') ||
     i._kind === 'htl' ||
-    (i._kind === 'inbox' && i.unread && !read.has(i.id) && i.action)
+    (i._kind === 'inbox' && i.unread && !read.has(i.id) && i.action) ||
+    (i._kind === 'wq' && i.tier === 'critical')
   ).length
 }
 

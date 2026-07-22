@@ -1,23 +1,28 @@
-import { useState } from 'react'
+import { CopilotProvider, useCopilot } from '../state/CopilotContext.jsx'
 import { HomeControlCenter } from '../components/home/HomeControlCenter.jsx'
 import { CopilotPanel }      from '../components/home/CopilotPanel.jsx'
 
-export default function HomePage() {
-  const [copilotOpen, setCopilotOpen] = useState(false)
-
+function HomeInner() {
+  const { open, setOpen } = useCopilot()
   return (
     <div className="flex h-full overflow-hidden">
-      {/* Scrollable main content */}
       <div className="h-full min-w-0 flex-1 overflow-auto">
         <div className="mx-auto w-full max-w-[1800px] px-6 pt-6 pb-12 lg:px-8 2xl:px-12">
           <HomeControlCenter
-            onCopilotOpen={() => setCopilotOpen(v => !v)}
-            copilotOpen={copilotOpen}
+            onCopilotOpen={() => setOpen(v => !v)}
+            copilotOpen={open}
           />
         </div>
       </div>
-      {/* Sidebar copilot panel — h-full sibling, not a floating overlay */}
-      <CopilotPanel isOpen={copilotOpen} onClose={() => setCopilotOpen(false)} />
+      <CopilotPanel isOpen={open} onClose={() => setOpen(false)} />
     </div>
+  )
+}
+
+export default function HomePage() {
+  return (
+    <CopilotProvider>
+      <HomeInner />
+    </CopilotProvider>
   )
 }
