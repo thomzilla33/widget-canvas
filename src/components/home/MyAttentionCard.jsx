@@ -1,6 +1,6 @@
 import { useState, useRef, useLayoutEffect } from 'react'
 import gsap from 'gsap'
-import { ListChecks, CheckCircle2, Pin, ChevronRight } from 'lucide-react'
+import { ListChecks, CheckCircle2, ChevronRight } from 'lucide-react'
 import { useScope, scopeAtLeast } from '../../state/ScopeContext.jsx'
 import { CardHeader }  from './CardHeader.jsx'
 import UndoToast       from './UndoToast.jsx'
@@ -41,9 +41,9 @@ function groupItems(items) {
     }
   }
   return [
-    { id: 'overdue', label: 'Overdue', color: 'text-red-500 dark:text-red-400',     items: overdue },
-    { id: 'today',   label: 'Today',   color: 'text-amber-500 dark:text-amber-400', items: today  },
-    { id: 'next',    label: 'Next',    color: 'text-gray-400 dark:text-slate-500',  items: next   },
+    { id: 'overdue', label: 'Overdue', color: 'text-red-500 dark:text-red-400',     borderColor: 'border-l-red-400/60',                    badgeColor: 'bg-red-500/10 text-red-600 dark:bg-red-400/10 dark:text-red-400',       items: overdue },
+    { id: 'today',   label: 'Today',   color: 'text-amber-500 dark:text-amber-400', borderColor: 'border-l-amber-400/60',                  badgeColor: 'bg-amber-500/10 text-amber-600 dark:bg-amber-400/10 dark:text-amber-400', items: today  },
+    { id: 'next',    label: 'Next',    color: 'text-slate-400 dark:text-slate-500', borderColor: 'border-l-gray-200 dark:border-l-white/[0.08]', badgeColor: 'bg-gray-100 text-gray-500 dark:bg-white/[0.07] dark:text-slate-500',  items: next   },
   ].filter(g => g.items.length > 0)
 }
 
@@ -258,41 +258,43 @@ export function MyAttentionCard() {
         }}
       />
 
-      {/* Tab bar */}
-      <div
-        className="flex items-center gap-0.5 overflow-x-auto border-b border-gray-100 px-2 dark:border-white/[0.05]"
-        role="tablist"
-        aria-label="Attention categories"
-      >
-        {TABS.map(t => {
-          const count = t.id === 'all' ? undefined : tabCounts[t.id]
-          const active = tab === t.id
-          return (
-            <button
-              key={t.id}
-              type="button"
-              role="tab"
-              aria-selected={active}
-              onClick={() => { setTab(t.id); setShowAll(false) }}
-              className={`flex shrink-0 items-center gap-1.5 border-b-2 px-3 py-2.5 text-[11px] font-semibold transition-colors ${
-                active
-                  ? 'border-aims-blue text-aims-blue dark:text-blue-400'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-slate-400 dark:hover:text-slate-200'
-              }`}
-            >
-              {t.label}
-              {count > 0 && (
-                <span className={`rounded-full px-1.5 py-0.5 text-[9px] font-bold ${
+      {/* Tab bar — pill/segment control */}
+      <div className="border-b border-gray-100 px-3 py-2 dark:border-white/[0.05]">
+        <div
+          className="flex items-center gap-0.5 overflow-x-auto rounded-lg bg-gray-100/70 p-0.5 dark:bg-white/[0.05]"
+          role="tablist"
+          aria-label="Attention categories"
+        >
+          {TABS.map(t => {
+            const count = t.id === 'all' ? undefined : tabCounts[t.id]
+            const active = tab === t.id
+            return (
+              <button
+                key={t.id}
+                type="button"
+                role="tab"
+                aria-selected={active}
+                onClick={() => { setTab(t.id); setShowAll(false) }}
+                className={`flex shrink-0 items-center gap-1.5 rounded-md px-2.5 py-1 text-[11px] font-semibold transition-all duration-150 ${
                   active
-                    ? 'bg-aims-blue/10 text-aims-blue'
-                    : 'bg-gray-100 text-gray-500 dark:bg-white/10 dark:text-slate-400'
-                }`}>
-                  {count}
-                </span>
-              )}
-            </button>
-          )
-        })}
+                    ? 'bg-white text-gray-800 shadow-sm dark:bg-white/[0.12] dark:text-slate-100'
+                    : 'text-gray-500 hover:text-gray-700 dark:text-slate-400 dark:hover:text-slate-200'
+                }`}
+              >
+                {t.label}
+                {count > 0 && (
+                  <span className={`rounded-full px-1.5 py-0.5 text-[9px] font-bold ${
+                    active
+                      ? 'bg-aims-blue/10 text-aims-blue'
+                      : 'bg-gray-200/60 text-gray-500 dark:bg-white/10 dark:text-slate-400'
+                  }`}>
+                    {count}
+                  </span>
+                )}
+              </button>
+            )
+          })}
+        </div>
       </div>
 
       {/* V2: bulk action bar (only visible in Full vision scope) */}
@@ -309,13 +311,14 @@ export function MyAttentionCard() {
         </div>
       )}
 
-      {/* V1 / V1.5: annotation that V2 bulk actions are coming */}
+      {/* V1 / V1.5: inline scope note for V2 bulk actions */}
       {!bulkEnabled && (
-        <div className="mx-4 mb-1 mt-2 flex items-start gap-1.5 rounded-lg border border-dashed border-gray-200 px-3 py-2 dark:border-white/[0.07]">
-          <Pin size={10} className="mt-0.5 shrink-0 text-gray-300 dark:text-slate-600" aria-hidden="true" />
-          <p className="text-[10px] text-gray-400 dark:text-slate-500">
-            <span className="font-semibold text-gray-500 dark:text-slate-400">V2:</span>{' '}
-            Bulk select, batch approve/decline, snooze, AI-suggested order
+        <div className="flex items-center gap-2 px-4 py-1.5">
+          <span className="shrink-0 rounded bg-gray-100 px-1.5 py-0.5 text-[9px] font-bold text-gray-500 dark:bg-white/[0.07] dark:text-slate-500">
+            V2
+          </span>
+          <p className="text-[10px] text-gray-400 dark:text-slate-600">
+            Bulk select · batch approve/decline · snooze · AI-suggested order
           </p>
         </div>
       )}
@@ -336,7 +339,7 @@ export function MyAttentionCard() {
                   <button
                     type="button"
                     onClick={() => toggleGroup(group.id)}
-                    className="flex w-full items-center gap-2 bg-gray-50/60 px-4 py-1.5 dark:bg-white/[0.02]"
+                    className={`flex w-full items-center gap-2 border-l-2 bg-gray-50/60 py-1.5 pl-3 pr-4 dark:bg-white/[0.02] ${group.borderColor}`}
                     aria-expanded={!collapsed}
                   >
                     <ChevronRight
@@ -347,7 +350,7 @@ export function MyAttentionCard() {
                     <span className={`text-[11px] font-semibold uppercase tracking-wider ${group.color}`}>
                       {group.label}
                     </span>
-                    <span className="ml-1 rounded-full bg-gray-100 px-1.5 py-0.5 text-[9px] font-bold text-gray-500 dark:bg-white/10 dark:text-slate-400">
+                    <span className={`ml-1 rounded-full px-1.5 py-0.5 text-[9px] font-bold ${group.badgeColor}`}>
                       {group.items.length}
                     </span>
                   </button>
