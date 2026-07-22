@@ -13,6 +13,7 @@ import WidgetMarketplacePage from './pages/WidgetMarketplacePage.jsx'
 import ProfilesPage from './pages/ProfilesPage.jsx'
 import UCPView from './pages/UCPView.jsx'
 import ModelsPage from './pages/ModelsPage.jsx'
+import AttentionRoom from './pages/AttentionRoom.jsx'
 
 // U7.2 — builder routes are admin-only; viewers are redirected to the read-only list.
 function AdminRoute({ children }) {
@@ -37,6 +38,7 @@ export default function App() {
         <Route path="/profiles" element={<ProfilesPage />} />
         <Route path="/ucp/:entityId" element={<UCPView />} />
         <Route path="/models" element={<ModelsPage />} />
+        <Route path="/home/attention" element={<AttentionRoom />} />
         <Route path="*" element={<Navigate to="/dashboards" replace />} />
       </Route>
     </Routes>

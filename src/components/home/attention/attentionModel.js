@@ -19,7 +19,7 @@ export function buildItems({ done, declined, archived }) {
     .map(g => ({ ...g, _kind: 'gov', _cat: 'approvals' }))
 
   const tasks = HOME_TASKS
-    .filter(t => !done.has(t.id))
+    .filter(t => !done.has(t.id) && !declined.has(t.id))
     .map(t => ({ ...t, _kind: 'task', _cat: 'tasks' }))
 
   const htl = HTL_ITEMS
@@ -71,4 +71,34 @@ export function totalUrgent(allItems, read) {
 // Source strings from active workflows — used to show "Also in Workflows" cross-link.
 export function workflowSources() {
   return new Set(HOME_WORKFLOWS.map(w => w.source))
+}
+
+// Bucket items into Overdue / Today / Next groups (shared by MyAttentionCard and AttentionRoom).
+export function groupItems(allItems) {
+  const overdue = []
+  const today   = []
+  const next    = []
+  for (const item of allItems) {
+    if (
+      (item._kind === 'task' && item.due === 'Overdue') ||
+      item.status === 'error' ||
+      (item._kind === 'gov' && item.blocking)
+    ) {
+      overdue.push(item)
+    } else if (
+      (item._kind === 'task' && item.due === 'Today') ||
+      item._kind === 'htl' ||
+      (item._kind === 'gov' && !item.blocking) ||
+      (item._kind === 'inbox' && item.unread && item.action)
+    ) {
+      today.push(item)
+    } else {
+      next.push(item)
+    }
+  }
+  return [
+    { id: 'overdue', label: 'Overdue', color: 'text-red-500 dark:text-red-400',     borderColor: 'border-l-red-400/60',                         badgeColor: 'bg-red-500/10 text-red-600 dark:bg-red-400/10 dark:text-red-400',       items: overdue },
+    { id: 'today',   label: 'Today',   color: 'text-amber-500 dark:text-amber-400', borderColor: 'border-l-amber-400/60',                       badgeColor: 'bg-amber-500/10 text-amber-600 dark:bg-amber-400/10 dark:text-amber-400', items: today  },
+    { id: 'next',    label: 'Next',    color: 'text-slate-400 dark:text-slate-500', borderColor: 'border-l-gray-200 dark:border-l-white/[0.08]', badgeColor: 'bg-gray-100 text-gray-500 dark:bg-white/[0.07] dark:text-slate-500',      items: next   },
+  ].filter(g => g.items.length > 0)
 }

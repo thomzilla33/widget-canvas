@@ -1,4 +1,5 @@
 import { useRef, useLayoutEffect, useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import gsap from 'gsap'
 import {
   Sparkles, ShieldAlert, ArrowUpRight, AlertCircle, Zap, ExternalLink,
@@ -121,6 +122,7 @@ const CHIPS = [
 export function HomeHero({ onCopilotOpen, copilotOpen = false }) {
   const heroRef      = useRef(null)
   const spotlightRef = useRef(null)
+  const navigate     = useNavigate()
 
   const dayPhase = getDayPhase()
   const resolvedToday = dayPhase === 'morning' ? 0 : dayPhase === 'midday' ? 7 : 14
@@ -287,12 +289,20 @@ export function HomeHero({ onCopilotOpen, copilotOpen = false }) {
                 <button
                   type="button"
                   onClick={() => defer(current.id)}
-                  className="ml-auto flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] text-white/35 transition-colors hover:text-white/60"
+                  className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] text-white/35 transition-colors hover:text-white/60"
                 >
                   <Clock size={11} aria-hidden="true" />
                   Defer to tomorrow
                 </button>
               )}
+              <button
+                type="button"
+                onClick={() => navigate('/home/attention')}
+                className="ml-auto flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[11px] text-white/40 transition-colors hover:text-white/70"
+              >
+                See all
+                <ChevronRight size={11} aria-hidden="true" />
+              </button>
             </div>
           </div>
         </div>
