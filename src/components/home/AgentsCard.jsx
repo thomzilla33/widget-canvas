@@ -19,7 +19,7 @@ export function AgentsCard() {
   const active   = HOME_AGENTS.filter((a) => a.status === 'active').length
 
   return (
-    <div className="card flex flex-col" id="home-agents">
+    <div className="card flex flex-col h-full" id="home-agents">
       <CardHeader
         icon={<Bot size={14} />}
         title="Agents"

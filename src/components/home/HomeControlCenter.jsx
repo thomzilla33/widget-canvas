@@ -29,13 +29,14 @@ export function HomeControlCenter({ onCopilotOpen, copilotOpen = false }) {
     <>
       <div ref={rootRef} className="flex flex-col gap-6">
         <HomeHero onCopilotOpen={onCopilotOpen} copilotOpen={copilotOpen} />
-        <div className={`bento-grid home-grid grid grid-cols-1 gap-4 lg:items-start ${copilotOpen ? 'lg:grid-cols-2' : 'lg:grid-cols-3'}`}>
-          {/* copilot closed: work=2/3, myday=1/3 | copilot open: work=1/2, myday=1/2 */}
-          <div id="home-work"      className={copilotOpen ? '' : 'lg:col-span-2'}><MyAttentionCard /></div>
-          <div id="home-myday"><MyDayCard /></div>
+        <div className={`bento-grid home-grid grid grid-cols-1 gap-4 ${copilotOpen ? 'lg:grid-cols-[3fr_2fr]' : 'lg:grid-cols-3'}`}>
+          {/* copilot closed: work=2/3, myday=1/3 | copilot open: work=60%, myday=40% */}
+          <div id="home-work"      className={copilotOpen ? 'h-full' : 'lg:col-span-2'}><MyAttentionCard /></div>
+          <div id="home-myday"     className="h-full"><MyDayCard /></div>
           {/* workflows: col-span-2 = 2/3 in 3-col, full-width in 2-col */}
-          <div id="home-workflows" className="lg:col-span-2"><WorkflowsCard /></div>
-          <AgentsCard />
+          <div id="home-workflows" className="h-full lg:col-span-2"><WorkflowsCard /></div>
+          {/* copilot open: span both cols to fill the empty right cell */}
+          <div id="home-agents"    className={`h-full ${copilotOpen ? 'lg:col-span-2' : ''}`}><AgentsCard /></div>
           <div className={copilotOpen ? 'lg:col-span-2' : 'lg:col-span-3'}><StudioHealthCard /></div>
         </div>
       </div>

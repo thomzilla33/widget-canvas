@@ -1,6 +1,6 @@
 import { useState, useRef, useLayoutEffect } from 'react'
 import gsap from 'gsap'
-import { ListChecks, CheckCircle2, Pin } from 'lucide-react'
+import { ListChecks, CheckCircle2, Pin, ChevronRight } from 'lucide-react'
 import { useScope, scopeAtLeast } from '../../state/ScopeContext.jsx'
 import { CardHeader }  from './CardHeader.jsx'
 import UndoToast       from './UndoToast.jsx'
@@ -18,6 +18,35 @@ const TABS = [
 const WF_SOURCES = workflowSources()
 const ROW_LIMIT  = 8
 
+function groupItems(items) {
+  const overdue = []
+  const today   = []
+  const next    = []
+  for (const item of items) {
+    if (
+      (item._kind === 'task' && item.due === 'Overdue') ||
+      item.status === 'error' ||
+      (item._kind === 'gov' && item.blocking)
+    ) {
+      overdue.push(item)
+    } else if (
+      (item._kind === 'task' && item.due === 'Today') ||
+      item._kind === 'htl' ||
+      (item._kind === 'gov' && !item.blocking) ||
+      (item._kind === 'inbox' && item.unread && item.action)
+    ) {
+      today.push(item)
+    } else {
+      next.push(item)
+    }
+  }
+  return [
+    { id: 'overdue', label: 'Overdue', color: 'text-red-500 dark:text-red-400',     items: overdue },
+    { id: 'today',   label: 'Today',   color: 'text-amber-500 dark:text-amber-400', items: today  },
+    { id: 'next',    label: 'Next',    color: 'text-gray-400 dark:text-slate-500',  items: next   },
+  ].filter(g => g.items.length > 0)
+}
+
 export function MyAttentionCard() {
   const { scope } = useScope()
   const crossLinksEnabled = scopeAtLeast(scope, 'v1.5')
@@ -30,7 +59,8 @@ export function MyAttentionCard() {
   const [archived, setArchived] = useState(new Set())
   const [selected, setSelected] = useState(null)
   const [showAll,  setShowAll]  = useState(false)
-  const [toast,    setToast]    = useState(null)
+  const [toast,           setToast]           = useState(null)
+  const [collapsedGroups, setCollapsedGroups] = useState(new Set())
 
   const listRef = useRef(null)
 
@@ -51,6 +81,16 @@ export function MyAttentionCard() {
     return () => ctx.revert()
   }, [tab])
 
+  // ── Helpers ─────────────────────────────────────────────────────────────────
+
+  function toggleGroup(id) {
+    setCollapsedGroups(prev => {
+      const s = new Set(prev)
+      if (s.has(id)) s.delete(id); else s.add(id)
+      return s
+    })
+  }
+
   // ── Derived data ────────────────────────────────────────────────────────────
 
   const allItems  = buildItems({ done, declined, archived })
@@ -61,6 +101,7 @@ export function MyAttentionCard() {
   const filtered = tab === 'all'
     ? sorted
     : allItems.filter(i => i._cat === tab)
+  const groups    = tab === 'all' ? groupItems(sorted) : null
   const display   = showAll ? filtered : filtered.slice(0, ROW_LIMIT)
   const remaining = filtered.length - display.length
 
@@ -206,7 +247,7 @@ export function MyAttentionCard() {
   // ── Render ──────────────────────────────────────────────────────────────────
 
   return (
-    <div className="card flex flex-col">
+    <div className="card flex flex-col max-h-[500px]">
       <CardHeader
         icon={<ListChecks size={14} />}
         title="My Work"
@@ -280,19 +321,59 @@ export function MyAttentionCard() {
       )}
 
       {/* Row list */}
-      <div ref={listRef} className="flex-1 divide-y divide-gray-100 dark:divide-white/[0.05]">
-        {display.length === 0 ? (
-          <div className="flex flex-col items-center gap-2 px-4 py-10 text-center">
-            <CheckCircle2 size={20} className="text-aims-governed" aria-hidden="true" />
-            <p className="text-sm font-medium text-gray-500 dark:text-slate-400">All clear — nothing here.</p>
-          </div>
+      <div ref={listRef} className="min-h-0 flex-1 overflow-y-auto divide-y divide-gray-100 dark:divide-white/[0.05]">
+        {tab === 'all' ? (
+          groups.length === 0 ? (
+            <div className="flex flex-col items-center gap-2 px-4 py-10 text-center">
+              <CheckCircle2 size={20} className="text-aims-governed" aria-hidden="true" />
+              <p className="text-sm font-medium text-gray-500 dark:text-slate-400">All clear — nothing here.</p>
+            </div>
+          ) : (
+            groups.map(group => {
+              const collapsed = collapsedGroups.has(group.id)
+              return (
+                <div key={group.id}>
+                  <button
+                    type="button"
+                    onClick={() => toggleGroup(group.id)}
+                    className="flex w-full items-center gap-2 bg-gray-50/60 px-4 py-1.5 dark:bg-white/[0.02]"
+                    aria-expanded={!collapsed}
+                  >
+                    <ChevronRight
+                      size={10}
+                      className={`shrink-0 text-gray-400 transition-transform duration-200 ${collapsed ? '' : 'rotate-90'}`}
+                      aria-hidden="true"
+                    />
+                    <span className={`text-[11px] font-semibold uppercase tracking-wider ${group.color}`}>
+                      {group.label}
+                    </span>
+                    <span className="ml-1 rounded-full bg-gray-100 px-1.5 py-0.5 text-[9px] font-bold text-gray-500 dark:bg-white/10 dark:text-slate-400">
+                      {group.items.length}
+                    </span>
+                  </button>
+                  {!collapsed && (
+                    <div className="divide-y divide-gray-100 dark:divide-white/[0.05]">
+                      {group.items.map(item => renderRow(item))}
+                    </div>
+                  )}
+                </div>
+              )
+            })
+          )
         ) : (
-          display.map(item => renderRow(item))
+          display.length === 0 ? (
+            <div className="flex flex-col items-center gap-2 px-4 py-10 text-center">
+              <CheckCircle2 size={20} className="text-aims-governed" aria-hidden="true" />
+              <p className="text-sm font-medium text-gray-500 dark:text-slate-400">All clear — nothing here.</p>
+            </div>
+          ) : (
+            display.map(item => renderRow(item))
+          )
         )}
       </div>
 
-      {/* Show more */}
-      {remaining > 0 && (
+      {/* Show more (specific-tab view only) */}
+      {tab !== 'all' && remaining > 0 && (
         <div className="border-t border-gray-100 px-4 py-2.5 dark:border-white/[0.05]">
           <button
             type="button"

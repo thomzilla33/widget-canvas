@@ -34,14 +34,15 @@ export function MyDayCard() {
   }
 
   return (
-    <div className="card flex flex-col">
+    <div className="card flex flex-col h-full">
       <CardHeader
         icon={<Calendar size={14} />}
         title="My Day"
         badge={MY_DAY_EVENTS.filter((e) => !isPast(e.time)).length}
         action={{ label: 'Open calendar', onClick: () => navigate('/dashboards') }}
       />
-      <div className="flex-1 divide-y divide-gray-100 dark:divide-white/[0.05]">
+      <div className="flex flex-col flex-1">
+      <div className="divide-y divide-gray-100 dark:divide-white/[0.05]">
         {MY_DAY_EVENTS.map((ev) => {
           const meta = TYPE_META[ev.type]
           const past = isPast(ev.time)
@@ -87,6 +88,10 @@ export function MyDayCard() {
             </div>
           )
         })}
+      </div>
+      <div className="flex flex-1 items-center justify-center border-t border-gray-100 px-4 py-4 dark:border-white/[0.05]">
+        <p className="text-[11px] text-gray-300 dark:text-slate-700">No more events today</p>
+      </div>
       </div>
     </div>
   )

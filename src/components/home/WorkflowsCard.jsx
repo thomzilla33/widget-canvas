@@ -32,7 +32,7 @@ export function WorkflowsCard() {
   const failing = HOME_WORKFLOWS.filter((w) => effectiveStatus(w) === 'failed').length
 
   return (
-    <div className="card flex flex-col">
+    <div className="card flex flex-col h-full">
       <CardHeader
         icon={<Workflow size={14} />}
         title="Workflows"
