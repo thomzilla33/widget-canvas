@@ -3,27 +3,27 @@ import { BookOpen, X, Check } from 'lucide-react'
 import { TIERS, useScope } from '../../state/ScopeContext.jsx'
 
 const TIERS_META = {
-  'v1':  { label: 'V1',          desc: 'Funcionalidad base' },
-  'v1.5':{ label: 'V1.5',        desc: 'Alertas y resolución' },
-  'v2':  { label: 'Full vision', desc: 'Visión completa' },
+  'v1':  { label: 'V1',          desc: 'Core functionality' },
+  'v1.5':{ label: 'V1.5',        desc: 'Alerts & resolution' },
+  'v2':  { label: 'Full vision', desc: 'Complete feature set' },
 }
 
 const CHANGELOG = {
   'v1': [
-    'Catálogo de widgets con búsqueda y filtros',
-    'Panel de detalle (slide-over sin backdrop)',
-    'Widget Builder — crear y editar (3 pasos)',
-    'Tamaño custom W×H independiente + presets S/M/L',
+    'Widget catalog with search and filters',
+    'Detail panel — right slide-over, no backdrop',
+    'Widget Builder — create & edit (3-step flow)',
+    'Custom W×H sizing with S/M/L presets',
   ],
   'v1.5': [
-    'Banner "Needs Attention" con flags activos',
-    'Flujo de remap para widgets con schema drift',
-    'Botón "Review & resolve" por flag',
+    '"Needs Attention" banner with open flags',
+    'Remap flow for widgets with schema drift',
+    '"Review & resolve" action per flag',
   ],
   'v2': [
-    'Historial de cambios por widget',
-    'Notificaciones en tiempo real de flags',
-    'Bulk remap desde el banner',
+    'Per-widget change history',
+    'Real-time flag notifications',
+    'Bulk remap from the attention banner',
   ],
 }
 
@@ -41,7 +41,7 @@ export default function ScopeToggle() {
           style={{ left: 60, bottom: 76, width: 300 }}
         >
           <div className="flex items-center justify-between border-b border-white/10 px-4 py-2.5">
-            <span className="text-[11px] font-bold uppercase tracking-wide text-slate-400">Changelog por scope</span>
+            <span className="text-[11px] font-bold uppercase tracking-wide text-slate-400">Scope changelog</span>
             <button onClick={() => setLogOpen(false)} className="grid h-5 w-5 place-items-center rounded text-slate-500 hover:text-slate-200">
               <X size={12} />
             </button>
@@ -55,7 +55,7 @@ export default function ScopeToggle() {
                   <div className="mb-1.5 flex items-center gap-2">
                     <span className={`text-[11px] font-bold ${isReached ? 'text-aims-blue' : 'text-slate-500'}`}>{label}</span>
                     <span className="text-[10px] text-slate-500">{desc}</span>
-                    {isReached && <span className="ml-auto text-[9px] font-semibold text-aims-blue">activo</span>}
+                    {isReached && <span className="ml-auto text-[9px] font-semibold text-aims-blue">active</span>}
                   </div>
                   <ul className="space-y-0.5">
                     {CHANGELOG[tier].map((item) => (
