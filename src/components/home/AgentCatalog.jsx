@@ -9,29 +9,19 @@ import { HOME_AGENTS } from '../../data/home.js'
 import { usePendingOutputs } from '../../state/PendingOutputsContext.jsx'
 import UndoToast from './UndoToast.jsx'
 
-const CATEGORIES = [
-  { id: 'single',   label: 'Single Agents' },
-  { id: 'workflow', label: 'Workflow Agents' },
+const CAT_OPTIONS = [
+  { id: 'all',      label: 'All Agents',      count: AGENT_CATALOG.single.length + AGENT_CATALOG.workflow.length },
+  { id: 'single',   label: 'Single Agents',   count: AGENT_CATALOG.single.length },
+  { id: 'workflow', label: 'Workflow Agents',  count: AGENT_CATALOG.workflow.length },
 ]
 
 const MAX_VISIBLE = 8
 
-// ── Active agents dropdown ────────────────────────────────────────────────────
-const STATUS_DOT = {
-  active: 'bg-emerald-400 animate-pulse',
-  idle:   'bg-gray-300 dark:bg-slate-600',
-  paused: 'bg-amber-400',
-}
-const STATUS_LABEL = {
-  active: 'text-emerald-500',
-  idle:   'text-gray-400 dark:text-slate-500',
-  paused: 'text-amber-500',
-}
-
-function AgentsStatusDropdown() {
+// ── Category filter dropdown ──────────────────────────────────────────────────
+function CategoryDropdown({ category, onChange }) {
   const [open, setOpen] = useState(false)
   const ref = useRef(null)
-  const activeCount = HOME_AGENTS.filter(a => a.status === 'active').length
+  const current = CAT_OPTIONS.find(o => o.id === category) ?? CAT_OPTIONS[0]
 
   useEffect(() => {
     const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false) }
@@ -39,22 +29,24 @@ function AgentsStatusDropdown() {
     return () => document.removeEventListener('mousedown', handler)
   }, [])
 
+  function select(id) { onChange(id); setOpen(false) }
+
   return (
     <div ref={ref} className="relative">
       <button
         type="button"
         onClick={() => setOpen(v => !v)}
-        className="flex items-center gap-1.5 rounded-lg border border-gray-100 bg-gray-50/60 px-2.5 py-1.5 text-[11px] font-medium text-gray-600 transition-colors hover:border-gray-200 hover:bg-white dark:border-white/[0.08] dark:bg-white/[0.04] dark:text-slate-300 dark:hover:border-white/[0.14]"
+        className="flex items-center gap-1.5 rounded-lg border border-gray-100 bg-gray-50/60 px-2.5 py-1.5 text-[11px] font-medium text-gray-700 transition-colors hover:border-gray-200 hover:bg-white dark:border-white/[0.08] dark:bg-white/[0.04] dark:text-slate-200 dark:hover:border-white/[0.14]"
         aria-expanded={open}
         aria-haspopup="listbox"
       >
-        <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" aria-hidden="true" />
-        <span>{activeCount} active</span>
-        <span className="text-gray-300 dark:text-slate-600">·</span>
-        <span className="text-gray-400 dark:text-slate-500">{HOME_AGENTS.length} agents</span>
+        <span className="font-semibold">{current.label}</span>
+        <span className="rounded-full bg-gray-100 px-1.5 py-0.5 text-[10px] font-semibold text-gray-500 dark:bg-white/[0.08] dark:text-slate-400">
+          {current.count}
+        </span>
         <ChevronDown
           size={10}
-          className={`ml-0.5 text-gray-300 transition-transform dark:text-slate-600 ${open ? 'rotate-180' : ''}`}
+          className={`text-gray-400 transition-transform dark:text-slate-500 ${open ? 'rotate-180' : ''}`}
           aria-hidden="true"
         />
       </button>
@@ -62,42 +54,39 @@ function AgentsStatusDropdown() {
       {open && (
         <div
           role="listbox"
-          aria-label="Active agents"
-          className="absolute left-0 top-[calc(100%+6px)] z-30 w-[280px] overflow-hidden rounded-xl border border-gray-100 bg-white shadow-xl dark:border-white/[0.1] dark:bg-slate-900"
+          aria-label="Filter by category"
+          className="absolute left-0 top-[calc(100%+6px)] z-30 w-[200px] overflow-hidden rounded-xl border border-gray-100 bg-white shadow-xl dark:border-white/[0.1] dark:bg-slate-900"
         >
-          <div className="px-3 py-2 border-b border-gray-50 dark:border-white/[0.06]">
-            <p className="text-[9px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-500">Running agents</p>
+          <div className="px-3 pt-2.5 pb-1">
+            <p className="text-[9px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-500">Show</p>
           </div>
-          <div className="divide-y divide-gray-50 dark:divide-white/[0.04]">
-            {HOME_AGENTS.map(ag => (
-              <div key={ag.id} role="option" className="flex items-center gap-2.5 px-3 py-2.5">
-                <span
-                  className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-[8px] font-bold text-white"
-                  style={{ background: ag.color }}
-                  aria-hidden="true"
-                >
-                  {ag.initials}
-                </span>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-1.5">
-                    <span className="truncate text-[12px] font-medium text-gray-800 dark:text-slate-200">{ag.name}</span>
-                    <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${STATUS_DOT[ag.status]}`} aria-hidden="true" />
-                  </div>
-                  <p className="text-[10px] text-gray-400 dark:text-slate-500">
-                    <span className={`font-medium capitalize ${STATUS_LABEL[ag.status]}`}>{ag.status}</span>
-                    {ag.conversationsToday > 0 && ` · ${ag.conversationsToday} convos today`}
-                    {ag.handoffs > 0 && ` · ${ag.handoffs} handoffs`}
-                  </p>
-                </div>
+          <div className="pb-1.5">
+            {CAT_OPTIONS.map(opt => {
+              const isSelected = opt.id === category
+              return (
                 <button
+                  key={opt.id}
                   type="button"
-                  aria-label={`Open ${ag.name}`}
-                  className="shrink-0 text-gray-200 transition-colors hover:text-gray-500 dark:text-slate-700 dark:hover:text-slate-300"
+                  role="option"
+                  aria-selected={isSelected}
+                  onClick={() => select(opt.id)}
+                  className={`flex w-full items-center justify-between px-3 py-2 text-left transition-colors ${
+                    isSelected
+                      ? 'bg-aims-blue/[0.07] text-aims-blue dark:bg-aims-blue/[0.12] dark:text-blue-400'
+                      : 'text-gray-700 hover:bg-gray-50 dark:text-slate-300 dark:hover:bg-white/[0.04]'
+                  }`}
                 >
-                  <ExternalLink size={11} />
+                  <span className="text-[12px] font-medium">{opt.label}</span>
+                  <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${
+                    isSelected
+                      ? 'bg-aims-blue/10 text-aims-blue dark:bg-aims-blue/20'
+                      : 'bg-gray-100 text-gray-500 dark:bg-white/[0.07] dark:text-slate-400'
+                  }`}>
+                    {opt.count}
+                  </span>
                 </button>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </div>
       )}
@@ -350,10 +339,13 @@ export function AgentCatalog() {
   const [highlightId, setHighlightId] = useState(null)
   const { addOutput } = usePendingOutputs()
 
-  const agents = AGENT_CATALOG[category]
+  const agents = category === 'all'
+    ? [...AGENT_CATALOG.single, ...AGENT_CATALOG.workflow]
+    : AGENT_CATALOG[category]
   const visible = showAll ? agents : agents.slice(0, MAX_VISIBLE)
   const overflow = agents.length - visible.length
-  const activeAgents = HOME_AGENTS.filter(a => a.status === 'active')
+
+  function handleCategoryChange(id) { setCategory(id); setShowAll(false) }
 
   function handleRun(agent) {
     const outputId = addOutput({
@@ -375,7 +367,7 @@ export function AgentCatalog() {
       >
         {/* Header row */}
         <div className="mb-3 flex items-center justify-between gap-4">
-          {/* Left: title + agents status dropdown */}
+          {/* Left: title + category filter */}
           <div className="flex min-w-0 items-center gap-2.5">
             <div className="flex shrink-0 items-center gap-2">
               <Cpu size={14} className="text-gray-300 dark:text-slate-600" aria-hidden="true" />
@@ -383,26 +375,7 @@ export function AgentCatalog() {
                 Agent Catalog
               </span>
             </div>
-            <AgentsStatusDropdown />
-          </div>
-
-          {/* Right: category tabs */}
-          <div className="flex shrink-0 items-center gap-1 rounded-lg border border-gray-100 p-0.5 dark:border-white/[0.07]">
-            {CATEGORIES.map(cat => (
-              <button
-                key={cat.id}
-                type="button"
-                onClick={() => { setCategory(cat.id); setShowAll(false) }}
-                aria-pressed={category === cat.id}
-                className={`rounded-md px-2.5 py-1 text-[11px] font-semibold transition-colors ${
-                  category === cat.id
-                    ? 'bg-aims-blue text-white'
-                    : 'text-gray-400 hover:text-gray-600 dark:text-slate-500 dark:hover:text-slate-300'
-                }`}
-              >
-                {cat.label}
-              </button>
-            ))}
+            <CategoryDropdown category={category} onChange={handleCategoryChange} />
           </div>
         </div>
 
