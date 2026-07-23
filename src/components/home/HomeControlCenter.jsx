@@ -4,7 +4,6 @@ import { WorkQueuesCard }   from './WorkQueuesCard.jsx'
 import { MyTeamCard }       from './MyTeamCard.jsx'
 import { WorkflowsCard }    from './WorkflowsCard.jsx'
 import { AgentsCard }       from './AgentsCard.jsx'
-import { StudioHealthCard } from './StudioHealthCard.jsx'
 import { HomeHero }         from './HomeHero.jsx'
 import { ScopeToggle }      from './ScopeToggle.jsx'
 
@@ -43,7 +42,6 @@ export function HomeControlCenter({ onCopilotOpen, copilotOpen = false }) {
           <div className={`flex min-w-0 flex-col gap-4 ${leftFlex}`}>
             <div className="home-card"><WorkQueuesCard /></div>
             <div className="home-card"><WorkflowsCard /></div>
-            <div className="home-card"><StudioHealthCard /></div>
           </div>
 
           {/* Right column: team + agents, each at natural height */}
