@@ -39,7 +39,7 @@ export function WorkflowsCard() {
         badge={failing || undefined}
         action={{ label: 'View all', onClick: () => navigate('/dashboards') }}
       />
-      <div className="flex-1 divide-y divide-gray-100 dark:divide-white/[0.05]">
+      <div className="flex-1 overflow-y-auto divide-y divide-gray-100 dark:divide-white/[0.05]">
         {HOME_WORKFLOWS.map((wf) => {
           const status = effectiveStatus(wf)
           const meta   = STATUS_META[status] ?? STATUS_META.completed

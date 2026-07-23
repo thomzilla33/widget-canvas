@@ -31,23 +31,14 @@ export function HomeControlCenter({ onCopilotOpen, copilotOpen = false }) {
       <div ref={rootRef} className="flex flex-col gap-6">
         <HomeHero onCopilotOpen={onCopilotOpen} copilotOpen={copilotOpen} />
 
-        {/*
-          Layout: two independent flex columns with items-start.
-          Left col: My Work → Workflows → Studio Health (all natural height)
-          Right col: My Team → Agents (all natural height)
-          No sync point between columns — no forced equal-height stretching.
-        */}
-        <div className={`flex flex-col gap-4 lg:flex-row lg:items-start`}>
-          {/* Left column: main content stack */}
+        <div className={`flex flex-col gap-4 lg:flex-row`}>
           <div className={`flex min-w-0 flex-col gap-4 ${leftFlex}`}>
-            <div className="home-card"><WorkQueuesCard /></div>
-            <div className="home-card"><WorkflowsCard /></div>
+            <div className="home-card h-[480px]"><WorkQueuesCard /></div>
+            <div className="home-card h-[360px]"><WorkflowsCard /></div>
           </div>
-
-          {/* Right column: team + agents, each at natural height */}
           <div className={`flex min-w-0 flex-col gap-4 ${rightFlex}`}>
-            <div className="home-card"><MyTeamCard /></div>
-            <div className="home-card"><AgentsCard /></div>
+            <div className="home-card h-[480px]"><MyTeamCard /></div>
+            <div className="home-card h-[360px]"><AgentsCard /></div>
           </div>
         </div>
       </div>

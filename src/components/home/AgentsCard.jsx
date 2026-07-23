@@ -26,7 +26,7 @@ export function AgentsCard() {
         badge={active}
         action={{ label: 'Manage', onClick: () => navigate('/dashboards') }}
       />
-      <div className="flex-1 divide-y divide-gray-100 dark:divide-white/[0.05]">
+      <div className="flex-1 overflow-y-auto divide-y divide-gray-100 dark:divide-white/[0.05]">
         {HOME_AGENTS.map((ag) => (
           <div key={ag.id} className="flex items-center gap-3 px-4 py-2.5">
             <span
