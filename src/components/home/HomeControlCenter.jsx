@@ -2,15 +2,18 @@ import { useRef, useLayoutEffect } from 'react'
 import gsap from 'gsap'
 import { WorkQueuesCard }          from './WorkQueuesCard.jsx'
 import { MyTeamCard }              from './MyTeamCard.jsx'
+import { MyAgentsCard }            from './MyAgentsCard.jsx'
 import { WorkflowsCard }           from './WorkflowsCard.jsx'
 import { HomeHero }                from './HomeHero.jsx'
 import { ScopeToggle }             from './ScopeToggle.jsx'
 import { AgentCatalog }            from './AgentCatalog.jsx'
 import { PendingOutputsCard }      from './PendingOutputsCard.jsx'
 import { PendingOutputsProvider }  from '../../state/PendingOutputsContext.jsx'
+import { useRole }                 from '../../state/RoleContext.jsx'
 
 export function HomeControlCenter({ onCopilotOpen, copilotOpen = false }) {
   const rootRef = useRef(null)
+  const { isAdmin } = useRole()
 
   useLayoutEffect(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
@@ -41,15 +44,19 @@ export function HomeControlCenter({ onCopilotOpen, copilotOpen = false }) {
           </div>
           {/* Right column */}
           <div className={`flex min-w-0 flex-col gap-4 ${rightFlex}`}>
-            <div className="home-card h-[480px]"><MyTeamCard /></div>
+            <div className="home-card h-[480px]">
+              {isAdmin ? <MyTeamCard /> : <MyAgentsCard />}
+            </div>
             <div className="home-card h-[360px]"><PendingOutputsCard /></div>
           </div>
         </div>
 
-        {/* Full-width Agent Catalog below the grid */}
-        <div className="home-card">
-          <AgentCatalog />
-        </div>
+        {/* Full-width Agent Catalog — Admin only */}
+        {isAdmin && (
+          <div className="home-card">
+            <AgentCatalog />
+          </div>
+        )}
       </div>
       <ScopeToggle />
     </PendingOutputsProvider>
