@@ -8,7 +8,6 @@ import { AgentsCard }            from './AgentsCard.jsx'
 import { StudioHealthCard }      from './StudioHealthCard.jsx'
 import { HomeHero }              from './HomeHero.jsx'
 import { ScopeToggle }           from './ScopeToggle.jsx'
-import StudioWelcome             from '../common/StudioWelcome.jsx'
 import { useRole }               from '../../state/RoleContext.jsx'
 
 // ── Card registry ─────────────────────────────────────────────────────────────
@@ -113,7 +112,6 @@ export function HomeControlCenter({ onCopilotOpen, copilotOpen = false }) {
   return (
     <>
       <div ref={rootRef} className="flex flex-col gap-6">
-        <StudioWelcome studioId="home" secondaryLabel="Got it" />
         <HomeHero onCopilotOpen={onCopilotOpen} copilotOpen={copilotOpen} />
 
         <div className={`bento-grid home-grid grid grid-cols-1 gap-4 ${copilotOpen ? 'lg:grid-cols-[3fr_2fr]' : 'lg:grid-cols-3'}`}>
