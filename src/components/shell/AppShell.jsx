@@ -4,6 +4,8 @@ import { Sparkles, Bell, Settings, ShieldCheck, Eye } from 'lucide-react'
 import { useTheme } from '../../state/ThemeContext.jsx'
 import { useRole } from '../../state/RoleContext.jsx'
 import { useNotifications } from '../../state/NotificationsContext.jsx'
+import { CopilotProvider, useCopilot } from '../../state/CopilotContext.jsx'
+import { CopilotPanel } from '../home/CopilotPanel.jsx'
 import { Topbar } from './Topbar.jsx'
 import { Sidebar } from './Sidebar.jsx'
 import NotificationsMenu from './NotificationsMenu.jsx'
@@ -35,12 +37,13 @@ const WORKSPACES = [
   { id: 'governance', name: 'Governance',             tag: 'Member' },
 ]
 
-export default function AppShell() {
+function AppShellInner() {
   const [notifOpen, setNotifOpen] = useState(false)
   const [cmdOpen,   setCmdOpen]   = useState(false)
   const { theme, setTheme }       = useTheme()
   const { isAdmin, setAdmin }     = useRole()
   const { unreadCount }           = useNotifications()
+  const { open: copilotOpen, setOpen: setCopilotOpen } = useCopilot()
   const location                  = useLocation()
   const navigate                  = useNavigate()
 
@@ -58,7 +61,12 @@ export default function AppShell() {
   }, [])
 
   const topbarActions = [
-    { icon: <Sparkles size={14} strokeWidth={1.75} />, label: 'AI Assistant', variant: 'primary' },
+    {
+      icon:    <Sparkles size={14} strokeWidth={1.75} />,
+      label:   'AI Assistant',
+      variant: copilotOpen ? 'active' : 'primary',
+      onClick: () => setCopilotOpen(v => !v),
+    },
     {
       icon:    <Bell size={14} strokeWidth={1.75} />,
       label:   'Notifications',
@@ -121,7 +129,7 @@ export default function AppShell() {
       {cmdOpen && <CommandPalette onClose={() => setCmdOpen(false)} />}
       <ScopeToggle />
 
-      {/* ── Body: sidebar + main ── */}
+      {/* ── Body: sidebar + main + copilot panel ── */}
       <div style={{ display: 'flex', flex: 1, paddingTop: 36, overflow: 'hidden' }}>
         <Sidebar
           items={NAV_ITEMS}
@@ -130,15 +138,24 @@ export default function AppShell() {
           defaultCollapsed={true}
         />
         <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column',
-                      padding: '0 8px 8px 0' }}>
+                      padding: '0 0 8px 0' }}>
           <main className="main">
             <div className="views">
               <Outlet />
             </div>
           </main>
         </div>
+        <CopilotPanel isOpen={copilotOpen} onClose={() => setCopilotOpen(false)} />
       </div>
 
     </div>
+  )
+}
+
+export default function AppShell() {
+  return (
+    <CopilotProvider>
+      <AppShellInner />
+    </CopilotProvider>
   )
 }
