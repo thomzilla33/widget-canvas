@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import {
-  Bot, ShieldCheck, X, ChevronRight, Zap, AlertCircle,
+  Bot, ShieldCheck, X, ChevronRight, ChevronDown, Zap, AlertCircle,
   Info, Cpu, Play, ExternalLink,
 } from 'lucide-react'
 import { AGENT_CATALOG } from '../../data/agentCatalog.js'
@@ -15,6 +15,95 @@ const CATEGORIES = [
 ]
 
 const MAX_VISIBLE = 8
+
+// ── Active agents dropdown ────────────────────────────────────────────────────
+const STATUS_DOT = {
+  active: 'bg-emerald-400 animate-pulse',
+  idle:   'bg-gray-300 dark:bg-slate-600',
+  paused: 'bg-amber-400',
+}
+const STATUS_LABEL = {
+  active: 'text-emerald-500',
+  idle:   'text-gray-400 dark:text-slate-500',
+  paused: 'text-amber-500',
+}
+
+function AgentsStatusDropdown() {
+  const [open, setOpen] = useState(false)
+  const ref = useRef(null)
+  const activeCount = HOME_AGENTS.filter(a => a.status === 'active').length
+
+  useEffect(() => {
+    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false) }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen(v => !v)}
+        className="flex items-center gap-1.5 rounded-lg border border-gray-100 bg-gray-50/60 px-2.5 py-1.5 text-[11px] font-medium text-gray-600 transition-colors hover:border-gray-200 hover:bg-white dark:border-white/[0.08] dark:bg-white/[0.04] dark:text-slate-300 dark:hover:border-white/[0.14]"
+        aria-expanded={open}
+        aria-haspopup="listbox"
+      >
+        <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" aria-hidden="true" />
+        <span>{activeCount} active</span>
+        <span className="text-gray-300 dark:text-slate-600">·</span>
+        <span className="text-gray-400 dark:text-slate-500">{HOME_AGENTS.length} agents</span>
+        <ChevronDown
+          size={10}
+          className={`ml-0.5 text-gray-300 transition-transform dark:text-slate-600 ${open ? 'rotate-180' : ''}`}
+          aria-hidden="true"
+        />
+      </button>
+
+      {open && (
+        <div
+          role="listbox"
+          aria-label="Active agents"
+          className="absolute left-0 top-[calc(100%+6px)] z-30 w-[280px] overflow-hidden rounded-xl border border-gray-100 bg-white shadow-xl dark:border-white/[0.1] dark:bg-slate-900"
+        >
+          <div className="px-3 py-2 border-b border-gray-50 dark:border-white/[0.06]">
+            <p className="text-[9px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-500">Running agents</p>
+          </div>
+          <div className="divide-y divide-gray-50 dark:divide-white/[0.04]">
+            {HOME_AGENTS.map(ag => (
+              <div key={ag.id} role="option" className="flex items-center gap-2.5 px-3 py-2.5">
+                <span
+                  className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-[8px] font-bold text-white"
+                  style={{ background: ag.color }}
+                  aria-hidden="true"
+                >
+                  {ag.initials}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-1.5">
+                    <span className="truncate text-[12px] font-medium text-gray-800 dark:text-slate-200">{ag.name}</span>
+                    <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${STATUS_DOT[ag.status]}`} aria-hidden="true" />
+                  </div>
+                  <p className="text-[10px] text-gray-400 dark:text-slate-500">
+                    <span className={`font-medium capitalize ${STATUS_LABEL[ag.status]}`}>{ag.status}</span>
+                    {ag.conversationsToday > 0 && ` · ${ag.conversationsToday} convos today`}
+                    {ag.handoffs > 0 && ` · ${ag.handoffs} handoffs`}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  aria-label={`Open ${ag.name}`}
+                  className="shrink-0 text-gray-200 transition-colors hover:text-gray-500 dark:text-slate-700 dark:hover:text-slate-300"
+                >
+                  <ExternalLink size={11} />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
 
 // ── Agent status chip ─────────────────────────────────────────────────────────
 function StatusChip({ status }) {
@@ -286,40 +375,15 @@ export function AgentCatalog() {
       >
         {/* Header row */}
         <div className="mb-3 flex items-center justify-between gap-4">
-          {/* Left: title + active agents overview */}
-          <div className="flex min-w-0 items-center gap-3">
+          {/* Left: title + agents status dropdown */}
+          <div className="flex min-w-0 items-center gap-2.5">
             <div className="flex shrink-0 items-center gap-2">
               <Cpu size={14} className="text-gray-300 dark:text-slate-600" aria-hidden="true" />
               <span className="text-[13px] font-semibold tracking-[-0.01em] text-gray-800 dark:text-slate-200">
                 Agent Catalog
               </span>
             </div>
-            {/* Active agents strip */}
-            <div className="flex min-w-0 items-center gap-2 overflow-x-auto">
-              <span className="shrink-0 text-[10px] text-gray-300 dark:text-slate-600">·</span>
-              {HOME_AGENTS.map(ag => (
-                <div key={ag.id} className="flex shrink-0 items-center gap-1.5">
-                  <span
-                    className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md text-[8px] font-bold text-white"
-                    style={{ background: ag.color }}
-                    aria-hidden="true"
-                  >
-                    {ag.initials}
-                  </span>
-                  <span className="text-[11px] font-medium text-gray-600 dark:text-slate-300">{ag.name}</span>
-                  <span className={`h-1.5 w-1.5 rounded-full ${
-                    ag.status === 'active' ? 'bg-emerald-400 animate-pulse' :
-                    ag.status === 'paused' ? 'bg-amber-400' : 'bg-gray-300 dark:bg-slate-600'
-                  }`} aria-label={ag.status} />
-                  <span className="text-[10px] text-gray-400 dark:text-slate-500">
-                    {ag.status === 'active' ? `${ag.conversationsToday} convos` :
-                     ag.status === 'paused' ? 'Paused' : 'Idle'}
-                    {ag.handoffs > 0 && ` · ${ag.handoffs} handoffs`}
-                  </span>
-                  <ExternalLink size={10} className="cursor-pointer text-gray-200 hover:text-gray-500 dark:text-slate-700 dark:hover:text-slate-400" />
-                </div>
-              ))}
-            </div>
+            <AgentsStatusDropdown />
           </div>
 
           {/* Right: category tabs */}
