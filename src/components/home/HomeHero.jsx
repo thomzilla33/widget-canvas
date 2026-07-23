@@ -262,7 +262,7 @@ export function HomeHero({ onCopilotOpen, copilotOpen = false }) {
           }`}
         >
           <Sparkles size={13} aria-hidden="true" />
-          {copilotOpen ? 'Close Copilot' : 'Ask Copilot'}
+          {copilotOpen ? 'Close PA' : 'Ask your PA'}
         </button>
       </div>
 

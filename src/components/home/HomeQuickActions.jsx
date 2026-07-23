@@ -10,13 +10,13 @@ const PHASE_ACTIONS = {
   morning: [
     { id: 'htl',       Icon: AlertCircle,   label: 'Review HTL',       action: (nav, _) => scrollTo('home-work')      },
     { id: 'workflows', Icon: Zap,           label: 'Check workflows',  action: (nav, _) => scrollTo('home-workflows') },
-    { id: 'agents',    Icon: Bot,           label: 'Agents status',    action: (nav, _) => scrollTo('home-agents')    },
+    { id: 'agents',    Icon: Bot,           label: 'Agents status',    action: (nav, _) => scrollTo('home-agent-catalog') },
   ],
   midday: [
     { id: 'trigger',   Icon: Zap,           label: 'Trigger workflow', action: (nav, _) => scrollTo('home-workflows') },
     { id: 'reports',   Icon: BarChart2,     label: 'View reports',     action: (nav, _) => nav('/reports')            },
     { id: 'htl',       Icon: AlertCircle,   label: 'Review HTL',       action: (nav, _) => scrollTo('home-work')      },
-    { id: 'agents',    Icon: Bot,           label: 'Agents',           action: (nav, _) => scrollTo('home-agents')    },
+    { id: 'agents',    Icon: Bot,           label: 'Agents',           action: (nav, _) => scrollTo('home-agent-catalog') },
   ],
   evening: [
     { id: 'wrapup',    Icon: CheckSquare2,  label: 'Wrap up day',      action: (nav, _) => scrollTo('home-work')      },

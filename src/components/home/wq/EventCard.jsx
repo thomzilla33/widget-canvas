@@ -1,4 +1,10 @@
-import { GitBranch, Zap, ChevronDown, UserPlus, BellOff, ArrowUpRight, SkipForward, Eye, XCircle, CheckCircle2, MessageSquare, ThumbsUp } from 'lucide-react'
+import { useState } from 'react'
+import {
+  GitBranch, Zap, ChevronDown, UserPlus, ArrowUpRight, SkipForward,
+  Eye, XCircle, CheckCircle2, MessageSquare, ThumbsUp, Pencil,
+} from 'lucide-react'
+import { WQ_TIER } from '../../../data/workqueue.js'
+import { useRole } from '../../../state/RoleContext.jsx'
 
 const SECONDARY_ICON = {
   Review:      Eye,
@@ -8,14 +14,107 @@ const SECONDARY_ICON = {
   Respond:     MessageSquare,
   Acknowledge: ThumbsUp,
 }
-import { WQ_TIER } from '../../../data/workqueue.js'
 
 function fmtMins(m) {
   return m < 60 ? `~${m}m` : `~${Math.floor(m / 60)}h ${m % 60 ? `${m % 60}m` : ''}`
 }
 
-export function EventCard({ event, expanded, onToggle, onOpen, onEscalate, onSkip, onTrace }) {
+// ── Inline correction editor ──────────────────────────────────────────────────
+function CorrectionEditor({ original, onConfirm, onCancel }) {
+  const [text, setText] = useState(original)
+  const trimmed = text.trim()
+  return (
+    <div className="mt-2 rounded-lg border border-blue-200 bg-blue-50 p-2.5 dark:border-aims-blue/20 dark:bg-aims-blue/[0.07]">
+      <p className="mb-1.5 text-[10px] font-semibold text-blue-700 dark:text-blue-300">Corrected statement</p>
+      <textarea
+        value={text}
+        onChange={e => setText(e.target.value)}
+        rows={3}
+        className="w-full resize-none rounded-lg border border-blue-200 bg-white px-2.5 py-1.5 text-[11px] leading-relaxed text-gray-700 outline-none focus:border-aims-blue focus:ring-1 focus:ring-aims-blue/30 dark:border-aims-blue/20 dark:bg-slate-800 dark:text-slate-200"
+        aria-label="Correction text"
+      />
+      {trimmed === '' && (
+        <p className="mt-1 text-[10px] text-red-500">Correction cannot be empty.</p>
+      )}
+      <div className="mt-2 flex gap-1.5">
+        <button
+          type="button"
+          disabled={trimmed === ''}
+          onClick={() => trimmed && onConfirm(trimmed)}
+          className="inline-flex items-center gap-1 rounded-md bg-aims-blue px-2.5 py-1 text-[10px] font-semibold text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          <CheckCircle2 size={9} /> Save correction
+        </button>
+        <button
+          type="button"
+          onClick={onCancel}
+          className="inline-flex items-center gap-1 rounded-md border border-gray-200 px-2.5 py-1 text-[10px] font-medium text-gray-400 transition-colors hover:bg-gray-50 dark:border-white/10 dark:hover:bg-white/[0.04]"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// ── Attestation action row (Approval-type events only) ─────────────────────────
+function AttestationActions({ event, onApprove, onReject, onCorrect, onEscalate }) {
+  const [correcting, setCorrecting] = useState(false)
+
+  function startCorrect(e) { e.stopPropagation(); setCorrecting(true) }
+  function handleConfirm(text) { setCorrecting(false); onCorrect?.(event.id, text) }
+  function handleCancel()  { setCorrecting(false) }
+
+  const statement = event.statement ?? event.title
+
+  return (
+    <div>
+      <div className="flex flex-wrap gap-1.5">
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); onApprove?.(event.id) }}
+          className="inline-flex items-center gap-1 rounded-md bg-emerald-500 px-2.5 py-1 text-[10px] font-semibold text-white transition-colors hover:bg-emerald-600"
+        >
+          <CheckCircle2 size={9} /> Approve
+        </button>
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); onReject?.(event.id) }}
+          className="inline-flex items-center gap-1 rounded-md border border-red-200 px-2.5 py-1 text-[10px] font-semibold text-red-500 transition-colors hover:bg-red-50 dark:border-red-400/20 dark:text-red-400 dark:hover:bg-red-400/10"
+        >
+          <XCircle size={9} /> Reject
+        </button>
+        <button
+          type="button"
+          onClick={startCorrect}
+          className="inline-flex items-center gap-1 rounded-md border border-blue-200 px-2.5 py-1 text-[10px] font-semibold text-blue-600 transition-colors hover:bg-blue-50 dark:border-aims-blue/20 dark:text-blue-400 dark:hover:bg-aims-blue/[0.08]"
+        >
+          <Pencil size={9} /> Correct
+        </button>
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); onEscalate?.(event) }}
+          className="inline-flex items-center gap-1 rounded-md border border-gray-200 px-2 py-0.5 text-[10px] font-medium text-gray-400 hover:bg-gray-50 dark:border-white/10 dark:text-slate-500 dark:hover:bg-white/[0.04]"
+        >
+          <ArrowUpRight size={9} /> Escalate
+        </button>
+      </div>
+      {correcting && (
+        <CorrectionEditor
+          original={statement}
+          onConfirm={handleConfirm}
+          onCancel={handleCancel}
+        />
+      )}
+    </div>
+  )
+}
+
+// ── EventCard ─────────────────────────────────────────────────────────────────
+export function EventCard({ event, expanded, onToggle, onOpen, onEscalate, onSkip, onTrace, onApprove, onReject, onCorrect }) {
   const t = WQ_TIER[event.tier] || WQ_TIER.headsup
+  const { isAdmin } = useRole()
+  const isApproval = event.type === 'Approval'
 
   function stopAndCall(fn) {
     return (e) => { e.stopPropagation(); fn?.() }
@@ -60,7 +159,8 @@ export function EventCard({ event, expanded, onToggle, onOpen, onEscalate, onSki
           <p className="mt-0.5 text-xs font-medium leading-snug text-gray-800 dark:text-slate-200">{event.title}</p>
           <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
             <span className="text-[10px] text-gray-400 dark:text-slate-500">{event.dueLabel}</span>
-            {event.sourceWorkflow && (
+            {/* Trace link — Admin role only */}
+            {isAdmin && event.sourceWorkflow && (
               <button
                 type="button"
                 onClick={stopAndCall(() => onTrace?.(event))}
@@ -89,52 +189,64 @@ export function EventCard({ event, expanded, onToggle, onOpen, onEscalate, onSki
       {/* Expanded action panel */}
       {expanded && (
         <div className="border-t border-gray-100 px-3 pb-3 pt-2.5 dark:border-white/[0.06]" onClick={e => e.stopPropagation()}>
-          {/* Primary CTA */}
-          <button
-            type="button"
-            onClick={() => onOpen?.(event)}
-            className="btn-primary mb-2 w-full justify-center text-xs"
-          >
-            {event.quickActions?.primary ?? 'Open'}
-          </button>
-          {/* Secondary actions */}
-          <div className="flex flex-wrap gap-1">
-            {(event.quickActions?.secondary ?? []).map(action => {
-              const Icon = SECONDARY_ICON[action]
-              return (
+          {isApproval ? (
+            /* Attestation actions for Approval-type events */
+            <AttestationActions
+              event={event}
+              onApprove={onApprove}
+              onReject={onReject}
+              onCorrect={onCorrect}
+              onEscalate={onEscalate}
+            />
+          ) : (
+            /* Standard actions for non-Approval events */
+            <>
+              <button
+                type="button"
+                onClick={() => onOpen?.(event)}
+                className="btn-primary mb-2 w-full justify-center text-xs"
+              >
+                {event.quickActions?.primary ?? 'Open'}
+              </button>
+              <div className="flex flex-wrap gap-1">
+                {(event.quickActions?.secondary ?? []).map(action => {
+                  const Icon = SECONDARY_ICON[action]
+                  return (
+                    <button
+                      key={action}
+                      type="button"
+                      onClick={() => onOpen?.(event, action)}
+                      className="inline-flex items-center gap-1 rounded-md border border-gray-200 px-2 py-0.5 text-[10px] font-medium text-gray-500 hover:bg-gray-50 dark:border-white/10 dark:text-slate-400 dark:hover:bg-white/[0.05]"
+                    >
+                      {Icon && <Icon size={9} aria-hidden="true" />} {action}
+                    </button>
+                  )
+                })}
                 <button
-                  key={action}
                   type="button"
-                  onClick={() => onOpen?.(event, action)}
-                  className="inline-flex items-center gap-1 rounded-md border border-gray-200 px-2 py-0.5 text-[10px] font-medium text-gray-500 hover:bg-gray-50 dark:border-white/10 dark:text-slate-400 dark:hover:bg-white/[0.05]"
+                  onClick={() => onEscalate?.(event)}
+                  className="inline-flex items-center gap-1 rounded-md border border-red-200 px-2 py-0.5 text-[10px] font-medium text-red-500 hover:bg-red-50 dark:border-red-400/20 dark:text-red-400 dark:hover:bg-red-400/10"
                 >
-                  {Icon && <Icon size={9} aria-hidden="true" />} {action}
+                  <ArrowUpRight size={9} aria-hidden="true" /> Escalate
                 </button>
-              )
-            })}
-            <button
-              type="button"
-              onClick={() => onEscalate?.(event)}
-              className="inline-flex items-center gap-1 rounded-md border border-red-200 px-2 py-0.5 text-[10px] font-medium text-red-500 hover:bg-red-50 dark:border-red-400/20 dark:text-red-400 dark:hover:bg-red-400/10"
-            >
-              <ArrowUpRight size={9} aria-hidden="true" /> Escalate
-            </button>
-            <button
-              type="button"
-              onClick={() => onSkip?.(event.id)}
-              className="inline-flex items-center gap-1 rounded-md border border-gray-200 px-2 py-0.5 text-[10px] font-medium text-gray-400 hover:bg-gray-50 dark:border-white/10 dark:text-slate-500 dark:hover:bg-white/[0.04]"
-            >
-              <SkipForward size={9} aria-hidden="true" /> Skip
-            </button>
-            <button
-              type="button"
-              disabled
-              title="Assign to team member — coming in V1.5"
-              className="inline-flex cursor-not-allowed items-center gap-1 rounded-md border border-gray-200 px-2 py-0.5 text-[10px] font-medium text-gray-400 opacity-40 dark:border-white/10 dark:text-slate-500"
-            >
-              <UserPlus size={9} aria-hidden="true" /> Assign
-            </button>
-          </div>
+                <button
+                  type="button"
+                  onClick={() => onSkip?.(event.id)}
+                  className="inline-flex items-center gap-1 rounded-md border border-gray-200 px-2 py-0.5 text-[10px] font-medium text-gray-400 hover:bg-gray-50 dark:border-white/10 dark:text-slate-500 dark:hover:bg-white/[0.04]"
+                >
+                  <SkipForward size={9} aria-hidden="true" /> Skip
+                </button>
+                <button
+                  type="button"
+                  disabled
+                  title="Assign to team member — coming in V1.5"
+                  className="inline-flex cursor-not-allowed items-center gap-1 rounded-md border border-gray-200 px-2 py-0.5 text-[10px] font-medium text-gray-400 opacity-40 dark:border-white/10 dark:text-slate-500"
+                >
+                  <UserPlus size={9} aria-hidden="true" /> Assign
+                </button>
+              </div>
+            </>
+          )}
         </div>
       )}
     </div>

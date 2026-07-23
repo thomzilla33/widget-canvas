@@ -13,8 +13,9 @@ export function MyWorkTab({ onOpen, onEscalate, onTrace }) {
   const [expandedId, setExpandedId] = useState(null)
   const [skipped, setSkipped] = useState(new Set())
   const [toast, setToast] = useState(null)
+  const [resolved, setResolved] = useState(new Set())
 
-  const visible = filtered.filter(e => !skipped.has(e.id))
+  const visible = filtered.filter(e => !skipped.has(e.id) && !resolved.has(e.id))
   const capped = visible.slice(0, MAX_VISIBLE)
   const overflow = visible.length - capped.length
 
@@ -26,6 +27,19 @@ export function MyWorkTab({ onOpen, onEscalate, onTrace }) {
       undo: () => setSkipped(prev => { const n = new Set(prev); n.delete(id); return n }),
     })
     setTimeout(() => setToast(null), 4000)
+  }
+
+  function resolveItem(id, actionLabel) {
+    setResolved(prev => new Set([...prev, id]))
+    if (expandedId === id) setExpandedId(null)
+    setToast({
+      message: `${actionLabel} — item moved to Done.`,
+      undo: () => {
+        setResolved(prev => { const n = new Set(prev); n.delete(id); return n })
+        setToast(null)
+      },
+    })
+    setTimeout(() => setToast(null), 5000)
   }
 
   function toggle(id) {
@@ -70,6 +84,9 @@ export function MyWorkTab({ onOpen, onEscalate, onTrace }) {
                           onEscalate={onEscalate}
                           onSkip={skip}
                           onTrace={onTrace}
+                          onApprove={(id) => resolveItem(id, 'Approved')}
+                          onReject={(id)  => resolveItem(id, 'Rejected')}
+                          onCorrect={(id) => resolveItem(id, 'Correction submitted')}
                         />
                       ))}
                     </div>
