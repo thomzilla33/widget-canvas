@@ -7,6 +7,9 @@ import {
 } from 'lucide-react'
 import { HOME_AGENTS, HTL_ITEMS, HOME_WORKFLOWS, HOME_INBOX, GOV_EVENTS } from '../../data/home.js'
 import { HomeQuickActions } from './HomeQuickActions.jsx'
+import { useLive } from '../../state/LiveContext.jsx'
+import { useWorkQueue } from '../../state/WorkQueueContext.jsx'
+import { getResolved } from '../../state/resolvedStore.js'
 
 // ── Day phase ─────────────────────────────────────────────────────────────────
 // Override via ?phase=morning | midday | evening for prototype testing
@@ -125,7 +128,40 @@ export function HomeHero({ onCopilotOpen, copilotOpen = false }) {
   const navigate     = useNavigate()
 
   const dayPhase = getDayPhase()
-  const resolvedToday = dayPhase === 'morning' ? 0 : dayPhase === 'midday' ? 7 : 14
+
+  // ── Live state ──────────────────────────────────────────────────────────────
+  const { tick }  = useLive()
+  const { htl }   = useWorkQueue()
+
+  // Hero-spotlight actions taken this session
+  const [heroResolved, setHeroResolved] = useState(0)
+  // Flash label shown for 3s after each action ("Approved", "Escalated", …)
+  const [lastAction, setLastAction]     = useState(null)
+  const lastActionTimerRef = useRef(null)
+  useEffect(() => () => clearTimeout(lastActionTimerRef.current), [])
+
+  // Simulated agent-resolved bonus: +1 every 5 ticks (≈15 s), capped at 20
+  const [liveBonus, setLiveBonus] = useState(0)
+  const prevTickRef = useRef(0)
+  useEffect(() => {
+    const added = Math.floor(tick / 5) - Math.floor(prevTickRef.current / 5)
+    if (added > 0) setLiveBonus(b => Math.min(b + added, 20))
+    prevTickRef.current = tick
+  }, [tick])
+
+  // My Work resolutions (localStorage, polled every 1.5 s)
+  const [wqResolved, setWqResolved] = useState(() => getResolved().size)
+  useEffect(() => {
+    const id = setInterval(() => setWqResolved(getResolved().size), 1500)
+    return () => clearInterval(id)
+  }, [])
+
+  // HTL items resolved in this session via the HITL panel
+  const htlResolved = htl.filter(h => h.status !== 'pending').length
+
+  // Base count simulates prior-to-session activity
+  const BASE_RESOLVED = dayPhase === 'morning' ? 0 : dayPhase === 'midday' ? 5 : 11
+  const resolvedToday = BASE_RESOLVED + heroResolved + htlResolved + wqResolved + liveBonus
 
   const [spotlightIdx, setSpotlightIdx] = useState(0)
   const [deferredIds,  setDeferredIds]  = useState(new Set())
@@ -146,6 +182,15 @@ export function HomeHero({ onCopilotOpen, copilotOpen = false }) {
   function defer(id) {
     setDeferredIds(prev => new Set([...prev, id]))
     setSpotlightIdx(prev => Math.max(0, Math.min(prev, items.length - 2)))
+  }
+
+  // Resolve a spotlight item: remove it + record the action for live counts + flash
+  function resolve(id, actionLabel) {
+    defer(id)
+    setHeroResolved(n => n + 1)
+    setLastAction(actionLabel)
+    clearTimeout(lastActionTimerRef.current)
+    lastActionTimerRef.current = setTimeout(() => setLastAction(null), 3000)
   }
 
   // ── Entrance animation ──────────────────────────────────────────────────────
@@ -195,10 +240,15 @@ export function HomeHero({ onCopilotOpen, copilotOpen = false }) {
             <span className="font-semibold text-white">Thomas.</span>
           </h1>
           <p className="hero-greeting mt-2 flex items-center gap-2 text-sm text-white/55">
-            {showSpotlight && (
-              <span className="inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-amber-300" aria-hidden="true" />
-            )}
-            {subline}
+            {/* Live pulse — amber when urgent items pending, green when calm */}
+            <span className="relative flex h-1.5 w-1.5 shrink-0" aria-hidden="true">
+              <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-60 ${showSpotlight ? 'bg-amber-300' : 'bg-emerald-300'}`} />
+              <span className={`relative inline-flex h-1.5 w-1.5 rounded-full ${showSpotlight ? 'bg-amber-300' : 'bg-emerald-300'}`} />
+            </span>
+            {lastAction
+              ? <span className="text-white/80">✓ {lastAction} · {resolvedToday} resolved today</span>
+              : subline
+            }
           </p>
         </div>
         <button
@@ -240,9 +290,9 @@ export function HomeHero({ onCopilotOpen, copilotOpen = false }) {
                   >
                     <ChevronLeft size={12} aria-hidden="true" />
                   </button>
-                  {items.map((_, i) => (
+                  {items.map((item, i) => (
                     <button
-                      key={i}
+                      key={item.id}
                       type="button"
                       onClick={() => setSpotlightIdx(i)}
                       aria-label={`Item ${i + 1} of ${items.length}`}
@@ -271,7 +321,7 @@ export function HomeHero({ onCopilotOpen, copilotOpen = false }) {
             <div className="mt-3.5 flex flex-wrap items-center gap-2">
               <button
                 type="button"
-                onClick={() => defer(current.id)}
+                onClick={() => resolve(current.id, current.primaryAction.label)}
                 className="flex items-center gap-1.5 rounded-lg bg-white px-3.5 py-1.5 text-[11px] font-bold text-blue-800 transition-all hover:bg-white/90 active:scale-95"
               >
                 <current.primaryAction.Icon size={11} aria-hidden="true" />
@@ -279,7 +329,7 @@ export function HomeHero({ onCopilotOpen, copilotOpen = false }) {
               </button>
               <button
                 type="button"
-                onClick={() => defer(current.id)}
+                onClick={() => resolve(current.id, current.secondaryAction.label)}
                 className="flex items-center gap-1.5 rounded-lg border border-white/20 bg-white/10 px-3.5 py-1.5 text-[11px] font-medium text-white/80 transition-all hover:bg-white/[0.18] hover:text-white active:scale-95"
               >
                 <current.secondaryAction.Icon size={11} aria-hidden="true" />
@@ -288,7 +338,7 @@ export function HomeHero({ onCopilotOpen, copilotOpen = false }) {
               {showDefer && (
                 <button
                   type="button"
-                  onClick={() => defer(current.id)}
+                  onClick={() => resolve(current.id, 'Deferred')}
                   className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] text-white/35 transition-colors hover:text-white/60"
                 >
                   <Clock size={11} aria-hidden="true" />
