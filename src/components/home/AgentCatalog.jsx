@@ -2,9 +2,10 @@ import { useState, useRef, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import {
   Bot, ShieldCheck, X, ChevronRight, Zap, AlertCircle,
-  BookOpen, Info, Cpu, Play,
+  Info, Cpu, Play, ExternalLink,
 } from 'lucide-react'
 import { AGENT_CATALOG } from '../../data/agentCatalog.js'
+import { HOME_AGENTS } from '../../data/home.js'
 import { usePendingOutputs } from '../../state/PendingOutputsContext.jsx'
 import UndoToast from './UndoToast.jsx'
 
@@ -34,7 +35,7 @@ function AgentCard({ agent, onClick, highlight }) {
     <button
       type="button"
       onClick={() => onClick(agent)}
-      className={`group relative flex min-w-[188px] max-w-[188px] flex-col rounded-xl border p-3.5 text-left transition-all ${
+      className={`group relative flex flex-col rounded-xl border p-3.5 text-left transition-all ${
         agent.status === 'unavailable'
           ? 'cursor-pointer border-gray-100 bg-gray-50/60 opacity-70 hover:opacity-90 dark:border-white/[0.06] dark:bg-white/[0.02]'
           : highlight
@@ -263,6 +264,7 @@ export function AgentCatalog() {
   const agents = AGENT_CATALOG[category]
   const visible = showAll ? agents : agents.slice(0, MAX_VISIBLE)
   const overflow = agents.length - visible.length
+  const activeAgents = HOME_AGENTS.filter(a => a.status === 'active')
 
   function handleRun(agent) {
     const outputId = addOutput({
@@ -282,17 +284,46 @@ export function AgentCatalog() {
         id="home-agent-catalog"
         className="rounded-2xl border border-gray-100 bg-white px-5 py-4 dark:border-white/[0.08] dark:bg-[#111827]"
       >
-        {/* Header */}
-        <div className="mb-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Cpu size={14} className="text-gray-300 dark:text-slate-600" aria-hidden="true" />
-            <span className="text-[13px] font-semibold tracking-[-0.01em] text-gray-800 dark:text-slate-200">
-              Agent Catalog
-            </span>
+        {/* Header row */}
+        <div className="mb-3 flex items-center justify-between gap-4">
+          {/* Left: title + active agents overview */}
+          <div className="flex min-w-0 items-center gap-3">
+            <div className="flex shrink-0 items-center gap-2">
+              <Cpu size={14} className="text-gray-300 dark:text-slate-600" aria-hidden="true" />
+              <span className="text-[13px] font-semibold tracking-[-0.01em] text-gray-800 dark:text-slate-200">
+                Agent Catalog
+              </span>
+            </div>
+            {/* Active agents strip */}
+            <div className="flex min-w-0 items-center gap-2 overflow-x-auto">
+              <span className="shrink-0 text-[10px] text-gray-300 dark:text-slate-600">·</span>
+              {HOME_AGENTS.map(ag => (
+                <div key={ag.id} className="flex shrink-0 items-center gap-1.5">
+                  <span
+                    className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md text-[8px] font-bold text-white"
+                    style={{ background: ag.color }}
+                    aria-hidden="true"
+                  >
+                    {ag.initials}
+                  </span>
+                  <span className="text-[11px] font-medium text-gray-600 dark:text-slate-300">{ag.name}</span>
+                  <span className={`h-1.5 w-1.5 rounded-full ${
+                    ag.status === 'active' ? 'bg-emerald-400 animate-pulse' :
+                    ag.status === 'paused' ? 'bg-amber-400' : 'bg-gray-300 dark:bg-slate-600'
+                  }`} aria-label={ag.status} />
+                  <span className="text-[10px] text-gray-400 dark:text-slate-500">
+                    {ag.status === 'active' ? `${ag.conversationsToday} convos` :
+                     ag.status === 'paused' ? 'Paused' : 'Idle'}
+                    {ag.handoffs > 0 && ` · ${ag.handoffs} handoffs`}
+                  </span>
+                  <ExternalLink size={10} className="cursor-pointer text-gray-200 hover:text-gray-500 dark:text-slate-700 dark:hover:text-slate-400" />
+                </div>
+              ))}
+            </div>
           </div>
 
-          {/* Category tabs */}
-          <div className="flex items-center gap-1 rounded-lg border border-gray-100 p-0.5 dark:border-white/[0.07]">
+          {/* Right: category tabs */}
+          <div className="flex shrink-0 items-center gap-1 rounded-lg border border-gray-100 p-0.5 dark:border-white/[0.07]">
             {CATEGORIES.map(cat => (
               <button
                 key={cat.id}
@@ -311,13 +342,13 @@ export function AgentCatalog() {
           </div>
         </div>
 
-        {/* Card rail */}
+        {/* Card grid — auto-fill, no trailing blank space */}
         {agents.length === 0 ? (
           <div className="flex items-center justify-center py-8 text-[12px] text-gray-400 dark:text-slate-500">
             No agents in this category yet.
           </div>
         ) : (
-          <div className="flex gap-3 overflow-x-auto pb-1">
+          <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))' }}>
             {visible.map(agent => (
               <AgentCard
                 key={agent.id}
@@ -330,7 +361,7 @@ export function AgentCatalog() {
               <button
                 type="button"
                 onClick={() => setShowAll(true)}
-                className="flex min-w-[96px] flex-col items-center justify-center gap-1.5 rounded-xl border border-dashed border-gray-200 text-gray-400 transition-colors hover:border-aims-blue/30 hover:text-aims-blue dark:border-white/[0.08] dark:text-slate-500"
+                className="flex flex-col items-center justify-center gap-1.5 rounded-xl border border-dashed border-gray-200 py-4 text-gray-400 transition-colors hover:border-aims-blue/30 hover:text-aims-blue dark:border-white/[0.08] dark:text-slate-500"
               >
                 <ChevronRight size={16} aria-hidden="true" />
                 <span className="text-[11px] font-semibold">+{overflow} more</span>
