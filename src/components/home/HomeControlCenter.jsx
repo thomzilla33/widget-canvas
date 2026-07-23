@@ -24,7 +24,6 @@ export function HomeControlCenter({ onCopilotOpen, copilotOpen = false }) {
     return () => ctx.revert()
   }, [])
 
-  // Left column is wider in normal mode; slightly narrower in copilot mode
   const leftFlex  = copilotOpen ? 'lg:flex-[3]' : 'lg:flex-[2]'
   const rightFlex = copilotOpen ? 'lg:flex-[2]' : 'lg:flex-1'
 
@@ -33,24 +32,25 @@ export function HomeControlCenter({ onCopilotOpen, copilotOpen = false }) {
       <div ref={rootRef} className="flex flex-col gap-6">
         <HomeHero onCopilotOpen={onCopilotOpen} copilotOpen={copilotOpen} />
 
-        {/* Two flex columns — columns stretch to equal height; Agents fills remaining space */}
-        <div className="flex flex-col gap-4 lg:flex-row">
-          {/* Left column: work queue + workflows */}
+        {/*
+          Layout: two independent flex columns with items-start.
+          Left col: My Work → Workflows → Studio Health (all natural height)
+          Right col: My Team → Agents (all natural height)
+          No sync point between columns — no forced equal-height stretching.
+        */}
+        <div className={`flex flex-col gap-4 lg:flex-row lg:items-start`}>
+          {/* Left column: main content stack */}
           <div className={`flex min-w-0 flex-col gap-4 ${leftFlex}`}>
             <div className="home-card"><WorkQueuesCard /></div>
             <div className="home-card"><WorkflowsCard /></div>
+            <div className="home-card"><StudioHealthCard /></div>
           </div>
 
-          {/* Right column: team on top, agents grows to fill leftover height */}
+          {/* Right column: team + agents, each at natural height */}
           <div className={`flex min-w-0 flex-col gap-4 ${rightFlex}`}>
             <div className="home-card"><MyTeamCard /></div>
-            <div className="home-card flex-1"><AgentsCard /></div>
+            <div className="home-card"><AgentsCard /></div>
           </div>
-        </div>
-
-        {/* Full-width bottom row */}
-        <div className="home-card">
-          <StudioHealthCard />
         </div>
       </div>
       <ScopeToggle />
