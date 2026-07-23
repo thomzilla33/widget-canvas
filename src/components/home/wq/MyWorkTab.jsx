@@ -6,6 +6,8 @@ import { EventCard } from './EventCard.jsx'
 import { FilterBar } from './FilterBar.jsx'
 import UndoToast from '../UndoToast.jsx'
 
+const MAX_VISIBLE = 7
+
 export function MyWorkTab({ onOpen, onEscalate, onTrace }) {
   const [filtered, setFiltered] = useState(MY_WORK_EVENTS)
   const [expandedId, setExpandedId] = useState(null)
@@ -13,6 +15,8 @@ export function MyWorkTab({ onOpen, onEscalate, onTrace }) {
   const [toast, setToast] = useState(null)
 
   const visible = filtered.filter(e => !skipped.has(e.id))
+  const capped = visible.slice(0, MAX_VISIBLE)
+  const overflow = visible.length - capped.length
 
   function skip(id) {
     setSkipped(prev => new Set([...prev, id]))
@@ -29,7 +33,7 @@ export function MyWorkTab({ onOpen, onEscalate, onTrace }) {
   }
 
   const grouped = WQ_TIER_ORDER
-    .map(tier => ({ tier, items: visible.filter(e => e.tier === tier) }))
+    .map(tier => ({ tier, items: capped.filter(e => e.tier === tier) }))
     .filter(g => g.items.length > 0)
 
   return (
@@ -44,33 +48,42 @@ export function MyWorkTab({ onOpen, onEscalate, onTrace }) {
               <p className="text-xs font-medium text-gray-500 dark:text-slate-400">All clear — nothing here.</p>
             </div>
           ) : (
-            grouped.map(({ tier, items }) => {
-              const t = WQ_TIER[tier]
-              return (
-                <div key={tier}>
-                  <div className={`flex items-center gap-1.5 border-l-2 bg-gray-50/60 py-1.5 pl-3 pr-4 dark:bg-white/[0.02] ${t.border}`}>
-                    <span className={`h-1.5 w-1.5 rounded-full ${t.dot}`} aria-hidden="true" />
-                    <span className={`text-[10px] font-bold uppercase tracking-wider ${t.text}`}>{t.label}</span>
-                    <span className="text-[10px] text-gray-400 dark:text-slate-600">· {t.sub}</span>
-                    <span className={`ml-auto rounded-full px-1.5 py-0.5 text-[9px] font-bold ${t.badge}`}>{items.length}</span>
+            <>
+              {grouped.map(({ tier, items }) => {
+                const t = WQ_TIER[tier]
+                return (
+                  <div key={tier}>
+                    <div className={`flex items-center gap-1.5 border-l-2 bg-gray-50/60 py-1.5 pl-3 pr-4 dark:bg-white/[0.02] ${t.border}`}>
+                      <span className={`h-1.5 w-1.5 rounded-full ${t.dot}`} aria-hidden="true" />
+                      <span className={`text-[10px] font-bold uppercase tracking-wider ${t.text}`}>{t.label}</span>
+                      <span className="text-[10px] text-gray-400 dark:text-slate-600">· {t.sub}</span>
+                      <span className={`ml-auto rounded-full px-1.5 py-0.5 text-[9px] font-bold ${t.badge}`}>{visible.filter(e => e.tier === tier).length}</span>
+                    </div>
+                    <div className="divide-y divide-gray-100 dark:divide-white/[0.05]">
+                      {items.map(event => (
+                        <EventCard
+                          key={event.id}
+                          event={event}
+                          expanded={expandedId === event.id}
+                          onToggle={() => toggle(event.id)}
+                          onOpen={onOpen}
+                          onEscalate={onEscalate}
+                          onSkip={skip}
+                          onTrace={onTrace}
+                        />
+                      ))}
+                    </div>
                   </div>
-                  <div className="divide-y divide-gray-100 dark:divide-white/[0.05]">
-                    {items.map(event => (
-                      <EventCard
-                        key={event.id}
-                        event={event}
-                        expanded={expandedId === event.id}
-                        onToggle={() => toggle(event.id)}
-                        onOpen={onOpen}
-                        onEscalate={onEscalate}
-                        onSkip={skip}
-                        onTrace={onTrace}
-                      />
-                    ))}
-                  </div>
+                )
+              })}
+              {overflow > 0 && (
+                <div className="flex items-center justify-center border-t border-gray-100 py-2.5 dark:border-white/[0.05]">
+                  <span className="text-[11px] text-gray-400 dark:text-slate-500">
+                    +{overflow} more · <a href="#" className="text-aims-blue hover:underline" onClick={e => e.preventDefault()}>See all in Attention Room</a>
+                  </span>
                 </div>
-              )
-            })
+              )}
+            </>
           )}
         </div>
       </div>

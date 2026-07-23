@@ -14,9 +14,9 @@ import { useRole }               from '../../state/RoleContext.jsx'
 // span: columns in a 3-col grid. fixed: not draggable.
 const CARD_DEFS = {
   work:      { id: 'work',      span: 2, Component: WorkQueuesCard },
-  myteam:    { id: 'myteam',    span: 1, Component: MyTeamCard },
+  myteam:    { id: 'myteam',    span: 1, Component: MyTeamCard,      selfStart: true },
   workflows: { id: 'workflows', span: 2, Component: WorkflowsCard },
-  agents:    { id: 'agents',    span: 1, Component: AgentsCard },
+  agents:    { id: 'agents',    span: 1, Component: AgentsCard,      selfStart: true },
   health:    { id: 'health',    span: 3, Component: StudioHealthCard, fixed: true },
 }
 
@@ -31,10 +31,11 @@ const SPAN_CLASS = { 1: '', 2: 'lg:col-span-2', 3: 'lg:col-span-3' }
 // ── DraggableCard ─────────────────────────────────────────────────────────────
 function DraggableCard({ cardId, span, isAdmin, isDragTarget, children, onDragStart, onDragOver, onDrop, onDragEnd }) {
   const fixed = CARD_DEFS[cardId]?.fixed
+  const selfStart = CARD_DEFS[cardId]?.selfStart
 
   return (
     <div
-      className={`relative h-full ${SPAN_CLASS[span] ?? ''}`}
+      className={`relative ${selfStart ? 'self-start' : 'h-full'} ${SPAN_CLASS[span] ?? ''}`}
       draggable={isAdmin && !fixed}
       onDragStart={isAdmin && !fixed ? () => onDragStart(cardId) : undefined}
       onDragOver={isAdmin && !fixed ? e => { e.preventDefault(); onDragOver(cardId) } : undefined}
@@ -52,7 +53,7 @@ function DraggableCard({ cardId, span, isAdmin, isDragTarget, children, onDragSt
           <GripVertical size={12} />
         </div>
       )}
-      <div className="h-full">{children}</div>
+      <div className={selfStart ? undefined : 'h-full'}>{children}</div>
     </div>
   )
 }
