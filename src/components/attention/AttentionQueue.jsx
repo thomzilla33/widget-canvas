@@ -59,7 +59,7 @@ export function AttentionQueue({ items, selectedId, onSelect }) {
     <div
       ref={queueRef}
       className="flex flex-col h-full border-r border-gray-200/80 dark:border-white/[0.05] bg-gray-50/70 dark:bg-[#09090e]"
-      style={{ width: 288, minWidth: 240, maxWidth: 320, flexShrink: 0 }}
+      style={{ flex: '0 0 40%', minWidth: 280, maxWidth: 560 }}
       onKeyDown={handleKeyDown}
       tabIndex={-1}
       aria-label="Attention queue"
