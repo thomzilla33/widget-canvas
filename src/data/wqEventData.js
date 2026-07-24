@@ -180,4 +180,24 @@ Thomas`,
     ],
     crmRecord: 'CRM-88312',
   },
+
+  // ── wq-13 · inbound-question ─────────────────────────────────────────────────
+  'wq-13': {
+    thread: {
+      status: 'open',
+      initiatorId: 'customer-rachel',
+      participants: ['customer-rachel', 'user-thomas'],
+      comments: [
+        {
+          id: 'c-1',
+          authorId: 'customer-rachel',
+          authorName: 'Rachel Kim',
+          authorRole: 'Procurement Manager · Acme Corp',
+          timestamp: '2h ago',
+          channel: 'webchat',
+          body: `Hi, I was reviewing the enterprise trial agreement and I noticed the SLA guarantees 99.9% uptime, but the addendum references 99.5%. Which one is contractually binding? We need this clarified before we can sign off on the expansion — our legal team is specifically asking about the discrepancy.`,
+        },
+      ],
+    },
+  },
 }

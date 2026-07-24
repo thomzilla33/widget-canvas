@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Bot, Building2, CheckCircle2, ChevronRight, Clock, ShieldAlert, Shuffle, User2 } from 'lucide-react'
+import { Bot, Building2, CheckCircle2, ChevronRight, Clock, MessageSquare, ShieldAlert, Shuffle, User2 } from 'lucide-react'
 import { WQConfirmBar, WQSecondaryLinks, SectionLabel, Divider } from './WQPrimitives.jsx'
 import { WQClaimsList } from './WQClaimsList.jsx'
 import { TEAM_ROSTER } from '../../data/workqueue.js'
@@ -16,9 +16,11 @@ export function WQDecisionSurface({ event, md, onResolve, onDecline }) {
     case 'gov-break-glass':    return <GovBreakGlass {...props} />
     case 'gov-change-request': return <GovChangeRequest {...props} />
     case 'train-me':           return <TrainMe {...props} />
-    case 'client-continuation':return <HTLContinuation {...props} isClient />
-    case 'client-handoff':     return <HTLHandoff {...props} isClient />
-    default:                   return <GenericWQSurface {...props} />
+    case 'client-continuation':  return <HTLContinuation {...props} isClient />
+    case 'client-handoff':       return <HTLHandoff {...props} isClient />
+    case 'inbound-question':     return <InboundQuestion {...props} />
+    case 'question':             return <QuestionSurface {...props} />
+    default:                     return <GenericWQSurface {...props} />
   }
 }
 
@@ -835,7 +837,225 @@ function TrainMe({ event, md, onResolve, onDecline }) {
   )
 }
 
-// ── 8. Generic WQ surface ─────────────────────────────────────────────────────
+// ── 8. Inbound Question ───────────────────────────────────────────────────────
+
+function InboundQuestion({ event, md, onResolve, onDecline }) {
+  const [phase, setPhase]     = useState('idle') // idle | composing | confirm-send
+  const [reply, setReply]     = useState('')
+  const [toast, setToast]     = useState(null)
+
+  const thread   = md.thread ?? {}
+  const comments = thread.comments ?? []
+  const first    = comments[0] ?? {}
+  const isOpen   = thread.status === 'open'
+
+  function mockAction(msg) {
+    setToast(msg)
+    setTimeout(() => setToast(null), 3000)
+  }
+
+  const footer = (
+    <>
+      {toast && (
+        <div className="mb-3 rounded-lg bg-gray-100 px-3 py-2 text-xs text-gray-600 dark:bg-white/[0.06] dark:text-slate-400">
+          {toast}
+        </div>
+      )}
+      {phase === 'idle' && (
+        <div className="space-y-2">
+          <button type="button" onClick={() => setPhase('composing')} className="btn-primary w-full py-2.5 text-sm font-semibold">
+            Reply
+          </button>
+          <div className="flex gap-2">
+            <button type="button" onClick={() => mockAction('Forwarded to team inbox.')} className="flex-1 rounded-lg border border-gray-200 py-2 text-xs font-medium text-gray-600 hover:bg-gray-50 dark:border-white/[0.08] dark:text-slate-300 dark:hover:bg-white/[0.04]">
+              Forward
+            </button>
+            {isOpen && (
+              <button type="button" onClick={() => setPhase('confirm-close')} className="flex-1 rounded-lg border border-gray-200 py-2 text-xs font-medium text-gray-600 hover:bg-gray-50 dark:border-white/[0.08] dark:text-slate-300 dark:hover:bg-white/[0.04]">
+                Close thread
+              </button>
+            )}
+          </div>
+          <WQSecondaryLinks onDecline={onDecline} declineLabel="Skip for now" />
+        </div>
+      )}
+      {phase === 'composing' && (
+        <div className="space-y-2">
+          <textarea
+            value={reply}
+            onChange={e => setReply(e.target.value)}
+            rows={4}
+            className="input w-full resize-none text-xs"
+            placeholder="Type your reply…"
+            autoFocus
+          />
+          <div className="flex gap-2">
+            <button type="button" onClick={() => { setReply(''); setPhase('idle') }} className="flex-1 rounded-lg border border-gray-200 py-2 text-xs text-gray-500 dark:border-white/[0.08] dark:text-slate-400">
+              Cancel
+            </button>
+            <button
+              type="button"
+              disabled={!reply.trim()}
+              onClick={() => setPhase('confirm-send')}
+              className="flex-1 btn-primary py-2 text-xs disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              Send reply
+            </button>
+          </div>
+        </div>
+      )}
+      {phase === 'confirm-send' && (
+        <WQConfirmBar
+          message={`Send your reply to ${first.authorName ?? 'customer'}? This will be logged to the thread.`}
+          confirmLabel="Send"
+          onCancel={() => setPhase('composing')}
+          onConfirm={() => onResolve('Reply sent — thread updated')}
+        />
+      )}
+      {phase === 'confirm-close' && (
+        <WQConfirmBar
+          message="Close this thread? The customer will be notified that the conversation is resolved."
+          confirmLabel="Close thread"
+          onCancel={() => setPhase('idle')}
+          onConfirm={() => onResolve('Thread closed — customer notified')}
+        />
+      )}
+    </>
+  )
+
+  return (
+    <Surface footer={footer}>
+      <div>
+        <SectionLabel>Message</SectionLabel>
+        <div className="rounded-xl border border-gray-100 bg-gray-50/60 p-4 dark:border-white/[0.07] dark:bg-white/[0.025]">
+          {/* Sender */}
+          <div className="flex items-start gap-3 mb-4">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-aims-blue/10 dark:bg-aims-blue/[0.15] text-[11px] font-bold text-aims-blue">
+              {(first.authorName ?? '?').charAt(0)}
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-baseline gap-2">
+                <p className="text-xs font-semibold text-gray-800 dark:text-slate-200">{first.authorName}</p>
+                <span className="text-[10px] text-gray-400 dark:text-slate-600">{first.timestamp}</span>
+              </div>
+              <p className="text-[10px] text-gray-500 dark:text-slate-500">{first.authorRole}</p>
+              {first.channel && (
+                <span className="mt-1 inline-flex items-center gap-1 rounded bg-gray-100 px-1.5 py-0.5 text-[9px] font-semibold text-gray-500 dark:bg-white/[0.06] dark:text-slate-500">
+                  <MessageSquare size={9} /> {first.channel}
+                </span>
+              )}
+            </div>
+          </div>
+          {/* Body */}
+          <p className="text-xs leading-relaxed text-gray-700 dark:text-slate-300">{first.body}</p>
+        </div>
+        {comments.length > 1 && (
+          <p className="mt-2 text-[10px] text-gray-400 dark:text-slate-600">
+            {comments.length} messages in this thread
+          </p>
+        )}
+      </div>
+    </Surface>
+  )
+}
+
+// ── 9. Question (person-to-person) ────────────────────────────────────────────
+
+function QuestionSurface({ event, md, onResolve, onDecline }) {
+  const [response, setResponse] = useState('')
+  const [phase, setPhase]       = useState('idle') // idle | confirm-send
+
+  const footer = (
+    <>
+      {phase === 'idle' && (
+        <div className="space-y-2">
+          <textarea
+            value={response}
+            onChange={e => setResponse(e.target.value)}
+            rows={3}
+            className="input w-full resize-none text-xs"
+            placeholder="Type your response…"
+            autoFocus
+          />
+          <button
+            type="button"
+            disabled={!response.trim()}
+            onClick={() => setPhase('confirm-send')}
+            className="btn-primary w-full py-2.5 text-sm font-semibold disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            Send response
+          </button>
+          <WQSecondaryLinks onDecline={onDecline} declineLabel="Skip for now" />
+        </div>
+      )}
+      {phase === 'confirm-send' && (
+        <WQConfirmBar
+          message={`Send your response to ${event.askedByName}?`}
+          confirmLabel="Send"
+          onCancel={() => setPhase('idle')}
+          onConfirm={() => onResolve(`Response sent to ${event.askedByName}`)}
+        />
+      )}
+    </>
+  )
+
+  return (
+    <Surface footer={footer}>
+      {/* Asked by */}
+      <div>
+        <SectionLabel>Asked by</SectionLabel>
+        <div className="flex items-center gap-3">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gray-200 dark:bg-white/10 text-[10px] font-bold text-gray-600 dark:text-slate-400">
+            {(event.askedByName ?? '?').charAt(0)}
+          </div>
+          <div>
+            <p className="text-xs font-semibold text-gray-800 dark:text-slate-200">{event.askedByName}</p>
+            <div className="flex items-center gap-1.5 text-[10px] text-gray-400 dark:text-slate-600">
+              <span>{event.askedByRole}</span>
+              <span>·</span>
+              <span>{event.askedAt}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <Divider />
+
+      {/* Question */}
+      <div>
+        <SectionLabel>Question</SectionLabel>
+        <p className="text-sm leading-relaxed text-gray-800 dark:text-slate-200">"{event.questionText}"</p>
+      </div>
+
+      {/* Why */}
+      {event.whyText && <>
+        <Divider />
+        <div>
+          <SectionLabel>Context</SectionLabel>
+          <p className="text-xs leading-relaxed text-gray-500 dark:text-slate-500">{event.whyText}</p>
+        </div>
+      </>}
+
+      {/* Linked event */}
+      {event.linkedEventTitle && <>
+        <Divider />
+        <div>
+          <SectionLabel>Linked event</SectionLabel>
+          <div className="flex items-center gap-2 rounded-lg border border-aims-blue/20 bg-aims-blue/[0.04] px-3 py-2.5 dark:border-aims-blue/10">
+            <ShieldAlert size={11} className="shrink-0 text-aims-blue" />
+            <div className="min-w-0">
+              <p className="truncate text-xs font-medium text-aims-blue">{event.linkedEventTitle}</p>
+              <p className="text-[10px] text-aims-blue/60">{event.linkedEventId}</p>
+            </div>
+            <ChevronRight size={12} className="ml-auto shrink-0 text-aims-blue/40" />
+          </div>
+        </div>
+      </>}
+    </Surface>
+  )
+}
+
+// ── 10. Generic WQ surface ────────────────────────────────────────────────────
 
 function GenericWQSurface({ event, md, onResolve, onDecline }) {
   const footer = (
