@@ -51,7 +51,7 @@ export function WorkQueuesCard() {
 
   return (
     <>
-      <div className="card flex h-full flex-col">
+      <div id="home-work" className="card flex h-full flex-col">
         <CardHeader
           icon={<ListChecks size={14} />}
           title="My Work"
@@ -64,6 +64,7 @@ export function WorkQueuesCard() {
           {TABS.map(({ id, label }) => (
             <button
               key={id}
+              id={id === 'focus' ? 'home-myday' : undefined}
               onClick={() => setTab(id)}
               className={`-mb-px border-b-2 px-3 py-2 text-xs font-medium transition-colors ${
                 tab === id

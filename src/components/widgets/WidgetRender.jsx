@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Sparkles, TrendingUp, TrendingDown } from 'lucide-react'
 import { SERIES, LineHC, BarHC, PieHC, GaugeHC, FunnelHC, HeatmapHC, SparklineHC } from '../charts/hc.jsx'
 import { widgetSample, formatValue } from '../../data/preview.js'
@@ -12,6 +13,7 @@ const H = { sm: 52, md: 84, lg: 150 }
 // Compact, real mini-visualization of a catalog widget, rendered by its
 // `skeleton` AND `size` (sm/md/lg) so the detail level scales with the widget.
 export default function WidgetRender({ widget, size = 'md', rows, scope, viewAs }) {
+  const navigate = useNavigate()
   // Tick only re-keys live widgets, so static tiles don't re-render every interval.
   const liveTick = widget?.freshness === 'live' && scope?.tick ? scope.tick : ''
   const scopeKey = scope
@@ -28,7 +30,7 @@ export default function WidgetRender({ widget, size = 'md', rows, scope, viewAs 
       <div className="grid h-[88px] place-items-center text-center px-3">
         <div>
           <div className="text-[11px] font-medium text-gray-400 dark:text-slate-500">No data connected</div>
-          <a href="#data-studio" className="mt-0.5 block text-[10px] text-aims-blue hover:underline">Map in Data Studio →</a>
+          <button type="button" onClick={() => navigate('/data-studio')} className="mt-0.5 block text-[10px] text-aims-blue hover:underline">Map in Data Studio →</button>
         </div>
       </div>
     )

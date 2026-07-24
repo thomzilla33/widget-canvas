@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Home, LayoutDashboard, FileBarChart, Boxes, UserRound, Plus, Search, CornerDownLeft } from 'lucide-react'
+import { Home, LayoutDashboard, FileBarChart, Boxes, UserRound, Database, Plus, Search, CornerDownLeft } from 'lucide-react'
 import { useDashboards } from '../../state/DashboardsContext.jsx'
 import { useWidgets } from '../../state/WidgetsContext.jsx'
 import { entities } from '../../data/mock.js'
@@ -30,6 +30,7 @@ export default function CommandPalette({ onClose }) {
       { id: 'nav-reports', group: 'Go to', label: 'Reports', icon: FileBarChart, run: () => go('/reports') },
       { id: 'nav-widgets', group: 'Go to', label: 'Widget Library', icon: Boxes, run: () => go('/widgets') },
       { id: 'nav-profiles', group: 'Go to', label: 'Profiles', icon: UserRound, run: () => go('/profiles') },
+      { id: 'nav-data-studio', group: 'Go to', label: 'Data Studio', icon: Database, run: () => go('/data-studio') },
       { id: 'act-newdash', group: 'Actions', label: 'New dashboard', icon: Plus, run: () => go('/dashboard/new') },
       { id: 'act-newwidget', group: 'Actions', label: 'New widget', icon: Plus, run: () => go('/widgets/new') },
     ]
