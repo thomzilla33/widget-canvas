@@ -9,6 +9,7 @@ import { AgentCatalog }            from './AgentCatalog.jsx'
 import { PendingOutputsCard }      from './PendingOutputsCard.jsx'
 import { PendingOutputsProvider }  from '../../state/PendingOutputsContext.jsx'
 import { useRole }                 from '../../state/RoleContext.jsx'
+import { WorkQueueHomeSection }    from './WorkQueueHomeSection.jsx'
 
 export function HomeControlCenter({ onCopilotOpen, copilotOpen = false }) {
   const rootRef = useRef(null)
@@ -48,6 +49,11 @@ export function HomeControlCenter({ onCopilotOpen, copilotOpen = false }) {
             </div>
             <div className="home-card h-[360px]"><PendingOutputsCard /></div>
           </div>
+        </div>
+
+        {/* Full-width Work Queue section */}
+        <div className="home-card">
+          <WorkQueueHomeSection />
         </div>
 
         {/* Full-width Agent Catalog — Admin only */}
