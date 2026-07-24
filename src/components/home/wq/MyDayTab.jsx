@@ -80,13 +80,14 @@ function ActionButtons({ item, includeTrain = false, onSnooze, onEscalate, onAsk
           disabled={!onClick}
           title={tooltip}
           className={`inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[10px] font-medium transition-colors
-            ${!onClick ? 'cursor-not-allowed opacity-40' : 'cursor-pointer'}
+            ${!onClick ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}
             ${red
               ? 'border-red-200 text-red-500 hover:bg-red-50 dark:border-red-400/20 dark:text-red-400 dark:hover:bg-red-400/10'
               : 'border-gray-200 text-gray-500 hover:bg-gray-50 dark:border-white/10 dark:text-slate-400 dark:hover:bg-white/[0.05]'
             }`}
         >
           <Icon size={10} aria-hidden="true" /> {label}
+          {!onClick && <span className="ml-0.5 rounded bg-gray-100 px-1 text-[8px] font-semibold text-gray-400 dark:bg-white/[0.06] dark:text-slate-600">V1.5</span>}
         </button>
       ))}
       <button

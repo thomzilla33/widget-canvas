@@ -5,7 +5,6 @@ import { MyTeamCard }              from './MyTeamCard.jsx'
 import { MyAgentsCard }            from './MyAgentsCard.jsx'
 import { WorkflowsCard }           from './WorkflowsCard.jsx'
 import { HomeHero }                from './HomeHero.jsx'
-import { ScopeToggle }             from './ScopeToggle.jsx'
 import { AgentCatalog }            from './AgentCatalog.jsx'
 import { PendingOutputsCard }      from './PendingOutputsCard.jsx'
 import { PendingOutputsProvider }  from '../../state/PendingOutputsContext.jsx'
@@ -58,7 +57,6 @@ export function HomeControlCenter({ onCopilotOpen, copilotOpen = false }) {
           </div>
         )}
       </div>
-      <ScopeToggle />
     </PendingOutputsProvider>
   )
 }

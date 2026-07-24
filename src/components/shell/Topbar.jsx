@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react"
+import { useNavigate } from "react-router-dom"
 import { ChevronDown, Search, Menu, Settings, LogOut, HelpCircle, Sun, Moon, Palette } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -103,9 +104,10 @@ function LeftMenu({ workspaces, selectedId, onSelect }) {
 }
 
 function RightMenu({ userName, userEmail, userAvatarSrc, theme, onThemeChange }) {
+  const navigate = useNavigate()
   const menuItems = [
-    { icon: <Settings size={14} strokeWidth={1.75} />,   label: "Settings"       },
-    { icon: <HelpCircle size={14} strokeWidth={1.75} />, label: "Help & Support" },
+    { icon: <Settings size={14} strokeWidth={1.75} />,   label: "Settings",       onClick: () => navigate('/profiles') },
+    { icon: <HelpCircle size={14} strokeWidth={1.75} />, label: "Help & Support", onClick: () => window.open('https://docs.aimsos.ai', '_blank') },
   ]
 
   return (
@@ -138,6 +140,7 @@ function RightMenu({ userName, userEmail, userAvatarSrc, theme, onThemeChange })
       <div className="px-[6px] py-[6px]">
         {menuItems.map(item => (
           <button key={item.label}
+            onClick={item.onClick}
             className="w-full flex items-center gap-[8px] px-[8px] py-[7px] rounded-[6px] text-left transition-colors cursor-pointer"
             style={{ color: "var(--topbar-menu-text)" }}
             onMouseEnter={e => (e.currentTarget.style.background = "var(--topbar-menu-item-hover)")}
@@ -181,6 +184,7 @@ function RightMenu({ userName, userEmail, userAvatarSrc, theme, onThemeChange })
       {/* Sign out */}
       <div className="px-[6px] py-[6px]">
         <button
+          onClick={() => navigate('/home')}
           className="w-full flex items-center gap-[8px] px-[8px] py-[7px] rounded-[6px] text-left transition-colors cursor-pointer"
           style={{ color: "var(--topbar-menu-text)" }}
           onMouseEnter={e => (e.currentTarget.style.background = "var(--topbar-menu-item-hover)")}

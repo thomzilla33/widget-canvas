@@ -4,7 +4,7 @@ import { X, GitBranch, Clock } from 'lucide-react'
 import { WQ_TIER } from '../../data/workqueue.js'
 
 // Decision surface varies by event type
-function DecisionSurface({ event, onPrimary, onSecondary, defaultDecision }) {
+function DecisionSurface({ event, onPrimary, onSecondary, defaultDecision, onTrainDecision }) {
   const { type, quickActions } = event
 
   // Approval — radio: approve / reject with note
@@ -65,6 +65,7 @@ function DecisionSurface({ event, onPrimary, onSecondary, defaultDecision }) {
             <div className="flex gap-1.5">
               {['Promote', 'Edit', 'Reject'].map(a => (
                 <button key={a} type="button"
+                  onClick={() => onTrainDecision?.(a, s)}
                   className="rounded px-2 py-0.5 text-[10px] font-medium border border-gray-200 text-gray-500 hover:border-aims-blue hover:text-aims-blue dark:border-white/10 dark:text-slate-400">
                   {a}
                 </button>
@@ -92,6 +93,11 @@ export function EventModal({ event, onClose, onPrimary, onEscalate, onTrace }) {
 
   function handlePrimary() {
     onPrimary?.(event)
+    onClose()
+  }
+
+  function handleTrainDecision(action, sample) {
+    onPrimary?.({ ...event, trainAction: action, trainSample: sample })
     onClose()
   }
 
@@ -168,7 +174,7 @@ export function EventModal({ event, onClose, onPrimary, onEscalate, onTrace }) {
 
           {/* Right: decision surface */}
           <div className="p-5">
-            <DecisionSurface event={event} onPrimary={handlePrimary} defaultDecision={intent} />
+            <DecisionSurface event={event} onPrimary={handlePrimary} defaultDecision={intent} onTrainDecision={handleTrainDecision} />
           </div>
         </div>
 

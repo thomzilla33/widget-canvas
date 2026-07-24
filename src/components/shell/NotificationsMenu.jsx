@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Settings, ChevronLeft, Lock, BellOff } from 'lucide-react'
 import { useNotifications } from '../../state/NotificationsContext.jsx'
 import { NOTIFICATION_CATEGORIES } from '../../data/mock.js'
@@ -6,6 +7,7 @@ import { Button } from '@/components/ui/Button'
 
 // S115–S120 — dropdown under the topbar bell (list + settings + empty state)
 export default function NotificationsMenu({ onClose }) {
+  const navigate = useNavigate()
   const { items, settings, markAllRead, markRead, toggleSetting } = useNotifications()
   const [view, setView] = useState('list')
 
@@ -44,7 +46,7 @@ export default function NotificationsMenu({ onClose }) {
               visible.map((n) => (
                 <button
                   key={n.id}
-                  onClick={() => markRead(n.id)}
+                  onClick={() => { markRead(n.id); onClose(); navigate('/home/attention') }}
                   className="flex w-full items-start gap-3 border-b border-gray-100 px-4 py-3 text-left last:border-0 hover:bg-gray-50 dark:border-white/5 dark:hover:bg-white/5"
                 >
                   <span className="text-lg leading-none">{n.icon}</span>
