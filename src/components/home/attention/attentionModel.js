@@ -1,4 +1,5 @@
-import { HOME_TASKS, HTL_ITEMS, HOME_INBOX, HOME_WORKFLOWS, GOV_EVENTS, MY_DAY_QUEUE } from '../../../data/home.js'
+import { HOME_TASKS, HTL_ITEMS, HOME_INBOX, HOME_WORKFLOWS, GOV_EVENTS } from '../../../data/home.js'
+import { MY_WORK_EVENTS } from '../../../data/workqueue.js'
 
 export const URGENCY_CLASS = {
   overdue:  'text-red-500 dark:text-red-400',
@@ -30,10 +31,9 @@ export function buildItems({ done, declined, archived }) {
     .filter(m => !archived.has(m.id) && !declined.has(m.id))
     .map(m => ({ ...m, _kind: 'inbox', _cat: 'messages' }))
 
-  // My Day work queue items — deduplicated against GOV_EVENTS by title
-  const govTitles = new Set(GOV_EVENTS.map(g => g.title))
-  const wq = MY_DAY_QUEUE
-    .filter(i => !done.has(i.id) && !declined.has(i.id) && !govTitles.has(i.title))
+  // Work Queue events — all 12 typed events with eventCategory
+  const wq = MY_WORK_EVENTS
+    .filter(i => !done.has(i.id) && !declined.has(i.id))
     .map(i => ({ ...i, _kind: 'wq', _cat: 'work' }))
 
   return [...gov, ...tasks, ...htl, ...inbox, ...wq]
@@ -74,7 +74,7 @@ export function totalUrgent(allItems, read) {
     (i._kind === 'task' && i.due === 'Overdue' && i.status !== 'error') ||
     i._kind === 'htl' ||
     (i._kind === 'inbox' && i.unread && !read.has(i.id) && i.action) ||
-    (i._kind === 'wq' && i.tier === 'critical')
+    (i._kind === 'wq' && (i.tier === 'actnow' || i.tier === 'critical'))
   ).length
 }
 
@@ -92,14 +92,16 @@ export function groupItems(allItems) {
     if (
       (item._kind === 'task' && item.due === 'Overdue') ||
       item.status === 'error' ||
-      (item._kind === 'gov' && item.blocking)
+      (item._kind === 'gov' && item.blocking) ||
+      (item._kind === 'wq' && item.tier === 'actnow')
     ) {
       overdue.push(item)
     } else if (
       (item._kind === 'task' && item.due === 'Today') ||
       item._kind === 'htl' ||
       (item._kind === 'gov' && !item.blocking) ||
-      (item._kind === 'inbox' && item.unread && item.action)
+      (item._kind === 'inbox' && item.unread && item.action) ||
+      (item._kind === 'wq' && (item.tier === 'critical' || item.tier === 'action'))
     ) {
       today.push(item)
     } else {

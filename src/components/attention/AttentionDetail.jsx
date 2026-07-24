@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { Workflow, Bot, ArrowUpRight } from 'lucide-react'
+import { WQDecisionSurface } from '../workqueue/WQDecisionSurface.jsx'
+import { WQ_EVENT_DATA } from '../../data/wqEventData.js'
 
 const KIND_LABEL = {
   gov:   { label: 'Policy · Governance', color: 'bg-aims-blue/10 text-aims-blue' },
@@ -141,8 +143,38 @@ export function AttentionDetail({ item, onApprove, onDecline, onComplete, onDism
     )
   }
 
-  const enrich = enrichItem(item)
   const kMeta  = KIND_LABEL[item._kind] ?? KIND_LABEL.task
+
+  // WQ events with eventCategory get a type-specific decision surface
+  if (item.eventCategory) {
+    const md = WQ_EVENT_DATA[item.id] ?? {}
+    return (
+      <div className="flex flex-1 flex-col h-full min-h-0 overflow-hidden">
+        <div className="shrink-0 px-7 pt-7 pb-5 border-b border-gray-100 dark:border-white/[0.05]">
+          <div className="mb-3 flex items-center gap-2">
+            <span className={`rounded px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide ${kMeta.color}`}>
+              {kMeta.label}
+            </span>
+            <span className="rounded bg-gray-100 px-1.5 py-0.5 text-[9px] font-semibold text-gray-500 dark:bg-white/[0.06] dark:text-slate-500">
+              {item.type}
+            </span>
+            <span className="ml-auto text-[10px] text-gray-400 dark:text-slate-600">{item.dueLabel ?? ''}</span>
+          </div>
+          <h2 className="text-base font-semibold leading-snug text-gray-900 dark:text-slate-100">
+            {item.title}
+          </h2>
+        </div>
+        <WQDecisionSurface
+          event={item}
+          md={md}
+          onResolve={() => onApprove(item)}
+          onDecline={() => onDecline(item)}
+        />
+      </div>
+    )
+  }
+
+  const enrich = enrichItem(item)
   const body   = bodyOf(item)
 
   function handlePrimary() {

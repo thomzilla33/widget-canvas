@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { ScanEye, ArrowLeft, CheckCircle2 } from 'lucide-react'
+import { ListChecks, ArrowLeft, CheckCircle2 } from 'lucide-react'
 import { buildItems, rank, totalUrgent } from '../components/home/attention/attentionModel.js'
 import { AttentionQueue } from '../components/attention/AttentionQueue.jsx'
 import { AttentionDetail } from '../components/attention/AttentionDetail.jsx'
@@ -109,8 +109,8 @@ export default function AttentionRoom() {
           <ArrowLeft size={13} aria-hidden="true" />
         </button>
         <div className="flex items-center gap-2">
-          <ScanEye size={14} className="text-aims-blue" aria-hidden="true" />
-          <h1 className="text-sm font-semibold text-gray-900 dark:text-slate-100">Attention Room</h1>
+          <ListChecks size={14} className="text-aims-blue" aria-hidden="true" />
+          <h1 className="text-sm font-semibold text-gray-900 dark:text-slate-100">Work Queue</h1>
           {urgent > 0 && (
             <span className="rounded-full bg-aims-blue/10 px-1.5 py-0.5 text-[10px] font-bold text-aims-blue">
               {urgent}
@@ -122,7 +122,7 @@ export default function AttentionRoom() {
           <span>
             {allItems.length === 0
               ? 'All clear'
-              : `${allItems.length} item${allItems.length !== 1 ? 's' : ''} need your attention`}
+              : `${allItems.length} item${allItems.length !== 1 ? 's' : ''} in queue`}
           </span>
         </div>
       </div>
