@@ -115,10 +115,10 @@ const _failingWf        = HOME_WORKFLOWS.filter(w => w.status === 'failed').leng
 const _unreadInbox      = HOME_INBOX.filter(m => m.unread).length
 
 const CHIPS = [
-  { id: 'agents',    Icon: Bot,         label: 'Active agents',     value: _activeAgents,     urgent: false },
-  { id: 'approvals', Icon: ShieldAlert, label: 'Pending approvals', value: _pendingApprovals, urgent: false },
-  { id: 'workflows', Icon: Zap,         label: 'Workflows failing', value: _failingWf,        urgent: true  },
-  { id: 'inbox',     Icon: Mail,        label: 'Unread messages',   value: _unreadInbox,      urgent: false },
+  { id: 'agents',    Icon: Bot,         label: 'Active agents',     value: _activeAgents,     urgent: false, to: '/profiles'        },
+  { id: 'approvals', Icon: ShieldAlert, label: 'Pending approvals', value: _pendingApprovals, urgent: false, to: '/home/attention'  },
+  { id: 'workflows', Icon: Zap,         label: 'Workflows failing', value: _failingWf,        urgent: true,  to: '/reports'         },
+  { id: 'inbox',     Icon: Mail,        label: 'Unread messages',   value: _unreadInbox,      urgent: false, to: '/home/attention'  },
 ]
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -380,10 +380,11 @@ export function HomeHero({ onCopilotOpen, copilotOpen = false }) {
       {/* KPI chips — only in calm state */}
       {showCalm && (
         <div className="relative mt-5 grid grid-cols-2 gap-2.5 sm:grid-cols-4">
-          {CHIPS.map(({ id, Icon, label, value, urgent }) => (
+          {CHIPS.map(({ id, Icon, label, value, urgent, to }) => (
             <button
               key={id}
               type="button"
+              onClick={() => navigate(to)}
               className="hero-chip home-kpi-chip rounded-xl border border-white/[0.12] bg-white/[0.08] px-4 py-3 text-left transition-all hover:bg-white/[0.16] hover:border-white/20"
             >
               <p

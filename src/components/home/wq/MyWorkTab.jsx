@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { createPortal } from 'react-dom'
 import { CheckCircle2 } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { MY_WORK_EVENTS, WQ_TIER, WQ_TIER_ORDER } from '../../../data/workqueue.js'
 import { EventCard } from './EventCard.jsx'
 import { FilterBar } from './FilterBar.jsx'
@@ -9,6 +10,7 @@ import UndoToast from '../UndoToast.jsx'
 const MAX_VISIBLE = 7
 
 export function MyWorkTab({ onOpen, onEscalate, onTrace }) {
+  const navigate = useNavigate()
   const [filtered, setFiltered] = useState(MY_WORK_EVENTS)
   const [expandedId, setExpandedId] = useState(null)
   const [skipped, setSkipped] = useState(new Set())
@@ -96,7 +98,7 @@ export function MyWorkTab({ onOpen, onEscalate, onTrace }) {
               {overflow > 0 && (
                 <div className="flex items-center justify-center border-t border-gray-100 py-2.5 dark:border-white/[0.05]">
                   <span className="text-[11px] text-gray-400 dark:text-slate-500">
-                    +{overflow} more · <a href="#" className="text-aims-blue hover:underline" onClick={e => e.preventDefault()}>See all in Attention Room</a>
+                    +{overflow} more · <button type="button" className="text-aims-blue hover:underline" onClick={() => navigate('/home/attention')}>See all in Attention Room</button>
                   </span>
                 </div>
               )}

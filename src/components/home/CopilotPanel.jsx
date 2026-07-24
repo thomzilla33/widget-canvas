@@ -42,6 +42,7 @@ export function CopilotPanel({ isOpen, onClose }) {
   const asideRef  = useRef(null)
   const innerRef  = useRef(null)
   const scrollRef = useRef(null)
+  const inputRef  = useRef(null)
 
   const [msgs,   setMsgs]   = useState([{
     from: 'agent',
@@ -105,8 +106,8 @@ export function CopilotPanel({ isOpen, onClose }) {
             <IconBtn label="New chat" onClick={() => { setMsgs([msgs[0]]); setInput('') }}>
               <PenSquare size={15} />
             </IconBtn>
-            <IconBtn label="Search"><Search size={15} /></IconBtn>
-            <IconBtn label="More"><MoreHorizontal size={15} /></IconBtn>
+            <IconBtn label="Search" onClick={() => { requestAnimationFrame(() => inputRef.current?.focus()) }}><Search size={15} /></IconBtn>
+            <IconBtn label="Clear chat" onClick={() => { setMsgs([msgs[0]]); setInput('') }}><MoreHorizontal size={15} /></IconBtn>
             <IconBtn label="Close copilot" onClick={onClose}><X size={15} /></IconBtn>
           </div>
         </div>
@@ -190,6 +191,7 @@ export function CopilotPanel({ isOpen, onClose }) {
         <div className="shrink-0 px-3 pb-3 pt-0">
           <div className="rounded-2xl border border-gray-200 bg-white shadow-sm transition-colors focus-within:border-aims-blue/50 dark:border-white/15 dark:bg-white/5">
             <input
+              ref={inputRef}
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); send() } }}

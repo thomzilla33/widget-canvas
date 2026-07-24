@@ -1,5 +1,8 @@
+import { useState } from 'react'
+import { createPortal } from 'react-dom'
 import { UserPlus, Bell, RefreshCw, AlertTriangle } from 'lucide-react'
 import { TEAM_ROSTER, WQ_TIER } from '../../../data/workqueue.js'
+import UndoToast from '../UndoToast.jsx'
 
 const TIER_NAMES = {
   actnow:   'blocking',
@@ -22,7 +25,7 @@ function TierDot({ tier, count }) {
   )
 }
 
-function TeamMemberRow({ member }) {
+function TeamMemberRow({ member, onAction }) {
   const total = Object.values(member.events).reduce((s, n) => s + n, 0)
 
   return (
@@ -59,6 +62,7 @@ function TeamMemberRow({ member }) {
         <button
           type="button"
           aria-label={`Take an item from ${member.name}`}
+          onClick={() => onAction?.(`Took an item from ${member.name}`)}
           className="inline-flex items-center gap-1 rounded-md border border-gray-200 px-2 py-0.5 text-[10px] font-medium text-gray-500 transition-colors hover:border-aims-blue hover:text-aims-blue dark:border-white/10 dark:text-slate-400 dark:hover:border-aims-blue dark:hover:text-aims-blue"
         >
           <UserPlus size={10} aria-hidden="true" /> Take
@@ -68,6 +72,7 @@ function TeamMemberRow({ member }) {
           aria-label={`Nudge ${member.name}`}
           disabled={!!member.ooo}
           title={member.ooo ? `On leave until ${member.oooReturn}` : undefined}
+          onClick={() => !member.ooo && onAction?.(`Nudge sent to ${member.name}`)}
           className="inline-flex items-center gap-1 rounded-md border border-gray-200 px-2 py-0.5 text-[10px] font-medium text-gray-500 transition-colors hover:border-amber-400 hover:text-amber-600 disabled:cursor-not-allowed disabled:opacity-40 dark:border-white/10 dark:text-slate-400 dark:hover:border-amber-400 dark:hover:text-amber-400"
         >
           <Bell size={10} aria-hidden="true" /> Nudge
@@ -75,6 +80,7 @@ function TeamMemberRow({ member }) {
         <button
           type="button"
           aria-label={`Reassign events from ${member.name}`}
+          onClick={() => onAction?.(`Reassigning events from ${member.name}…`)}
           className={`inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[10px] font-medium transition-colors ${
             member.ooo
               ? 'border-aims-blue text-aims-blue hover:bg-aims-blue/5 dark:hover:bg-aims-blue/10'
@@ -89,6 +95,13 @@ function TeamMemberRow({ member }) {
 }
 
 export function MyTeamTab({ isManager }) {
+  const [toast, setToast] = useState(null)
+
+  function showToast(msg) {
+    setToast({ message: msg })
+    setTimeout(() => setToast(null), 3500)
+  }
+
   if (!isManager) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-3 px-6 py-10 text-center">
@@ -106,20 +119,26 @@ export function MyTeamTab({ isManager }) {
   const actnowTotal = TEAM_ROSTER.reduce((s, m) => s + m.events.actnow, 0)
 
   return (
-    <div className="flex flex-1 flex-col overflow-hidden">
-      {actnowTotal > 0 && (
-        <div className="flex items-center gap-2 border-b border-red-100 bg-red-50/60 px-4 py-2 dark:border-red-400/10 dark:bg-red-400/5">
-          <AlertTriangle size={12} className="shrink-0 text-red-500" aria-hidden="true" />
-          <p className="text-[11px] text-red-600 dark:text-red-400">
-            {actnowTotal} blocking event{actnowTotal !== 1 ? 's' : ''} across your team require immediate attention.
-          </p>
+    <>
+      <div className="flex flex-1 flex-col overflow-hidden">
+        {actnowTotal > 0 && (
+          <div className="flex items-center gap-2 border-b border-red-100 bg-red-50/60 px-4 py-2 dark:border-red-400/10 dark:bg-red-400/5">
+            <AlertTriangle size={12} className="shrink-0 text-red-500" aria-hidden="true" />
+            <p className="text-[11px] text-red-600 dark:text-red-400">
+              {actnowTotal} blocking event{actnowTotal !== 1 ? 's' : ''} across your team require immediate attention.
+            </p>
+          </div>
+        )}
+        <div className="flex-1 overflow-y-auto divide-y divide-gray-100 dark:divide-white/[0.05]">
+          {TEAM_ROSTER.map(member => (
+            <TeamMemberRow key={member.id} member={member} onAction={showToast} />
+          ))}
         </div>
-      )}
-      <div className="flex-1 overflow-y-auto divide-y divide-gray-100 dark:divide-white/[0.05]">
-        {TEAM_ROSTER.map(member => (
-          <TeamMemberRow key={member.id} member={member} />
-        ))}
       </div>
-    </div>
+      {toast && createPortal(
+        <UndoToast message={toast.message} onClose={() => setToast(null)} />,
+        document.body,
+      )}
+    </>
   )
 }

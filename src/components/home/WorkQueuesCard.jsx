@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { ListChecks } from 'lucide-react'
 import { CardHeader }      from './CardHeader.jsx'
 import { MyWorkTab }       from './wq/MyWorkTab.jsx'
@@ -17,6 +18,7 @@ const TABS = [
 ]
 
 export function WorkQueuesCard() {
+  const navigate                         = useNavigate()
   const { setOpen: setCopilotOpen }      = useCopilot()
   const [tab, setTab]                    = useState('work')
   const [modalEvent, setModalEvent]      = useState(null)
@@ -54,7 +56,7 @@ export function WorkQueuesCard() {
           icon={<ListChecks size={14} />}
           title="My Work"
           badge={badge}
-          action={{ label: 'See all', onClick: undefined }}
+          action={{ label: 'See all', onClick: () => navigate('/home/attention') }}
         />
 
         {/* Tab bar */}

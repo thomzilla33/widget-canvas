@@ -73,7 +73,7 @@ function AppShellInner() {
       badge:   unreadCount > 0,
       onClick: () => setNotifOpen(v => !v),
     },
-    { icon: <Settings size={14} strokeWidth={1.75} />, label: 'Settings' },
+    { icon: <Settings size={14} strokeWidth={1.75} />, label: 'Settings', onClick: () => navigate('/widgets') },
   ]
 
   const rolePill = (

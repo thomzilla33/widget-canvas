@@ -1,6 +1,8 @@
 import { Bot, MessageSquare, FileOutput, Zap } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { CardHeader } from './CardHeader.jsx'
 import { HOME_AGENTS } from '../../data/home.js'
+import { useCopilot } from '../../state/CopilotContext.jsx'
 
 const STATUS_CFG = {
   active: {
@@ -31,6 +33,8 @@ const SORTED_AGENTS = [...HOME_AGENTS].sort((a, b) => {
 })
 
 export function MyAgentsCard() {
+  const navigate = useNavigate()
+  const { setOpen: setCopilotOpen } = useCopilot()
   const activeCount   = HOME_AGENTS.filter(a => a.status === 'active').length
   const handoffTotal  = HOME_AGENTS.reduce((s, a) => s + a.handoffs, 0)
 
@@ -40,7 +44,7 @@ export function MyAgentsCard() {
         icon={<Bot size={14} />}
         title="My Agents"
         badge={handoffTotal > 0 ? handoffTotal : undefined}
-        action={{ label: 'See all', onClick: undefined }}
+        action={{ label: 'See all', onClick: () => navigate('/profiles') }}
       />
 
       {/* Stats strip */}
@@ -123,6 +127,7 @@ export function MyAgentsCard() {
                   type="button"
                   aria-label={`Chat with ${agent.name}`}
                   title="Chat"
+                  onClick={() => setCopilotOpen(true)}
                   className="rounded-md p-1.5 text-gray-300 transition-colors hover:bg-gray-100 hover:text-aims-blue dark:text-slate-600 dark:hover:bg-white/[0.06] dark:hover:text-blue-400"
                 >
                   <MessageSquare size={12} aria-hidden="true" />
@@ -131,6 +136,7 @@ export function MyAgentsCard() {
                   type="button"
                   aria-label={`View ${agent.name} outputs`}
                   title="View outputs"
+                  onClick={() => navigate(`/ucp/${agent.id}`)}
                   className="rounded-md p-1.5 text-gray-300 transition-colors hover:bg-gray-100 hover:text-aims-blue dark:text-slate-600 dark:hover:bg-white/[0.06] dark:hover:text-blue-400"
                 >
                   <FileOutput size={12} aria-hidden="true" />

@@ -37,7 +37,7 @@ export function WorkflowsCard() {
         icon={<Workflow size={14} />}
         title="Workflows"
         badge={failing || undefined}
-        action={{ label: 'View all', onClick: () => navigate('/dashboards') }}
+        action={{ label: 'View all', onClick: () => navigate('/reports') }}
       />
       <div className="flex-1 overflow-y-auto divide-y divide-gray-100 dark:divide-white/[0.05]">
         {HOME_WORKFLOWS.map((wf) => {
@@ -86,7 +86,7 @@ export function WorkflowsCard() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => navigate('/dashboards')}
+                      onClick={() => navigate('/reports')}
                       className="flex items-center gap-1 rounded-md bg-gray-100 px-2 py-0.5 text-[10px] font-semibold text-gray-500 transition-colors hover:bg-gray-200 dark:bg-white/5 dark:text-slate-400 dark:hover:bg-white/10"
                     >
                       <ScrollText size={9} /> Logs

@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { createPortal } from 'react-dom'
+import { useNavigate } from 'react-router-dom'
 import {
   FileOutput, X, ShieldCheck, BookOpen, Info,
   AlertTriangle, ArrowUpRight, ChevronRight,
@@ -214,6 +215,7 @@ function OutputPreviewDrawer({ output, onClose }) {
 const MAX_VISIBLE_OUTPUTS = 10
 
 export function PendingOutputsCard() {
+  const navigate = useNavigate()
   const { outputs, newIds, pendingCount } = usePendingOutputs()
   const [selected, setSelected] = useState(null)
 
@@ -229,7 +231,7 @@ export function PendingOutputsCard() {
           icon={<FileOutput size={14} />}
           title="Pending Outputs"
           badge={pendingCount || undefined}
-          action={{ label: 'See all', onClick: undefined }}
+          action={{ label: 'See all', onClick: () => navigate('/reports') }}
         />
 
         <div className="flex-1 overflow-y-auto divide-y divide-gray-100 dark:divide-white/[0.05]">
