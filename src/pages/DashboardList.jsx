@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useLoadMore } from '../hooks/useLoadMore.js'
-import { MapPin, FileBarChart, ArrowRight, Sparkles, MoreHorizontal, Eye, Pencil, Trash2, Copy, Plus, LayoutGrid } from 'lucide-react'
+import { MapPin, FileBarChart, Sparkles, MoreHorizontal, Eye, Pencil, Trash2, Copy, Plus } from 'lucide-react'
 import { PageHeader, Badge, EmptyState } from '../components/common/index.jsx'
 import { Tag } from '@/components/ui/Tag'
 import { Button } from '@/components/ui/Button'
@@ -9,8 +9,7 @@ import { CardContainer } from '@/components/ui/CardContainer'
 import { PopoverPanel } from '../components/common/Popover.jsx'
 import StudioWelcome from '../components/common/StudioWelcome.jsx'
 import FilterToolbar from '../components/common/FilterToolbar.jsx'
-import AIGenerateModal from '../components/ai/AIGenerateModal.jsx'
-import CreateLauncher from '../components/create/CreateLauncher.jsx'
+import CreateDashboardModal from '../components/dashboard/CreateDashboardModal.jsx'
 import DeleteDashboardDialog from '../components/dashboard/DeleteDashboardDialog.jsx'
 import DuplicateDashboardDialog from '../components/dashboard/DuplicateDashboardDialog.jsx'
 import DashboardDetailModal from '../components/dashboard/DashboardDetailModal.jsx'
@@ -53,21 +52,9 @@ export default function DashboardList() {
   const [sortBy, setSortBy] = useState('recent')
   const [sortDir, setSortDir] = useState('desc')
 
-  const [aiOpen, setAiOpen] = useState(false)
   const [launcher, setLauncher] = useState(false)
   const gridReveal = useStaggerReveal('dashboards') // reveal the card grid once on entry
 
-  // Defer the successor a frame so the launcher's focus-trap restores focus to the
-  // Create button first; the next modal then traps from a real trigger, not a dead card.
-  function pickCreate(mode) {
-    setLauncher(false)
-    // Defer past the launcher's focus-trap cleanup (setTimeout, not rAF — rAF can stall
-    // in a backgrounded tab, leaving the successor modal unopened).
-    setTimeout(() => {
-      if (mode === 'ai') setAiOpen(true)
-      else navigate('/dashboard/new')
-    }, 0)
-  }
   // Owner filter — distinct owners across the catalog (enterprise scale).
   const ownerOptions = [
     { value: 'All', label: 'All owners' },
@@ -136,23 +123,6 @@ export default function DashboardList() {
           ) : null
         }
       />
-
-      {/* Browse Library — anchored card always at top */}
-      <div className="px-6 pt-2 pb-1">
-        <button
-          onClick={() => navigate('/widgets')}
-          className="group flex w-full items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-left transition-all hover:border-white/20 hover:bg-white/[0.08]"
-        >
-          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-white/10 text-slate-300">
-            <LayoutGrid size={17} aria-hidden="true" />
-          </span>
-          <span className="min-w-0 flex-1">
-            <span className="block text-xs font-semibold text-slate-100">Browse widget library</span>
-            <span className="block text-[11px] text-slate-400">Find and install widgets to build your dashboards.</span>
-          </span>
-          <ArrowRight size={14} className="shrink-0 text-slate-600 transition-transform group-hover:translate-x-0.5 group-hover:text-slate-400" />
-        </button>
-      </div>
 
       <FilterToolbar
         searchValue={search}
@@ -288,7 +258,7 @@ export default function DashboardList() {
         )}
       </div>
 
-      {launcher && <CreateLauncher kind="dashboard" onPick={pickCreate} onClose={() => setLauncher(false)} />}
+      {launcher && <CreateDashboardModal onClose={() => setLauncher(false)} />}
 
       {deletingDashboard && (
         <DeleteDashboardDialog
@@ -309,8 +279,6 @@ export default function DashboardList() {
           }}
         />
       )}
-
-      {aiOpen && <AIGenerateModal mode="dashboard" onClose={() => setAiOpen(false)} />}
 
       {detailDashboard && (
         <DashboardDetailModal

@@ -452,6 +452,28 @@ export const dashboardTemplates = [
   { id: 't-exec', name: 'Exec Overview', desc: 'High-level rollups for leadership.', entity: 'Report' },
 ]
 
+// Richer template catalog used by the Create dashboard marketplace modal.
+export const DASHBOARD_TEMPLATES_RICH = [
+  // Sales
+  { id: 't-acct360',    name: 'Account 360',         category: 'Sales',            desc: 'KPIs, pipeline, and recent activity for any account profile.',                     featured: true,  complexity: 'Intermediate', widgets: 6, tenants: 1284, entity: 'Company', zones: ['header','header','main','main','sidebar','bottom'] },
+  { id: 't-pipeline',   name: 'Sales Pipeline',       category: 'Sales',            desc: 'Stage-by-stage deal flow with velocity and win-rate breakdowns.',                  featured: false, complexity: 'Basic',        widgets: 5, tenants: 890,  entity: 'Report',  zones: ['header','header','main','main','bottom'] },
+  { id: 't-sales-rep',  name: 'Rep Performance',      category: 'Sales',            desc: 'Quota attainment, win rate, and activity benchmarks per rep.',                     featured: false, complexity: 'Basic',        widgets: 4, tenants: 671,  entity: 'Company', zones: ['header','header','main','bottom'] },
+  // Customer Service
+  { id: 't-support',    name: 'Support Health',       category: 'Customer Service', desc: 'Open tickets, SLA breaches, CSAT, and first response time in one view.',          featured: true,  complexity: 'Intermediate', widgets: 5, tenants: 921,  entity: 'Company', zones: ['header','header','main','sidebar','bottom'] },
+  { id: 't-cs-agent',   name: 'Agent Dashboard',      category: 'Customer Service', desc: 'Per-agent ticket load, resolution rate, and customer satisfaction scores.',        featured: false, complexity: 'Basic',        widgets: 4, tenants: 543,  entity: 'Company', zones: ['header','header','main','bottom'] },
+  // Finance
+  { id: 't-exec',       name: 'Exec Overview',        category: 'Finance',          desc: 'Board-level rollups: ARR, MRR, gross margin, and churn in a single view.',        featured: true,  complexity: 'Advanced',     widgets: 6, tenants: 760,  entity: 'Report',  zones: ['header','header','main','main','sidebar','bottom'] },
+  { id: 't-rev-ops',    name: 'Revenue Operations',   category: 'Finance',          desc: 'Revenue reconciliation, invoicing pipeline, and renewal tracking.',                featured: false, complexity: 'Intermediate', widgets: 5, tenants: 412,  entity: 'Report',  zones: ['header','header','main','main','bottom'] },
+  { id: 't-ai-consumption', name: 'AI Consumption',   category: 'Finance',          desc: 'AI spend, cost by model, prompt volume, and token efficiency.',                    featured: false, complexity: 'Basic',        widgets: 6, tenants: 328,  entity: 'Report',  zones: ['header','header','header','main','main','main'] },
+  // HR
+  { id: 't-hr-overview',name: 'HR Overview',          category: 'HR',               desc: 'Headcount, attrition, time-to-hire, and eNPS across the organization.',           featured: false, complexity: 'Basic',        widgets: 4, tenants: 489,  entity: 'Report',  zones: ['header','header','main','bottom'] },
+  { id: 't-hr-perf',    name: 'Performance Reviews',  category: 'HR',               desc: 'Goal completion rates, review cycle timelines, and calibration summaries.',        featured: false, complexity: 'Intermediate', widgets: 5, tenants: 301,  entity: 'Company', zones: ['header','header','main','main','bottom'] },
+  // Operations
+  { id: 't-aims-ops',   name: 'AIMS Operations',      category: 'Operations',       desc: 'Agent runs, HITL queue depth, credit burn, and automation outcome tracking.',      featured: false, complexity: 'Advanced',     widgets: 7, tenants: 156,  entity: 'Report',  zones: ['header','header','main','main','main','sidebar','bottom'] },
+  // Marketing
+  { id: 't-mkt-pipeline', name: 'Marketing Pipeline', category: 'Marketing',        desc: 'Lead volume, MQL-to-SQL conversion, CAC, and campaign-level ROI.',                featured: false, complexity: 'Intermediate', widgets: 5, tenants: 627,  entity: 'Report',  zones: ['header','header','main','main','bottom'] },
+]
+
 // Pre-built widget layout per template (zone -> widget ids). Used to seed a
 // dashboard canvas created "from an AIMS template".
 export const TEMPLATE_SEED = {

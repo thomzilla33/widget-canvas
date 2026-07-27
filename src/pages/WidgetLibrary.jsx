@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useLoadMore } from '../hooks/useLoadMore.js'
-import { Flag, Sparkles, MoreHorizontal, Plus, Pencil, Trash2, PenLine, ChevronDown } from 'lucide-react'
+import { Flag, Sparkles, MoreHorizontal, Plus, Pencil, Trash2 } from 'lucide-react'
 import { PopoverPanel } from '../components/common/Popover.jsx'
 import { PageHeader, HealthBadge, FreshnessBadge, EmptyState, DataPlaneBadge } from '../components/common/index.jsx'
 import { Tag } from '@/components/ui/Tag'
@@ -15,7 +15,7 @@ import FlagDetailModal from '../components/widgets/FlagDetailModal.jsx'
 import WidgetDetailModal from '../components/widgets/WidgetDetailModal.jsx'
 import WidgetDetailPanel from '../components/widgets/WidgetDetailPanel.jsx'
 import DeleteWidgetDialog from '../components/widgets/DeleteWidgetDialog.jsx'
-import AIGenerateModal from '../components/ai/AIGenerateModal.jsx'
+import CreateWidgetModal from '../components/widgets/CreateWidgetModal.jsx'
 import { useStaggerReveal } from '../hooks/useReveal.js'
 import { useScope, scopeAtLeast } from '../state/ScopeContext.jsx'
 
@@ -67,8 +67,7 @@ export default function WidgetLibrary() {
   const [detailWidget, setDetailWidget] = useState(null) // Tier 2 — widget detail (not the builder)
   const [deletingWidget, setDeletingWidget] = useState(null) // CRUD D — staged delete dialog
   const [menuId, setMenuId] = useState(null) // per-card ⋯ actions menu (by widget id)
-  const [aiOpen, setAiOpen] = useState(false)
-  const [createMenuOpen, setCreateMenuOpen] = useState(false)
+  const [widgetCreateOpen, setWidgetCreateOpen] = useState(false)
   const gridReveal = useStaggerReveal('widgets')
   const { scope } = useScope()
   const showV15 = scopeAtLeast(scope, 'v1.5')
@@ -104,7 +103,7 @@ export default function WidgetLibrary() {
           studioId="widgets"
           built={{ count: widgets.length, label: 'widgets' }}
           ctaLabel={isAdmin ? 'Create widget' : undefined}
-          onCta={isAdmin ? () => navigate('/widgets/new') : undefined}
+          onCta={isAdmin ? () => setWidgetCreateOpen(true) : undefined}
         />
       </div>
       <PageHeader
@@ -112,34 +111,9 @@ export default function WidgetLibrary() {
         description={`${widgets.length} widgets · ${governedCount} governed`}
         actions={
           isAdmin ? (
-            <div className="relative">
-              <Button
-                variant="primary"
-                onClick={() => setCreateMenuOpen((v) => !v)}
-                aria-haspopup="menu"
-                aria-expanded={createMenuOpen}
-              >
-                <Sparkles size={15} aria-hidden="true" />
-                Create widget
-                <ChevronDown size={14} aria-hidden="true" className={`transition-transform duration-150 ${createMenuOpen ? 'rotate-180' : ''}`} />
-              </Button>
-              {createMenuOpen && (
-                <PopoverPanel onClose={() => setCreateMenuOpen(false)} align="right" className="w-52 p-1.5">
-                  <CardMenuItem
-                    icon={PenLine}
-                    onClick={() => { setCreateMenuOpen(false); navigate('/widgets/new') }}
-                  >
-                    Start from scratch
-                  </CardMenuItem>
-                  <CardMenuItem
-                    icon={Sparkles}
-                    onClick={() => { setCreateMenuOpen(false); setAiOpen(true) }}
-                  >
-                    AI assistant
-                  </CardMenuItem>
-                </PopoverPanel>
-              )}
-            </div>
+            <Button onClick={() => setWidgetCreateOpen(true)} icon={<Sparkles size={15} />}>
+              Create widget
+            </Button>
           ) : null
         }
       />
@@ -367,7 +341,7 @@ export default function WidgetLibrary() {
 
 
 
-      {aiOpen && <AIGenerateModal mode="widget" onClose={() => setAiOpen(false)} />}
+      {widgetCreateOpen && <CreateWidgetModal onClose={() => setWidgetCreateOpen(false)} />}
     </div>
   )
 }
