@@ -8,7 +8,6 @@ import { useModalEnter } from '../../hooks/useReveal.js'
 import { useDashboards } from '../../state/DashboardsContext.jsx'
 import { DASHBOARD_TEMPLATES_RICH, TEMPLATE_SEED } from '../../data/mock.js'
 import AIGenerateModal from '../ai/AIGenerateModal.jsx'
-import SectionPickerDialog from './SectionPickerDialog.jsx'
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -283,9 +282,8 @@ export default function CreateDashboardModal({ onClose }) {
   useModalEnter(trapRef)
   const { addDashboard }  = useDashboards()
 
-  const [aiOpen, setAiOpen]                     = useState(false)
-  const [sectionPickerOpen, setSectionPickerOpen] = useState(false)
-  const [activeNav, setActiveNav]               = useState('all')
+  const [aiOpen, setAiOpen]     = useState(false)
+  const [activeNav, setActiveNav] = useState('all')
   const [search, setSearch]                     = useState('')
   const [complexity, setComplexity]             = useState('all-complexity')
   const [sort, setSort]                         = useState('popular')
@@ -339,15 +337,15 @@ export default function CreateDashboardModal({ onClose }) {
     onClose()
   }
 
-  function fromScratch(placement) {
+  function fromScratch() {
     const id = `d-blank-${Date.now().toString(36)}`
     addDashboard({
       id,
       template:  null,
       name:      'Untitled dashboard',
-      entity:    placement?.surface === 'profile' ? placement.profileType : 'Report',
+      entity:    'Report',
       audience:  'Manager',
-      placement: placement ?? { surface: 'report', collection: 'Custom' },
+      placement: null,
       status:    'draft',
       widgets:   0,
       updated:   'just now',
@@ -500,21 +498,13 @@ export default function CreateDashboardModal({ onClose }) {
           </div>
         </div>
 
-        {/* ── Section picker dialog (layered on top) ── */}
-        {sectionPickerOpen && (
-          <SectionPickerDialog
-            onSelect={(placement) => { setSectionPickerOpen(false); fromScratch(placement) }}
-            onClose={() => setSectionPickerOpen(false)}
-          />
-        )}
-
         {/* ── Footer ── */}
         <div className="flex flex-shrink-0 items-center justify-between border-t border-gray-200 px-6 py-3.5 dark:border-white/10">
           <p className="text-xs text-gray-400 dark:text-slate-500">Prefer to start your own?</p>
           <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={() => setSectionPickerOpen(true)}
+              onClick={fromScratch}
               className="flex h-9 items-center gap-1.5 rounded-lg border border-gray-200 px-4 text-xs font-semibold text-gray-700 transition-colors hover:border-gray-300 hover:bg-gray-50 dark:border-white/10 dark:text-slate-300 dark:hover:bg-white/[0.04]"
             >
               <PencilRuler size={13} aria-hidden="true" />

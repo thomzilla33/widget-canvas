@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { useParams, Navigate, useNavigate, useLocation } from 'react-router-dom'
-import { Plus, X, Lock, Unlock, Trash2, Sparkles, RotateCcw, SlidersHorizontal, GripVertical, Move, Check, RefreshCw, MoreHorizontal, Flag, Info, Pencil, LayoutGrid } from 'lucide-react'
+import { Plus, X, Lock, Unlock, Trash2, Sparkles, RotateCcw, SlidersHorizontal, GripVertical, Move, Check, RefreshCw, MoreHorizontal, Flag, Info, Pencil, LayoutGrid, MapPin } from 'lucide-react'
 import { PageHeader, GovernedBadge, FreshnessBadge, Badge, EmptyState } from '../components/common/index.jsx'
 import { Button } from '@/components/ui/Button'
 import { CardContainer } from '@/components/ui/CardContainer'
@@ -15,6 +15,7 @@ import EditSetupModal from '../components/dashboard/EditSetupModal.jsx'
 import EntityContextHeader, { entityHeaderApplies } from '../components/dashboard/EntityContextHeader.jsx'
 import SuggestWidgetsModal from '../components/dashboard/SuggestWidgetsModal.jsx'
 import AskDashboardModal from '../components/dashboard/AskDashboardModal.jsx'
+import SectionPickerDialog from '../components/dashboard/SectionPickerDialog.jsx'
 import FeedbackPanel from '../components/ucp/FeedbackPanel.jsx'
 import { useWidgets } from '../state/WidgetsContext.jsx'
 import { useDashboards } from '../state/DashboardsContext.jsx'
@@ -46,6 +47,7 @@ export default function DashboardCanvas() {
   const { dashboards, updateDashboard } = useDashboards()
   const dashboard = dashboards.find((d) => d.id === id)
   const [addOpen, setAddOpen] = useState(false)
+  const [sectionPickerOpen, setSectionPickerOpen] = useState(false)
   const [moreOpen, setMoreOpen] = useState(false)
   const [tipDismissed, setTipDismissed] = useState(false)
   const [selectedPid, setSelectedPid] = useState(null)
@@ -67,6 +69,9 @@ export default function DashboardCanvas() {
   const selected = placements.find((p) => p.pid === selectedPid)
   const lockedCount = placements.filter((p) => p.fixed).length
   const allLocked = placements.length > 0 && lockedCount === placements.length
+  // If placement is null the user hasn't chosen a section yet — show the section-picker empty state.
+  const needsSection = !dashboard?.placement
+
   // Lifecycle: edits auto-persist; a published dashboard with edits has unpublished changes.
   const published = dashboard?.status === 'published'
   const dirty = !!dashboard?.dirty
@@ -224,14 +229,22 @@ export default function DashboardCanvas() {
           {entityHeaderApplies(dashboard?.placement) && <EntityContextHeader placement={dashboard.placement} />}
 
           {placements.length === 0 ? (
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              <AddWidgetCard onClick={() => setAddOpen(true)} />
-              <div className="flex items-center sm:col-span-1 lg:col-span-2">
-                <Button variant="secondary" onClick={() => setSuggestOpen(true)}>
-                  <Sparkles size={15} aria-hidden="true" /> Suggest widgets
-                </Button>
+            needsSection ? (
+              /* No section chosen yet — guide the user before they add widgets */
+              <div className="mx-auto mt-8 flex max-w-lg flex-col gap-3">
+                <ChooseSectionCard onClick={() => setSectionPickerOpen(true)} />
+                <AddWidgetCardDisabled />
               </div>
-            </div>
+            ) : (
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                <AddWidgetCard onClick={() => setAddOpen(true)} />
+                <div className="flex items-center sm:col-span-1 lg:col-span-2">
+                  <Button variant="secondary" onClick={() => setSuggestOpen(true)}>
+                    <Sparkles size={15} aria-hidden="true" /> Suggest widgets
+                  </Button>
+                </div>
+              </div>
+            )
           ) : (
             <>
             {!tipDismissed && (
@@ -269,6 +282,18 @@ export default function DashboardCanvas() {
             </>
           )}
         </div>
+
+        {/* Section picker — shown when dashboard has no placement yet */}
+        {sectionPickerOpen && (
+          <SectionPickerDialog
+            onSelect={(placement) => {
+              const entity = placement.surface === 'profile' ? placement.profileType : 'Report'
+              updateDashboard(id, { placement, entity })
+              setSectionPickerOpen(false)
+            }}
+            onClose={() => setSectionPickerOpen(false)}
+          />
+        )}
 
         {/* Library browser — marketplace-style picker over the widget library */}
         {addOpen && (
@@ -414,6 +439,52 @@ function MenuItem({ icon: Icon, onClick, children }) {
       {Icon && <Icon size={15} aria-hidden="true" className="shrink-0 text-gray-500 dark:text-slate-400" />}
       {children}
     </button>
+  )
+}
+
+/* ── "Choose section" empty-state card — shown before a placement is assigned ── */
+function ChooseSectionCard({ onClick }) {
+  return (
+    <button
+      onClick={onClick}
+      className="group flex w-full flex-col items-center gap-3 rounded-xl border border-dashed border-aims-blue/40 bg-aims-blue/[0.03] px-6 py-8 text-center transition-all duration-200 hover:border-aims-blue/70 hover:bg-aims-blue/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aims-blue/40"
+    >
+      <span className="grid h-10 w-10 place-items-center rounded-xl border border-aims-blue/20 bg-aims-blue/10 text-aims-blue transition-colors group-hover:border-aims-blue/40 group-hover:bg-aims-blue/20">
+        <MapPin size={18} strokeWidth={1.5} aria-hidden="true" />
+      </span>
+      <span className="flex flex-col items-center gap-1">
+        <span className="text-[14px] font-semibold text-slate-100">Choose section</span>
+        <span className="max-w-xs text-[12px] leading-relaxed text-slate-400">
+          The widgets you can add depend on where this dashboard will be displayed.
+        </span>
+      </span>
+      <span className="inline-flex items-center gap-1.5 rounded-lg bg-aims-blue px-4 py-1.5 text-[12px] font-semibold text-white transition-opacity group-hover:opacity-90">
+        Choose <Plus size={13} strokeWidth={2.5} aria-hidden="true" />
+      </span>
+    </button>
+  )
+}
+
+/* ── Disabled "Add widget" card — shown before section is chosen ── */
+function AddWidgetCardDisabled() {
+  return (
+    <div
+      aria-disabled="true"
+      className="flex w-full flex-col items-center gap-3 rounded-xl border border-dashed border-white/[0.07] bg-white/[0.015] px-6 py-8 text-center opacity-40"
+    >
+      <span className="grid h-10 w-10 place-items-center rounded-xl border border-white/10 bg-white/5 text-slate-500">
+        <LayoutGrid size={18} strokeWidth={1.5} aria-hidden="true" />
+      </span>
+      <span className="flex flex-col items-center gap-1">
+        <span className="text-[14px] font-semibold text-slate-300">Start adding widgets</span>
+        <span className="max-w-xs text-[12px] leading-relaxed text-slate-500">
+          Customize your dashboard with widgets that assist your team.
+        </span>
+      </span>
+      <span className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-4 py-1.5 text-[12px] font-semibold text-slate-400">
+        Add <Plus size={13} strokeWidth={2.5} aria-hidden="true" />
+      </span>
+    </div>
   )
 }
 
