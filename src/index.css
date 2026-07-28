@@ -64,22 +64,16 @@
     @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-red-50 text-aims-stale border border-red-200 dark:bg-red-500/10 dark:border-red-500/25;
   }
 
-  /* Buttons — high-end control system: fixed 36px height, focus-visible ring,
-     press state, restrained shadows. Primary keeps the AIMS-OS brand gradient. */
+  /* Buttons — DS spec: Primary = solid #2b7fff, h-10, rounded-lg, no shadow. */
   .btn-primary {
-    @apply inline-flex h-9 select-none items-center justify-center gap-2 whitespace-nowrap rounded-lg px-4 text-sm font-semibold text-white transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none;
-    background: var(--grad);
-    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    @apply inline-flex h-10 select-none items-center justify-center gap-2 whitespace-nowrap rounded-lg px-4 text-sm font-semibold text-white transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50;
+    background: #2b7fff;
   }
   .btn-primary:hover:not(:disabled) {
-    transform: translateY(-1px);
-    filter: brightness(1.05);
-    box-shadow: 0 6px 16px -4px rgba(21, 93, 252, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    filter: brightness(1.08);
   }
   .btn-primary:active:not(:disabled) {
-    transform: translateY(0);
-    filter: brightness(0.97);
-    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.24), inset 0 1px 1px rgba(15, 23, 42, 0.12);
+    filter: brightness(0.95);
   }
   .btn-primary:focus-visible {
     @apply outline-none ring-2 ring-aims-blue/50 ring-offset-2 ring-offset-white dark:ring-offset-[#131a2c];
