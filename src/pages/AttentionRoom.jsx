@@ -11,21 +11,36 @@ export default function AttentionRoom() {
   const navigate  = useNavigate()
   const location  = useLocation()
 
-  // Pre-resolve any wq items already actioned from Today's Focus
-  const [done,     setDone]     = useState(() => getResolved())
-  const [declined, setDeclined] = useState(new Set())
-  const [archived, setArchived] = useState(new Set())
-  const [read,     setRead]     = useState(new Set())
-  // Deep-link: /home/attention navigated from Today's Focus "Review in full" passes selectId
-  const [selected, setSelected] = useState(
+  const [done,      setDone]      = useState(() => getResolved())
+  const [declined,  setDeclined]  = useState(new Set())
+  const [archived,  setArchived]  = useState(new Set())
+  const [read,      setRead]      = useState(new Set())
+  const [selected,  setSelected]  = useState(
     location.state?.selectId ? { id: location.state.selectId } : null,
   )
-  const [toast,    setToast]    = useState(null)
+  const [toast,     setToast]     = useState(null)
+  const [search,    setSearch]    = useState('')
+  const [filterCat, setFilterCat] = useState('all')
 
   const allItems = useMemo(
     () => buildItems({ done, declined, archived }).slice().sort((a, b) => rank(a) - rank(b)),
     [done, declined, archived],
   )
+
+  const filteredItems = useMemo(() => {
+    let items = allItems
+    if (filterCat !== 'all') items = items.filter(i => i._cat === filterCat)
+    if (search.trim()) {
+      const q = search.trim().toLowerCase()
+      items = items.filter(i =>
+        (i.title ?? i.subject ?? '').toLowerCase().includes(q) ||
+        (i.studio ?? '').toLowerCase().includes(q) ||
+        (i.type ?? '').toLowerCase().includes(q) ||
+        (i.from ?? '').toLowerCase().includes(q),
+      )
+    }
+    return items
+  }, [allItems, search, filterCat])
 
   const urgent = totalUrgent(allItems, read)
 
@@ -130,9 +145,14 @@ export default function AttentionRoom() {
       {/* Two-pane body */}
       <div className="flex min-h-0 flex-1 overflow-hidden">
         <AttentionQueue
-          items={allItems}
+          items={filteredItems}
+          totalCount={allItems.length}
           selectedId={selectedItem?.id ?? null}
           onSelect={handleSelect}
+          search={search}
+          onSearch={setSearch}
+          filterCat={filterCat}
+          onFilterCat={setFilterCat}
         />
         <AttentionDetail
           item={selectedItem}
