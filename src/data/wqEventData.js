@@ -3,6 +3,14 @@ export const WQ_EVENT_DATA = {
 
   // ── wq-1 · gov-promotion ────────────────────────────────────────────────────
   'wq-1': {
+    sourceRef: 'DIAN-4821',
+    destination: 'KCON Legal Queue',
+    pipelineSteps: [
+      { id: 'ps-1', label: 'Indexing',         status: 'complete' },
+      { id: 'ps-2', label: 'Claim Detection',   status: 'complete' },
+      { id: 'ps-3', label: 'Conflict Check',    status: 'active'   },
+      { id: 'ps-4', label: 'KCON Routing',      status: 'pending'  },
+    ],
     claims: [
       { id: 'CLM-001', text: 'The applicable withholding rate for cross-border service providers under DIAN Resolution 2024-0419 is 3.5%.', confidence: 0.94, conflict: false },
       { id: 'CLM-002', text: 'Electronic invoicing is mandatory for all transactions exceeding COP 3,500,000.', confidence: 0.88, conflict: false },

@@ -361,6 +361,45 @@ function GovPromotion({ event, md, onResolve, onDecline }) {
             <span><strong>{event.blastRadius}</strong> workflows blocked until this attestation is submitted</span>
           </div>
         )}
+
+        {/* Pipeline steps */}
+        {md.pipelineSteps?.length > 0 && (
+          <div className="mt-4">
+            <p className="mb-2 text-[9px] font-semibold uppercase tracking-[0.1em] text-gray-400 dark:text-slate-600">Pipeline</p>
+            <div className="flex flex-wrap items-center">
+              {md.pipelineSteps.map((step, idx) => (
+                <div key={step.id} className="flex items-center">
+                  <div className={`flex h-5 items-center gap-1 rounded-full px-2 text-[9px] font-semibold ${
+                    step.status === 'complete'
+                      ? 'bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-400'
+                      : step.status === 'active'
+                      ? 'bg-aims-blue/10 text-aims-blue ring-1 ring-inset ring-aims-blue/40'
+                      : 'bg-gray-100 text-gray-400 dark:bg-white/[0.04] dark:text-slate-600'
+                  }`}>
+                    {step.status === 'complete' && <CheckCircle2 size={8} />}
+                    {step.status === 'active' && (
+                      <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-aims-blue" />
+                    )}
+                    {step.label}
+                  </div>
+                  {idx < md.pipelineSteps.length - 1 && (
+                    <div className={`h-px w-3 shrink-0 ${
+                      md.pipelineSteps[idx + 1].status !== 'pending'
+                        ? 'bg-green-300 dark:bg-green-800/40'
+                        : 'bg-gray-200 dark:bg-white/[0.06]'
+                    }`} />
+                  )}
+                </div>
+              ))}
+            </div>
+            {md.destination && (
+              <div className="mt-2 flex items-center gap-1.5 text-[10px] text-gray-500 dark:text-slate-500">
+                <span className="text-gray-300 dark:text-white/20">→</span>
+                <span className="font-medium text-gray-700 dark:text-slate-300">{md.destination}</span>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       <Divider />

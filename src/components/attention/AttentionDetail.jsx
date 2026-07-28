@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Workflow, Bot, ArrowUpRight, CheckSquare, Square, Clock, Tag, Link2 } from 'lucide-react'
+import { Workflow, Bot, ArrowUpRight, CheckSquare, Square, Clock, Tag, Link2, AlertTriangle, CheckCircle2 } from 'lucide-react'
 import { WQDecisionSurface } from '../workqueue/WQDecisionSurface.jsx'
 import { WQ_EVENT_DATA } from '../../data/wqEventData.js'
 
@@ -177,21 +177,62 @@ export function AttentionDetail({ item, onApprove, onDecline, onComplete, onDism
   // WQ events with eventCategory get a type-specific decision surface
   if (item.eventCategory) {
     const md = WQ_EVENT_DATA[item.id] ?? {}
+    const evtNum = (() => {
+      const n = parseInt((item.id ?? '').replace(/\D/g, ''), 10)
+      return isNaN(n) ? 'EVT-???' : `EVT-${String(n).padStart(3, '0')}`
+    })()
+    const isUrgent = item.missionCritical || (item.blastRadius ?? 0) >= 10
     return (
       <div className="flex flex-1 flex-col h-full min-h-0 overflow-hidden">
-        <div className="shrink-0 px-7 pt-7 pb-5 border-b border-gray-100 dark:border-white/[0.05]">
-          <div className="mb-3 flex items-center gap-2">
+        <div className="shrink-0 px-7 pt-6 pb-5 border-b border-gray-100 dark:border-white/[0.05]">
+
+          {/* Row 1 — chips */}
+          <div className="mb-2.5 flex flex-wrap items-center gap-1.5">
+            <span className="rounded bg-gray-900 dark:bg-white/[0.1] px-1.5 py-0.5 font-mono text-[9px] font-bold text-white dark:text-slate-200">
+              {evtNum}
+            </span>
             <span className={`rounded px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide ${kMeta.color}`}>
               {kMeta.label}
             </span>
-            <span className="rounded bg-gray-100 px-1.5 py-0.5 text-[9px] font-semibold text-gray-500 dark:bg-white/[0.06] dark:text-slate-500">
-              {item.type}
+            {md.sourceRef && (
+              <span className="rounded bg-gray-100 dark:bg-white/[0.06] px-1.5 py-0.5 font-mono text-[9px] text-gray-500 dark:text-slate-500">
+                {md.sourceRef}
+              </span>
+            )}
+            {item.quickActions?.primary && (
+              <span className="rounded bg-aims-blue/10 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-aims-blue">
+                {item.quickActions.primary}
+              </span>
+            )}
+            <span className="ml-auto rounded bg-green-500/10 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-green-600 dark:text-green-400">
+              OPEN
             </span>
-            <span className="ml-auto text-[10px] text-gray-400 dark:text-slate-600">{item.dueLabel ?? ''}</span>
           </div>
-          <h2 className="text-base font-semibold leading-snug text-gray-900 dark:text-slate-100">
+
+          {/* Title */}
+          <h2 className="text-[15px] font-semibold leading-snug text-gray-900 dark:text-slate-100">
             {item.title}
           </h2>
+
+          {/* Mission Critical badge */}
+          {item.missionCritical && (
+            <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-amber-50 dark:bg-amber-900/20 border border-amber-200/60 dark:border-amber-700/30 px-2 py-0.5">
+              <AlertTriangle size={9} className="text-amber-500" aria-hidden="true" />
+              <span className="text-[9px] font-bold uppercase tracking-wide text-amber-600 dark:text-amber-400">Mission Critical</span>
+            </div>
+          )}
+
+          {/* Urgency bar */}
+          {isUrgent && (
+            <div className="mt-3 h-0.5 w-full overflow-hidden rounded-full bg-red-100 dark:bg-red-900/20">
+              <div className="h-full w-4/5 rounded-full bg-red-400 dark:bg-red-500" />
+            </div>
+          )}
+
+          {/* Due label */}
+          {item.dueLabel && (
+            <p className="mt-2 text-[10px] text-gray-400 dark:text-slate-600">{item.dueLabel}</p>
+          )}
         </div>
         <WQDecisionSurface
           event={item}
