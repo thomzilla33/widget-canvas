@@ -301,6 +301,45 @@ Thomas`,
     crmRecord: 'CRM-88312',
   },
 
+  // ── wq-6 · task ─────────────────────────────────────────────────────────────
+  'wq-6': {
+    templateId: 'TMPL-REV-Q3-2026',
+    assignedBy: 'Ana Restrepo',
+    assignedByRole: 'Revenue Ops Lead',
+    note: 'Template pre-filled from Q2 2026 actuals. Review the pipeline section before submitting — the coverage ratio changed after two new deals closed last week.',
+    requiredFields: [
+      'Q3 projected revenue by product line',
+      'Pipeline coverage ratio (target: 2.0x minimum)',
+      'At-risk deals above $100K with mitigation notes',
+      'YoY variance commentary (target ± 5%)',
+    ],
+    submissionTarget: 'RevOps Dashboard — Q3 Forecast Collection',
+    deadline: 'Today · 12:00 PM',
+  },
+
+  // ── wq-9 · acknowledge ──────────────────────────────────────────────────────
+  'wq-9': {
+    incidentRef: 'SYNC-2026-0728',
+    status: 'Monitoring',
+    responsibleTeam: 'Engineering / Infra Ops',
+    resolvedEta: '~2h remaining',
+    note: 'Delay caused by upstream Salesforce API rate limiting during peak window. Engineering has increased the polling interval as a temporary fix and is monitoring recovery. Dashboards will show stale data until sync completes — no manual action required.',
+  },
+
+  // ── wq-10 · resolve ─────────────────────────────────────────────────────────
+  'wq-10': {
+    auditRef: 'ISO-27001-2026-Q3',
+    nextMilestone: 'Aug 10 — Kickoff call with external auditors',
+    assignedAreas: ['Data Classification', 'Access Control Logs', 'Incident Response Playbook'],
+    checklist: [
+      'Review and sign off on the Data Classification Policy update (v2.3)',
+      'Verify access control logs are complete for the past 90 days',
+      'Confirm Incident Response Playbook reflects current agent infrastructure',
+      'Validate all governance workflows are documented in the KCON register',
+      'Schedule pre-audit internal review with the Compliance team',
+    ],
+  },
+
   // ── wq-13 · inbound-question ─────────────────────────────────────────────────
   'wq-13': {
     thread: {

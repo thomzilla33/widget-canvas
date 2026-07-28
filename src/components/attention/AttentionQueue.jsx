@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { ShieldAlert, Bot, ListChecks, Mail, CircleAlert, Search, X } from 'lucide-react'
 import { groupItems } from '../home/attention/attentionModel.js'
+import { WQ_TIER } from '../../data/workqueue.js'
 
 const KIND_META = {
   gov:   { icon: ShieldAlert, color: 'text-aims-blue',                        bg: 'bg-aims-blue/10 dark:bg-aims-blue/[0.15]'          },
@@ -77,6 +78,110 @@ function itemDetail(item) {
   if (item._kind === 'inbox' && item.from)   return `From ${item.from}`
   if (item._kind === 'task' && item.assignee) return item.assignee
   return null
+}
+
+const STUDIO_LABEL = {
+  GOV:  'Governance',
+  AGNT: 'Agentic',
+  DATA: 'Data Studio',
+  TASK: 'Tasks',
+}
+
+function WQItemCard({ item, isActive, onClick }) {
+  const tier = WQ_TIER[item.tier] ?? WQ_TIER.action
+  const studioLabel = STUDIO_LABEL[item.studio] ?? item.studio ?? ''
+  const evtNum = (() => {
+    const n = parseInt((item.id ?? '').replace(/\D/g, ''), 10)
+    return isNaN(n) ? '' : `EVT-${String(n).padStart(3, '0')}`
+  })()
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`w-full text-left px-3 py-2.5 transition-all duration-150 ${
+        isActive
+          ? 'bg-gradient-to-r from-aims-blue/[0.08] to-transparent dark:from-aims-blue/[0.13] dark:to-transparent'
+          : 'hover:bg-gray-100/80 dark:hover:bg-white/[0.025]'
+      }`}
+      aria-pressed={isActive}
+    >
+      <div className="flex items-start gap-2.5">
+        {/* Active bar */}
+        <span className={`mt-[3px] self-stretch w-[2px] rounded-full shrink-0 transition-all duration-200 ${isActive ? 'bg-aims-blue' : 'bg-transparent'}`} />
+
+        {/* Tier dot */}
+        <span className={`mt-2 h-1.5 w-1.5 rounded-full shrink-0 ${tier.dot}`} />
+
+        {/* Content */}
+        <div className="min-w-0 flex-1">
+
+          {/* Row 1: event ID + due status + mission critical */}
+          <div className="flex flex-wrap items-center gap-1 mb-1">
+            {evtNum && (
+              <span className="font-mono text-[8px] font-bold text-gray-400 dark:text-slate-700">{evtNum}</span>
+            )}
+            {item.dueLabel && (
+              <span className={`rounded px-1.5 py-[1px] text-[8px] font-bold leading-4 ${tier.badge}`}>
+                {item.dueLabel}
+              </span>
+            )}
+            {item.missionCritical && (
+              <span className="rounded bg-amber-500/10 px-1.5 py-[1px] text-[8px] font-bold leading-4 text-amber-600 dark:text-amber-400">
+                Mission Critical
+              </span>
+            )}
+          </div>
+
+          {/* Row 2: title */}
+          <p className={`text-[11px] leading-snug transition-colors ${
+            isActive
+              ? 'font-semibold text-gray-900 dark:text-white'
+              : 'font-medium text-gray-700 dark:text-slate-300'
+          }`}>
+            {item.title}
+          </p>
+
+          {/* Row 3: description snippet */}
+          {item.description && (
+            <p className="mt-0.5 text-[9px] leading-relaxed text-gray-400 dark:text-slate-600 line-clamp-2">
+              {item.description}
+            </p>
+          )}
+
+          {/* Row 4: studio + type + blast radius + est. time */}
+          <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+            {item.studio && (
+              <span
+                className="rounded-full px-1.5 py-[1px] text-[8px] font-bold leading-4"
+                style={{ backgroundColor: (item.studioColor ?? '#888') + '22', color: item.studioColor ?? '#888' }}
+              >
+                {studioLabel}
+              </span>
+            )}
+            {item.type && (
+              <span className="rounded bg-gray-100 dark:bg-white/[0.06] px-1.5 py-[1px] text-[8px] font-semibold leading-4 text-gray-500 dark:text-slate-500">
+                {item.type}
+              </span>
+            )}
+            {item.blastRadius > 0 && (
+              <>
+                <span className="text-gray-300 dark:text-slate-800 text-[8px]">·</span>
+                <span className="text-[8px] text-gray-400 dark:text-slate-600">
+                  {item.blastRadius} {item.blastRadius === 1 ? 'flow' : 'flows'} blocked
+                </span>
+              </>
+            )}
+            {item.estimatedMinutes && (
+              <span className="ml-auto text-[8px] text-gray-400 dark:text-slate-700">
+                ~{item.estimatedMinutes}m
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+    </button>
+  )
 }
 
 export function AttentionQueue({ items, totalCount, selectedId, onSelect, search, onSearch, filterCat, onFilterCat }) {
@@ -208,10 +313,17 @@ export function AttentionQueue({ items, totalCount, selectedId, onSelect, search
                 </div>
 
                 {group.items.map(item => {
+                  const isActive = item.id === selectedId
+
+                  if (item._kind === 'wq') {
+                    return (
+                      <WQItemCard key={item.id} item={item} isActive={isActive} onClick={() => onSelect(item)} />
+                    )
+                  }
+
                   const meta     = KIND_META[item._kind] ?? KIND_META.task
                   const Icon     = item.status === 'error' ? CircleAlert : meta.icon
                   const iconCol  = item.status === 'error' ? 'text-red-500 dark:text-red-400' : meta.color
-                  const isActive = item.id === selectedId
                   const impact   = itemImpact(item)
                   const when     = itemWhen(item)
                   const badge    = kindBadge(item)

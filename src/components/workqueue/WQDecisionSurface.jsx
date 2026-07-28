@@ -1094,23 +1094,140 @@ function QuestionSurface({ event, md, onResolve, onDecline }) {
   )
 }
 
-// ── 10. Generic WQ surface ────────────────────────────────────────────────────
+// ── 10. Generic WQ surface (task / acknowledge / resolve / fallback) ──────────
 
 function GenericWQSurface({ event, md, onResolve, onDecline }) {
+  const secondary = event.quickActions?.secondary ?? []
+
   const footer = (
     <div className="space-y-2">
       <button type="button" onClick={() => onResolve('Acknowledged')} className="btn-primary w-full py-2.5 text-sm font-semibold">
         {event.quickActions?.primary ?? 'Take action'}
       </button>
+      {secondary.length > 0 && (
+        <div className="flex gap-2">
+          {secondary.slice(0, 2).map((label, i) => (
+            <button key={i} type="button" onClick={() => onDecline()} className="flex-1 rounded-lg border border-gray-200 py-2 text-xs font-medium text-gray-600 hover:bg-gray-50 dark:border-white/[0.08] dark:text-slate-300 dark:hover:bg-white/[0.04]">
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
       <WQSecondaryLinks onDecline={onDecline} />
     </div>
   )
+
   return (
     <Surface footer={footer}>
+
+      {/* Context / description */}
       <div>
         <SectionLabel>Context</SectionLabel>
         <p className="text-sm leading-relaxed text-gray-600 dark:text-slate-400">{event.description}</p>
       </div>
+
+      {/* Details grid: source workflow + due + estimated time */}
+      {(event.sourceWorkflow || event.dueLabel || event.estimatedMinutes) && <>
+        <Divider />
+        <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+          {event.sourceWorkflow && <Row label="Source" value={event.sourceWorkflow} />}
+          {event.dueLabel && <Row label="Timeline" value={event.dueLabel} />}
+          {event.estimatedMinutes && <Row label="Est. time" value={`~${event.estimatedMinutes} min`} />}
+          {md.deadline && <Row label="Deadline" value={md.deadline} accent />}
+          {md.auditRef && <Row label="Audit ref" value={md.auditRef} accent />}
+          {md.nextMilestone && <Row label="Next milestone" value={md.nextMilestone} />}
+        </div>
+      </>}
+
+      {/* Assignee / source (task) */}
+      {(md.assignedBy || md.submissionTarget) && <>
+        <Divider />
+        <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+          {md.assignedBy && (
+            <div>
+              <p className="text-[9px] font-semibold uppercase tracking-wide text-gray-400 dark:text-slate-600">Assigned by</p>
+              <p className="mt-0.5 text-[11px] font-medium text-gray-700 dark:text-slate-300">{md.assignedBy}</p>
+              {md.assignedByRole && <p className="text-[9px] text-gray-400 dark:text-slate-600">{md.assignedByRole}</p>}
+            </div>
+          )}
+          {md.submissionTarget && (
+            <div>
+              <p className="text-[9px] font-semibold uppercase tracking-wide text-gray-400 dark:text-slate-600">Submit to</p>
+              <p className="mt-0.5 text-[11px] font-medium text-gray-700 dark:text-slate-300">{md.submissionTarget}</p>
+            </div>
+          )}
+        </div>
+      </>}
+
+      {/* Required fields (task) */}
+      {md.requiredFields?.length > 0 && <>
+        <Divider />
+        <div>
+          <SectionLabel>Required fields</SectionLabel>
+          <ul className="mt-2 space-y-1.5">
+            {md.requiredFields.map((field, i) => (
+              <li key={i} className="flex items-start gap-2 text-xs text-gray-600 dark:text-slate-400">
+                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-gray-300 dark:bg-white/20" />
+                {field}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </>}
+
+      {/* Incident note (acknowledge) */}
+      {md.note && <>
+        <Divider />
+        <div>
+          <SectionLabel>Note</SectionLabel>
+          <p className="text-xs leading-relaxed text-gray-600 dark:text-slate-400">{md.note}</p>
+        </div>
+      </>}
+
+      {/* Incident status row (acknowledge) */}
+      {(md.status || md.responsibleTeam || md.resolvedEta || md.incidentRef) && <>
+        <Divider />
+        <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+          {md.status && <Row label="Status" value={md.status} />}
+          {md.responsibleTeam && <Row label="Handling" value={md.responsibleTeam} />}
+          {md.resolvedEta && <Row label="ETA" value={md.resolvedEta} />}
+          {md.incidentRef && <Row label="Incident ref" value={md.incidentRef} accent />}
+        </div>
+      </>}
+
+      {/* Checklist (resolve / audit) */}
+      {md.checklist?.length > 0 && <>
+        <Divider />
+        <div>
+          <SectionLabel>Checklist</SectionLabel>
+          <ul className="mt-2 space-y-2">
+            {md.checklist.map((item, i) => (
+              <li key={i} className="flex items-start gap-2.5 text-xs text-gray-600 dark:text-slate-400">
+                <span className="mt-1 flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded border border-gray-300 dark:border-white/20">
+                  <span className="h-1.5 w-1.5 rounded-sm bg-gray-300 dark:bg-white/20" />
+                </span>
+                {item}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </>}
+
+      {/* Assigned areas (resolve / audit) */}
+      {md.assignedAreas?.length > 0 && <>
+        <Divider />
+        <div>
+          <SectionLabel>Assigned areas</SectionLabel>
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {md.assignedAreas.map((area, i) => (
+              <span key={i} className="rounded-full bg-aims-blue/10 px-2.5 py-0.5 text-[10px] font-semibold text-aims-blue dark:bg-aims-blue/[0.12]">
+                {area}
+              </span>
+            ))}
+          </div>
+        </div>
+      </>}
+
     </Surface>
   )
 }
