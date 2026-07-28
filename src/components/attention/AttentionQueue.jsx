@@ -23,8 +23,13 @@ const FILTER_TABS = [
   { id: 'messages',  label: 'Messages'  },
 ]
 
-function itemTitle(item) { return item.title ?? item.subject ?? '(untitled)' }
-function itemWhen(item)  { return item.when ?? item.at ?? '' }
+function itemTitle(item)   { return item.title ?? item.subject ?? '(untitled)' }
+function itemWhen(item)   { return item.when ?? item.at ?? '' }
+function itemSnippet(item) {
+  const t = item.body ?? item.context ?? item.detail ?? ''
+  if (!t) return null
+  return t.length > 72 ? t.slice(0, 72).trimEnd() + '…' : t
+}
 
 function itemImpact(item) {
   if (item._kind === 'gov' && item.impact) return `${item.impact.workflows}w · ${item.impact.agents}a`
@@ -259,6 +264,13 @@ export function AttentionQueue({ items, totalCount, selectedId, onSelect, search
                             <span className="truncate text-[9px] text-gray-400 dark:text-slate-600">{detail}</span>
                           )}
                         </div>
+
+                        {/* Body snippet */}
+                        {(() => { const s = itemSnippet(item); return s ? (
+                          <p className="mt-0.5 text-[9px] leading-relaxed text-gray-400 dark:text-slate-600 line-clamp-1">
+                            {s}
+                          </p>
+                        ) : null })()}
 
                         {/* Impact + when row */}
                         {(impact || when) && (

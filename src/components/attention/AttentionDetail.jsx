@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Workflow, Bot, ArrowUpRight } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Workflow, Bot, ArrowUpRight, CheckSquare, Square, Clock, Tag, Link2 } from 'lucide-react'
 import { WQDecisionSurface } from '../workqueue/WQDecisionSurface.jsx'
 import { WQ_EVENT_DATA } from '../../data/wqEventData.js'
 
@@ -9,6 +9,12 @@ const KIND_LABEL = {
   task:  { label: 'Task',                color: 'bg-gray-100 text-gray-600 dark:bg-white/[0.07] dark:text-slate-400' },
   inbox: { label: 'Message',             color: 'bg-gray-100 text-gray-600 dark:bg-white/[0.07] dark:text-slate-400' },
   wq:    { label: 'My Day · Work Queue', color: 'bg-amber-500/10 text-amber-600 dark:text-amber-400' },
+}
+
+const PRIORITY_COLOR = {
+  high: 'bg-red-500/10 text-red-600 dark:text-red-400',
+  med:  'bg-amber-500/10 text-amber-700 dark:text-amber-400',
+  low:  'bg-gray-100 text-gray-500 dark:bg-white/[0.06] dark:text-slate-500',
 }
 
 function enrichItem(item) {
@@ -118,16 +124,39 @@ function enrichItem(item) {
   return base
 }
 
+// Build compact metadata chips from item fields
+function metaChips(item) {
+  const chips = []
+  if (item.at) {
+    chips.push({ icon: 'clock', label: item.at })
+  }
+  if (item.meta?.trigger)     chips.push({ icon: 'tag', label: item.meta.trigger })
+  if (item.meta?.source)      chips.push({ icon: 'tag', label: item.meta.source })
+  if (item.meta?.requestedBy) chips.push({ icon: 'tag', label: `Req. by ${item.meta.requestedBy}` })
+  if (item.meta?.category)    chips.push({ icon: 'tag', label: item.meta.category })
+  if (item.meta?.lastOk)      chips.push({ icon: 'clock', label: `Last OK: ${item.meta.lastOk}` })
+  if (item.meta?.confidence)  chips.push({ icon: 'tag', label: `Confidence ${item.meta.confidence}` })
+  if (item.meta?.model)       chips.push({ icon: 'tag', label: item.meta.model })
+  if (item.meta?.runId)       chips.push({ icon: 'tag', label: item.meta.runId })
+  if (item._kind === 'wq' && item.dueLabel)          chips.push({ icon: 'clock', label: item.dueLabel })
+  if (item._kind === 'wq' && item.estimatedMinutes)  chips.push({ icon: 'clock', label: `~${item.estimatedMinutes} min` })
+  if (item.priority && item.priority !== 'med')      chips.push({ icon: 'tag', label: `${item.priority === 'high' ? 'High' : 'Low'} priority`, priority: item.priority })
+  return chips
+}
+
 function titleOf(item) { return item.title ?? item.subject ?? '(untitled)' }
 function whenOf(item)  { return item.when ?? item.at ?? '' }
 function bodyOf(item)  { return item.body ?? item.detail ?? item.context ?? '' }
 
-const Divider = () => (
-  <div className="border-t border-gray-100 dark:border-white/[0.05]" />
-)
+const Divider = () => <div className="border-t border-gray-100 dark:border-white/[0.05]" />
 
 export function AttentionDetail({ item, onApprove, onDecline, onComplete, onDismiss }) {
-  const [note, setNote] = useState('')
+  const [note,     setNote]     = useState('')
+  const [attested, setAttested] = useState(false)
+
+  useEffect(() => {
+    setAttested(false)
+  }, [item?.id])
 
   if (!item) {
     return (
@@ -143,7 +172,7 @@ export function AttentionDetail({ item, onApprove, onDecline, onComplete, onDism
     )
   }
 
-  const kMeta  = KIND_LABEL[item._kind] ?? KIND_LABEL.task
+  const kMeta = KIND_LABEL[item._kind] ?? KIND_LABEL.task
 
   // WQ events with eventCategory get a type-specific decision surface
   if (item.eventCategory) {
@@ -176,6 +205,11 @@ export function AttentionDetail({ item, onApprove, onDecline, onComplete, onDism
 
   const enrich = enrichItem(item)
   const body   = bodyOf(item)
+  const chips  = metaChips(item)
+
+  // Attestation required for governance and HTL approvals — V1 requirement
+  const needsAttestation = item._kind === 'gov' || item._kind === 'htl'
+  const primaryDisabled  = needsAttestation && !attested
 
   function handlePrimary() {
     if (item._kind === 'gov' || item._kind === 'htl') onApprove(item)
@@ -190,13 +224,23 @@ export function AttentionDetail({ item, onApprove, onDecline, onComplete, onDism
 
         {/* ── Item header ── */}
         <div className="px-7 pt-7 pb-5">
-          <div className="mb-3 flex items-center gap-2">
+          <div className="mb-3 flex flex-wrap items-center gap-2">
             <span className={`rounded px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide ${kMeta.color}`}>
               {kMeta.label}
             </span>
             {item.status === 'error' && (
               <span className="rounded bg-red-500/10 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-red-500 dark:text-red-400">
                 Error
+              </span>
+            )}
+            {item.priority && (
+              <span className={`rounded px-1.5 py-0.5 text-[9px] font-semibold ${PRIORITY_COLOR[item.priority] ?? PRIORITY_COLOR.low}`}>
+                {item.priority === 'high' ? 'High priority' : item.priority === 'med' ? 'Medium' : 'Low priority'}
+              </span>
+            )}
+            {item.statusLabel && (
+              <span className="rounded bg-gray-100 px-1.5 py-0.5 text-[9px] font-semibold text-gray-500 dark:bg-white/[0.06] dark:text-slate-500">
+                {item.statusLabel}
               </span>
             )}
             <span className="ml-auto text-[10px] text-gray-400 dark:text-slate-600">{whenOf(item)}</span>
@@ -228,6 +272,36 @@ export function AttentionDetail({ item, onApprove, onDecline, onComplete, onDism
             </div>
           </div>
         </div>
+
+        {/* ── Metadata chips ── */}
+        {chips.length > 0 && (
+          <>
+            <Divider />
+            <div className="px-7 py-3.5">
+              <p className="mb-2 text-[9px] font-semibold uppercase tracking-[0.1em] text-gray-400 dark:text-slate-600">
+                Details
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {chips.map((chip, i) => (
+                  <span
+                    key={i}
+                    className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[9px] font-medium ${
+                      chip.priority === 'high'
+                        ? 'border-red-200 bg-red-50 text-red-600 dark:border-red-400/20 dark:bg-red-400/10 dark:text-red-400'
+                        : 'border-gray-200 bg-gray-50 text-gray-600 dark:border-white/[0.06] dark:bg-white/[0.03] dark:text-slate-400'
+                    }`}
+                  >
+                    {chip.icon === 'clock'
+                      ? <Clock size={9} className="shrink-0 opacity-60" aria-hidden="true" />
+                      : <Tag  size={9} className="shrink-0 opacity-60" aria-hidden="true" />
+                    }
+                    {chip.label}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
 
         {/* ── At stake ── */}
         {(enrich.stakesWorkflows > 0 || enrich.stakesAgents > 0) && (
@@ -278,12 +352,38 @@ export function AttentionDetail({ item, onApprove, onDecline, onComplete, onDism
                 Context
               </p>
               <p className="text-sm leading-relaxed text-gray-600 dark:text-slate-400">{body}</p>
-              {item.related?.label && (
-                <button type="button" className="mt-3 flex items-center gap-1 text-[11px] text-aims-blue hover:underline">
-                  <ArrowUpRight size={11} aria-hidden="true" />
-                  {item.related.label}
-                </button>
-              )}
+            </div>
+          </>
+        )}
+
+        {/* ── Related item ── */}
+        {item.related?.label && (
+          <>
+            <Divider />
+            <div className="px-7 py-4">
+              <p className="mb-2 text-[9px] font-semibold uppercase tracking-[0.1em] text-gray-400 dark:text-slate-600">
+                Related
+              </p>
+              <button
+                type="button"
+                className="flex w-full items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 text-left transition-colors hover:border-aims-blue/40 hover:bg-aims-blue/[0.03] dark:border-white/[0.06] dark:bg-white/[0.02] dark:hover:border-aims-blue/30"
+              >
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-aims-blue/10 dark:bg-aims-blue/[0.15]">
+                  <Link2 size={12} className="text-aims-blue" aria-hidden="true" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-[11px] font-medium text-gray-800 dark:text-slate-200">
+                    {item.related.label}
+                  </p>
+                  {(item.related.widgetId || item.related.dashboardId) && (
+                    <p className="text-[9px] text-gray-400 dark:text-slate-600">
+                      {item.related.widgetId ? 'Widget' : 'Dashboard'}
+                      {' · '}{item.related.widgetId ?? item.related.dashboardId}
+                    </p>
+                  )}
+                </div>
+                <ArrowUpRight size={12} className="shrink-0 text-gray-400 dark:text-slate-600" aria-hidden="true" />
+              </button>
             </div>
           </>
         )}
@@ -331,7 +431,9 @@ export function AttentionDetail({ item, onApprove, onDecline, onComplete, onDism
                     <span className={`rounded px-1.5 py-0.5 text-[9px] font-bold ${
                       h.decision === 'Approved' || h.decision === 'Completed' || h.decision === 'Read'
                         ? 'bg-green-500/10 text-aims-governed'
-                        : 'bg-red-500/10 text-red-500 dark:text-red-400'
+                        : h.decision === 'Declined'
+                        ? 'bg-red-500/10 text-red-500 dark:text-red-400'
+                        : 'bg-gray-100 text-gray-500 dark:bg-white/[0.06] dark:text-slate-500'
                     }`}>
                       {h.decision}
                     </span>
@@ -360,12 +462,42 @@ export function AttentionDetail({ item, onApprove, onDecline, onComplete, onDism
         <div className="h-2" />
       </div>
 
-      {/* ── Sticky footer — decisive action strip ── */}
+      {/* ── Sticky footer — attestation + decisive action strip ── */}
       <div className="shrink-0 border-t border-gray-200 dark:border-white/[0.07] bg-white dark:bg-[#0d1117] px-7 pt-4 pb-5">
+
+        {/* Attestation checkbox — required for gov / htl approvals (V1) */}
+        {needsAttestation && (
+          <button
+            type="button"
+            onClick={() => setAttested(a => !a)}
+            className={`mb-3 flex w-full items-start gap-2.5 rounded-lg border px-3 py-2.5 text-left transition-colors ${
+              attested
+                ? 'border-aims-blue/40 bg-aims-blue/[0.05] dark:bg-aims-blue/[0.08]'
+                : 'border-gray-200 bg-gray-50 dark:border-white/[0.07] dark:bg-white/[0.02]'
+            }`}
+            aria-pressed={attested}
+          >
+            {attested
+              ? <CheckSquare size={14} className="mt-0.5 shrink-0 text-aims-blue" aria-hidden="true" />
+              : <Square      size={14} className="mt-0.5 shrink-0 text-gray-400 dark:text-slate-600" aria-hidden="true" />
+            }
+            <span className={`text-[11px] leading-snug ${
+              attested
+                ? 'font-medium text-aims-blue'
+                : 'text-gray-500 dark:text-slate-400'
+            }`}>
+              I have reviewed this item and confirm my decision is intentional.
+            </span>
+          </button>
+        )}
+
         <button
           type="button"
           onClick={handlePrimary}
-          className="btn-primary w-full py-2.5 text-sm font-semibold"
+          disabled={primaryDisabled}
+          className={`btn-primary w-full py-2.5 text-sm font-semibold transition-opacity ${
+            primaryDisabled ? 'opacity-35 cursor-not-allowed' : ''
+          }`}
         >
           {enrich.primaryLabel}
         </button>
