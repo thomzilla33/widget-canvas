@@ -3,21 +3,19 @@ import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
 import { ListChecks, ArrowRight, CheckCircle2 } from 'lucide-react'
 import { MY_WORK_EVENTS, WQ_TIER, WQ_TIER_ORDER } from '../../data/workqueue.js'
-import { WQSectionFilterBar } from './WQSectionFilterBar.jsx'
 import { EventCard } from './wq/EventCard.jsx'
 import UndoToast from './UndoToast.jsx'
 
-const MAX_PER_TIER = 5
+const MAX_TOTAL = 5
 
 export function WorkQueueHomeSection() {
   const navigate = useNavigate()
-  const [filtered,   setFiltered]   = useState(MY_WORK_EVENTS)
   const [expandedId, setExpandedId] = useState(null)
   const [skipped,    setSkipped]    = useState(new Set())
   const [resolved,   setResolved]   = useState(new Set())
   const [toast,      setToast]      = useState(null)
 
-  const visible = filtered.filter(e => !skipped.has(e.id) && !resolved.has(e.id))
+  const visible = MY_WORK_EVENTS.filter(e => !skipped.has(e.id) && !resolved.has(e.id))
 
   const urgentCount = MY_WORK_EVENTS.filter(
     e => !skipped.has(e.id) && !resolved.has(e.id) && ['actnow', 'critical'].includes(e.tier)
@@ -45,8 +43,11 @@ export function WorkQueueHomeSection() {
     })
   }
 
+  const capped   = visible.slice(0, MAX_TOTAL)
+  const overflow = visible.length - capped.length
+
   const grouped = WQ_TIER_ORDER
-    .map(tier => ({ tier, items: visible.filter(e => e.tier === tier) }))
+    .map(tier => ({ tier, items: capped.filter(e => e.tier === tier) }))
     .filter(g => g.items.length > 0)
 
   return (
@@ -61,7 +62,7 @@ export function WorkQueueHomeSection() {
 
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
-              <h2 className="text-sm font-semibold text-gray-900 dark:text-slate-100">Work Queue</h2>
+              <h2 className="text-sm font-semibold text-gray-900 dark:text-slate-100">My Work</h2>
               {urgentCount > 0 && (
                 <span className="rounded-full bg-red-500/10 px-1.5 py-0.5 text-[10px] font-bold text-red-600 dark:text-red-400">
                   {urgentCount} urgent
@@ -85,65 +86,58 @@ export function WorkQueueHomeSection() {
           </button>
         </div>
 
-        {/* ── Filter bar ───────────────────────────────────────────────────── */}
-        <WQSectionFilterBar events={MY_WORK_EVENTS} onFilter={setFiltered} />
-
         {/* ── List ─────────────────────────────────────────────────────────── */}
         <div>
           {visible.length === 0 ? (
             <div className="flex flex-col items-center gap-2 py-14 text-center">
               <CheckCircle2 size={22} className="text-aims-governed" aria-hidden="true" />
               <p className="text-sm font-medium text-gray-400 dark:text-slate-500">All clear</p>
-              <p className="text-xs text-gray-300 dark:text-slate-700">Nothing matches the current filters.</p>
+              <p className="text-xs text-gray-300 dark:text-slate-700">No pending items right now.</p>
             </div>
           ) : (
-            grouped.map(({ tier, items }) => {
-              const t       = WQ_TIER[tier]
-              const capped  = items.slice(0, MAX_PER_TIER)
-              const overflow = items.length - capped.length
-              return (
-                <div key={tier}>
-                  {/* Tier header */}
-                  <div className={`flex items-center gap-2 border-l-2 bg-gray-50/60 px-5 py-2 dark:bg-white/[0.015] ${t.border}`}>
-                    <span className={`h-1.5 w-1.5 rounded-full ${t.dot}`} aria-hidden="true" />
-                    <span className={`text-[10px] font-bold uppercase tracking-wider ${t.text}`}>{t.label}</span>
-                    <span className="text-[10px] text-gray-400 dark:text-slate-600">· {t.sub}</span>
-                    <span className={`ml-auto rounded-full px-1.5 py-0.5 text-[9px] font-bold ${t.badge}`}>{items.length}</span>
-                  </div>
-
-                  {/* Event rows */}
-                  <div className="divide-y divide-gray-50 dark:divide-white/[0.03]">
-                    {capped.map(event => (
-                      <EventCard
-                        key={event.id}
-                        event={event}
-                        expanded={expandedId === event.id}
-                        onToggle={() => setExpandedId(prev => prev === event.id ? null : event.id)}
-                        onOpen={() => navigate('/home/attention')}
-                        onEscalate={() => navigate('/home/attention')}
-                        onSkip={skip}
-                        onTrace={() => {}}
-                        onApprove={id => resolveItem(id, 'Approved')}
-                        onReject={id  => resolveItem(id, 'Rejected')}
-                        onCorrect={id => resolveItem(id, 'Correction submitted')}
-                      />
-                    ))}
-                  </div>
-
-                  {overflow > 0 && (
-                    <div className="flex items-center justify-center border-t border-gray-50 py-2.5 dark:border-white/[0.03]">
-                      <button
-                        type="button"
-                        onClick={() => navigate('/home/attention')}
-                        className="text-[11px] text-aims-blue hover:underline"
-                      >
-                        +{overflow} more — see all in Work Queue
-                      </button>
+            <>
+              {grouped.map(({ tier, items }) => {
+                const t = WQ_TIER[tier]
+                return (
+                  <div key={tier}>
+                    <div className={`flex items-center gap-2 border-l-2 bg-gray-50/60 px-5 py-2 dark:bg-white/[0.015] ${t.border}`}>
+                      <span className={`h-1.5 w-1.5 rounded-full ${t.dot}`} aria-hidden="true" />
+                      <span className={`text-[10px] font-bold uppercase tracking-wider ${t.text}`}>{t.label}</span>
+                      <span className="text-[10px] text-gray-400 dark:text-slate-600">· {t.sub}</span>
+                      <span className={`ml-auto rounded-full px-1.5 py-0.5 text-[9px] font-bold ${t.badge}`}>{items.length}</span>
                     </div>
-                  )}
+                    <div className="divide-y divide-gray-50 dark:divide-white/[0.03]">
+                      {items.map(event => (
+                        <EventCard
+                          key={event.id}
+                          event={event}
+                          expanded={expandedId === event.id}
+                          onToggle={() => setExpandedId(prev => prev === event.id ? null : event.id)}
+                          onOpen={() => navigate('/home/attention')}
+                          onEscalate={() => navigate('/home/attention')}
+                          onSkip={skip}
+                          onTrace={() => {}}
+                          onApprove={id => resolveItem(id, 'Approved')}
+                          onReject={id  => resolveItem(id, 'Rejected')}
+                          onCorrect={id => resolveItem(id, 'Correction submitted')}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )
+              })}
+              {overflow > 0 && (
+                <div className="flex items-center justify-center border-t border-gray-50 py-2.5 dark:border-white/[0.03]">
+                  <button
+                    type="button"
+                    onClick={() => navigate('/home/attention')}
+                    className="text-[11px] text-aims-blue hover:underline"
+                  >
+                    +{overflow} more — see all in Attention Room
+                  </button>
                 </div>
-              )
-            })
+              )}
+            </>
           )}
         </div>
       </div>

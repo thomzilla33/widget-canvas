@@ -4,20 +4,18 @@ import { CheckCircle2 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { MY_WORK_EVENTS, WQ_TIER, WQ_TIER_ORDER } from '../../../data/workqueue.js'
 import { EventCard } from './EventCard.jsx'
-import { FilterBar } from './FilterBar.jsx'
 import UndoToast from '../UndoToast.jsx'
 
-const MAX_VISIBLE = 7
+const MAX_VISIBLE = 5
 
 export function MyWorkTab({ onOpen, onEscalate, onTrace }) {
   const navigate = useNavigate()
-  const [filtered, setFiltered] = useState(MY_WORK_EVENTS)
   const [expandedId, setExpandedId] = useState(null)
   const [skipped, setSkipped] = useState(new Set())
   const [toast, setToast] = useState(null)
   const [resolved, setResolved] = useState(new Set())
 
-  const visible = filtered.filter(e => !skipped.has(e.id) && !resolved.has(e.id))
+  const visible = MY_WORK_EVENTS.filter(e => !skipped.has(e.id) && !resolved.has(e.id))
   const capped = visible.slice(0, MAX_VISIBLE)
   const overflow = visible.length - capped.length
 
@@ -55,8 +53,6 @@ export function MyWorkTab({ onOpen, onEscalate, onTrace }) {
   return (
     <>
       <div className="flex flex-1 flex-col overflow-hidden">
-        <FilterBar events={MY_WORK_EVENTS} onFilter={setFiltered} />
-
         <div className="flex-1 overflow-y-auto divide-y divide-gray-100 dark:divide-white/[0.05]">
           {visible.length === 0 ? (
             <div className="flex flex-col items-center gap-2 py-10 text-center">

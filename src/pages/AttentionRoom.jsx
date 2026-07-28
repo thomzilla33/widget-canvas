@@ -110,7 +110,7 @@ export default function AttentionRoom() {
         </button>
         <div className="flex items-center gap-2">
           <ListChecks size={14} className="text-aims-blue" aria-hidden="true" />
-          <h1 className="text-sm font-semibold text-gray-900 dark:text-slate-100">Work Queue</h1>
+          <h1 className="text-sm font-semibold text-gray-900 dark:text-slate-100">Attention Room</h1>
           {urgent > 0 && (
             <span className="rounded-full bg-aims-blue/10 px-1.5 py-0.5 text-[10px] font-bold text-aims-blue">
               {urgent}

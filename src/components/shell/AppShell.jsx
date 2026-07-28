@@ -15,7 +15,7 @@ import './shell.css'
 
 const NAV_ITEMS = [
   { id: 'home',        label: 'Home',        icon: 'Home' },
-  { id: 'work-queue',  label: 'Work Queue',  icon: 'ListChecks' },
+  { id: 'work-queue',  label: 'Attention Room',  icon: 'ListChecks' },
   { id: 'dashboards',  label: 'Dashboards',  icon: 'LayoutDashboard' },
   { id: 'reports',     label: 'Reports',     icon: 'FileBarChart' },
   { id: 'widgets',     label: 'Widgets',     icon: 'Boxes' },
