@@ -10,6 +10,7 @@ export { HOME_INBOX, HOME_TASKS, HTL_ITEMS } from './mock.js'
 export const GOV_EVENTS = [
   {
     id: 'gov-1',
+    wqId: 'wq-1',
     title: 'Financial Policy PDF requires approval',
     context: 'DIAN Intake workflow paused — document requires your sign-off before it can be ingested and forwarded.',
     statusLabel: 'Due now',
@@ -20,6 +21,7 @@ export const GOV_EVENTS = [
   },
   {
     id: 'gov-2',
+    wqId: 'wq-2',
     title: 'SalesForecastPA about to send external email',
     context: 'Agent paused at a Human in the Loop checkpoint. Review the draft message before allowing send.',
     statusLabel: 'Paused',
@@ -30,6 +32,7 @@ export const GOV_EVENTS = [
   },
   {
     id: 'gov-3',
+    wqId: 'wq-5',
     title: 'Temp PII partition access request',
     context: 'Break Glass access requested for the Finance PII partition. A second approval is required to proceed.',
     statusLabel: 'Awaiting 2nd approval',

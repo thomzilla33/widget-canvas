@@ -51,11 +51,6 @@ export function HomeControlCenter({ onCopilotOpen, copilotOpen = false }) {
           </div>
         </div>
 
-        {/* Full-width Work Queue section */}
-        <div className="home-card">
-          <WorkQueueHomeSection />
-        </div>
-
         {/* Full-width Agent Catalog — Admin only */}
         {isAdmin && (
           <div className="home-card">

@@ -36,8 +36,10 @@ function buildSpotlightItems() {
   // 1. Blocking governance — critical
   GOV_EVENTS.filter(g => g.blocking).forEach(g => items.push({
     id:      g.id,
+    wqId:    g.wqId ?? null,
     urgency: 'critical',
     title:   g.title,
+    context: g.context ?? null,
     meta:    `Blocking ${g.impact.workflows} workflows · ${g.impact.agents} agents · ${g.when}`,
     badge:   g.statusLabel,
     primaryAction:   { label: g.action,    Icon: ShieldAlert },
@@ -47,8 +49,10 @@ function buildSpotlightItems() {
   // 2. High-priority HTL
   HTL_ITEMS.filter(i => i.priority === 'high').forEach(i => items.push({
     id:      i.id,
+    wqId:    i.wqId ?? null,
     urgency: 'high',
     title:   i.title,
+    context: null,
     meta:    `${i.source} · ${i.when}`,
     badge:   'Needs action',
     primaryAction:   { label: i.action,   Icon: AlertCircle },
@@ -58,8 +62,10 @@ function buildSpotlightItems() {
   // 3. Non-blocking governance — medium
   GOV_EVENTS.filter(g => !g.blocking).forEach(g => items.push({
     id:      g.id,
+    wqId:    g.wqId ?? null,
     urgency: 'medium',
     title:   g.title,
+    context: g.context ?? null,
     meta:    `${g.impact.workflows} workflows affected · ${g.when}`,
     badge:   g.statusLabel,
     primaryAction:   { label: g.action,   Icon: ShieldAlert },
@@ -313,9 +319,12 @@ export function HomeHero({ onCopilotOpen, copilotOpen = false }) {
               )}
             </div>
 
-            {/* Title + meta */}
+            {/* Title + context + meta */}
             <p className="text-[14px] font-semibold leading-snug text-white">{current.title}</p>
-            <p className="mt-1 text-[11px] text-white/50">{current.meta}</p>
+            {current.context && (
+              <p className="mt-1.5 text-[11px] leading-relaxed text-white/65">{current.context}</p>
+            )}
+            <p className="mt-1 text-[11px] text-white/40">{current.meta}</p>
 
             {/* Actions */}
             <div className="mt-3.5 flex flex-wrap items-center gap-2">
@@ -347,10 +356,10 @@ export function HomeHero({ onCopilotOpen, copilotOpen = false }) {
               )}
               <button
                 type="button"
-                onClick={() => navigate('/home/attention')}
-                className="ml-auto flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[11px] text-white/40 transition-colors hover:text-white/70"
+                onClick={() => navigate('/home/attention', current.wqId ? { state: { selectId: current.wqId } } : undefined)}
+                className="ml-auto flex items-center gap-1 rounded-lg border border-white/15 bg-white/[0.08] px-2.5 py-1.5 text-[11px] font-medium text-white/60 transition-all hover:bg-white/[0.15] hover:text-white/90"
               >
-                See all
+                View full detail
                 <ChevronRight size={11} aria-hidden="true" />
               </button>
             </div>
