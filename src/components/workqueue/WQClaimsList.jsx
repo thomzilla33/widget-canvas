@@ -38,6 +38,20 @@ export function WQClaimsList({ claims = [], conflicts = [], onAllDecided }) {
               'border-gray-100 bg-white dark:border-white/[0.07] dark:bg-transparent'
             }`}
           >
+            {/* Claim header: ID + conflict tag + confidence */}
+            <div className="mb-2 flex items-center gap-1.5">
+              <span className="rounded bg-gray-100 dark:bg-white/[0.07] px-1.5 py-0.5 font-mono text-[9px] font-bold text-gray-500 dark:text-slate-500">
+                {claim.id}
+              </span>
+              {claim.conflict && (
+                <span className="rounded-full bg-amber-100 dark:bg-amber-900/20 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wide text-amber-600 dark:text-amber-400">
+                  Conflict
+                </span>
+              )}
+              <span className="ml-auto text-[9px] text-gray-400 dark:text-slate-600">
+                {Math.round(claim.confidence * 100)}% conf
+              </span>
+            </div>
             <p className="text-xs leading-relaxed text-gray-700 dark:text-slate-200">{claim.text}</p>
 
             {conflict && (
@@ -104,9 +118,6 @@ export function WQClaimsList({ claims = [], conflicts = [], onAllDecided }) {
                   <Edit2 size={11} /> Correct
                 </button>
               )}
-              <span className="ml-auto text-[9px] text-gray-400 dark:text-slate-600">
-                {Math.round(claim.confidence * 100)}% conf
-              </span>
             </div>
           </div>
         )

@@ -5,6 +5,25 @@ export const WQ_EVENT_DATA = {
   'wq-1': {
     sourceRef: 'DIAN-4821',
     destination: 'KCON Legal Queue',
+    thread: {
+      status: 'open',
+      comments: [
+        {
+          id: 'tc-1',
+          authorName: 'Ana Restrepo',
+          authorRole: 'Revenue Ops Lead',
+          timestamp: '9:02 AM',
+          body: 'Routed to you — there\'s a conflict on CLM-003. DIAN Resolution says quarterly but our internal manual says monthly. Need your call before we proceed.',
+        },
+        {
+          id: 'tc-2',
+          authorName: 'Thomas G.',
+          authorRole: 'You',
+          timestamp: '9:18 AM',
+          body: 'On it. The quarterly cadence matches what was in the last compliance brief. Will resolve the conflict and attest.',
+        },
+      ],
+    },
     pipelineSteps: [
       { id: 'ps-1', label: 'Indexing',         status: 'complete' },
       { id: 'ps-2', label: 'Claim Detection',   status: 'complete' },

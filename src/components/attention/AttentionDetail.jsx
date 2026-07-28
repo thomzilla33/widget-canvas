@@ -153,9 +153,11 @@ const Divider = () => <div className="border-t border-gray-100 dark:border-white
 export function AttentionDetail({ item, onApprove, onDecline, onComplete, onDismiss }) {
   const [note,     setNote]     = useState('')
   const [attested, setAttested] = useState(false)
+  const [wqTab,    setWqTab]    = useState('decision')
 
   useEffect(() => {
     setAttested(false)
+    setWqTab('decision')
   }, [item?.id])
 
   if (!item) {
@@ -234,12 +236,121 @@ export function AttentionDetail({ item, onApprove, onDecline, onComplete, onDism
             <p className="mt-2 text-[10px] text-gray-400 dark:text-slate-600">{item.dueLabel}</p>
           )}
         </div>
-        <WQDecisionSurface
-          event={item}
-          md={md}
-          onResolve={() => onApprove(item)}
-          onDecline={() => onDecline(item)}
-        />
+
+        {/* Tab bar */}
+        <div className="shrink-0 flex items-center gap-0 border-b border-gray-100 dark:border-white/[0.05] px-7">
+          {[
+            { id: 'decision', label: 'Decision' },
+            { id: 'thread',   label: 'Thread',   badge: md.thread?.comments?.length },
+            { id: 'audit',    label: 'Audit'     },
+          ].map(t => (
+            <button
+              key={t.id}
+              type="button"
+              onClick={() => setWqTab(t.id)}
+              className={`relative flex items-center gap-1.5 py-3 pr-4 text-[11px] font-semibold transition-colors ${
+                wqTab === t.id
+                  ? 'text-aims-blue'
+                  : 'text-gray-400 hover:text-gray-600 dark:text-slate-600 dark:hover:text-slate-400'
+              }`}
+            >
+              {t.label}
+              {t.badge > 0 && (
+                <span className="rounded-full bg-aims-blue/10 px-1.5 py-0.5 text-[9px] font-bold text-aims-blue">
+                  {t.badge}
+                </span>
+              )}
+              {wqTab === t.id && (
+                <span className="absolute bottom-0 left-0 right-4 h-0.5 rounded-full bg-aims-blue" />
+              )}
+            </button>
+          ))}
+        </div>
+
+        {/* Decision tab */}
+        {wqTab === 'decision' && (
+          <WQDecisionSurface
+            event={item}
+            md={md}
+            onResolve={() => onApprove(item)}
+            onDecline={() => onDecline(item)}
+          />
+        )}
+
+        {/* Thread tab */}
+        {wqTab === 'thread' && (
+          <div className="flex flex-1 flex-col min-h-0 overflow-hidden">
+            <div className="flex items-center gap-2 shrink-0 px-7 py-3 border-b border-gray-100 dark:border-white/[0.05]">
+              <span className={`rounded-full px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide ${
+                md.thread?.status === 'open'
+                  ? 'bg-green-500/10 text-green-600 dark:text-green-400'
+                  : 'bg-gray-100 text-gray-500 dark:bg-white/[0.06] dark:text-slate-500'
+              }`}>
+                {md.thread?.status?.toUpperCase() ?? 'OPEN'}
+              </span>
+              <span className="text-[10px] text-gray-400 dark:text-slate-600">
+                {md.thread?.comments?.length ?? 0} messages
+              </span>
+            </div>
+            <div className="flex-1 overflow-y-auto px-7 py-5 space-y-5">
+              {(md.thread?.comments ?? []).length === 0 ? (
+                <p className="text-xs text-gray-400 dark:text-slate-600">No messages yet.</p>
+              ) : (md.thread.comments.map(c => (
+                <div key={c.id} className="flex gap-3">
+                  <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${
+                    c.authorRole === 'You'
+                      ? 'bg-aims-blue/10 text-aims-blue dark:bg-aims-blue/[0.15]'
+                      : 'bg-gray-200 text-gray-600 dark:bg-white/10 dark:text-slate-400'
+                  }`}>
+                    {c.authorName.charAt(0)}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-xs font-semibold text-gray-800 dark:text-slate-200">{c.authorName}</span>
+                      <span className="text-[9px] text-gray-400 dark:text-slate-600">{c.timestamp}</span>
+                    </div>
+                    <p className="text-[10px] text-gray-400 dark:text-slate-600">{c.authorRole}</p>
+                    <p className="mt-1.5 text-xs leading-relaxed text-gray-600 dark:text-slate-400">{c.body}</p>
+                  </div>
+                </div>
+              )))}
+            </div>
+            <div className="shrink-0 border-t border-gray-200 dark:border-white/[0.07] px-7 pt-4 pb-5">
+              <WQThreadComposer />
+            </div>
+          </div>
+        )}
+
+        {/* Audit tab */}
+        {wqTab === 'audit' && (
+          <div className="flex-1 overflow-y-auto px-7 py-5">
+            <p className="mb-4 text-[9px] font-semibold uppercase tracking-[0.1em] text-gray-400 dark:text-slate-600">
+              Activity log
+            </p>
+            {(item.auditTrail ?? []).length === 0 ? (
+              <p className="text-xs text-gray-400 dark:text-slate-600">No audit events recorded.</p>
+            ) : (
+              <div className="space-y-0">
+                {item.auditTrail.map((entry, i) => (
+                  <div key={i} className="relative flex gap-3 pb-5">
+                    {i < item.auditTrail.length - 1 && (
+                      <div className="absolute left-[10px] top-5 bottom-0 w-px bg-gray-100 dark:bg-white/[0.04]" />
+                    )}
+                    <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-gray-100 dark:bg-white/[0.06] mt-0.5">
+                      <div className="h-1.5 w-1.5 rounded-full bg-gray-400 dark:bg-slate-500" />
+                    </div>
+                    <div className="min-w-0 flex-1 pt-0.5">
+                      <p className="text-[11px] font-medium text-gray-700 dark:text-slate-300">{entry.action}</p>
+                      <p className="mt-0.5 text-[9px] text-gray-400 dark:text-slate-600">
+                        {entry.by} · {entry.at}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     )
   }
@@ -553,6 +664,40 @@ export function AttentionDetail({ item, onApprove, onDecline, onComplete, onDism
         )}
       </div>
 
+    </div>
+  )
+}
+
+function WQThreadComposer() {
+  const [text, setText] = useState('')
+  const [sent, setSent]   = useState(false)
+
+  if (sent) {
+    return (
+      <div className="flex items-center gap-2 rounded-lg bg-green-50 dark:bg-green-950/20 px-3 py-2.5">
+        <CheckCircle2 size={13} className="text-aims-governed shrink-0" />
+        <span className="text-xs font-medium text-aims-governed">Reply sent.</span>
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-2">
+      <textarea
+        value={text}
+        onChange={e => setText(e.target.value)}
+        rows={2}
+        className="input w-full resize-none text-xs"
+        placeholder="Reply to thread… use @name to mention a teammate"
+      />
+      <button
+        type="button"
+        disabled={!text.trim()}
+        onClick={() => { setSent(true); setTimeout(() => setSent(false), 3000) }}
+        className="btn-primary w-full py-2 text-xs font-semibold disabled:opacity-40 disabled:cursor-not-allowed"
+      >
+        Send reply
+      </button>
     </div>
   )
 }
