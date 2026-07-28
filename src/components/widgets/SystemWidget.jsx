@@ -246,7 +246,7 @@ function DecisionPanel({ item: itemProp, onDecide, onClose }) {
             <div className="flex items-center justify-end gap-2">
               <Button variant="tertiary" size="sm" onClick={() => { setMode(null); setTarget('') }}>Back</Button>
               <button disabled={!canReassign} onClick={confirmReassign}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-aims-blue px-3 py-2 text-xs font-semibold text-white hover:bg-aims-blue/90 disabled:cursor-not-allowed disabled:opacity-40">
+                className="btn-primary inline-flex items-center gap-1.5 px-3 py-2 text-xs disabled:cursor-not-allowed disabled:opacity-40">
                 <CornerUpRight size={14} aria-hidden="true" /> Confirm reassign
               </button>
             </div>
@@ -261,7 +261,7 @@ function DecisionPanel({ item: itemProp, onDecide, onClose }) {
                 <X size={14} aria-hidden="true" /> Reject
               </button>
               <button onClick={() => onDecide(item, 'approved')}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-aims-governed px-3 py-2 text-xs font-semibold text-white hover:bg-aims-governed/90">
+                className="btn-primary inline-flex items-center gap-1.5 px-3 py-2 text-xs">
                 <Check size={14} aria-hidden="true" /> Approve
               </button>
             </div>

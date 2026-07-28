@@ -102,6 +102,9 @@ function AppShellInner() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
 
+      {/* DS App Background — fixed gradient layer */}
+      <div style={{ position: 'fixed', inset: 0, zIndex: -10, background: 'var(--app-bg)' }} aria-hidden="true" />
+
       {/* ── Fixed topbar ── */}
       <div style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 20, background: 'var(--shell-topbar-bg)', backdropFilter: 'blur(20px) saturate(1.8)', WebkitBackdropFilter: 'blur(20px) saturate(1.8)', borderBottom: '1px solid var(--shell-topbar-border)' }}>
         <Topbar

@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { ShieldAlert, Bot, ListChecks, Mail, CircleAlert, Search, X } from 'lucide-react'
+import { ShieldAlert, Bot, ListChecks, Mail, CircleAlert, Search, X, ArrowUpDown } from 'lucide-react'
 import { groupItems } from '../home/attention/attentionModel.js'
 import { WQ_TIER } from '../../data/workqueue.js'
 
@@ -184,7 +184,7 @@ function WQItemCard({ item, isActive, onClick }) {
   )
 }
 
-export function AttentionQueue({ items, totalCount, selectedId, onSelect, search, onSearch, filterCat, onFilterCat }) {
+export function AttentionQueue({ items, totalCount, tabCounts, selectedId, onSelect, search, onSearch, filterCat, onFilterCat }) {
   const groups    = groupItems(items)
   const flatItems = groups.flatMap(g => g.items)
   const selIdx    = flatItems.findIndex(i => i.id === selectedId)
@@ -219,61 +219,66 @@ export function AttentionQueue({ items, totalCount, selectedId, onSelect, search
       aria-label="Attention queue"
     >
       {/* ── Header ── */}
-      <div className="shrink-0 border-b border-gray-200 dark:border-white/[0.06] bg-white dark:bg-[#0d1117] px-4 pt-4 pb-0">
-        <div className="flex items-center gap-2 pb-3.5">
-          <span className="text-sm font-semibold text-gray-900 dark:text-slate-100">Queue</span>
-          {totalCount > 0 && (
-            <span className="rounded-full bg-aims-blue/10 px-1.5 py-0.5 text-[9px] font-bold text-aims-blue tabular-nums">
-              {totalCount}
-            </span>
-          )}
-          {isFiltered && items.length !== totalCount && (
-            <span className="rounded-full bg-gray-200/80 px-1.5 py-0.5 text-[9px] font-semibold text-gray-500 dark:bg-white/[0.06] dark:text-slate-500 tabular-nums">
-              {items.length} shown
-            </span>
-          )}
-          <span className="ml-auto text-[9px] text-gray-300 dark:text-slate-800">↑↓</span>
-        </div>
+      <div className="shrink-0 border-b border-gray-200 dark:border-white/[0.06] bg-white dark:bg-[#0d1117] px-3 pt-3 pb-0">
 
         {/* Search */}
         <div className="relative mb-2.5">
-          <Search size={11} className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-600" aria-hidden="true" />
+          <Search size={13} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500" aria-hidden="true" />
           <input
             ref={searchRef}
             type="search"
             value={search}
             onChange={e => onSearch(e.target.value)}
             placeholder="Search queue…"
-            className="w-full rounded-md border border-gray-200 bg-white py-1.5 pl-7 pr-7 text-[11px] text-gray-700 placeholder-gray-400 outline-none transition-colors focus:border-aims-blue/60 focus:ring-1 focus:ring-aims-blue/20 dark:border-white/[0.07] dark:bg-white/[0.03] dark:text-slate-200 dark:placeholder-slate-600 dark:focus:border-aims-blue/40"
+            className="input pl-8 pr-8 text-xs"
           />
           {search && (
             <button
               type="button"
               onClick={() => onSearch('')}
-              className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-0.5 text-gray-400 hover:text-gray-600 dark:text-slate-600 dark:hover:text-slate-400"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded p-0.5 text-gray-400 hover:text-gray-600 dark:text-slate-600 dark:hover:text-slate-400"
               aria-label="Clear search"
             >
-              <X size={10} />
+              <X size={11} />
             </button>
           )}
         </div>
 
-        {/* Filter chips */}
-        <div className="flex gap-1 overflow-x-auto pb-2.5 scrollbar-none">
-          {FILTER_TABS.map(tab => (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => onFilterCat(tab.id)}
-              className={`shrink-0 rounded-full border px-2.5 py-0.5 text-[10px] font-semibold transition-colors ${
-                filterCat === tab.id
-                  ? 'border-aims-blue bg-aims-blue/10 text-aims-blue dark:bg-aims-blue/[0.15]'
-                  : 'border-gray-200 bg-white text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:border-white/[0.07] dark:bg-transparent dark:text-slate-500 dark:hover:border-white/[0.12] dark:hover:text-slate-300'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
+        {/* Filter tabs + sort */}
+        <div className="flex items-center gap-1 pb-2.5 overflow-x-auto scrollbar-none">
+          {FILTER_TABS.map(tab => {
+            const count = tabCounts?.[tab.id] ?? 0
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => onFilterCat(tab.id)}
+                className={`shrink-0 flex items-center gap-1 h-8 rounded-lg border px-2.5 text-[11px] font-medium transition-colors ${
+                  filterCat === tab.id
+                    ? 'border-aims-blue/50 bg-aims-blue/[0.06] text-aims-blue dark:bg-aims-blue/[0.12] dark:border-aims-blue/40'
+                    : 'border-gray-200 bg-white text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:border-white/[0.08] dark:bg-transparent dark:text-slate-500 dark:hover:border-white/[0.14] dark:hover:text-slate-300'
+                }`}
+              >
+                {tab.label}
+                {count > 0 && (
+                  <span className={`rounded-full px-1 py-px text-[9px] font-bold tabular-nums ${
+                    filterCat === tab.id
+                      ? 'bg-aims-blue/15 text-aims-blue'
+                      : 'bg-gray-100 text-gray-400 dark:bg-white/[0.06] dark:text-slate-600'
+                  }`}>
+                    {count}
+                  </span>
+                )}
+              </button>
+            )
+          })}
+          <button
+            type="button"
+            className="ml-auto shrink-0 flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-400 transition-colors hover:border-gray-300 hover:text-gray-600 dark:border-white/[0.08] dark:bg-transparent dark:text-slate-600 dark:hover:border-white/[0.14] dark:hover:text-slate-400"
+            aria-label="Sort queue"
+          >
+            <ArrowUpDown size={13} />
+          </button>
         </div>
       </div>
 

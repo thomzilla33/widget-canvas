@@ -1,5 +1,6 @@
 import { useRef, useLayoutEffect, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { HomeItemPanel } from './HomeItemPanel.jsx'
 import gsap from 'gsap'
 import {
   Sparkles, ShieldAlert, ArrowUpRight, AlertCircle, Zap, ExternalLink,
@@ -140,6 +141,8 @@ export function HomeHero({ onCopilotOpen, copilotOpen = false }) {
   const { htl }   = useWorkQueue()
 
   // Hero-spotlight actions taken this session
+  const [panelItem, setPanelItem] = useState(null)
+
   const [heroResolved, setHeroResolved] = useState(0)
   // Flash label shown for 3s after each action ("Approved", "Escalated", …)
   const [lastAction, setLastAction]     = useState(null)
@@ -356,7 +359,7 @@ export function HomeHero({ onCopilotOpen, copilotOpen = false }) {
               )}
               <button
                 type="button"
-                onClick={() => navigate('/home/attention', current.wqId ? { state: { selectId: current.wqId } } : undefined)}
+                onClick={() => setPanelItem(current)}
                 className="ml-auto flex items-center gap-1 rounded-lg border border-white/15 bg-white/[0.08] px-2.5 py-1.5 text-[11px] font-medium text-white/60 transition-all hover:bg-white/[0.15] hover:text-white/90"
               >
                 View full detail
@@ -415,6 +418,15 @@ export function HomeHero({ onCopilotOpen, copilotOpen = false }) {
       <div className="relative mt-4">
         <HomeQuickActions variant="hero" phase={dayPhase} showSpotlight={showSpotlight} />
       </div>
+
+      {/* Detail panel — portal, renders over the whole app */}
+      {panelItem && (
+        <HomeItemPanel
+          spotlightItem={panelItem}
+          onClose={() => setPanelItem(null)}
+          onResolve={(id, label) => { resolve(id, label); setPanelItem(null) }}
+        />
+      )}
     </div>
   )
 }

@@ -27,6 +27,14 @@ export default function AttentionRoom() {
     [done, declined, archived],
   )
 
+  const tabCounts = useMemo(() => ({
+    all:       allItems.length,
+    approvals: allItems.filter(i => i._cat === 'approvals').length,
+    work:      allItems.filter(i => i._cat === 'work').length,
+    tasks:     allItems.filter(i => i._cat === 'tasks').length,
+    messages:  allItems.filter(i => i._cat === 'messages').length,
+  }), [allItems])
+
   const filteredItems = useMemo(() => {
     let items = allItems
     if (filterCat !== 'all') items = items.filter(i => i._cat === filterCat)
@@ -147,6 +155,7 @@ export default function AttentionRoom() {
         <AttentionQueue
           items={filteredItems}
           totalCount={allItems.length}
+          tabCounts={tabCounts}
           selectedId={selectedItem?.id ?? null}
           onSelect={handleSelect}
           search={search}

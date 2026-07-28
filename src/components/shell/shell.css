@@ -48,8 +48,11 @@
   --shell-focus-ring: rgba(43, 127, 255, 0.4);
   --shell-accent-blue: #2b7fff;
 
+  /* DS App Background — gradient layer (fixed, z-[-10]) */
+  --app-bg: radial-gradient(circle at 50% 0%, #F6F9FF 0%, #FFFFFF 80%);
+
   /* content surfaces (consumed via arbitrary Tailwind values in JSX too) */
-  --main-bg: #f1f5f9;
+  --main-bg: transparent;
 }
 
 html.dark {
@@ -86,11 +89,14 @@ html.dark {
   --shell-divider: rgba(255, 255, 255, 0.06);
   --shell-focus-ring: rgba(43, 127, 255, 0.3);
   --shell-accent-blue: #2b7fff;
-  --main-bg: #0b1120;
+  --main-bg: transparent;
+
+  /* DS App Background — dark variant */
+  --app-bg: linear-gradient(144deg, #020618 0%, #0F172B 50%, #020618 100%);
 }
 
 body {
-  background: var(--shell-page-bg);
+  background: transparent;
 }
 
 /* ── LAYOUT ── */
