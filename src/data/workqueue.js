@@ -216,10 +216,10 @@ export const MY_WORK_EVENTS = [
 
 // ── Tier config ──────────────────────────────────────────────────────────────
 export const WQ_TIER = {
-  actnow:   { label: 'Act Now',  sub: 'blocking',       dot: 'bg-red-600',   text: 'text-red-600 dark:text-red-400',     border: 'border-l-red-600',    badge: 'bg-red-600/10 text-red-600 dark:text-red-400' },
-  critical: { label: 'Critical', sub: 'within 7 days',  dot: 'bg-red-400',   text: 'text-red-500 dark:text-red-400',     border: 'border-l-red-400/70', badge: 'bg-red-500/10 text-red-600 dark:text-red-400' },
-  action:   { label: 'Action',   sub: 'this week',       dot: 'bg-amber-400', text: 'text-amber-500 dark:text-amber-400', border: 'border-l-amber-400/70',badge: 'bg-amber-500/10 text-amber-600 dark:text-amber-400' },
-  headsup:  { label: 'Heads-up', sub: 'on radar',        dot: 'bg-slate-400', text: 'text-slate-400 dark:text-slate-500', border: 'border-l-slate-300/50 dark:border-l-white/10', badge: 'bg-gray-100 text-gray-500 dark:bg-white/[0.07] dark:text-slate-400' },
+  actnow:   { label: 'Act Now',  sub: 'blocking',       dot: 'bg-red-600',   text: 'text-red-600 dark:text-red-400',     border: 'border-l-red-600',    badge: 'bg-red-600/[0.16] text-red-600 dark:text-red-400' },
+  critical: { label: 'Critical', sub: 'within 7 days',  dot: 'bg-red-400',   text: 'text-red-500 dark:text-red-400',     border: 'border-l-red-400/70', badge: 'bg-red-500/[0.16] text-red-600 dark:text-red-400' },
+  action:   { label: 'Action',   sub: 'this week',       dot: 'bg-amber-400', text: 'text-amber-500 dark:text-amber-400', border: 'border-l-amber-400/70',badge: 'bg-amber-500/[0.20] text-amber-600 dark:text-amber-400' },
+  headsup:  { label: 'Heads-up', sub: 'on radar',        dot: 'bg-slate-400', text: 'text-slate-400 dark:text-slate-500', border: 'border-l-slate-300/50 dark:border-l-white/10', badge: 'bg-gray-200/80 text-gray-500 dark:bg-white/[0.08] dark:text-slate-400' },
 }
 
 export const WQ_TIER_ORDER = ['actnow', 'critical', 'action', 'headsup']

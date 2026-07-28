@@ -1,11 +1,19 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useRef, useCallback, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { ListChecks, ArrowLeft, CheckCircle2 } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import { buildItems, rank, totalUrgent } from '../components/home/attention/attentionModel.js'
 import { AttentionQueue } from '../components/attention/AttentionQueue.jsx'
 import { AttentionDetail } from '../components/attention/AttentionDetail.jsx'
 import { getResolved, markResolved, unmarkResolved } from '../state/resolvedStore.js'
 import UndoToast from '../components/home/UndoToast.jsx'
+
+const FILTER_TABS = [
+  { id: 'all',       label: 'All'       },
+  { id: 'approvals', label: 'Approvals' },
+  { id: 'work',      label: 'Work'      },
+  { id: 'tasks',     label: 'Tasks'     },
+  { id: 'messages',  label: 'Messages'  },
+]
 
 export default function AttentionRoom() {
   const navigate  = useNavigate()
@@ -21,6 +29,41 @@ export default function AttentionRoom() {
   const [toast,     setToast]     = useState(null)
   const [search,    setSearch]    = useState('')
   const [filterCat, setFilterCat] = useState('all')
+
+  // ── Resizable split pane ─────────────────────────────────────────────────
+  const [leftPct,    setLeftPct]   = useState(40)
+  const containerRef               = useRef(null)
+  const isDragging                 = useRef(false)
+
+  const startDrag = useCallback((e) => {
+    e.preventDefault()
+    isDragging.current = true
+    document.body.style.cursor      = 'col-resize'
+    document.body.style.userSelect  = 'none'
+  }, [])
+
+  const onMouseMove = useCallback((e) => {
+    if (!isDragging.current || !containerRef.current) return
+    const rect = containerRef.current.getBoundingClientRect()
+    const pct  = ((e.clientX - rect.left) / rect.width) * 100
+    setLeftPct(Math.min(65, Math.max(22, pct)))
+  }, [])
+
+  const stopDrag = useCallback(() => {
+    if (!isDragging.current) return
+    isDragging.current              = false
+    document.body.style.cursor      = ''
+    document.body.style.userSelect  = ''
+  }, [])
+
+  useEffect(() => {
+    document.addEventListener('mousemove', onMouseMove)
+    document.addEventListener('mouseup',   stopDrag)
+    return () => {
+      document.removeEventListener('mousemove', onMouseMove)
+      document.removeEventListener('mouseup',   stopDrag)
+    }
+  }, [onMouseMove, stopDrag])
 
   const allItems = useMemo(
     () => buildItems({ done, declined, archived }).slice().sort((a, b) => rank(a) - rank(b)),
@@ -121,55 +164,75 @@ export default function AttentionRoom() {
   return (
     <div className="flex h-full flex-col overflow-hidden bg-white dark:bg-[#0d1117]">
 
-      {/* Page header */}
-      <div className="flex shrink-0 items-center gap-3 border-b border-gray-200 dark:border-white/[0.07] px-5 py-3">
+      {/* ── Page Header — title + subline only ── */}
+      <div className="flex shrink-0 items-center gap-3 border-b border-gray-200 dark:border-white/[0.07] bg-white dark:bg-[#0d1117] px-5 pt-4 pb-3.5">
         <button
           type="button"
           onClick={() => navigate('/home')}
-          className="flex items-center gap-1 rounded-lg p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:text-slate-600 dark:hover:bg-white/[0.04] dark:hover:text-slate-400"
           aria-label="Back to Home"
+          className="grid h-6 w-6 shrink-0 place-items-center rounded text-[var(--muted-foreground)] hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
         >
-          <ArrowLeft size={13} aria-hidden="true" />
+          <ArrowLeft size={16} />
         </button>
-        <div className="flex items-center gap-2">
-          <ListChecks size={14} className="text-aims-blue" aria-hidden="true" />
-          <h1 className="text-sm font-semibold text-gray-900 dark:text-slate-100">Work Queue</h1>
-          {urgent > 0 && (
-            <span className="rounded-full bg-aims-blue/10 px-1.5 py-0.5 text-[10px] font-bold text-aims-blue">
-              {urgent}
-            </span>
-          )}
-        </div>
-        <div className="ml-auto flex items-center gap-1.5 text-[10px] text-gray-400 dark:text-slate-600">
-          <CheckCircle2 size={11} aria-hidden="true" />
-          <span>
-            {allItems.length === 0
-              ? 'All clear'
-              : `${allItems.length} item${allItems.length !== 1 ? 's' : ''} in queue`}
-          </span>
+        <div className="min-w-0 flex-1">
+          <h1
+            className="text-[18px] font-semibold leading-tight text-[var(--foreground)]"
+            style={{ letterSpacing: '0.25px' }}
+          >
+            Work Queue
+          </h1>
+          <p className="flex items-center gap-1.5 text-[11px] text-[var(--muted-foreground)]">
+            {allItems.length === 0 ? 'All clear' : `${allItems.length} items in queue`}
+            {urgent > 0 && (
+              <span className="rounded-full bg-red-500/10 px-1.5 py-[1px] text-[10px] font-bold text-red-600 dark:text-red-400">
+                {urgent} urgent
+              </span>
+            )}
+          </p>
         </div>
       </div>
 
-      {/* Two-pane body */}
-      <div className="flex min-h-0 flex-1 overflow-hidden">
-        <AttentionQueue
-          items={filteredItems}
-          totalCount={allItems.length}
-          tabCounts={tabCounts}
-          selectedId={selectedItem?.id ?? null}
-          onSelect={handleSelect}
-          search={search}
-          onSearch={setSearch}
-          filterCat={filterCat}
-          onFilterCat={setFilterCat}
-        />
-        <AttentionDetail
-          item={selectedItem}
-          onApprove={handleApprove}
-          onDecline={handleDecline}
-          onComplete={handleComplete}
-          onDismiss={handleDismiss}
-        />
+      {/* Two-pane body — resizable */}
+      <div ref={containerRef} className="flex min-h-0 flex-1 overflow-hidden">
+
+        {/* Left pane */}
+        <div
+          className="flex h-full shrink-0 flex-col overflow-hidden border-r border-gray-200 dark:border-white/[0.10]"
+          style={{ width: `${leftPct}%`, minWidth: 260, maxWidth: '65%' }}
+        >
+          <AttentionQueue
+            items={filteredItems}
+            totalCount={allItems.length}
+            selectedId={selectedItem?.id ?? null}
+            onSelect={handleSelect}
+            search={search}
+            filterCat={filterCat}
+            onSearch={setSearch}
+            onFilterCat={setFilterCat}
+            tabCounts={tabCounts}
+          />
+        </div>
+
+        {/* Drag handle */}
+        <div
+          onMouseDown={startDrag}
+          className="group relative z-10 flex w-1.5 shrink-0 cursor-col-resize items-center justify-center"
+          title="Drag to resize"
+        >
+          <div className="h-10 w-[3px] rounded-full bg-gray-300/0 transition-all duration-150 group-hover:bg-gray-300 dark:group-hover:bg-white/20" />
+        </div>
+
+        {/* Right pane */}
+        <div className="min-w-0 flex-1 overflow-hidden">
+          <AttentionDetail
+            item={selectedItem}
+            onApprove={handleApprove}
+            onDecline={handleDecline}
+            onComplete={handleComplete}
+            onDismiss={handleDismiss}
+          />
+        </div>
+
       </div>
 
       {toast && (

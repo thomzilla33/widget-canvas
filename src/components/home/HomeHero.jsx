@@ -232,13 +232,20 @@ export function HomeHero({ onCopilotOpen, copilotOpen = false }) {
     <div
       ref={heroRef}
       className="relative overflow-hidden rounded-2xl px-7 pb-6 pt-7"
-      style={{ background: 'linear-gradient(135deg, #1e40af 0%, #2563eb 45%, #4338ca 100%)' }}
+      style={{
+        background: 'linear-gradient(135deg, rgba(30,64,175,0.78) 0%, rgba(37,99,235,0.74) 45%, rgba(67,56,202,0.80) 100%)',
+        backdropFilter: 'blur(28px) saturate(1.7)',
+        WebkitBackdropFilter: 'blur(28px) saturate(1.7)',
+        boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,0.52), inset 0 0 0 0.75px rgba(255,255,255,0.16), 0 8px 40px rgba(20,50,160,0.28)',
+      }}
     >
-      {/* Mesh layer */}
+      {/* Liquid glass refraction layer — diagonal catch + top specular + ambient radials */}
       <div aria-hidden="true" className="pointer-events-none absolute inset-0" style={{
         backgroundImage:
-          'radial-gradient(ellipse 60% 80% at 10% 40%, rgba(255,255,255,0.07) 0%, transparent 60%),' +
-          'radial-gradient(ellipse 40% 50% at 90% 10%, rgba(255,255,255,0.05) 0%, transparent 55%)',
+          'linear-gradient(145deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.06) 22%, transparent 52%),' +
+          'linear-gradient(180deg, rgba(255,255,255,0.13) 0%, rgba(255,255,255,0.00) 20%),' +
+          'radial-gradient(ellipse 55% 70% at 12% 45%, rgba(255,255,255,0.09) 0%, transparent 60%),' +
+          'radial-gradient(ellipse 35% 45% at 88% 8%, rgba(255,255,255,0.07) 0%, transparent 55%)',
       }} />
 
       {/* ── Greeting row ── */}
@@ -264,11 +271,15 @@ export function HomeHero({ onCopilotOpen, copilotOpen = false }) {
           type="button"
           onClick={onCopilotOpen}
           aria-pressed={copilotOpen}
-          className={`hero-copilot-btn mt-1 flex shrink-0 items-center gap-2 rounded-xl border px-4 py-2.5 text-[12px] font-semibold text-white backdrop-blur-sm transition-all ${
+          className={`hero-copilot-btn mt-1 flex shrink-0 items-center gap-2 rounded-xl border px-4 py-2.5 text-[12px] font-semibold text-white backdrop-blur-xl transition-all ${
             copilotOpen
-              ? 'border-white/40 bg-white/25 hover:bg-white/30 hover:border-white/50'
-              : 'border-white/20 bg-white/10 hover:bg-white/20 hover:border-white/30'
+              ? 'border-white/40 bg-white/[0.22] hover:bg-white/[0.28] hover:border-white/50'
+              : 'border-white/[0.18] bg-white/[0.12] hover:bg-white/[0.20] hover:border-white/30'
           }`}
+          style={{
+            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.40), inset 0 0 0 0.5px rgba(255,255,255,0.08)',
+            backgroundImage: 'linear-gradient(145deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.02) 55%)',
+          }}
         >
           <Sparkles size={13} aria-hidden="true" />
           {copilotOpen ? 'Close PA' : 'Ask your PA'}
@@ -280,7 +291,11 @@ export function HomeHero({ onCopilotOpen, copilotOpen = false }) {
         <div className="hero-spotlight relative mt-5">
           <div
             ref={spotlightRef}
-            className={`rounded-xl border border-white/[0.12] border-l-[3px] bg-white/[0.10] px-4 py-4 backdrop-blur-sm ${uc.accent}`}
+            className={`rounded-xl border border-white/[0.16] border-l-[3px] bg-white/[0.13] px-4 py-4 backdrop-blur-xl ${uc.accent}`}
+            style={{
+              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.40), inset 0 0 0 0.5px rgba(255,255,255,0.08), 0 4px 28px rgba(0,0,0,0.14)',
+              backgroundImage: 'linear-gradient(145deg, rgba(255,255,255,0.17) 0%, rgba(255,255,255,0.03) 50%, transparent 100%)',
+            }}
           >
             {/* Badge + dot nav */}
             <div className="mb-3 flex items-center justify-between">
@@ -342,7 +357,8 @@ export function HomeHero({ onCopilotOpen, copilotOpen = false }) {
               <button
                 type="button"
                 onClick={() => resolve(current.id, current.secondaryAction.label)}
-                className="flex items-center gap-1.5 rounded-lg border border-white/20 bg-white/10 px-3.5 py-1.5 text-[11px] font-medium text-white/80 transition-all hover:bg-white/[0.18] hover:text-white active:scale-95"
+                className="flex items-center gap-1.5 rounded-lg border border-white/[0.22] bg-white/[0.11] px-3.5 py-1.5 text-[11px] font-medium text-white/80 backdrop-blur-sm transition-all hover:bg-white/[0.20] hover:text-white active:scale-95"
+                style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.28)' }}
               >
                 <current.secondaryAction.Icon size={11} aria-hidden="true" />
                 {current.secondaryAction.label}
@@ -372,7 +388,13 @@ export function HomeHero({ onCopilotOpen, copilotOpen = false }) {
 
       {/* ── CALM STATE ── */}
       {showCalm && (
-        <div className="hero-spotlight relative mt-5 flex items-center gap-3 rounded-xl border border-white/[0.12] bg-white/[0.06] px-4 py-3.5">
+        <div
+          className="hero-spotlight relative mt-5 flex items-center gap-3 rounded-xl border border-white/[0.14] bg-white/[0.09] px-4 py-3.5 backdrop-blur-xl"
+          style={{
+            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.35), inset 0 0 0 0.5px rgba(255,255,255,0.07), 0 2px 18px rgba(0,0,0,0.10)',
+            backgroundImage: 'linear-gradient(145deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.02) 55%)',
+          }}
+        >
           <CheckCircle2 size={16} className="shrink-0 text-emerald-300" aria-hidden="true" />
           <div>
             <p className="text-[13px] font-semibold text-white">
@@ -397,7 +419,11 @@ export function HomeHero({ onCopilotOpen, copilotOpen = false }) {
               key={id}
               type="button"
               onClick={() => navigate(to)}
-              className="hero-chip home-kpi-chip rounded-xl border border-white/[0.12] bg-white/[0.08] px-4 py-3 text-left transition-all hover:bg-white/[0.16] hover:border-white/20"
+              className="hero-chip home-kpi-chip rounded-xl border border-white/[0.13] bg-white/[0.09] px-4 py-3 text-left transition-all hover:bg-white/[0.17] hover:border-white/[0.22] backdrop-blur-md"
+              style={{
+                boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.30)',
+                backgroundImage: 'linear-gradient(145deg, rgba(255,255,255,0.12) 0%, transparent 55%)',
+              }}
             >
               <p
                 className={`home-kpi-num text-[28px] font-semibold leading-none tracking-tight ${urgent && value > 0 ? 'text-red-300' : 'text-white'}`}

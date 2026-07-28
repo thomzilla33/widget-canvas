@@ -376,32 +376,34 @@ export function AttentionDetail({ item, onApprove, onDecline, onComplete, onDism
       {/* Scrollable content */}
       <div className="flex-1 overflow-y-auto">
 
-        {/* ── Item header ── */}
+        {/* ── Item header: title + tags inline, timestamp below ── */}
         <div className="px-7 pt-7 pb-5">
-          <div className="mb-3 flex flex-wrap items-center gap-2">
-            <span className={`rounded px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide ${kMeta.color}`}>
-              {kMeta.label}
-            </span>
-            {item.status === 'error' && (
-              <span className="rounded bg-red-500/10 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-red-500 dark:text-red-400">
-                Error
+          <div className="flex items-start justify-between gap-3">
+            <h2 className="text-lg font-semibold leading-snug text-gray-900 dark:text-slate-100">
+              {titleOf(item)}
+            </h2>
+            <div className="flex shrink-0 flex-wrap items-center justify-end gap-1.5 pt-0.5">
+              <span className={`rounded px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide ${kMeta.color}`}>
+                {kMeta.label}
               </span>
-            )}
-            {item.priority && (
-              <span className={`rounded px-1.5 py-0.5 text-[9px] font-semibold ${PRIORITY_COLOR[item.priority] ?? PRIORITY_COLOR.low}`}>
-                {item.priority === 'high' ? 'High priority' : item.priority === 'med' ? 'Medium' : 'Low priority'}
-              </span>
-            )}
-            {item.statusLabel && (
-              <span className="rounded bg-gray-100 px-1.5 py-0.5 text-[9px] font-semibold text-gray-500 dark:bg-white/[0.06] dark:text-slate-500">
-                {item.statusLabel}
-              </span>
-            )}
-            <span className="ml-auto text-[10px] text-gray-400 dark:text-slate-600">{whenOf(item)}</span>
+              {item.status === 'error' && (
+                <span className="rounded bg-red-500/10 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-red-500 dark:text-red-400">
+                  Error
+                </span>
+              )}
+              {item.priority && (
+                <span className={`rounded px-1.5 py-0.5 text-[9px] font-semibold ${PRIORITY_COLOR[item.priority] ?? PRIORITY_COLOR.low}`}>
+                  {item.priority === 'high' ? 'High priority' : item.priority === 'med' ? 'Medium' : 'Low priority'}
+                </span>
+              )}
+              {item.statusLabel && (
+                <span className="rounded bg-gray-100 px-1.5 py-0.5 text-[9px] font-semibold text-gray-500 dark:bg-white/[0.06] dark:text-slate-500">
+                  {item.statusLabel}
+                </span>
+              )}
+            </div>
           </div>
-          <h2 className="text-lg font-semibold leading-snug text-gray-900 dark:text-slate-100">
-            {titleOf(item)}
-          </h2>
+          <p className="mt-1.5 text-[10px] text-gray-400 dark:text-slate-600">{whenOf(item)}</p>
         </div>
 
         <Divider />
@@ -465,31 +467,35 @@ export function AttentionDetail({ item, onApprove, onDecline, onComplete, onDism
               <p className="mb-3 text-[9px] font-semibold uppercase tracking-[0.1em] text-amber-600 dark:text-amber-500/80">
                 At stake
               </p>
-              <div className="flex items-start gap-10">
+              <div className="space-y-2">
                 {enrich.stakesWorkflows > 0 && (
-                  <div>
-                    <div className="flex items-baseline gap-1.5">
+                  <div className="flex items-center justify-between rounded-xl border border-gray-200 dark:border-white/[0.08] bg-gray-50/60 dark:bg-white/[0.02] px-4 py-3.5">
+                    <div>
+                      <p className="text-[11px] text-gray-500 dark:text-slate-500">
+                        Workflow{enrich.stakesWorkflows !== 1 ? 's' : ''} blocked
+                      </p>
                       <span className="text-3xl font-bold tabular-nums text-gray-900 dark:text-white">
                         {enrich.stakesWorkflows}
                       </span>
-                      <Workflow size={13} className="mb-0.5 text-amber-500" aria-hidden="true" />
                     </div>
-                    <p className="mt-0.5 text-[10px] text-gray-500 dark:text-slate-500">
-                      workflow{enrich.stakesWorkflows !== 1 ? 's' : ''} blocked
-                    </p>
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-500/[0.12]">
+                      <Workflow size={16} className="text-amber-500" aria-hidden="true" />
+                    </div>
                   </div>
                 )}
                 {enrich.stakesAgents > 0 && (
-                  <div>
-                    <div className="flex items-baseline gap-1.5">
+                  <div className="flex items-center justify-between rounded-xl border border-gray-200 dark:border-white/[0.08] bg-gray-50/60 dark:bg-white/[0.02] px-4 py-3.5">
+                    <div>
+                      <p className="text-[11px] text-gray-500 dark:text-slate-500">
+                        Agent{enrich.stakesAgents !== 1 ? 's' : ''} waiting
+                      </p>
                       <span className="text-3xl font-bold tabular-nums text-gray-900 dark:text-white">
                         {enrich.stakesAgents}
                       </span>
-                      <Bot size={13} className="mb-0.5 text-amber-500" aria-hidden="true" />
                     </div>
-                    <p className="mt-0.5 text-[10px] text-gray-500 dark:text-slate-500">
-                      agent{enrich.stakesAgents !== 1 ? 's' : ''} waiting
-                    </p>
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-purple-500/[0.12]">
+                      <Bot size={16} className="text-purple-500" aria-hidden="true" />
+                    </div>
                   </div>
                 )}
               </div>
@@ -598,19 +604,51 @@ export function AttentionDetail({ item, onApprove, onDecline, onComplete, onDism
           </>
         )}
 
-        {/* ── Note ── */}
+        {/* ── Metadata rows ── */}
         <Divider />
-        <div className="px-7 py-5">
+        <div className="px-7 py-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-[9px] font-semibold uppercase tracking-[0.1em] text-gray-400 dark:text-slate-600">
+              Notification ID
+            </span>
+            <span className="font-mono text-[11px] text-gray-600 dark:text-slate-400">
+              {(() => {
+                const n = parseInt((item.id ?? '').replace(/\D/g, ''), 10)
+                return isNaN(n) ? 'ATT-001' : `ATT-${String(n).padStart(3, '0')}`
+              })()}
+            </span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-[9px] font-semibold uppercase tracking-[0.1em] text-gray-400 dark:text-slate-600">
+              Received
+            </span>
+            <span className="text-[11px] text-gray-600 dark:text-slate-400">{whenOf(item)}</span>
+          </div>
+        </div>
+
+        {/* ── Comment ── */}
+        <Divider />
+        <div className="px-7 py-4">
           <p className="mb-2 text-[9px] font-semibold uppercase tracking-[0.1em] text-gray-400 dark:text-slate-600">
-            Note (optional)
+            Comment
           </p>
-          <textarea
-            value={note}
-            onChange={e => setNote(e.target.value)}
-            placeholder="Add a note before deciding — e.g. why you're escalating or approving…"
-            rows={2}
-            className="input w-full resize-none text-xs"
-          />
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={note}
+              onChange={e => setNote(e.target.value)}
+              placeholder="Add a comment..."
+              className="input flex-1 py-2 text-[12px]"
+            />
+            <button
+              type="button"
+              disabled={!note.trim()}
+              onClick={() => setNote('')}
+              className="rounded-lg border border-gray-200 dark:border-white/[0.07] px-3 py-2 text-[12px] font-medium text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-white/5 disabled:opacity-40 transition-colors"
+            >
+              Post
+            </button>
+          </div>
         </div>
 
         <div className="h-2" />
