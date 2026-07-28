@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from 'react'
-import { LayoutGrid, UserSquare, MapPin, ChevronDown, Wand2 } from 'lucide-react'
+import { LayoutGrid, UserSquare, MapPin, Wand2, AlertTriangle, Lock } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import EntityRecordPicker from '../common/EntityRecordPicker.jsx'
 import { entities, PROFILE_TYPES, REPORT_COLLECTIONS, HOME_SCOPES, placementLabel } from '../../data/mock.js'
 import { AUDIENCE_TYPES, AUDIENCE_TARGETS, audienceKey, audienceLabel, normalizeAudience } from '../../data/audiences.js'
 import { useProfileConfig } from '../../state/ProfileConfigContext.jsx'
+import { useRole } from '../../state/RoleContext.jsx'
 
 // Shared placement picker — the single source for "where does this dashboard live?"
 // Used by NewDashboard (create) AND EditSetupModal (recover/change after creation).
@@ -61,12 +62,12 @@ export default function PlacementForm({ initial, onChange }) {
   const [entityId, setEntityId] = useState(p0?.entityId || null)
   const { getTabs, setTabs } = useProfileConfig()
   const [tab, setTab] = useState(p0?.tab || typeOf(p0?.profileType || 'Company').tabs[0])
-  const [tabExpanded, setTabExpanded] = useState(false)
   const [addingTab, setAddingTab] = useState(false)
   const [newTab, setNewTab] = useState('')
   const [collection, setCollection] = useState(p0?.collection || REPORT_COLLECTIONS[0])
   const [homeScope, setHomeScope] = useState(p0?.homeScope || 'personal')
 
+  const { isAdmin } = useRole()
   const currentType = typeOf(profileType)
   const allTabs = getTabs(profileType)
   function addCustomTab() {
@@ -77,7 +78,6 @@ export default function PlacementForm({ initial, onChange }) {
     }
     setNewTab('')
     setAddingTab(false)
-    setTabExpanded(false)
   }
   function removeCustomTab(t) {
     if (currentType.tabs.includes(t)) return
@@ -216,82 +216,78 @@ export default function PlacementForm({ initial, onChange }) {
             )}
           </div>
 
-          {/* Tab — collapsed by default to reduce cognitive load */}
+          {/* Tab */}
           <div>
             <div className="mb-1.5 text-sm font-medium text-gray-700 dark:text-slate-200">Tab</div>
-            {!tabExpanded ? (
-              <button
-                onClick={() => setTabExpanded(true)}
-                className="flex h-8 items-center gap-2 rounded-full border border-aims-blue/40 bg-aims-blue/5 pl-3 pr-2.5 text-xs font-semibold text-aims-blue transition-colors hover:bg-aims-blue/10"
-              >
-                {tab}
-                <ChevronDown size={13} className="opacity-60" />
-              </button>
-            ) : (
-              <div>
-                <div className="flex flex-wrap items-center gap-2">
-                  {allTabs.map((t) => {
-                    const custom = !currentType.tabs.includes(t)
-                    if (!custom) return <Chip key={t} active={tab === t} onClick={() => setTab(t)}>{t}</Chip>
-                    const on = tab === t
-                    return (
-                      <span
-                        key={t}
-                        className={`inline-flex h-8 items-center gap-1 rounded-full border pl-3 pr-1.5 text-xs font-semibold transition-colors ${
-                          on ? 'border-aims-blue bg-aims-blue/10 text-aims-blue' : 'border-gray-300 text-gray-600 dark:border-white/15 dark:text-slate-300'
-                        }`}
-                      >
-                        <button type="button" onClick={() => setTab(t)} className="focus:outline-none">{t}</button>
-                        <button
-                          type="button"
-                          onClick={() => removeCustomTab(t)}
-                          aria-label={`Remove ${t} tab`}
-                          title={`Remove ${t}`}
-                          className="grid h-4 w-4 place-items-center rounded-full text-gray-400 hover:bg-gray-200 hover:text-gray-700 dark:hover:bg-white/15 dark:hover:text-slate-200"
-                        >
-                          ×
-                        </button>
-                      </span>
-                    )
-                  })}
-
-                  {addingTab ? (
-                    <input
-                      className="input h-8 w-36 text-sm"
-                      placeholder="Name + Enter"
-                      value={newTab}
-                      autoFocus
-                      onChange={(e) => setNewTab(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') { e.preventDefault(); addCustomTab() }
-                        if (e.key === 'Escape') { setNewTab(''); setAddingTab(false) }
-                      }}
-                      onBlur={() => { if (!newTab.trim()) setAddingTab(false) }}
-                      aria-label="New tab name"
-                    />
-                  ) : (
-                    <button
-                      onClick={() => setAddingTab(true)}
-                      className="h-8 rounded-full border border-dashed border-gray-300 px-3 text-xs font-semibold text-gray-500 transition-colors hover:border-aims-blue hover:text-aims-blue dark:border-white/15 dark:text-slate-400"
+            <div className="flex flex-wrap items-center gap-2">
+              {allTabs.map((t) => {
+                const custom = !currentType.tabs.includes(t)
+                const on = tab === t
+                if (isAdmin && custom) {
+                  return (
+                    <span
+                      key={t}
+                      className={`inline-flex h-8 items-center gap-1 rounded-full border pl-3 pr-1.5 text-xs font-semibold transition-colors ${
+                        on ? 'border-aims-blue bg-aims-blue/10 text-aims-blue' : 'border-gray-300 text-gray-600 dark:border-white/15 dark:text-slate-300'
+                      }`}
                     >
-                      + New tab
-                    </button>
-                  )}
-                  {addingTab && (
-                    <Button variant="tertiary" onClick={() => { setNewTab(''); setAddingTab(false) }} className="h-8 text-xs">Cancel</Button>
-                  )}
-                </div>
-                {addingTab ? (
-                  <p className="mt-1.5 text-[11px] text-gray-500 dark:text-slate-400">Press Enter to add the tab — picker will close automatically.</p>
-                ) : (
-                  <button
-                    onClick={() => setTabExpanded(false)}
-                    className="mt-2 text-[11px] text-gray-400 hover:text-gray-600 dark:text-slate-500 dark:hover:text-slate-300"
-                  >
-                    Done
-                  </button>
-                )}
+                      <button type="button" onClick={() => setTab(t)} className="focus:outline-none">{t}</button>
+                      <button
+                        type="button"
+                        onClick={() => removeCustomTab(t)}
+                        aria-label={`Remove ${t} tab`}
+                        title={`Remove ${t}`}
+                        className="grid h-4 w-4 place-items-center rounded-full text-gray-400 hover:bg-gray-200 hover:text-gray-700 dark:hover:bg-white/15 dark:hover:text-slate-200"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  )
+                }
+                return <Chip key={t} active={on} onClick={() => setTab(t)}>{t}</Chip>
+              })}
+
+              {isAdmin && !addingTab && (
+                <button
+                  onClick={() => setAddingTab(true)}
+                  className="h-8 rounded-full border border-dashed border-gray-300 px-3 text-xs font-semibold text-gray-500 transition-colors hover:border-aims-blue hover:text-aims-blue dark:border-white/15 dark:text-slate-400"
+                >
+                  + New tab
+                </button>
+              )}
+              {isAdmin && addingTab && (
+                <>
+                  <input
+                    className="input h-8 w-36 text-sm"
+                    placeholder="Name + Enter"
+                    value={newTab}
+                    autoFocus
+                    onChange={(e) => setNewTab(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') { e.preventDefault(); addCustomTab() }
+                      if (e.key === 'Escape') { setNewTab(''); setAddingTab(false) }
+                    }}
+                    onBlur={() => { if (!newTab.trim()) setAddingTab(false) }}
+                    aria-label="New tab name"
+                  />
+                  <Button variant="tertiary" onClick={() => { setNewTab(''); setAddingTab(false) }} className="h-8 text-xs">Cancel</Button>
+                </>
+              )}
+            </div>
+
+            {isAdmin && addingTab && newTab.trim() && (
+              <div className="mt-2 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-2.5 dark:border-amber-500/25 dark:bg-amber-500/10">
+                <AlertTriangle size={13} className="mt-0.5 shrink-0 text-aims-ungoverned" aria-hidden="true" />
+                <p className="text-[11px] text-gray-600 dark:text-slate-300">
+                  This tab will appear on <strong>all {currentType.label} profiles</strong> for users with access. Manage tabs in workspace settings.
+                </p>
               </div>
+            )}
+            {!isAdmin && (
+              <p className="mt-1.5 flex items-center gap-1 text-[11px] text-gray-400 dark:text-slate-500">
+                <Lock size={11} aria-hidden="true" />
+                Need a different tab? Ask a workspace admin.
+              </p>
             )}
           </div>
         </div>

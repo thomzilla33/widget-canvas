@@ -152,7 +152,14 @@ export default function DashboardCanvas() {
   return (
     <div className="h-full flex flex-col">
       <PageHeader
-        title={dashboard?.name || 'Dashboard canvas'}
+        title={
+          dashboard ? (
+            <InlineTitle
+              value={dashboard.name}
+              onChange={(name) => { updateDashboard(id, { name }); flashSaved() }}
+            />
+          ) : 'Dashboard canvas'
+        }
         description={
           dashboard ? (
             <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
@@ -197,6 +204,9 @@ export default function DashboardCanvas() {
                     <MenuItem icon={SlidersHorizontal} onClick={() => { setMoreOpen(false); setEditSetupOpen(true) }}>
                       Edit setup
                     </MenuItem>
+                    <MenuItem icon={MapPin} onClick={() => { setMoreOpen(false); setSectionPickerOpen(true) }}>
+                      Change section
+                    </MenuItem>
                     {placements.length > 0 && (
                       <MenuItem icon={allLocked ? Unlock : Lock} onClick={() => { setMoreOpen(false); setAllFixed(!allLocked) }}>
                         {allLocked ? 'Unlock all widgets' : 'Lock all widgets'}
@@ -231,7 +241,7 @@ export default function DashboardCanvas() {
           {placements.length === 0 ? (
             needsSection ? (
               /* No section chosen yet — guide the user before they add widgets */
-              <div className="mx-auto mt-8 flex max-w-lg flex-col gap-3">
+              <div className="flex flex-col gap-3">
                 <ChooseSectionCard onClick={() => setSectionPickerOpen(true)} />
                 <AddWidgetCardDisabled />
               </div>
@@ -445,45 +455,49 @@ function MenuItem({ icon: Icon, onClick, children }) {
 /* ── "Choose section" empty-state card — shown before a placement is assigned ── */
 function ChooseSectionCard({ onClick }) {
   return (
-    <button
-      onClick={onClick}
-      className="group flex w-full flex-col items-center gap-3 rounded-xl border border-dashed border-aims-blue/40 bg-aims-blue/[0.03] px-6 py-8 text-center transition-all duration-200 hover:border-aims-blue/70 hover:bg-aims-blue/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aims-blue/40"
-    >
-      <span className="grid h-10 w-10 place-items-center rounded-xl border border-aims-blue/20 bg-aims-blue/10 text-aims-blue transition-colors group-hover:border-aims-blue/40 group-hover:bg-aims-blue/20">
-        <MapPin size={18} strokeWidth={1.5} aria-hidden="true" />
-      </span>
-      <span className="flex flex-col items-center gap-1">
-        <span className="text-[14px] font-semibold text-slate-100">Choose section</span>
-        <span className="max-w-xs text-[12px] leading-relaxed text-slate-400">
-          The widgets you can add depend on where this dashboard will be displayed.
+    <div className="rounded-xl border border-gray-200 bg-white dark:border-white/[0.08] dark:bg-[#0f1629]">
+      <div className="flex flex-col items-center gap-4 px-6 py-12 text-center">
+        <span className="grid h-12 w-12 place-items-center rounded-xl bg-aims-blue/10 text-aims-blue">
+          <MapPin size={22} strokeWidth={1.5} aria-hidden="true" />
         </span>
-      </span>
-      <span className="inline-flex items-center gap-1.5 rounded-lg bg-aims-blue px-4 py-1.5 text-[12px] font-semibold text-white transition-opacity group-hover:opacity-90">
-        Choose <Plus size={13} strokeWidth={2.5} aria-hidden="true" />
-      </span>
-    </button>
+        <span className="flex flex-col items-center gap-1.5">
+          <span className="text-[15px] font-semibold text-gray-900 dark:text-slate-100">Choose section</span>
+          <span className="max-w-sm text-[13px] leading-relaxed text-gray-500 dark:text-slate-400">
+            The widgets you can add depend on where this dashboard will be displayed.
+          </span>
+        </span>
+        <button
+          onClick={onClick}
+          className="mt-1 inline-flex items-center gap-1.5 rounded-full bg-aims-blue px-5 py-2 text-[13px] font-semibold text-white transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aims-blue/50"
+        >
+          Choose <Plus size={14} strokeWidth={2.5} aria-hidden="true" />
+        </button>
+      </div>
+    </div>
   )
 }
 
 /* ── Disabled "Add widget" card — shown before section is chosen ── */
 function AddWidgetCardDisabled() {
   return (
-    <div
-      aria-disabled="true"
-      className="flex w-full flex-col items-center gap-3 rounded-xl border border-dashed border-white/[0.07] bg-white/[0.015] px-6 py-8 text-center opacity-40"
-    >
-      <span className="grid h-10 w-10 place-items-center rounded-xl border border-white/10 bg-white/5 text-slate-500">
-        <LayoutGrid size={18} strokeWidth={1.5} aria-hidden="true" />
-      </span>
-      <span className="flex flex-col items-center gap-1">
-        <span className="text-[14px] font-semibold text-slate-300">Start adding widgets</span>
-        <span className="max-w-xs text-[12px] leading-relaxed text-slate-500">
-          Customize your dashboard with widgets that assist your team.
+    <div className="rounded-xl border border-gray-200 bg-white dark:border-white/[0.08] dark:bg-[#0f1629]">
+      <div className="flex flex-col items-center gap-4 px-6 py-12 text-center">
+        <span className="grid h-12 w-12 place-items-center rounded-xl bg-gray-100 text-gray-400 dark:bg-white/[0.05] dark:text-slate-500">
+          <LayoutGrid size={22} strokeWidth={1.5} aria-hidden="true" />
         </span>
-      </span>
-      <span className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-4 py-1.5 text-[12px] font-semibold text-slate-400">
-        Add <Plus size={13} strokeWidth={2.5} aria-hidden="true" />
-      </span>
+        <span className="flex flex-col items-center gap-1.5">
+          <span className="text-[15px] font-semibold text-gray-900 dark:text-slate-100">Start adding widgets</span>
+          <span className="max-w-sm text-[13px] leading-relaxed text-gray-500 dark:text-slate-400">
+            Customize your dashboard with widgets that assist your team.
+          </span>
+        </span>
+        <span
+          aria-disabled="true"
+          className="mt-1 inline-flex cursor-not-allowed items-center gap-1.5 rounded-full bg-aims-blue/20 px-5 py-2 text-[13px] font-semibold text-aims-blue/40 dark:bg-aims-blue/10 dark:text-aims-blue/30"
+        >
+          Add <Plus size={14} strokeWidth={2.5} aria-hidden="true" />
+        </span>
+      </div>
     </div>
   )
 }
@@ -807,6 +821,56 @@ function ConfigPanel({ placement, widget, onChange, onDetail, onRemap, onFeedbac
         </div>
       </div>
     </div>
+  )
+}
+
+/* ── Inline-editable dashboard title ── */
+function InlineTitle({ value, onChange }) {
+  const [editing, setEditing] = useState(false)
+  const [draft, setDraft] = useState(value)
+  const inputRef = useRef(null)
+
+  useEffect(() => {
+    if (editing && inputRef.current) {
+      inputRef.current.focus()
+      inputRef.current.select()
+    }
+  }, [editing])
+
+  function commit() {
+    const trimmed = draft.trim() || 'Untitled dashboard'
+    onChange(trimmed)
+    setDraft(trimmed)
+    setEditing(false)
+  }
+
+  if (editing) {
+    return (
+      <input
+        ref={inputRef}
+        value={draft}
+        onChange={(e) => setDraft(e.target.value)}
+        onBlur={commit}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') { e.preventDefault(); commit() }
+          if (e.key === 'Escape') { setDraft(value); setEditing(false) }
+        }}
+        className="w-full min-w-0 bg-transparent text-[22px] font-bold tracking-tight text-gray-900 dark:text-slate-100 border-b-2 border-aims-blue outline-none"
+        style={{ fontFamily: 'inherit' }}
+      />
+    )
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={() => { setDraft(value); setEditing(true) }}
+      title="Click to rename"
+      className="group flex items-center gap-2 text-left text-[22px] font-bold tracking-tight text-gray-900 dark:text-slate-100 cursor-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aims-blue/50 rounded"
+    >
+      {value}
+      <Pencil size={14} className="opacity-0 group-hover:opacity-40 text-gray-500 dark:text-slate-400 transition-opacity shrink-0" aria-hidden="true" />
+    </button>
   )
 }
 

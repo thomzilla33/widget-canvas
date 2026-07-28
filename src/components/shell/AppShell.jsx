@@ -14,21 +14,23 @@ import ScopeToggle from '../common/ScopeToggle.jsx'
 import './shell.css'
 
 const NAV_ITEMS = [
-  { id: 'home',       label: 'Home',       icon: 'Home' },
-  { id: 'dashboards', label: 'Dashboards', icon: 'LayoutDashboard' },
-  { id: 'reports',    label: 'Reports',    icon: 'FileBarChart' },
-  { id: 'widgets',    label: 'Widgets',    icon: 'Boxes' },
-  { id: 'profiles',   label: 'Profiles',   icon: 'UserRound' },
-  { id: 'models',     label: 'Models',     icon: 'Package2' },
+  { id: 'home',        label: 'Home',        icon: 'Home' },
+  { id: 'work-queue',  label: 'Work Queue',  icon: 'ListChecks' },
+  { id: 'dashboards',  label: 'Dashboards',  icon: 'LayoutDashboard' },
+  { id: 'reports',     label: 'Reports',     icon: 'FileBarChart' },
+  { id: 'widgets',     label: 'Widgets',     icon: 'Boxes' },
+  { id: 'profiles',    label: 'Profiles',    icon: 'UserRound' },
+  { id: 'models',      label: 'Models',      icon: 'Package2' },
 ]
 
 const ID_TO_PATH = {
-  home:       '/home',
-  dashboards: '/dashboards',
-  reports:    '/reports',
-  widgets:    '/widgets',
-  profiles:   '/profiles',
-  models:     '/models',
+  'work-queue': '/home/attention',
+  home:         '/home',
+  dashboards:   '/dashboards',
+  reports:      '/reports',
+  widgets:      '/widgets',
+  profiles:     '/profiles',
+  models:       '/models',
 }
 
 const WORKSPACES = [
@@ -47,7 +49,9 @@ function AppShellInner() {
   const location                  = useLocation()
   const navigate                  = useNavigate()
 
-  const activeId = NAV_ITEMS.find(n => location.pathname.startsWith(ID_TO_PATH[n.id]))?.id
+  const activeId = [...NAV_ITEMS]
+    .sort((a, b) => ID_TO_PATH[b.id].length - ID_TO_PATH[a.id].length)
+    .find(n => location.pathname.startsWith(ID_TO_PATH[n.id]))?.id
 
   useEffect(() => {
     const onKey = (e) => {
