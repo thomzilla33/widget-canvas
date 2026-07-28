@@ -20,11 +20,39 @@ export function WQClaimsList({ claims = [], conflicts = [], onAllDecided }) {
     if (allDone && onAllDecided) onAllDecided(next, corrections)
   }
 
+  const nonConflictedUndecided = claims.filter(c => !c.conflict && !decisions[c.id])
+  const conflictCount = claims.filter(c => c.conflict).length
+
+  function approveAllNonConflicted() {
+    const next = { ...decisions }
+    claims.filter(c => !c.conflict).forEach(c => { next[c.id] = 'approve' })
+    setDecisions(next)
+    const allDone = claims.every(c => next[c.id])
+    if (allDone && onAllDecided) onAllDecided(next, corrections)
+  }
+
   const decided = claims.filter(c => decisions[c.id]).length
   const allDone  = decided === claims.length && claims.length > 0
 
   return (
     <div className="space-y-3">
+      {nonConflictedUndecided.length > 0 && (
+        <div className="flex items-center justify-between rounded-lg bg-aims-blue/[0.04] border border-aims-blue/10 dark:border-aims-blue/[0.08] px-3 py-2">
+          <button
+            type="button"
+            onClick={approveAllNonConflicted}
+            className="flex items-center gap-1.5 text-[10px] font-semibold text-aims-blue hover:text-aims-blue/70 transition-colors"
+          >
+            <CheckCircle2 size={11} />
+            Approve all non-conflicted ({nonConflictedUndecided.length})
+          </button>
+          {conflictCount > 0 && (
+            <span className="text-[10px] text-gray-400 dark:text-slate-600">
+              {conflictCount} conflict{conflictCount !== 1 ? 's' : ''} need manual review
+            </span>
+          )}
+        </div>
+      )}
       {claims.map(claim => {
         const d        = decisions[claim.id]
         const conflict = conflictMap[claim.id]
