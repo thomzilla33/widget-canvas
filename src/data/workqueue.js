@@ -80,7 +80,10 @@ export const MY_WORK_EVENTS = [
     dueLabel: 'Due today · 12:00 PM', estimatedMinutes: 20,
     sourceWorkflow: null,
     description: 'Complete and submit the Q3 revenue forecast to the RevOps dashboard before 12:00 PM. The forecast template is pre-filled from last quarter.',
-    auditTrail: [],
+    auditTrail: [
+      { action: 'Task created from forecast template', by: 'RevOps System', at: 'Jul 25, 9:00 AM' },
+      { action: 'Assigned to Thomas G.', by: 'Ana Restrepo', at: 'Jul 25, 9:02 AM' },
+    ],
     quickActions: { primary: 'Open task', secondary: ['Assign', 'Skip'] },
   },
   { id: 'wq-7', tier: 'action',
@@ -91,7 +94,10 @@ export const MY_WORK_EVENTS = [
     dueLabel: 'Due Friday', estimatedMinutes: 12,
     sourceWorkflow: 'CustomerSuccessPA',
     description: 'Review 3 interaction samples flagged by CustomerSuccessPA for training feedback. Your input is used to improve agent behavior on follow-up calls.',
-    auditTrail: [],
+    auditTrail: [
+      { action: '3 samples flagged below confidence threshold', by: 'CustomerSuccessPA', at: 'Jul 25, 8:44 AM' },
+      { action: 'Training request routed to human queue', by: 'CustomerSuccessPA', at: 'Jul 25, 8:45 AM' },
+    ],
     quickActions: { primary: 'Review and Edit', secondary: ['Promote', 'Reject'] },
   },
   { id: 'wq-8', tier: 'action',
@@ -102,7 +108,11 @@ export const MY_WORK_EVENTS = [
     dueLabel: 'Due Thursday', estimatedMinutes: 10,
     sourceWorkflow: 'Legal Compliance Flow',
     description: 'Legal requires your response on the proposed 90-day data retention policy update for agent output logs. A summary of the policy changes has been attached.',
-    auditTrail: [],
+    auditTrail: [
+      { action: 'Review request submitted', by: 'Carlos Mejía', at: 'Jul 24, 3:28 PM' },
+      { action: 'Linked to DIAN attestation (wq-1)', by: 'System', at: 'Jul 24, 3:31 PM' },
+      { action: 'Routed to Thomas G. for sign-off', by: 'Legal Compliance Flow', at: 'Jul 24, 3:35 PM' },
+    ],
     quickActions: { primary: 'Respond', secondary: ['View Details', 'Escalate'] },
   },
   // ── Heads-up ─────────────────────────────────────────────────────────────
@@ -113,7 +123,11 @@ export const MY_WORK_EVENTS = [
     dueLabel: 'No deadline · monitoring', estimatedMinutes: 2,
     sourceWorkflow: 'Revenue Sync Pipeline',
     description: 'The revenue dashboard is experiencing a 4-hour data sync delay. Engineering is monitoring. No action required from you at this time.',
-    auditTrail: [],
+    auditTrail: [
+      { action: 'Sync delay alert triggered', by: 'Revenue Sync Pipeline', at: '4h ago' },
+      { action: 'Engineering team notified', by: 'System', at: '4h ago' },
+      { action: 'Monitoring activated — no action needed', by: 'Infra Ops', at: '3.5h ago' },
+    ],
     quickActions: { primary: 'Acknowledge', secondary: ['View'] },
   },
   { id: 'wq-10', tier: 'headsup',
@@ -123,7 +137,11 @@ export const MY_WORK_EVENTS = [
     dueLabel: 'In 2 weeks · low urgency', estimatedMinutes: 30,
     sourceWorkflow: 'Compliance Audit Tracker',
     description: 'The ISO 27001 audit begins in 2 weeks. Review the pre-audit checklist assigned to your governance role.',
-    auditTrail: [],
+    auditTrail: [
+      { action: 'Audit prep checklist generated', by: 'Compliance Audit Tracker', at: 'Jul 14, 9:00 AM' },
+      { action: 'Governance tasks assigned to Thomas G.', by: 'System', at: 'Jul 14, 9:05 AM' },
+      { action: '2-week reminder sent', by: 'System', at: 'Jul 25, 8:00 AM' },
+    ],
     quickActions: { primary: 'Review Checklist', secondary: ['Resolve', 'Escalate'] },
   },
   // ── Action — Questions ────────────────────────────────────────────────────
@@ -149,6 +167,10 @@ export const MY_WORK_EVENTS = [
     dueLabel: 'Awaiting reply · 45m', estimatedMinutes: 3,
     sourceWorkflow: null,
     description: 'Ana Restrepo has a question about CLM-003 in the DIAN policy attestation.',
+    auditTrail: [
+      { action: 'Question submitted by Ana Restrepo', by: 'Governance Portal', at: '45m ago' },
+      { action: 'Linked to DIAN attestation (wq-1)', by: 'System', at: '45m ago' },
+    ],
     askedByName: 'Ana Restrepo',
     askedByRole: 'Revenue Ops Lead',
     askedAt: '45m ago',
@@ -156,7 +178,6 @@ export const MY_WORK_EVENTS = [
     whyText: 'This claim is blocking the DIAN attestation which is holding up 14 downstream workflows.',
     linkedEventId: 'wq-1',
     linkedEventTitle: 'Financial Policy PDF — DIAN approval required',
-    auditTrail: [],
     quickActions: { primary: 'Reply', secondary: ['Skip'] },
   },
   // ── Action — Client ───────────────────────────────────────────────────────

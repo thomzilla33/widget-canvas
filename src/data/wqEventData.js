@@ -47,6 +47,25 @@ export const WQ_EVENT_DATA = {
 
   // ── wq-2 · htl-continuation ─────────────────────────────────────────────────
   'wq-2': {
+    thread: {
+      status: 'open',
+      comments: [
+        {
+          id: 'tc-1',
+          authorName: 'Ana Restrepo',
+          authorRole: 'Revenue Ops Lead',
+          timestamp: '10:29 AM',
+          body: 'Thomas — before this goes out, double-check the pipeline coverage ratio. Last week\'s model showed 2.1x but the draft says 2.3x. Want to make sure we\'re aligned with what we told the CFO.',
+        },
+        {
+          id: 'tc-2',
+          authorName: 'Thomas G.',
+          authorRole: 'You',
+          timestamp: '10:33 AM',
+          body: 'Good catch. The 2.3x is the updated figure after the two new deals closed this week. I\'ll verify the numbers and then approve the send.',
+        },
+      ],
+    },
     agent: 'SalesForecastPA',
     model: 'GE-Comms-v2.1',
     confidence: 0.71,
@@ -84,6 +103,25 @@ Thomas`,
 
   // ── wq-4 · htl-handoff ──────────────────────────────────────────────────────
   'wq-4': {
+    thread: {
+      status: 'open',
+      comments: [
+        {
+          id: 'tc-1',
+          authorName: 'Diana Torres',
+          authorRole: 'Agent Ops Lead',
+          timestamp: 'Jul 19, 11:05 AM',
+          body: 'Flagging this for you — the Model Registry issued a deprecation notice for 3 of the 6 routing endpoints in MR-PACK-4.2.1. We need to update the routing logic before Aug 1 or ~3,200 daily calls will start failing.',
+        },
+        {
+          id: 'tc-2',
+          authorName: 'Thomas G.',
+          authorRole: 'You',
+          timestamp: 'Jul 19, 11:22 AM',
+          body: 'On it. I\'ll review the new endpoint contracts and coordinate with the model team on the claude-opus-5 migration. Will update you once staging tests pass.',
+        },
+      ],
+    },
     entityName: 'Model Routing Pack v4 — production endpoints',
     recordId: 'MR-PACK-4.2.1',
     sourceSystem: 'Model Registry Deprecation Alert',
@@ -125,6 +163,18 @@ Thomas`,
 
   // ── wq-7 · train-me ─────────────────────────────────────────────────────────
   'wq-7': {
+    thread: {
+      status: 'open',
+      comments: [
+        {
+          id: 'tc-1',
+          authorName: 'Carlos Mejía',
+          authorRole: 'Governance Lead',
+          timestamp: 'Jul 25, 9:00 AM',
+          body: 'Thomas — Sample C is the tricky one. Model scored it as "Lost" at 65% confidence but I think the outcome was actually "Interested with conditions." Worth your read before you promote. The other two look right to me.',
+        },
+      ],
+    },
     submitter: 'CustomerSuccessPA',
     submitterRole: 'Agent (automated)',
     note: 'Three follow-up call transcripts scored below confidence threshold. Human feedback needed to improve call-close detection.',
@@ -141,6 +191,25 @@ Thomas`,
 
   // ── wq-8 · gov-review ───────────────────────────────────────────────────────
   'wq-8': {
+    thread: {
+      status: 'open',
+      comments: [
+        {
+          id: 'tc-1',
+          authorName: 'Carlos Mejía',
+          authorRole: 'Governance Lead',
+          timestamp: 'Jul 24, 3:28 PM',
+          body: 'Routing this to you — Legal is pushing for 90-day retention on agent logs but our internal archive policy says 180 days. CLM-R01 has a direct source conflict. Need your sign-off before I can attest to either claim.',
+        },
+        {
+          id: 'tc-2',
+          authorName: 'Thomas G.',
+          authorRole: 'You',
+          timestamp: 'Jul 24, 4:15 PM',
+          body: 'Reviewing now. The 90-day proposal likely needs an exception waiver given our regulatory baseline. I\'ll check with Legal Ops before attesting.',
+        },
+      ],
+    },
     requestedBy: { name: 'Carlos Mejía', role: 'Governance Lead' },
     requestReason: 'The proposed 90-day retention update conflicts with our current 180-day archive policy. I need Legal Ops sign-off before I can attest to either claim.',
     linkedProposal: { id: 'wq-1', title: 'Agent Output Logs — Data Retention Policy Review' },
@@ -159,6 +228,18 @@ Thomas`,
 
   // ── wq-11 · client-continuation ─────────────────────────────────────────────
   'wq-11': {
+    thread: {
+      status: 'open',
+      comments: [
+        {
+          id: 'tc-1',
+          authorName: 'Isabel Niño',
+          authorRole: 'Revenue Ops',
+          timestamp: '11:40 AM',
+          body: 'Heads-up on Marcus — he was positive in the demo but pushed back on SSO timelines. The draft looks good but I\'d soften the "next Tuesday" ask. He\'s a methodical buyer, give him more flexibility.',
+        },
+      ],
+    },
     entityName: 'Marcus Webb — Contoso Ltd',
     recordId: 'OPP-88312',
     sourceSystem: 'SupportBot v2 — Enterprise Trial',
@@ -191,6 +272,18 @@ Thomas`,
 
   // ── wq-12 · client-handoff ──────────────────────────────────────────────────
   'wq-12': {
+    thread: {
+      status: 'open',
+      comments: [
+        {
+          id: 'tc-1',
+          authorName: 'SupportBot v2',
+          authorRole: 'Agent (automated)',
+          timestamp: '12:01 PM',
+          body: 'Customer escalated after 3 turns. Sentiment shifted from positive to concerned around the SSO integration question. Key blocker: customer believes our SSO docs are outdated for Okta SAML 2.0. Transcript and CRM attached.',
+        },
+      ],
+    },
     entityName: 'Marcus Webb — Contoso Ltd',
     recordId: 'OPP-88312',
     sourceSystem: 'VCard Webchat Session',

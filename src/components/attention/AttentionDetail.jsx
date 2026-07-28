@@ -241,7 +241,9 @@ export function AttentionDetail({ item, onApprove, onDecline, onComplete, onDism
         <div className="shrink-0 flex items-center gap-0 border-b border-gray-100 dark:border-white/[0.05] px-7">
           {[
             { id: 'decision', label: 'Decision' },
-            { id: 'thread',   label: 'Thread',   badge: md.thread?.comments?.length },
+            ...(item.eventCategory !== 'inbound-question'
+              ? [{ id: 'thread', label: 'Thread', badge: md.thread?.comments?.length }]
+              : []),
             { id: 'audit',    label: 'Audit'     },
           ].map(t => (
             <button
