@@ -104,7 +104,7 @@ export default function UcpConcierge({ entity, open, onClose }) {
     <aside
       ref={asideRef}
       style={{ width: open ? width : 0 }}
-      className={`relative h-full shrink-0 overflow-hidden bg-white dark:bg-[#0f1629] ${open ? 'border-l border-gray-200 dark:border-white/10' : ''}`}
+      className={`relative h-full shrink-0 overflow-hidden bg-white dark:bg-[var(--surface)] ${open ? 'border-l border-gray-200 dark:border-white/10' : ''}`}
       aria-label="UCP Concierge"
       aria-hidden={!open}
     >

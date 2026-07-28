@@ -179,7 +179,7 @@ export default function NewDashboard() {
       </div>
 
       {/* Footer nav — single Cancel/Back here; no duplicate in the header */}
-      <div className="border-t border-gray-200 dark:border-white/10 bg-white dark:bg-[#0f1629] px-4 md:px-6 py-3">
+      <div className="border-t border-gray-200 dark:border-white/10 bg-white dark:bg-[var(--surface)] px-4 md:px-6 py-3">
         <div className="flex items-center justify-between">
           <Button variant="secondary" onClick={() => (step === 0 ? navigate('/dashboards') : setStep(0))}>
             <ChevronLeft size={16} />

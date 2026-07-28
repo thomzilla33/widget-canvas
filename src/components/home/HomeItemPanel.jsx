@@ -82,7 +82,7 @@ function Panel({ spotlightItem, onClose, onResolve }) {
         role="dialog"
         aria-modal="true"
         aria-label={spotlightItem.title}
-        className={`relative flex h-full flex-col bg-white shadow-2xl dark:bg-[#0d1117] transition-transform duration-300 ease-out ${
+        className={`relative flex h-full flex-col bg-white shadow-2xl dark:bg-[var(--surface)] transition-transform duration-300 ease-out ${
           visible ? 'translate-x-0' : 'translate-x-full'
         }`}
         style={{ width: 'min(75vw, 860px)' }}

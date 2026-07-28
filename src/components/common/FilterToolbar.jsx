@@ -56,7 +56,7 @@ function FilterDropdown({ label, value, onChange, options, align = 'left' }) {
       </button>
 
       {open && (
-        <div className={`absolute top-full mt-1.5 z-30 min-w-[160px] rounded-xl border border-gray-100 bg-white py-1 shadow-lg dark:border-white/[0.08] dark:bg-[#1a1f2e] dark:shadow-black/40 ${align === 'right' ? 'right-0' : 'left-0'}`}>
+        <div className={`absolute top-full mt-1.5 z-30 min-w-[160px] rounded-xl border border-gray-100 bg-white py-1 shadow-lg dark:border-white/[0.08] dark:bg-[var(--surface-raised)] dark:shadow-black/40 ${align === 'right' ? 'right-0' : 'left-0'}`}>
           {options.map(o => (
             <button
               key={o.value}
@@ -113,7 +113,7 @@ function SortDropdown({ sort }) {
         </button>
 
         {open && (
-          <div className="absolute right-0 top-full mt-1.5 z-30 min-w-[160px] rounded-xl border border-gray-100 bg-white py-1 shadow-lg dark:border-white/[0.08] dark:bg-[#1a1f2e] dark:shadow-black/40">
+          <div className="absolute right-0 top-full mt-1.5 z-30 min-w-[160px] rounded-xl border border-gray-100 bg-white py-1 shadow-lg dark:border-white/[0.08] dark:bg-[var(--surface-raised)] dark:shadow-black/40">
             {sort.options.map(o => (
               <button
                 key={o.value}
@@ -157,7 +157,7 @@ function FiltersSlideout({ filters, draft, onDraftChange, onApply, onClose }) {
       />
 
       {/* Slideout panel */}
-      <div className="relative z-10 flex h-full w-80 flex-col bg-white shadow-2xl dark:bg-[#111623]"
+      <div className="relative z-10 flex h-full w-80 flex-col bg-white shadow-2xl dark:bg-[var(--surface)]"
         style={{ borderLeft: '1px solid rgba(255,255,255,0.07)' }}
       >
         {/* Header */}

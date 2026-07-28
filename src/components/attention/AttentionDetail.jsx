@@ -655,7 +655,7 @@ export function AttentionDetail({ item, onApprove, onDecline, onComplete, onDism
       </div>
 
       {/* ── Sticky footer — attestation + decisive action strip ── */}
-      <div className="shrink-0 border-t border-gray-200 dark:border-white/[0.07] bg-white dark:bg-[#0d1117] px-7 pt-4 pb-5">
+      <div className="shrink-0 border-t border-gray-200 dark:border-white/[0.07] bg-white dark:bg-[var(--canvas)] px-7 pt-4 pb-5">
 
         {/* Attestation checkbox — required for gov / htl approvals (V1) */}
         {needsAttestation && (

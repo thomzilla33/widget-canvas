@@ -44,7 +44,7 @@ export default function WidgetDetailPanel({ widget, isAdmin, onClose, onEditFull
       ref={panelRef}
       role="complementary"
       aria-label={`${widget.name} details`}
-      className="fixed right-0 top-0 z-40 flex h-full w-[320px] flex-col border-l border-gray-200 bg-white shadow-xl dark:border-white/10 dark:bg-[#131a2c]"
+      className="fixed right-0 top-0 z-40 flex h-full w-[320px] flex-col border-l border-gray-200 bg-white shadow-xl dark:border-white/10 dark:bg-[var(--surface-raised)]"
       style={{ animation: 'slideInRight 0.18s ease-out' }}
     >
       <style>{`@keyframes slideInRight{from{transform:translateX(100%)}to{transform:translateX(0)}}`}</style>
@@ -75,7 +75,7 @@ export default function WidgetDetailPanel({ widget, isAdmin, onClose, onEditFull
         {/* Preview */}
         <div>
           <div className="mb-2 text-[10px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-500">Preview</div>
-          <div className="pointer-events-none rounded-lg border border-gray-200 bg-white p-3 dark:border-white/10 dark:bg-[#0d1117]">
+          <div className="pointer-events-none rounded-lg border border-gray-200 bg-white p-3 dark:border-white/10 dark:bg-[var(--canvas)]">
             <WidgetRender widget={widget} size="md" />
           </div>
         </div>

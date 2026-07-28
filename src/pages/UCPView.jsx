@@ -263,7 +263,7 @@ export default function UCPView() {
       {/* The entity (Company/Contact/Employee) leads; its tabs sit BELOW it. For
           profile types without a header (Deal/Case) we keep the plain page title. */}
       {hasEntityHeader ? (
-        <div className="border-b border-gray-200 bg-white px-6 pt-4 dark:border-white/10 dark:bg-[#0f1629] lg:px-8 2xl:px-12">
+        <div className="border-b border-gray-200 bg-white px-6 pt-4 dark:border-white/10 dark:bg-[var(--surface)] lg:px-8 2xl:px-12">
           <div className="mx-auto w-full max-w-[1800px]">
             <EntityContextHeader entity={entity} viewerRole={viewAs} onChat={toggleChat} />
           </div>
@@ -275,7 +275,7 @@ export default function UCPView() {
         />
       )}
 
-      <div className="border-b border-gray-200 bg-white px-6 dark:border-white/10 dark:bg-[#0f1629]">
+      <div className="border-b border-gray-200 bg-white px-6 dark:border-white/10 dark:bg-[var(--surface)]">
         <div className="flex items-center gap-2">
           <div className="flex min-w-0 flex-1 items-center gap-0.5 overflow-x-auto">
           {shownTabs.map((t) => {
@@ -583,7 +583,7 @@ function HoverIcon({ title, onClick, active, activeClass, children }) {
       aria-label={title}
       aria-pressed={active != null ? !!active : undefined}
       onClick={onClick}
-      className={`h-6 w-6 grid place-items-center rounded-md border border-gray-200 bg-white shadow-sm hover:border-aims-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aims-blue/50 dark:border-white/15 dark:bg-[#1b2540] ${
+      className={`h-6 w-6 grid place-items-center rounded-md border border-gray-200 bg-white shadow-sm hover:border-aims-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aims-blue/50 dark:border-white/15 dark:bg-[var(--surface-raised)] ${
         active ? activeClass : 'text-gray-500 dark:text-slate-400 hover:text-aims-blue'
       }`}
     >
@@ -942,7 +942,7 @@ function ResetModal({ onCancel, onConfirm }) {
 function QuickActionPanel({ action, widgetName, onClose }) {
   const [done, setDone] = useState(false)
   return (
-    <div className="absolute top-0 right-0 bottom-0 w-80 max-w-[calc(100vw-2rem)] bg-white border-l border-gray-200 shadow-xl flex flex-col z-10 dark:bg-[#0f1629] dark:border-white/10">
+    <div className="absolute top-0 right-0 bottom-0 w-80 max-w-[calc(100vw-2rem)] bg-white border-l border-gray-200 shadow-xl flex flex-col z-10 dark:bg-[var(--surface)] dark:border-white/10">
       <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-white/10">
         <span className="font-semibold text-gray-900 dark:text-slate-100">{action}</span>
         <button onClick={onClose} className="text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-300">

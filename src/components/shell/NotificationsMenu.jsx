@@ -40,7 +40,7 @@ export default function NotificationsMenu({ onClose }) {
 
   return (
     <div
-      className="absolute right-0 top-[calc(100%+10px)] z-[200] w-full sm:w-[440px] max-w-[95vw] overflow-hidden rounded-xl border border-[var(--border)] bg-white dark:bg-[#131a2c] shadow-xl"
+      className="absolute right-0 top-[calc(100%+10px)] z-[200] w-full sm:w-[440px] max-w-[95vw] overflow-hidden rounded-xl border border-[var(--border)] bg-white dark:bg-[var(--surface-raised)] shadow-xl"
     >
       {view === 'list' ? (
         <>

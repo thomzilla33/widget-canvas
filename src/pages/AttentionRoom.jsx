@@ -162,10 +162,10 @@ export default function AttentionRoom() {
   const selectedItem = allItems.find(i => i.id === selected?.id) ?? null
 
   return (
-    <div className="flex h-full flex-col overflow-hidden bg-white dark:bg-[#0d1117]">
+    <div className="flex h-full flex-col overflow-hidden bg-[var(--canvas)]">
 
       {/* ── Page Header — title + subline only ── */}
-      <div className="flex shrink-0 items-center gap-3 border-b border-gray-200 dark:border-white/[0.07] bg-white dark:bg-[#0d1117] px-5 pt-4 pb-3.5">
+      <div className="flex shrink-0 items-center gap-3 border-b border-gray-200 dark:border-white/[0.07] bg-[var(--canvas)] px-5 pt-4 pb-3.5">
         <button
           type="button"
           onClick={() => navigate('/home')}

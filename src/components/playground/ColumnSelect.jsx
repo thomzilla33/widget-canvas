@@ -32,7 +32,7 @@ export function ColumnChip({ col, active, onClick }) {
       </button>
 
       {showCard && (
-        <div className="pointer-events-none absolute bottom-full left-0 z-50 mb-2 w-52 rounded-xl border border-white/10 bg-[#0d0f14] p-3 shadow-2xl shadow-black/60">
+        <div className="pointer-events-none absolute bottom-full left-0 z-50 mb-2 w-52 rounded-xl border border-white/10 bg-[var(--canvas)] p-3 shadow-2xl shadow-black/60">
           <p className="text-xs font-semibold text-slate-100">{meta.display_name}</p>
           {meta.description && (
             <p className="mt-1 text-[11px] leading-relaxed text-slate-400">{meta.description}</p>
@@ -146,7 +146,7 @@ function ColumnPickerModal({ columns, selected, onClose, onApply }) {
       className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm"
       onMouseDown={(e) => { if (e.target === overlayRef.current) onClose() }}
     >
-      <div className="relative mx-4 flex w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#0a0c11] shadow-2xl shadow-black/80">
+      <div className="relative mx-4 flex w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-white/10 bg-[var(--canvas)] shadow-2xl shadow-black/80">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-white/[0.07] px-5 py-4">
           <div>
@@ -251,7 +251,7 @@ export function ColumnLibrary({ columns = [], selected = [], onChange }) {
 
   return (
     <>
-      <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-[#0a0c11] px-4 py-3">
+      <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-[var(--canvas)] px-4 py-3">
         <div className="flex min-w-0 flex-1 flex-wrap items-center gap-1.5">
           {selected.length === 0 ? (
             <span className="text-[11px] text-slate-600">No columns selected</span>
@@ -354,7 +354,7 @@ export default function ColumnSelect({ value, onChange, columns = [], placeholde
 
       {/* Dropdown */}
       {open && (
-        <div className="absolute z-50 mt-1 w-full min-w-[200px] overflow-hidden rounded-xl border border-white/10 bg-[#0d0f14] shadow-2xl shadow-black/60">
+        <div className="absolute z-50 mt-1 w-full min-w-[200px] overflow-hidden rounded-xl border border-white/10 bg-[var(--canvas)] shadow-2xl shadow-black/60">
           {/* Search — shown only when there are enough columns to justify it */}
           {columns.length > 5 && (
             <div className="border-b border-white/[0.07] p-2">

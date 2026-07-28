@@ -32,7 +32,7 @@ function Surface({ children, footer }) {
       <div className="flex-1 overflow-y-auto px-7 py-5 space-y-6">
         {children}
       </div>
-      <div className="shrink-0 border-t border-gray-200 dark:border-white/[0.07] bg-white dark:bg-[#0d1117] px-7 pt-4 pb-5">
+      <div className="shrink-0 border-t border-gray-200 dark:border-white/[0.07] bg-white dark:bg-[var(--canvas)] px-7 pt-4 pb-5">
         {footer}
       </div>
     </div>

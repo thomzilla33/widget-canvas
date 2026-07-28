@@ -17,7 +17,7 @@ export function TraceSlideout({ event, onClose }) {
       <div className="absolute inset-0 bg-black/30" onClick={onClose} aria-hidden="true" />
 
       {/* Panel */}
-      <div className="absolute right-0 top-0 flex h-full w-[340px] flex-col border-l border-gray-200 bg-white shadow-2xl dark:border-white/10 dark:bg-[#131a2c]">
+      <div className="absolute right-0 top-0 flex h-full w-[340px] flex-col border-l border-gray-200 bg-white shadow-2xl dark:border-white/10 dark:bg-[var(--surface-raised)]">
 
         {/* Header */}
         <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3.5 dark:border-white/[0.06]">

@@ -254,7 +254,7 @@ function WidgetResult({ result, onCreate, onTune, onPatch }) {
   const [editing, setEditing] = useState(null) // 'type' | 'breakdown' | null
   const toggle = (f) => setEditing((e) => (e === f ? null : f))
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-3 dark:border-white/10 dark:bg-[#131a2c]">
+    <div className="rounded-xl border border-gray-200 bg-white p-3 dark:border-white/10 dark:bg-[var(--surface-raised)]">
       <ResultHeader />
       <p className="mb-2 text-sm text-gray-700 dark:text-slate-200">Here’s a starting point — adjust the mapping below, or keep refining above.</p>
 
@@ -297,7 +297,7 @@ function DashboardResult({ result, widgets, onCreate, onPatch }) {
   const [editing, setEditing] = useState(null) // 'audience' | 'template' | null
   const toggle = (f) => setEditing((e) => (e === f ? null : f))
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-3 dark:border-white/10 dark:bg-[#131a2c]">
+    <div className="rounded-xl border border-gray-200 bg-white p-3 dark:border-white/10 dark:bg-[var(--surface-raised)]">
       <ResultHeader />
       <p className="mb-2 text-sm text-gray-700 dark:text-slate-200">
         A starting layout based on the <span className="font-semibold text-gray-900 dark:text-slate-100">closest template</span> — swap it or change the audience below, then refine on the canvas.
@@ -322,7 +322,7 @@ function DashboardResult({ result, widgets, onCreate, onPatch }) {
           </p>
         )}
         {shown.map((w, i) => (
-          <div key={w.id || i} className="rounded-md border border-gray-200 bg-white p-2 dark:border-white/10 dark:bg-[#0f1629]">
+          <div key={w.id || i} className="rounded-md border border-gray-200 bg-white p-2 dark:border-white/10 dark:bg-[var(--surface)]">
             <div className="mb-1 truncate text-[11px] font-semibold text-gray-900 dark:text-slate-100">{w.name}</div>
             <WidgetRender widget={w} size="sm" />
           </div>

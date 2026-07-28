@@ -24,6 +24,10 @@ export default {
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
       },
+      backgroundImage: {
+        'app-light': 'radial-gradient(circle at 50% 0%, #F6F9FF 0%, #FFFFFF 80%)',
+        'app-dark':  'linear-gradient(144deg, #020618 0%, #0F172B 50%, #020618 100%)',
+      },
     },
   },
   plugins: [],

@@ -430,7 +430,7 @@ function Detail({ mw, installed, onInstall, onBack }) {
             </div>
           </div>
           <div className="rounded-xl border border-gray-200 bg-gray-50/60 p-6 dark:border-white/10 dark:bg-white/[0.02]">
-            <div className={`mx-auto rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition-all dark:border-white/10 dark:bg-[#131a2c] ${PREVIEW_WIDTH[size]}`}>
+            <div className={`mx-auto rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition-all dark:border-white/10 dark:bg-[var(--surface-raised)] ${PREVIEW_WIDTH[size]}`}>
               <div className="mb-2 text-[10px] font-bold uppercase tracking-wide text-gray-500 dark:text-slate-400">{mw.name}</div>
               <WidgetRender widget={mw} size={size} />
             </div>

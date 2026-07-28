@@ -455,7 +455,7 @@ function MenuItem({ icon: Icon, onClick, children }) {
 /* ── "Choose section" empty-state card — shown before a placement is assigned ── */
 function ChooseSectionCard({ onClick }) {
   return (
-    <div className="rounded-xl border border-gray-200 bg-white dark:border-white/[0.08] dark:bg-[#0f1629]">
+    <div className="rounded-xl border border-gray-200 bg-white dark:border-white/[0.08] dark:bg-[var(--surface)]">
       <div className="flex flex-col items-center gap-4 px-6 py-12 text-center">
         <span className="grid h-12 w-12 place-items-center rounded-xl bg-aims-blue/10 text-aims-blue">
           <MapPin size={22} strokeWidth={1.5} aria-hidden="true" />
@@ -480,7 +480,7 @@ function ChooseSectionCard({ onClick }) {
 /* ── Disabled "Add widget" card — shown before section is chosen ── */
 function AddWidgetCardDisabled() {
   return (
-    <div className="rounded-xl border border-gray-200 bg-white dark:border-white/[0.08] dark:bg-[#0f1629]">
+    <div className="rounded-xl border border-gray-200 bg-white dark:border-white/[0.08] dark:bg-[var(--surface)]">
       <div className="flex flex-col items-center gap-4 px-6 py-12 text-center">
         <span className="grid h-12 w-12 place-items-center rounded-xl bg-gray-100 text-gray-400 dark:bg-white/[0.05] dark:text-slate-500">
           <LayoutGrid size={22} strokeWidth={1.5} aria-hidden="true" />
@@ -507,7 +507,7 @@ function AddWidgetCard({ onClick }) {
   return (
     <button
       onClick={onClick}
-      className="group relative flex min-h-[180px] w-full cursor-pointer flex-col items-center justify-center gap-3 overflow-hidden rounded-xl border border-dashed border-white/10 bg-white/[0.02] px-6 py-8 text-center transition-all duration-200 hover:border-aims-blue/40 hover:bg-aims-blue/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aims-blue/40 dark:bg-[#0d1424]/60"
+      className="group relative flex min-h-[180px] w-full cursor-pointer flex-col items-center justify-center gap-3 overflow-hidden rounded-xl border border-dashed border-white/10 bg-white/[0.02] px-6 py-8 text-center transition-all duration-200 hover:border-aims-blue/40 hover:bg-aims-blue/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aims-blue/40 dark:bg-[var(--canvas)]/80"
     >
       {/* Subtle radial glow on hover */}
       <span
@@ -599,7 +599,7 @@ function CanvasTile({ placement: p, widget: w, selected, dragging, onSelect, onU
       onClick={onSelect}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect() } }}
       aria-label={`Configure ${w?.name || 'widget'}`}
-      className={`group relative rounded-lg border bg-white p-2.5 text-left transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aims-blue/50 dark:bg-[#131a2c] ${span} ${dragging ? 'opacity-50' : ''} ${
+      className={`group relative rounded-lg border bg-white p-2.5 text-left transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aims-blue/50 dark:bg-[var(--surface-raised)] ${span} ${dragging ? 'opacity-50' : ''} ${
         resizing ? 'border-aims-blue ring-2 ring-aims-blue/40' : selected ? 'border-aims-blue ring-2 ring-aims-blue/30' : 'border-gray-200 dark:border-white/10'
       }`}
     >
@@ -877,7 +877,7 @@ function InlineTitle({ value, onChange }) {
 /* ── Reusable right-side slide-over ── */
 function SidePanel({ title, children, footer, onClose }) {
   return (
-    <div className="absolute top-0 right-0 bottom-0 w-80 max-w-[calc(100vw-2rem)] bg-white border-l border-gray-200 dark:bg-[#0f1629] dark:border-white/10 shadow-xl flex flex-col z-10">
+    <div className="absolute top-0 right-0 bottom-0 w-80 max-w-[calc(100vw-2rem)] bg-white border-l border-gray-200 dark:bg-[var(--surface)] dark:border-white/10 shadow-xl flex flex-col z-10">
       <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-white/10">
         <span className="font-semibold text-gray-900 dark:text-slate-100">{title}</span>
         <button

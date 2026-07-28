@@ -265,7 +265,7 @@ export function StepIndicator({ steps = [], current = 0 }) {
 
 export function PageHeader({ title, description, actions }) {
   return (
-    <div className="border-b border-gray-200 bg-white dark:border-white/10 dark:bg-[#0f1629] px-6 py-4">
+    <div className="border-b border-gray-200 bg-white dark:border-white/10 dark:bg-[var(--surface)] px-6 py-4">
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-[22px] font-bold tracking-tight text-gray-900 dark:text-slate-100">{title}</h1>

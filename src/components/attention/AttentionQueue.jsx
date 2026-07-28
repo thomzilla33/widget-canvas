@@ -164,7 +164,7 @@ function QueueItemCard({ item, isActive, onClick }) {
       className={`group w-full text-left rounded-xl border px-3 py-3 transition-all duration-150 ${
         isActive
           ? 'border-aims-blue/30 bg-aims-blue/[0.06] shadow-sm dark:border-aims-blue/40 dark:bg-aims-blue/[0.10]'
-          : 'border-gray-200/80 bg-white shadow-sm hover:border-gray-300 hover:shadow dark:border-white/[0.08] dark:bg-[#1a2236] dark:hover:border-white/[0.14]'
+          : 'border-gray-200/80 bg-white shadow-sm hover:border-gray-300 hover:shadow dark:border-white/[0.08] dark:bg-[var(--surface-raised)] dark:hover:border-white/[0.14]'
       }`}
       aria-pressed={isActive}
     >
@@ -258,13 +258,13 @@ export function AttentionQueue({ items, totalCount, selectedId, onSelect, search
   return (
     <div
       ref={queueRef}
-      className="flex h-full w-full flex-col bg-gray-50 dark:bg-[#0f1520]"
+      className="flex h-full w-full flex-col bg-gray-50 dark:bg-[var(--surface)]"
       onKeyDown={handleKeyDown}
       tabIndex={-1}
       aria-label="Attention queue"
     >
       {/* ── Internal panel header: Queue label + search + filter chips ── */}
-      <div className="shrink-0 border-b border-gray-200/80 dark:border-white/[0.07] bg-gray-50 dark:bg-[#0f1520] px-3 pt-3 pb-2.5 flex flex-col gap-2">
+      <div className="shrink-0 border-b border-gray-200/80 dark:border-white/[0.07] bg-gray-50 dark:bg-[var(--surface)] px-3 pt-3 pb-2.5 flex flex-col gap-2">
         {/* Queue [N] label */}
         <div className="flex items-center gap-1.5">
           <span className="text-[11px] font-semibold text-[var(--muted-foreground)]">Queue</span>
@@ -273,7 +273,7 @@ export function AttentionQueue({ items, totalCount, selectedId, onSelect, search
           </span>
         </div>
         {/* Search */}
-        <div className="relative flex h-8 items-center rounded-lg border-[0.5px] border-[var(--border)] bg-white dark:bg-[#151d2e]">
+        <div className="relative flex h-8 items-center rounded-lg border-[0.5px] border-[var(--border)] bg-white dark:bg-[var(--surface-raised)]">
           <Search size={12} className="pointer-events-none absolute left-2.5 text-[var(--muted-foreground)]" />
           <input
             type="search"

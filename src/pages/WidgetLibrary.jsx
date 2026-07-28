@@ -158,7 +158,7 @@ export default function WidgetLibrary() {
                 return (
                   <div
                     key={f.id}
-                    className="flex flex-col sm:flex-row sm:items-start gap-3 rounded-lg border border-gray-200 bg-white p-2.5 dark:border-white/10 dark:bg-[#131a2c]"
+                    className="flex flex-col sm:flex-row sm:items-start gap-3 rounded-lg border border-gray-200 bg-white p-2.5 dark:border-white/10 dark:bg-[var(--surface-raised)]"
                   >
                     <WidgetGlyph skeleton={w?.skeleton || 'KPI'} source={w?.source || ''} sm />
                     <div className="min-w-0 flex-1">

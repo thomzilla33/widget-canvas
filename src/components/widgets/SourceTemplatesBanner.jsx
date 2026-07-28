@@ -51,7 +51,7 @@ export default function SourceTemplatesBanner() {
         {active.map((s) => {
           const n = remaining(s).length
           return (
-            <div key={s.id} className="flex items-center gap-2.5 rounded-lg border border-gray-200 bg-white p-2.5 dark:border-white/10 dark:bg-[#131a2c]">
+            <div key={s.id} className="flex items-center gap-2.5 rounded-lg border border-gray-200 bg-white p-2.5 dark:border-white/10 dark:bg-[var(--surface-raised)]">
               <span className="logo-sq !h-8 !w-8 !text-[10px]" style={{ background: s.logoColor }}>{s.initials}</span>
               <div className="min-w-0 flex-1">
                 <div className="truncate text-sm font-semibold text-gray-900 dark:text-slate-100">{s.name}</div>

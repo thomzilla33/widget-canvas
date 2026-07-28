@@ -119,7 +119,7 @@ export default function WidgetLibraryModal({ zoneLabel, onAdd, onClose, onCreate
                       {onCreateNew && (
                         <button
                           onClick={onCreateNew}
-                          className="group relative flex min-h-[210px] w-full cursor-pointer flex-col items-center justify-center gap-3 overflow-hidden rounded-xl border border-dashed border-white/10 bg-white/[0.02] px-6 py-8 text-center transition-all duration-200 hover:border-aims-blue/40 hover:bg-aims-blue/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aims-blue/40 dark:bg-[#0d1424]/60"
+                          className="group relative flex min-h-[210px] w-full cursor-pointer flex-col items-center justify-center gap-3 overflow-hidden rounded-xl border border-dashed border-white/10 bg-white/[0.02] px-6 py-8 text-center transition-all duration-200 hover:border-aims-blue/40 hover:bg-aims-blue/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aims-blue/40 dark:bg-[var(--canvas)]/80"
                         >
                           <span
                             className="pointer-events-none absolute inset-0 rounded-xl opacity-0 transition-opacity duration-300 group-hover:opacity-100"
@@ -237,7 +237,7 @@ function Detail({ widget, onBack, onAdd }) {
             </div>
           </div>
           <div className="rounded-xl border border-gray-200 bg-gray-50/60 p-6 dark:border-white/10 dark:bg-white/[0.02]">
-            <div className={`pointer-events-none mx-auto rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition-all dark:border-white/10 dark:bg-[#131a2c] ${PREVIEW_WIDTH[colsToDetail(dims.cols)]}`}>
+            <div className={`pointer-events-none mx-auto rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition-all dark:border-white/10 dark:bg-[var(--surface-raised)] ${PREVIEW_WIDTH[colsToDetail(dims.cols)]}`}>
               <div className="mb-2 text-[10px] font-bold uppercase tracking-wide text-gray-500 dark:text-slate-400">{widget.name}</div>
               <WidgetRender widget={widget} size={colsToDetail(dims.cols)} rows={dims.rows} />
             </div>

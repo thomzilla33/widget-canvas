@@ -363,7 +363,7 @@ export function AgentCatalog() {
     <>
       <section
         id="home-agent-catalog"
-        className="rounded-2xl border border-gray-100 bg-white px-5 py-4 dark:border-white/[0.08] dark:bg-[#111827]"
+        className="rounded-2xl border border-gray-100 bg-white px-5 py-4 dark:border-white/[0.08] dark:bg-[var(--surface)]"
       >
         {/* Header row */}
         <div className="mb-3 flex items-center justify-between gap-4">

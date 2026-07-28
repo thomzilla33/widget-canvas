@@ -392,7 +392,7 @@ function LibraryModal({ title, subtitle, onClose, children }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center px-6">
       <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" onClick={onClose} />
       <div
-        className="relative z-10 flex w-full max-w-5xl flex-col rounded-2xl border border-white/[0.08] bg-[#0d0f14] shadow-2xl overflow-hidden"
+        className="relative z-10 flex w-full max-w-5xl flex-col rounded-2xl border border-white/[0.08] bg-[var(--canvas)] shadow-2xl overflow-hidden"
         style={{ height: 'min(680px, 92dvh)' }}
       >
         {/* Header */}

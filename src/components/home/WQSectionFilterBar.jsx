@@ -38,7 +38,7 @@ function FilterDropdown({ label, items, selected, onToggle, open, onOpen, counts
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full z-30 mt-1.5 min-w-[160px] rounded-xl border border-gray-100 bg-white py-1 shadow-lg dark:border-white/[0.08] dark:bg-[#1a1f2e]">
+        <div className="absolute right-0 top-full z-30 mt-1.5 min-w-[160px] rounded-xl border border-gray-100 bg-white py-1 shadow-lg dark:border-white/[0.08] dark:bg-[var(--surface-raised)]">
           {items.map(item => (
             <button
               key={item}
@@ -180,7 +180,7 @@ export function WQSectionFilterBar({ events, onFilter }) {
             <ChevronDown size={11} className={`transition-transform ${openMenu === 'sort' ? 'rotate-180' : ''}`} />
           </button>
           {openMenu === 'sort' && (
-            <div className="absolute right-0 top-full z-30 mt-1.5 w-40 rounded-xl border border-gray-100 bg-white py-1 shadow-lg dark:border-white/[0.08] dark:bg-[#1a1f2e]">
+            <div className="absolute right-0 top-full z-30 mt-1.5 w-40 rounded-xl border border-gray-100 bg-white py-1 shadow-lg dark:border-white/[0.08] dark:bg-[var(--surface-raised)]">
               {SORTS.map(s => (
                 <button
                   key={s.id}

@@ -259,7 +259,7 @@ function SimpleDropdown({ label, value, options, onChange }) {
         <ChevronDown size={11} className={`transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
       {open && (
-        <div className="absolute left-0 top-full z-30 mt-1.5 min-w-[160px] rounded-xl border border-gray-100 bg-white py-1 shadow-lg dark:border-white/[0.08] dark:bg-[#1a1f2e] dark:shadow-black/40">
+        <div className="absolute left-0 top-full z-30 mt-1.5 min-w-[160px] rounded-xl border border-gray-100 bg-white py-1 shadow-lg dark:border-white/[0.08] dark:bg-[var(--surface-raised)] dark:shadow-black/40">
           {options.map(o => (
             <button key={o.value} type="button"
               onClick={() => { onChange(o.value); setOpen(false) }}

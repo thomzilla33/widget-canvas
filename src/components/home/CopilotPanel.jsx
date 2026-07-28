@@ -88,7 +88,7 @@ export function CopilotPanel({ isOpen, onClose }) {
     <aside
       ref={asideRef}
       style={{ width: isOpen ? 380 : 0 }}
-      className="relative h-full shrink-0 overflow-hidden bg-white dark:bg-[#0f1629]"
+      className="relative h-full shrink-0 overflow-hidden bg-white dark:bg-[var(--surface)]"
       aria-label="AIMS Copilot"
       aria-hidden={!isOpen}
     >

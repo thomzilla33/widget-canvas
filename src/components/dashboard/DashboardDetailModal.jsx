@@ -280,7 +280,7 @@ export default function DashboardDetailModal({ dashboard, isAdmin, onClose, onOp
                     <div
                       key={tile.pid || i}
                       data-tile
-                      className={`${span} flex flex-col gap-1.5 rounded-lg border bg-white p-2.5 dark:bg-[#131a2c] ${meta.border}`}
+                      className={`${span} flex flex-col gap-1.5 rounded-lg border bg-white p-2.5 dark:bg-[var(--surface-raised)] ${meta.border}`}
                       style={{ minHeight: isLarge ? '72px' : '60px' }}
                     >
                       {/* Top row: skeleton chip */}

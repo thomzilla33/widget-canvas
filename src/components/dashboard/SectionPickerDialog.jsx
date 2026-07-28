@@ -111,7 +111,7 @@ export default function SectionPickerDialog({ onSelect, onClose }) {
       <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px]" onClick={onClose} aria-hidden="true" />
 
       {/* Dialog */}
-      <div className="relative z-10 w-full max-w-[440px] rounded-2xl bg-white shadow-2xl dark:bg-[#111623]"
+      <div className="relative z-10 w-full max-w-[440px] rounded-2xl bg-white shadow-2xl dark:bg-[var(--surface)]"
         style={{ border: '1px solid rgba(255,255,255,0.07)' }}
       >
         {/* Header */}

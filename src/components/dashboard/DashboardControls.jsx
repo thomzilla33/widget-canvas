@@ -52,7 +52,7 @@ export default function DashboardControls({ scope, onChange }) {
     (scope?.env || 'prod') !== DEFAULT_SCOPE.env
 
   return (
-    <div className="mb-4 flex flex-col gap-3 rounded-xl border border-gray-200 bg-white p-3 dark:border-white/10 dark:bg-[#131a2c]">
+    <div className="mb-4 flex flex-col gap-3 rounded-xl border border-gray-200 bg-white p-3 dark:border-white/10 dark:bg-[var(--surface-raised)]">
       <div className="flex flex-wrap items-center gap-2">
         {/* Date range segmented control */}
         <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-gray-500 dark:text-slate-400">
