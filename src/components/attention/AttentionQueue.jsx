@@ -114,9 +114,9 @@ export function AttentionQueue({ items, totalCount, selectedId, onSelect, search
       aria-label="Attention queue"
     >
       {/* ── Header ── */}
-      <div className="shrink-0 border-b border-gray-100 dark:border-white/[0.04] px-4 pt-3.5 pb-0">
-        <div className="flex items-center gap-2 pb-3">
-          <span className="text-[11px] font-semibold tracking-tight text-gray-700 dark:text-slate-300">Queue</span>
+      <div className="shrink-0 border-b border-gray-200 dark:border-white/[0.06] bg-white dark:bg-[#0d1117] px-4 pt-4 pb-0">
+        <div className="flex items-center gap-2 pb-3.5">
+          <span className="text-sm font-semibold text-gray-900 dark:text-slate-100">Queue</span>
           {totalCount > 0 && (
             <span className="rounded-full bg-aims-blue/10 px-1.5 py-0.5 text-[9px] font-bold text-aims-blue tabular-nums">
               {totalCount}
