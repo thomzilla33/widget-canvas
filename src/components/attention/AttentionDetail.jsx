@@ -193,7 +193,7 @@ export function AttentionDetail({ item, onApprove, onDecline, onComplete, onDism
             <span className="rounded bg-gray-900 dark:bg-white/[0.1] px-1.5 py-0.5 font-mono text-[9px] font-bold text-white dark:text-slate-200">
               {evtNum}
             </span>
-            <span className={`rounded px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide ${kMeta.color}`}>
+            <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${kMeta.color}`}>
               {kMeta.label}
             </span>
             {md.sourceRef && (
@@ -202,12 +202,12 @@ export function AttentionDetail({ item, onApprove, onDecline, onComplete, onDism
               </span>
             )}
             {item.quickActions?.primary && (
-              <span className="rounded bg-aims-blue/10 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-aims-blue">
+              <span className="rounded-full bg-amber-400/[0.22] px-2.5 py-1 text-[11px] font-semibold text-amber-700 dark:bg-amber-400/[0.20] dark:text-amber-400">
                 {item.quickActions.primary}
               </span>
             )}
-            <span className="ml-auto rounded bg-green-500/10 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-green-600 dark:text-green-400">
-              OPEN
+            <span className="ml-auto rounded-full bg-green-500/10 px-2.5 py-1 text-[11px] font-semibold text-green-600 dark:text-green-400">
+              Open
             </span>
           </div>
 
@@ -383,22 +383,27 @@ export function AttentionDetail({ item, onApprove, onDecline, onComplete, onDism
               {titleOf(item)}
             </h2>
             <div className="flex shrink-0 flex-wrap items-center justify-end gap-1.5 pt-0.5">
-              <span className={`rounded px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide ${kMeta.color}`}>
+              <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${kMeta.color}`}>
                 {kMeta.label}
               </span>
               {item.status === 'error' && (
-                <span className="rounded bg-red-500/10 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-red-500 dark:text-red-400">
+                <span className="rounded-full bg-red-500/[0.18] px-2.5 py-1 text-[11px] font-semibold text-red-500 dark:bg-red-400/[0.18] dark:text-red-400">
                   Error
                 </span>
               )}
               {item.priority && (
-                <span className={`rounded px-1.5 py-0.5 text-[9px] font-semibold ${PRIORITY_COLOR[item.priority] ?? PRIORITY_COLOR.low}`}>
+                <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${PRIORITY_COLOR[item.priority] ?? PRIORITY_COLOR.low}`}>
                   {item.priority === 'high' ? 'High priority' : item.priority === 'med' ? 'Medium' : 'Low priority'}
                 </span>
               )}
               {item.statusLabel && (
-                <span className="rounded bg-gray-100 px-1.5 py-0.5 text-[9px] font-semibold text-gray-500 dark:bg-white/[0.06] dark:text-slate-400">
+                <span className="rounded-full bg-gray-100 px-2.5 py-1 text-[11px] font-semibold text-gray-500 dark:bg-white/[0.06] dark:text-slate-400">
                   {item.statusLabel}
+                </span>
+              )}
+              {item.quickActions?.primary && (
+                <span className="rounded-full bg-amber-400/[0.22] px-2.5 py-1 text-[11px] font-semibold text-amber-700 dark:bg-amber-400/[0.20] dark:text-amber-400">
+                  {item.quickActions.primary}
                 </span>
               )}
             </div>

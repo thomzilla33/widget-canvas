@@ -104,7 +104,7 @@ function kindBadge(item) {
 function kindBadgeColor(item) {
   if (item._kind === 'gov' && item.blocking) return 'bg-red-500/[0.15] text-red-600 dark:bg-red-400/[0.18] dark:text-red-400'
   if (item._kind === 'gov')                  return 'bg-aims-blue/[0.15] text-aims-blue'
-  if (item._kind === 'htl')                  return 'bg-purple-500/[0.18] text-purple-600 dark:text-purple-400'
+  if (item._kind === 'htl')                  return 'bg-purple-500/[0.22] text-purple-600 dark:bg-purple-400/[0.22] dark:text-purple-300'
   if (item._kind === 'wq' && item.tier === 'actnow')   return 'bg-red-500/[0.15] text-red-600 dark:bg-red-400/[0.18] dark:text-red-400'
   if (item._kind === 'wq' && item.tier === 'critical') return 'bg-amber-400/[0.22] text-amber-700 dark:bg-amber-400/[0.18] dark:text-amber-400'
   if (item.due === 'Overdue' || item.status === 'error') return 'bg-red-500/[0.15] text-red-600 dark:bg-red-400/[0.18] dark:text-red-400'
@@ -163,8 +163,8 @@ function QueueItemCard({ item, isActive, onClick }) {
       onClick={onClick}
       className={`group w-full text-left rounded-xl border px-3 py-3 transition-all duration-150 ${
         isActive
-          ? 'border-aims-blue/30 bg-aims-blue/[0.06] shadow-sm dark:border-aims-blue/40 dark:bg-aims-blue/[0.10]'
-          : 'border-gray-200/80 bg-white shadow-sm hover:border-gray-300 hover:shadow dark:border-white/[0.08] dark:bg-[var(--surface-raised)] dark:hover:border-white/[0.14]'
+          ? 'border-aims-blue/40 bg-aims-blue/[0.08] shadow-sm dark:border-aims-blue/50 dark:bg-aims-blue/[0.12] ring-1 ring-inset ring-aims-blue/20'
+          : 'border-gray-200/80 bg-white shadow-sm hover:border-gray-300 hover:shadow dark:border-white/[0.08] dark:bg-[var(--surface-raised)] dark:hover:border-white/[0.16]'
       }`}
       aria-pressed={isActive}
     >
