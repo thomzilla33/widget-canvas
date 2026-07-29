@@ -88,14 +88,14 @@ function PartitionCard({ partition, studioLabel, studioColor, studioShort }) {
       {/* Path to 100% */}
       <div className="mt-3 rounded-lg border border-gray-200 bg-white p-3 dark:border-white/[0.06] dark:bg-black/20">
         <div className="mb-1 flex items-center justify-between">
-          <span className="text-[9px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-500">
+          <span className="text-[9px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400">
             Path to 100%
           </span>
-          <span className="text-[10px] text-gray-400 dark:text-slate-500">
+          <span className="text-[10px] text-gray-400 dark:text-slate-400">
             Gap to close: {partition.gapPts} pts
           </span>
         </div>
-        <p className="mb-2.5 text-[10px] leading-snug text-gray-400 dark:text-slate-500">
+        <p className="mb-2.5 text-[10px] leading-snug text-gray-400 dark:text-slate-400">
           Do these in order and you'll reach 100% health on this partition. Estimated lift: +{partition.gapPts} pts.
         </p>
 
@@ -124,7 +124,7 @@ function PartitionCard({ partition, studioLabel, studioColor, studioShort }) {
                         Linked: {action.linkedIssue}
                       </span>
                     )}
-                    <span className="rounded bg-gray-100 px-1 py-px text-[9px] text-gray-500 dark:bg-white/5 dark:text-slate-500">
+                    <span className="rounded bg-gray-100 px-1 py-px text-[9px] text-gray-500 dark:bg-white/5 dark:text-slate-400">
                       Opens in {studioShort}
                     </span>
                     <span className="rounded bg-green-500/10 px-1 py-px text-[9px] font-semibold text-aims-governed">
@@ -191,7 +191,7 @@ export function StudioHealthCard() {
 
       {/* Subtitle */}
       <div className="border-b border-gray-100 px-4 py-2 dark:border-white/[0.04]">
-        <p className="text-[11px] text-gray-400 dark:text-slate-500">
+        <p className="text-[11px] text-gray-400 dark:text-slate-400">
           Partition breakdown — click any studio above to switch.
         </p>
       </div>

@@ -94,7 +94,7 @@ function AttestationActions({ event, onApprove, onReject, onCorrect, onEscalate 
         <button
           type="button"
           onClick={(e) => { e.stopPropagation(); onEscalate?.(event) }}
-          className="inline-flex items-center gap-1 rounded-md border border-gray-200 px-2 py-0.5 text-[10px] font-medium text-gray-400 hover:bg-gray-50 dark:border-white/10 dark:text-slate-500 dark:hover:bg-white/[0.04]"
+          className="inline-flex items-center gap-1 rounded-md border border-gray-200 px-2 py-0.5 text-[10px] font-medium text-gray-400 hover:bg-gray-50 dark:border-white/10 dark:text-slate-400 dark:hover:bg-white/[0.04]"
         >
           <ArrowUpRight size={9} /> Escalate
         </button>
@@ -142,7 +142,7 @@ export function EventCard({ event, expanded, onToggle, onOpen, onEscalate, onSki
         {/* Content */}
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-1">
-            <span className="rounded-full border border-gray-200 px-1.5 py-0.5 text-[9px] font-medium text-gray-500 dark:border-white/10 dark:text-slate-500">
+            <span className="rounded-full border border-gray-200 px-1.5 py-0.5 text-[9px] font-medium text-gray-500 dark:border-white/10 dark:text-slate-400">
               {event.type}
             </span>
             {event.missionCritical && (
@@ -151,14 +151,14 @@ export function EventCard({ event, expanded, onToggle, onOpen, onEscalate, onSki
               </span>
             )}
             {event.blastRadius > 0 && (
-              <span className="text-[9px] text-gray-400 dark:text-slate-600">
+              <span className="text-[9px] text-gray-400 dark:text-slate-400">
                 {event.blastRadius} workflows
               </span>
             )}
           </div>
           <p className="mt-0.5 text-xs font-medium leading-snug text-gray-800 dark:text-slate-200">{event.title}</p>
           <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
-            <span className="text-[10px] text-gray-400 dark:text-slate-500">{event.dueLabel}</span>
+            <span className="text-[10px] text-gray-400 dark:text-slate-400">{event.dueLabel}</span>
             {/* Trace link — Admin role only */}
             {isAdmin && event.sourceWorkflow && (
               <button
@@ -175,12 +175,12 @@ export function EventCard({ event, expanded, onToggle, onOpen, onEscalate, onSki
 
         {/* Right: time + chevron */}
         <div className="flex shrink-0 items-center gap-1">
-          <span className="text-[10px] tabular-nums text-gray-400 dark:text-slate-600">
+          <span className="text-[10px] tabular-nums text-gray-400 dark:text-slate-400">
             {fmtMins(event.estimatedMinutes)}
           </span>
           <ChevronDown
             size={12}
-            className={`text-gray-300 transition-transform dark:text-slate-600 ${expanded ? 'rotate-180' : ''}`}
+            className={`text-gray-300 transition-transform dark:text-slate-400 ${expanded ? 'rotate-180' : ''}`}
             aria-hidden="true"
           />
         </div>
@@ -232,7 +232,7 @@ export function EventCard({ event, expanded, onToggle, onOpen, onEscalate, onSki
                 <button
                   type="button"
                   onClick={() => onSkip?.(event.id)}
-                  className="inline-flex items-center gap-1 rounded-md border border-gray-200 px-2 py-0.5 text-[10px] font-medium text-gray-400 hover:bg-gray-50 dark:border-white/10 dark:text-slate-500 dark:hover:bg-white/[0.04]"
+                  className="inline-flex items-center gap-1 rounded-md border border-gray-200 px-2 py-0.5 text-[10px] font-medium text-gray-400 hover:bg-gray-50 dark:border-white/10 dark:text-slate-400 dark:hover:bg-white/[0.04]"
                 >
                   <SkipForward size={9} aria-hidden="true" /> Skip
                 </button>
@@ -240,7 +240,7 @@ export function EventCard({ event, expanded, onToggle, onOpen, onEscalate, onSki
                   type="button"
                   disabled
                   title="Assign to team member — coming in V1.5"
-                  className="inline-flex cursor-not-allowed items-center gap-1 rounded-md border border-gray-200 px-2 py-0.5 text-[10px] font-medium text-gray-400 opacity-40 dark:border-white/10 dark:text-slate-500"
+                  className="inline-flex cursor-not-allowed items-center gap-1 rounded-md border border-gray-200 px-2 py-0.5 text-[10px] font-medium text-gray-400 opacity-40 dark:border-white/10 dark:text-slate-400"
                 >
                   <UserPlus size={9} aria-hidden="true" /> Assign
                 </button>

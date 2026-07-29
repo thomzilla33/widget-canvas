@@ -46,7 +46,7 @@ function CategoryDropdown({ category, onChange }) {
         </span>
         <ChevronDown
           size={10}
-          className={`text-gray-400 transition-transform dark:text-slate-500 ${open ? 'rotate-180' : ''}`}
+          className={`text-gray-400 transition-transform dark:text-slate-400 ${open ? 'rotate-180' : ''}`}
           aria-hidden="true"
         />
       </button>
@@ -58,7 +58,7 @@ function CategoryDropdown({ category, onChange }) {
           className="absolute left-0 top-[calc(100%+6px)] z-30 w-[200px] overflow-hidden rounded-xl border border-gray-100 bg-white shadow-xl dark:border-white/[0.1] dark:bg-slate-900"
         >
           <div className="px-3 pt-2.5 pb-1">
-            <p className="text-[9px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-500">Show</p>
+            <p className="text-[9px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400">Show</p>
           </div>
           <div className="pb-1.5">
             {CAT_OPTIONS.map(opt => {
@@ -99,7 +99,7 @@ function StatusChip({ status }) {
   if (status === 'active') return null
   if (status === 'unavailable') {
     return (
-      <span className="inline-flex items-center gap-0.5 rounded-full bg-gray-100 px-1.5 py-0.5 text-[9px] font-semibold text-gray-400 dark:bg-white/[0.07] dark:text-slate-500">
+      <span className="inline-flex items-center gap-0.5 rounded-full bg-gray-100 px-1.5 py-0.5 text-[9px] font-semibold text-gray-400 dark:bg-white/[0.07] dark:text-slate-400">
         Unavailable
       </span>
     )
@@ -130,11 +130,11 @@ function AgentCard({ agent, onClick, highlight }) {
           </span>
           <span className="truncate text-[12px] font-semibold text-gray-800 dark:text-slate-200">{agent.name}</span>
         </div>
-        <ChevronRight size={11} className="mt-0.5 shrink-0 text-gray-300 transition-transform group-hover:translate-x-0.5 dark:text-slate-600" aria-hidden="true" />
+        <ChevronRight size={11} className="mt-0.5 shrink-0 text-gray-300 transition-transform group-hover:translate-x-0.5 dark:text-slate-400" aria-hidden="true" />
       </div>
 
       {/* Description */}
-      <p className="line-clamp-2 flex-1 text-[10px] leading-[1.45] text-gray-400 dark:text-slate-500">
+      <p className="line-clamp-2 flex-1 text-[10px] leading-[1.45] text-gray-400 dark:text-slate-400">
         {agent.description}
       </p>
 
@@ -189,9 +189,9 @@ function CannedAnswerBlock({ answer, onClose }) {
       <p className="text-[12px] leading-relaxed text-gray-700 dark:text-slate-200">{answer.answer}</p>
       {answer.citations?.length > 0 && (
         <div className="mt-3 space-y-1 border-t border-gray-100 pt-2.5 dark:border-white/[0.07]">
-          <p className="text-[9px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-500">Sources</p>
+          <p className="text-[9px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400">Sources</p>
           {answer.citations.map((c, i) => (
-            <p key={i} className="text-[10px] text-gray-400 dark:text-slate-500">· {c}</p>
+            <p key={i} className="text-[10px] text-gray-400 dark:text-slate-400">· {c}</p>
           ))}
         </div>
       )}
@@ -228,7 +228,7 @@ function AgentDetailDrawer({ agent, onClose, onRun }) {
             </span>
             <div>
               <p className="text-[14px] font-semibold text-gray-900 dark:text-slate-100">{agent.name}</p>
-              <p className="text-[10px] text-gray-400 dark:text-slate-500">
+              <p className="text-[10px] text-gray-400 dark:text-slate-400">
                 {isWorkflow ? 'Workflow Agent' : 'Single Agent'}
               </p>
             </div>
@@ -236,7 +236,7 @@ function AgentDetailDrawer({ agent, onClose, onRun }) {
           <button
             type="button"
             onClick={onClose}
-            className="mt-0.5 rounded-lg p-1.5 text-gray-300 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:text-slate-600 dark:hover:bg-white/[0.07] dark:hover:text-slate-300"
+            className="mt-0.5 rounded-lg p-1.5 text-gray-300 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:text-slate-400 dark:hover:bg-white/[0.07] dark:hover:text-slate-300"
             aria-label="Close drawer"
           >
             <X size={16} />
@@ -246,10 +246,10 @@ function AgentDetailDrawer({ agent, onClose, onRun }) {
         {/* Unavailable banner */}
         {agent.status === 'unavailable' && (
           <div className="mx-5 mt-4 flex items-start gap-2.5 rounded-xl bg-gray-50 p-3.5 dark:bg-white/[0.04]">
-            <AlertCircle size={14} className="mt-0.5 shrink-0 text-gray-400 dark:text-slate-500" />
+            <AlertCircle size={14} className="mt-0.5 shrink-0 text-gray-400 dark:text-slate-400" />
             <div>
               <p className="text-[12px] font-semibold text-gray-600 dark:text-slate-300">Currently unavailable</p>
-              <p className="mt-0.5 text-[11px] leading-relaxed text-gray-400 dark:text-slate-500">{agent.unavailableReason}</p>
+              <p className="mt-0.5 text-[11px] leading-relaxed text-gray-400 dark:text-slate-400">{agent.unavailableReason}</p>
             </div>
           </div>
         )}
@@ -272,14 +272,14 @@ function AgentDetailDrawer({ agent, onClose, onRun }) {
               {showGrounding && <GroundingPopover agent={agent} onClose={() => setShowGrounding(false)} />}
             </div>
           ) : (
-            <div className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-gray-100 px-2.5 py-1 text-[11px] font-semibold text-gray-400 dark:bg-white/[0.07] dark:text-slate-500">
+            <div className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-gray-100 px-2.5 py-1 text-[11px] font-semibold text-gray-400 dark:bg-white/[0.07] dark:text-slate-400">
               <Info size={10} /> Not grounded
             </div>
           )}
 
           {/* Example prompts */}
           <div className="mt-5">
-            <p className="mb-2.5 text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-500">
+            <p className="mb-2.5 text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400">
               Example prompts
             </p>
             <div className="space-y-2">
@@ -303,7 +303,7 @@ function AgentDetailDrawer({ agent, onClose, onRun }) {
         {/* Footer CTA */}
         <div className="border-t border-gray-100 px-5 py-4 dark:border-white/[0.07]">
           {agent.status === 'unavailable' ? (
-            <div className="flex items-center justify-center gap-2 rounded-xl bg-gray-100 py-2.5 text-[12px] font-semibold text-gray-400 dark:bg-white/[0.06] dark:text-slate-500">
+            <div className="flex items-center justify-center gap-2 rounded-xl bg-gray-100 py-2.5 text-[12px] font-semibold text-gray-400 dark:bg-white/[0.06] dark:text-slate-400">
               <AlertCircle size={13} /> Not available
             </div>
           ) : isWorkflow ? (
@@ -370,7 +370,7 @@ export function AgentCatalog() {
           {/* Left: title + category filter */}
           <div className="flex min-w-0 items-center gap-2.5">
             <div className="flex shrink-0 items-center gap-2">
-              <Cpu size={14} className="text-gray-300 dark:text-slate-600" aria-hidden="true" />
+              <Cpu size={14} className="text-gray-300 dark:text-slate-400" aria-hidden="true" />
               <span className="text-[13px] font-semibold tracking-[-0.01em] text-gray-800 dark:text-slate-200">
                 Agent Catalog
               </span>
@@ -381,7 +381,7 @@ export function AgentCatalog() {
 
         {/* Card grid — auto-fill, no trailing blank space */}
         {agents.length === 0 ? (
-          <div className="flex items-center justify-center py-8 text-[12px] text-gray-400 dark:text-slate-500">
+          <div className="flex items-center justify-center py-8 text-[12px] text-gray-400 dark:text-slate-400">
             No agents in this category yet.
           </div>
         ) : (
@@ -398,7 +398,7 @@ export function AgentCatalog() {
               <button
                 type="button"
                 onClick={() => setShowAll(true)}
-                className="flex flex-col items-center justify-center gap-1.5 rounded-xl border border-dashed border-gray-200 py-4 text-gray-400 transition-colors hover:border-aims-blue/30 hover:text-aims-blue dark:border-white/[0.08] dark:text-slate-500"
+                className="flex flex-col items-center justify-center gap-1.5 rounded-xl border border-dashed border-gray-200 py-4 text-gray-400 transition-colors hover:border-aims-blue/30 hover:text-aims-blue dark:border-white/[0.08] dark:text-slate-400"
               >
                 <ChevronRight size={16} aria-hidden="true" />
                 <span className="text-[11px] font-semibold">+{overflow} more</span>

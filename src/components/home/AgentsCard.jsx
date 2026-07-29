@@ -10,7 +10,7 @@ const STATUS_DOT = {
 }
 const STATUS_LABEL = {
   active: 'text-aims-governed',
-  idle:   'text-gray-400 dark:text-slate-500',
+  idle:   'text-gray-400 dark:text-slate-400',
   paused: 'text-aims-aging',
 }
 
@@ -41,7 +41,7 @@ export function AgentsCard() {
                 <p className="truncate text-xs font-medium text-gray-800 dark:text-slate-200">{ag.name}</p>
                 <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${STATUS_DOT[ag.status]}`} aria-hidden="true" />
               </div>
-              <div className="flex items-center gap-2 text-[10px] text-gray-400 dark:text-slate-500">
+              <div className="flex items-center gap-2 text-[10px] text-gray-400 dark:text-slate-400">
                 <span className={`font-medium capitalize ${STATUS_LABEL[ag.status]}`}>{ag.status}</span>
                 <span>·</span>
                 <span className="num">{ag.conversationsToday} convos today</span>
@@ -56,7 +56,7 @@ export function AgentsCard() {
             <button
               type="button"
               onClick={() => navigate('/dashboards')}
-              className="shrink-0 text-gray-300 transition-colors hover:text-gray-600 dark:text-slate-600 dark:hover:text-slate-300"
+              className="shrink-0 text-gray-300 transition-colors hover:text-gray-600 dark:text-slate-400 dark:hover:text-slate-300"
               aria-label={`Open ${ag.name}`}
             >
               <ExternalLink size={12} />

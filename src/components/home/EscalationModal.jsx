@@ -46,10 +46,10 @@ export function EscalationModal({ event, onClose, onEscalate }) {
           {/* Event summary (read-only) */}
           {event && (
             <div className="rounded-lg border border-gray-100 bg-gray-50 px-3 py-2.5 dark:border-white/[0.06] dark:bg-white/[0.03]">
-              <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400 dark:text-slate-500">Event</p>
+              <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400 dark:text-slate-400">Event</p>
               <p className="mt-0.5 text-xs font-medium text-gray-800 dark:text-slate-200">{event.title}</p>
               {event.sourceWorkflow && (
-                <p className="mt-0.5 text-[10px] text-gray-400 dark:text-slate-500">via {event.sourceWorkflow}</p>
+                <p className="mt-0.5 text-[10px] text-gray-400 dark:text-slate-400">via {event.sourceWorkflow}</p>
               )}
             </div>
           )}

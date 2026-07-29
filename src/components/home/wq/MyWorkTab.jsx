@@ -68,7 +68,7 @@ export function MyWorkTab({ onOpen, onEscalate, onTrace }) {
                     <div className={`flex items-center gap-1.5 border-l-2 bg-gray-50/60 py-1.5 pl-3 pr-4 dark:bg-white/[0.02] ${t.border}`}>
                       <span className={`h-1.5 w-1.5 rounded-full ${t.dot}`} aria-hidden="true" />
                       <span className={`text-[10px] font-bold uppercase tracking-wider ${t.text}`}>{t.label}</span>
-                      <span className="text-[10px] text-gray-400 dark:text-slate-600">· {t.sub}</span>
+                      <span className="text-[10px] text-gray-400 dark:text-slate-400">· {t.sub}</span>
                       <span className={`ml-auto rounded-full px-1.5 py-0.5 text-[9px] font-bold ${t.badge}`}>{visible.filter(e => e.tier === tier).length}</span>
                     </div>
                     <div className="divide-y divide-gray-100 dark:divide-white/[0.05]">
@@ -93,7 +93,7 @@ export function MyWorkTab({ onOpen, onEscalate, onTrace }) {
               })}
               {overflow > 0 && (
                 <div className="flex items-center justify-center border-t border-gray-100 py-2.5 dark:border-white/[0.05]">
-                  <span className="text-[11px] text-gray-400 dark:text-slate-500">
+                  <span className="text-[11px] text-gray-400 dark:text-slate-400">
                     +{overflow} more · <button type="button" className="text-aims-blue hover:underline" onClick={() => navigate('/home/attention')}>See all in Attention Room</button>
                   </span>
                 </div>

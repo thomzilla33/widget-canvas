@@ -15,7 +15,7 @@ const STATUS_STYLE = {
   ready:             'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
   adjusted:          'bg-blue-500/10 text-blue-600 dark:text-blue-400',
   requires_approval: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
-  advanced:          'bg-gray-100 text-gray-400 dark:bg-white/[0.05] dark:text-slate-500',
+  advanced:          'bg-gray-100 text-gray-400 dark:bg-white/[0.05] dark:text-slate-400',
 }
 
 function StatusChip({ status, label }) {
@@ -54,7 +54,7 @@ function ProvenancePopover({ field, onClose }) {
         {auth.label}
       </div>
       <p className="mb-2 text-[11px] leading-relaxed text-gray-500 dark:text-slate-400">{auth.description}</p>
-      <div className="space-y-1 border-t border-gray-100 pt-2 text-[10px] text-gray-400 dark:border-white/[0.07] dark:text-slate-500">
+      <div className="space-y-1 border-t border-gray-100 pt-2 text-[10px] text-gray-400 dark:border-white/[0.07] dark:text-slate-400">
         <div><span className="font-medium text-gray-500 dark:text-slate-400">Source:</span> {field.source}</div>
         <div><span className="font-medium text-gray-500 dark:text-slate-400">Attested:</span> {field.attestedDate}</div>
         <div><span className="font-medium text-gray-500 dark:text-slate-400">Version:</span> {field.version}</div>
@@ -102,12 +102,12 @@ function OutputPreviewDrawer({ output, onClose }) {
               )}
             </div>
             <p className="truncate text-[14px] font-semibold text-gray-900 dark:text-slate-100">{output.title}</p>
-            <p className="text-[10px] text-gray-400 dark:text-slate-500">{output.producingWorkflow} · {output.when}</p>
+            <p className="text-[10px] text-gray-400 dark:text-slate-400">{output.producingWorkflow} · {output.when}</p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="ml-3 mt-0.5 shrink-0 rounded-lg p-1.5 text-gray-300 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:text-slate-600 dark:hover:bg-white/[0.07] dark:hover:text-slate-300"
+            className="ml-3 mt-0.5 shrink-0 rounded-lg p-1.5 text-gray-300 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:text-slate-400 dark:hover:bg-white/[0.07] dark:hover:text-slate-300"
             aria-label="Close"
           >
             <X size={16} />
@@ -126,13 +126,13 @@ function OutputPreviewDrawer({ output, onClose }) {
         <div className="flex-1 overflow-y-auto px-5 py-4">
           {/* Summary */}
           <div className="mb-4 rounded-xl border border-gray-100 bg-gray-50 p-4 dark:border-white/[0.07] dark:bg-white/[0.03]">
-            <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-500">Summary</p>
+            <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400">Summary</p>
             <p className="text-[13px] leading-relaxed text-gray-700 dark:text-slate-200">{output.preview.summary}</p>
           </div>
 
           {/* Authority legend */}
           <div className="mb-3 flex flex-wrap items-center gap-2">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-500 mr-1">Authority</p>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400 mr-1">Authority</p>
             {Object.values(AUTHORITY).map(a => (
               <span key={a.id} className={`inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[9px] font-semibold ${a.bgClass} ${a.colorClass}`}>
                 <AuthIcon level={a.id} />
@@ -155,7 +155,7 @@ function OutputPreviewDrawer({ output, onClose }) {
                   }`}
                 >
                   <div className="min-w-0 flex-1">
-                    <p className="text-[10px] text-gray-400 dark:text-slate-500">{field.label}</p>
+                    <p className="text-[10px] text-gray-400 dark:text-slate-400">{field.label}</p>
                     <p className="text-[13px] font-semibold text-gray-800 dark:text-slate-200">{field.value}</p>
                     {field.superseded && field.previousValue && (
                       <p className="text-[9px] text-amber-600 dark:text-amber-400">
@@ -195,7 +195,7 @@ function OutputPreviewDrawer({ output, onClose }) {
           <button
             type="button"
             onClick={onClose}
-            className="rounded-xl border border-gray-100 px-4 py-2 text-[12px] font-semibold text-gray-400 transition-colors hover:bg-gray-50 dark:border-white/[0.07] dark:text-slate-500 dark:hover:bg-white/[0.05]"
+            className="rounded-xl border border-gray-100 px-4 py-2 text-[12px] font-semibold text-gray-400 transition-colors hover:bg-gray-50 dark:border-white/[0.07] dark:text-slate-400 dark:hover:bg-white/[0.05]"
           >
             Close
           </button>
@@ -237,8 +237,8 @@ export function PendingOutputsCard() {
         <div className="flex-1 overflow-y-auto divide-y divide-gray-100 dark:divide-white/[0.05]">
           {visible.length === 0 ? (
             <div className="flex flex-col items-center gap-2 py-8 text-center">
-              <FileOutput size={20} className="text-gray-200 dark:text-slate-700" />
-              <p className="text-xs font-medium text-gray-400 dark:text-slate-500">No outputs pending review.</p>
+              <FileOutput size={20} className="text-gray-200 dark:text-slate-500" />
+              <p className="text-xs font-medium text-gray-400 dark:text-slate-400">No outputs pending review.</p>
             </div>
           ) : (
             <>
@@ -257,7 +257,7 @@ export function PendingOutputsCard() {
                     <div className="min-w-0 flex-1">
                       <p className={`truncate text-xs font-medium ${
                         output.status === 'advanced'
-                          ? 'text-gray-400 dark:text-slate-500'
+                          ? 'text-gray-400 dark:text-slate-400'
                           : 'text-gray-800 dark:text-slate-200'
                       }`}>
                         {output.title}
@@ -266,9 +266,9 @@ export function PendingOutputsCard() {
                         )}
                       </p>
                       <div className="mt-0.5 flex items-center gap-1.5 flex-wrap">
-                        <span className="text-[10px] text-gray-400 dark:text-slate-500">{output.producingWorkflow}</span>
-                        <span className="text-[10px] text-gray-300 dark:text-slate-600">·</span>
-                        <span className="text-[10px] text-gray-400 dark:text-slate-500">{output.when}</span>
+                        <span className="text-[10px] text-gray-400 dark:text-slate-400">{output.producingWorkflow}</span>
+                        <span className="text-[10px] text-gray-300 dark:text-slate-400">·</span>
+                        <span className="text-[10px] text-gray-400 dark:text-slate-400">{output.when}</span>
                       </div>
                     </div>
 
@@ -280,14 +280,14 @@ export function PendingOutputsCard() {
                           <AlertTriangle size={7} /> Updated
                         </span>
                       )}
-                      <ChevronRight size={10} className="mt-0.5 text-gray-300 dark:text-slate-600" aria-hidden="true" />
+                      <ChevronRight size={10} className="mt-0.5 text-gray-300 dark:text-slate-400" aria-hidden="true" />
                     </div>
                   </button>
                 )
               })}
               {overflow > 0 && (
                 <div className="flex items-center justify-center border-t border-gray-100 py-2.5 dark:border-white/[0.05]">
-                  <span className="text-[11px] text-gray-400 dark:text-slate-500">
+                  <span className="text-[11px] text-gray-400 dark:text-slate-400">
                     +{overflow} more
                   </span>
                 </div>

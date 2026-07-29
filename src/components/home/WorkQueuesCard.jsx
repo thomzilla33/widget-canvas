@@ -69,7 +69,7 @@ export function WorkQueuesCard() {
               className={`-mb-px border-b-2 px-3 py-2 text-xs font-medium transition-colors ${
                 tab === id
                   ? 'border-aims-blue text-aims-blue'
-                  : 'border-transparent text-gray-400 hover:text-gray-600 dark:text-slate-500 dark:hover:text-slate-300'
+                  : 'border-transparent text-gray-400 hover:text-gray-600 dark:text-slate-400 dark:hover:text-slate-300'
               }`}
             >
               {label}

@@ -67,7 +67,7 @@ export function WorkflowsCard() {
               )}
 
               <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3 text-[10px] text-gray-400 dark:text-slate-500">
+                <div className="flex items-center gap-3 text-[10px] text-gray-400 dark:text-slate-400">
                   <span>{wf.trigger}</span>
                   <span>·</span>
                   <span>{wf.lastRun}</span>

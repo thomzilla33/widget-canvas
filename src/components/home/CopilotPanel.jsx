@@ -102,7 +102,7 @@ export function CopilotPanel({ isOpen, onClose }) {
             <Sparkles size={14} className="text-aims-blue" aria-hidden="true" />
             <span className="text-sm font-semibold text-gray-900 dark:text-slate-100">AIMS Copilot</span>
           </div>
-          <div className="ml-auto flex items-center gap-0.5 text-gray-400 dark:text-slate-500">
+          <div className="ml-auto flex items-center gap-0.5 text-gray-400 dark:text-slate-400">
             <IconBtn label="New chat" onClick={() => { setMsgs([msgs[0]]); setInput('') }}>
               <PenSquare size={15} />
             </IconBtn>
@@ -142,7 +142,7 @@ export function CopilotPanel({ isOpen, onClose }) {
         {/* Suggestions + copilots — only on a fresh thread */}
         {onlyGreeting && (
           <div className="shrink-0 px-4 pb-3">
-            <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-slate-500">
+            <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-slate-400">
               For you
             </p>
             <div className="flex flex-col gap-1.5">
@@ -159,7 +159,7 @@ export function CopilotPanel({ isOpen, onClose }) {
               ))}
             </div>
 
-            <p className="mb-2 mt-4 text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-slate-500">
+            <p className="mb-2 mt-4 text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-slate-400">
               Your copilots
             </p>
             <div className="grid grid-cols-2 gap-2">
@@ -179,7 +179,7 @@ export function CopilotPanel({ isOpen, onClose }) {
                   </span>
                   <div className="min-w-0">
                     <p className="truncate text-[11px] font-semibold text-gray-800 dark:text-slate-100">{cp.name}</p>
-                    <p className="text-[10px] text-gray-400 dark:text-slate-500">{cp.lastUsed}</p>
+                    <p className="text-[10px] text-gray-400 dark:text-slate-400">{cp.lastUsed}</p>
                   </div>
                 </button>
               ))}

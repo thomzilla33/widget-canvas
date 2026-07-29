@@ -15,7 +15,7 @@ const STATUS_CFG = {
     dot:   'bg-slate-300 dark:bg-slate-600',
     pulse: false,
     label: 'Idle',
-    text:  'text-gray-400 dark:text-slate-500',
+    text:  'text-gray-400 dark:text-slate-400',
   },
   paused: {
     dot:   'bg-amber-400',
@@ -93,7 +93,7 @@ export function MyAgentsCard() {
                     {agent.capability}
                   </span>
                 </div>
-                <div className="mt-0.5 flex items-center gap-1.5 text-[10px] text-gray-400 dark:text-slate-500">
+                <div className="mt-0.5 flex items-center gap-1.5 text-[10px] text-gray-400 dark:text-slate-400">
                   {/* Status dot */}
                   <span className="relative flex h-1.5 w-1.5 shrink-0" aria-hidden="true">
                     {s.pulse && (
@@ -128,7 +128,7 @@ export function MyAgentsCard() {
                   aria-label={`Chat with ${agent.name}`}
                   title="Chat"
                   onClick={() => setCopilotOpen(true)}
-                  className="rounded-md p-1.5 text-gray-300 transition-colors hover:bg-gray-100 hover:text-aims-blue dark:text-slate-600 dark:hover:bg-white/[0.06] dark:hover:text-blue-400"
+                  className="rounded-md p-1.5 text-gray-300 transition-colors hover:bg-gray-100 hover:text-aims-blue dark:text-slate-400 dark:hover:bg-white/[0.06] dark:hover:text-blue-400"
                 >
                   <MessageSquare size={12} aria-hidden="true" />
                 </button>
@@ -137,7 +137,7 @@ export function MyAgentsCard() {
                   aria-label={`View ${agent.name} outputs`}
                   title="View outputs"
                   onClick={() => navigate(`/ucp/${agent.id}`)}
-                  className="rounded-md p-1.5 text-gray-300 transition-colors hover:bg-gray-100 hover:text-aims-blue dark:text-slate-600 dark:hover:bg-white/[0.06] dark:hover:text-blue-400"
+                  className="rounded-md p-1.5 text-gray-300 transition-colors hover:bg-gray-100 hover:text-aims-blue dark:text-slate-400 dark:hover:bg-white/[0.06] dark:hover:text-blue-400"
                 >
                   <FileOutput size={12} aria-hidden="true" />
                 </button>

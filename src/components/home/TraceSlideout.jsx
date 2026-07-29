@@ -5,7 +5,7 @@ import { traceSteps } from '../../data/workqueue.js'
 const STATUS_ICON = {
   done:    <CheckCircle2 size={12} className="text-aims-governed" aria-hidden="true" />,
   current: <Clock size={12} className="text-aims-blue animate-pulse" aria-hidden="true" />,
-  pending: <Circle size={12} className="text-gray-300 dark:text-slate-600" aria-hidden="true" />,
+  pending: <Circle size={12} className="text-gray-300 dark:text-slate-400" aria-hidden="true" />,
 }
 
 export function TraceSlideout({ event, onClose }) {
@@ -37,7 +37,7 @@ export function TraceSlideout({ event, onClose }) {
 
         {/* Event reference */}
         <div className="border-b border-gray-100 px-4 py-3 dark:border-white/[0.06]">
-          <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400 dark:text-slate-500">Event</p>
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400 dark:text-slate-400">Event</p>
           <p className="mt-0.5 text-xs font-medium leading-snug text-gray-800 dark:text-slate-200">{event?.title}</p>
           {event?.sourceWorkflow && (
             <p className="mt-0.5 text-[10px] text-aims-blue">{event.sourceWorkflow}</p>
@@ -47,7 +47,7 @@ export function TraceSlideout({ event, onClose }) {
         {/* Steps timeline */}
         <div className="flex-1 overflow-y-auto p-4">
           {steps.length === 0 ? (
-            <p className="text-xs text-gray-400 dark:text-slate-500">No workflow trace available for this event.</p>
+            <p className="text-xs text-gray-400 dark:text-slate-400">No workflow trace available for this event.</p>
           ) : (
             <ol className="relative space-y-0">
               {steps.map((step, i) => {
@@ -68,12 +68,12 @@ export function TraceSlideout({ event, onClose }) {
                           ? 'text-aims-blue'
                           : step.status === 'done'
                           ? 'text-gray-800 dark:text-slate-200'
-                          : 'text-gray-400 dark:text-slate-500'
+                          : 'text-gray-400 dark:text-slate-400'
                       }`}>
                         {step.label}
                       </p>
-                      <p className="mt-0.5 text-[10px] text-gray-400 dark:text-slate-500">{step.detail}</p>
-                      <p className="mt-0.5 text-[10px] tabular-nums text-gray-300 dark:text-slate-600">{step.time}</p>
+                      <p className="mt-0.5 text-[10px] text-gray-400 dark:text-slate-400">{step.detail}</p>
+                      <p className="mt-0.5 text-[10px] tabular-nums text-gray-300 dark:text-slate-400">{step.time}</p>
                     </div>
                   </li>
                 )

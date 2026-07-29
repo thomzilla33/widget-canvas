@@ -68,11 +68,11 @@ export function WorkQueueHomeSection() {
                   {urgentCount} urgent
                 </span>
               )}
-              <span className="rounded-full bg-gray-100 px-1.5 py-0.5 text-[10px] font-semibold text-gray-500 dark:bg-white/[0.06] dark:text-slate-500">
+              <span className="rounded-full bg-gray-100 px-1.5 py-0.5 text-[10px] font-semibold text-gray-500 dark:bg-white/[0.06] dark:text-slate-400">
                 {visible.length} items
               </span>
             </div>
-            <p className="mt-0.5 text-xs text-gray-400 dark:text-slate-500">
+            <p className="mt-0.5 text-xs text-gray-400 dark:text-slate-400">
               Decisions and actions that need your attention — approvals, agent reviews, questions, and tasks.
             </p>
           </div>
@@ -91,8 +91,8 @@ export function WorkQueueHomeSection() {
           {visible.length === 0 ? (
             <div className="flex flex-col items-center gap-2 py-14 text-center">
               <CheckCircle2 size={22} className="text-aims-governed" aria-hidden="true" />
-              <p className="text-sm font-medium text-gray-400 dark:text-slate-500">All clear</p>
-              <p className="text-xs text-gray-300 dark:text-slate-700">No pending items right now.</p>
+              <p className="text-sm font-medium text-gray-400 dark:text-slate-400">All clear</p>
+              <p className="text-xs text-gray-300 dark:text-slate-500">No pending items right now.</p>
             </div>
           ) : (
             <>
@@ -103,7 +103,7 @@ export function WorkQueueHomeSection() {
                     <div className={`flex items-center gap-2 border-l-2 bg-gray-50/60 px-5 py-2 dark:bg-white/[0.015] ${t.border}`}>
                       <span className={`h-1.5 w-1.5 rounded-full ${t.dot}`} aria-hidden="true" />
                       <span className={`text-[10px] font-bold uppercase tracking-wider ${t.text}`}>{t.label}</span>
-                      <span className="text-[10px] text-gray-400 dark:text-slate-600">· {t.sub}</span>
+                      <span className="text-[10px] text-gray-400 dark:text-slate-400">· {t.sub}</span>
                       <span className={`ml-auto rounded-full px-1.5 py-0.5 text-[9px] font-bold ${t.badge}`}>{items.length}</span>
                     </div>
                     <div className="divide-y divide-gray-50 dark:divide-white/[0.03]">

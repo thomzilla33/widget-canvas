@@ -53,7 +53,7 @@ export function FilterBar({ events, onFilter }) {
     <div className="space-y-2 border-b border-gray-100 px-3 py-2.5 dark:border-white/[0.05]">
       {/* Search */}
       <div className="relative">
-        <Search size={11} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-300 dark:text-slate-600" aria-hidden="true" />
+        <Search size={11} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-300 dark:text-slate-400" aria-hidden="true" />
         <input
           type="search"
           value={search}
@@ -65,7 +65,7 @@ export function FilterBar({ events, onFilter }) {
 
       {/* Studio chips */}
       <div className="flex flex-wrap items-center gap-1">
-        <span className="text-[9px] font-semibold uppercase tracking-wider text-gray-400 dark:text-slate-600">Studio</span>
+        <span className="text-[9px] font-semibold uppercase tracking-wider text-gray-400 dark:text-slate-400">Studio</span>
         {STUDIOS.map(s => (
           <button
             key={s}
@@ -84,7 +84,7 @@ export function FilterBar({ events, onFilter }) {
 
       {/* Type chips with live counts */}
       <div className="flex flex-wrap items-center gap-1">
-        <span className="text-[9px] font-semibold uppercase tracking-wider text-gray-400 dark:text-slate-600">Type</span>
+        <span className="text-[9px] font-semibold uppercase tracking-wider text-gray-400 dark:text-slate-400">Type</span>
         {EVENT_TYPES.filter(t => typeCounts[t] > 0).map(t => (
           <button
             key={t}
@@ -97,7 +97,7 @@ export function FilterBar({ events, onFilter }) {
             }`}
           >
             {t}
-            <span className={`font-bold ${types.includes(t) ? 'text-blue-200' : 'text-gray-400 dark:text-slate-600'}`}>
+            <span className={`font-bold ${types.includes(t) ? 'text-blue-200' : 'text-gray-400 dark:text-slate-400'}`}>
               {typeCounts[t]}
             </span>
           </button>
@@ -106,7 +106,7 @@ export function FilterBar({ events, onFilter }) {
           <button
             type="button"
             onClick={clearAll}
-            className="flex items-center gap-0.5 rounded-full px-2 py-0.5 text-[9px] font-medium text-gray-400 hover:text-red-500 dark:text-slate-500"
+            className="flex items-center gap-0.5 rounded-full px-2 py-0.5 text-[9px] font-medium text-gray-400 hover:text-red-500 dark:text-slate-400"
           >
             <X size={9} aria-hidden="true" /> Clear all
           </button>

@@ -90,7 +90,7 @@ function Panel({ spotlightItem, onClose, onResolve }) {
         {/* Panel header */}
         <div className="shrink-0 flex items-center gap-3 border-b border-gray-200 dark:border-white/[0.07] px-6 py-3.5">
           <div className="min-w-0 flex-1">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-600 mb-0.5">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400 mb-0.5">
               {spotlightItem.badge}
             </p>
             <p className="truncate text-[13px] font-semibold leading-snug text-gray-900 dark:text-slate-100">
@@ -102,7 +102,7 @@ function Panel({ spotlightItem, onClose, onResolve }) {
             <button
               type="button"
               onClick={handleGoToWQ}
-              className="shrink-0 flex items-center gap-1.5 rounded-lg border border-gray-200 px-2.5 py-1.5 text-[11px] font-medium text-gray-500 transition-colors hover:border-gray-300 hover:text-gray-700 dark:border-white/[0.08] dark:text-slate-500 dark:hover:text-slate-300"
+              className="shrink-0 flex items-center gap-1.5 rounded-lg border border-gray-200 px-2.5 py-1.5 text-[11px] font-medium text-gray-500 transition-colors hover:border-gray-300 hover:text-gray-700 dark:border-white/[0.08] dark:text-slate-400 dark:hover:text-slate-300"
             >
               Open in Work Queue
               <ExternalLink size={11} />
@@ -112,7 +112,7 @@ function Panel({ spotlightItem, onClose, onResolve }) {
           <button
             type="button"
             onClick={handleClose}
-            className="shrink-0 flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 text-gray-400 transition-colors hover:border-gray-300 hover:text-gray-600 dark:border-white/[0.08] dark:text-slate-600 dark:hover:text-slate-400"
+            className="shrink-0 flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 text-gray-400 transition-colors hover:border-gray-300 hover:text-gray-600 dark:border-white/[0.08] dark:text-slate-400 dark:hover:text-slate-400"
             aria-label="Close detail panel"
           >
             <X size={14} />
@@ -136,7 +136,7 @@ function Panel({ spotlightItem, onClose, onResolve }) {
               {spotlightItem.context && (
                 <p className="mt-3 text-sm leading-relaxed text-gray-600 dark:text-slate-400">{spotlightItem.context}</p>
               )}
-              <p className="mt-2 text-xs text-gray-400 dark:text-slate-600">{spotlightItem.meta}</p>
+              <p className="mt-2 text-xs text-gray-400 dark:text-slate-400">{spotlightItem.meta}</p>
               <div className="mt-8 flex flex-col gap-2">
                 <button
                   type="button"
@@ -148,7 +148,7 @@ function Panel({ spotlightItem, onClose, onResolve }) {
                 <button
                   type="button"
                   onClick={handleDecline}
-                  className="w-full rounded-lg py-2 text-[12px] font-medium text-gray-400 transition-colors hover:text-gray-600 dark:text-slate-600 dark:hover:text-slate-400"
+                  className="w-full rounded-lg py-2 text-[12px] font-medium text-gray-400 transition-colors hover:text-gray-600 dark:text-slate-400 dark:hover:text-slate-400"
                 >
                   {spotlightItem.secondaryAction?.label ?? 'Escalate'}
                 </button>

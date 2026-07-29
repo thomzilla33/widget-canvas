@@ -12,7 +12,7 @@ function DecisionSurface({ event, onPrimary, onSecondary, defaultDecision, onTra
     const rejectFirst = defaultDecision === 'reject'
     return (
       <div className="space-y-3">
-        <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400 dark:text-slate-500">Decision</p>
+        <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400 dark:text-slate-400">Decision</p>
         <div className="space-y-2">
           <label className="flex items-center gap-2 cursor-pointer">
             <input type="radio" name="decision" defaultChecked={!rejectFirst} className="text-aims-blue" />
@@ -36,7 +36,7 @@ function DecisionSurface({ event, onPrimary, onSecondary, defaultDecision, onTra
   if (type === 'Review') {
     return (
       <div className="space-y-3">
-        <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400 dark:text-slate-500">Review action</p>
+        <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400 dark:text-slate-400">Review action</p>
         <div className="space-y-2">
           {(quickActions.secondary || []).map(action => (
             <button
@@ -58,7 +58,7 @@ function DecisionSurface({ event, onPrimary, onSecondary, defaultDecision, onTra
   if (type === 'Train') {
     return (
       <div className="space-y-3">
-        <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400 dark:text-slate-500">Training feedback</p>
+        <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400 dark:text-slate-400">Training feedback</p>
         {['Sample A', 'Sample B', 'Sample C'].map(s => (
           <div key={s} className="flex items-center justify-between rounded-lg border border-gray-100 px-3 py-2 dark:border-white/[0.06]">
             <span className="text-xs text-gray-700 dark:text-slate-300">{s}</span>
@@ -80,7 +80,7 @@ function DecisionSurface({ event, onPrimary, onSecondary, defaultDecision, onTra
   // Default — text area + primary CTA
   return (
     <div className="space-y-3">
-      <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400 dark:text-slate-500">Your response</p>
+      <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400 dark:text-slate-400">Your response</p>
       <textarea rows={3} placeholder="Add your response or notes…" className="input w-full resize-none text-xs" />
     </div>
   )
@@ -144,7 +144,7 @@ export function EventModal({ event, onClose, onPrimary, onEscalate, onTrace }) {
           {/* Left: situation */}
           <div className="border-r border-gray-100 p-5 dark:border-white/[0.06] space-y-4">
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400 dark:text-slate-500">Situation</p>
+              <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400 dark:text-slate-400">Situation</p>
               <p className="mt-1.5 text-xs leading-relaxed text-gray-600 dark:text-slate-300">{event.description}</p>
             </div>
             {event.blastRadius > 0 && (
@@ -156,14 +156,14 @@ export function EventModal({ event, onClose, onPrimary, onEscalate, onTrace }) {
             {/* Audit trail */}
             {event.auditTrail?.length > 0 && (
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400 dark:text-slate-500">Audit trail</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400 dark:text-slate-400">Audit trail</p>
                 <ul className="mt-1.5 space-y-1.5">
                   {event.auditTrail.map((entry, i) => (
                     <li key={i} className="flex items-start gap-1.5">
-                      <Clock size={10} className="mt-0.5 shrink-0 text-gray-300 dark:text-slate-600" aria-hidden="true" />
+                      <Clock size={10} className="mt-0.5 shrink-0 text-gray-300 dark:text-slate-400" aria-hidden="true" />
                       <div>
                         <span className="text-[10px] text-gray-600 dark:text-slate-300">{entry.action}</span>
-                        <span className="text-[10px] text-gray-400 dark:text-slate-500"> · {entry.by} · {entry.at}</span>
+                        <span className="text-[10px] text-gray-400 dark:text-slate-400"> · {entry.by} · {entry.at}</span>
                       </div>
                     </li>
                   ))}

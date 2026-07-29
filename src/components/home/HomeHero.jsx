@@ -256,7 +256,7 @@ export function HomeHero({ onCopilotOpen, copilotOpen = false }) {
             {greetingText()},{' '}
             <span className="font-semibold text-white">Thomas.</span>
           </h1>
-          <p className="hero-greeting mt-2 flex items-center gap-2 text-sm text-white/55">
+          <p className="hero-greeting mt-2 flex items-center gap-2 text-sm text-white/70">
             {/* Live pulse — amber when urgent items pending, green when calm */}
             <span className="relative flex h-1.5 w-1.5 shrink-0" aria-hidden="true">
               <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-60 ${showSpotlight ? 'bg-amber-300' : 'bg-emerald-300'}`} />
@@ -343,7 +343,7 @@ export function HomeHero({ onCopilotOpen, copilotOpen = false }) {
             {current.context && (
               <p className="mt-1.5 text-[11px] leading-relaxed text-white/65">{current.context}</p>
             )}
-            <p className="mt-1 text-[11px] text-white/40">{current.meta}</p>
+            <p className="mt-1 text-[11px] text-white/60">{current.meta}</p>
 
             {/* Actions */}
             <div className="mt-3.5 flex flex-wrap items-center gap-2">
@@ -368,7 +368,7 @@ export function HomeHero({ onCopilotOpen, copilotOpen = false }) {
                 <button
                   type="button"
                   onClick={() => resolve(current.id, 'Deferred to tomorrow', false)}
-                  className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] text-white/35 transition-colors hover:text-white/60"
+                  className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] text-white/55 transition-colors hover:text-white/80"
                 >
                   <Clock size={11} aria-hidden="true" />
                   Defer to tomorrow
@@ -401,7 +401,7 @@ export function HomeHero({ onCopilotOpen, copilotOpen = false }) {
             <p className="text-[13px] font-semibold text-white">
               {dayPhase === 'morning' ? 'Clean start' : dayPhase === 'evening' ? 'All clear' : 'All caught up'}
             </p>
-            <p className="text-[11px] text-white/50">
+            <p className="text-[11px] text-white/65">
               {dayPhase === 'morning'
                 ? 'No pending items from yesterday. You\'re all set.'
                 : dayPhase === 'evening'
@@ -433,8 +433,8 @@ export function HomeHero({ onCopilotOpen, copilotOpen = false }) {
                 {value}
               </p>
               <div className="mt-1.5 flex items-center gap-1.5">
-                <Icon size={10} className="shrink-0 text-white/35" aria-hidden="true" />
-                <p className="text-[10px] font-medium text-white/50">{label}</p>
+                <Icon size={10} className="shrink-0 text-white/55" aria-hidden="true" />
+                <p className="text-[10px] font-medium text-white/65">{label}</p>
               </div>
             </button>
           ))}

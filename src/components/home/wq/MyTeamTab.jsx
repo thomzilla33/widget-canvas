@@ -47,13 +47,13 @@ function TeamMemberRow({ member, onAction }) {
             </span>
           )}
         </div>
-        <p className="text-[10px] text-gray-400 dark:text-slate-500">{member.role}</p>
+        <p className="text-[10px] text-gray-400 dark:text-slate-400">{member.role}</p>
         <div className="mt-1 flex items-center gap-1">
           <TierDot tier="actnow"   count={member.events.actnow} />
           <TierDot tier="critical" count={member.events.critical} />
           <TierDot tier="action"   count={member.events.action} />
           <TierDot tier="headsup"  count={member.events.headsup} />
-          {total === 0 && <span className="text-[10px] text-gray-300 dark:text-slate-600">No open events</span>}
+          {total === 0 && <span className="text-[10px] text-gray-300 dark:text-slate-400">No open events</span>}
         </div>
       </div>
 
@@ -105,11 +105,11 @@ export function MyTeamTab({ isManager }) {
   if (!isManager) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-3 px-6 py-10 text-center">
-        <AlertTriangle size={20} className="text-gray-300 dark:text-slate-600" aria-hidden="true" />
+        <AlertTriangle size={20} className="text-gray-300 dark:text-slate-400" aria-hidden="true" />
         <p className="text-xs font-medium text-gray-500 dark:text-slate-400">
           My Team is available to managers and executives.
         </p>
-        <p className="text-[11px] text-gray-400 dark:text-slate-500">
+        <p className="text-[11px] text-gray-400 dark:text-slate-400">
           Switch to Admin role using the role toggle in the top bar to preview this view.
         </p>
       </div>

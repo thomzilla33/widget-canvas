@@ -57,7 +57,7 @@ function FilterDropdown({ label, items, selected, onToggle, open, onOpen, counts
               }`} />
               {item}
               {counts && (
-                <span className="ml-auto text-[10px] text-gray-400 dark:text-slate-600">{counts[item] ?? 0}</span>
+                <span className="ml-auto text-[10px] text-gray-400 dark:text-slate-400">{counts[item] ?? 0}</span>
               )}
             </button>
           ))}
@@ -136,7 +136,7 @@ export function WQSectionFilterBar({ events, onFilter }) {
       {/* Row 1 — search + dropdowns */}
       <div className="flex items-center gap-2 px-5 py-3">
         <div className="relative w-64">
-          <Search size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300 dark:text-slate-600" aria-hidden="true" />
+          <Search size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300 dark:text-slate-400" aria-hidden="true" />
           <input
             type="search"
             value={search}
@@ -202,7 +202,7 @@ export function WQSectionFilterBar({ events, onFilter }) {
           <button
             type="button"
             onClick={clearAll}
-            className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs text-gray-400 transition-colors hover:text-red-500 dark:text-slate-500"
+            className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs text-gray-400 transition-colors hover:text-red-500 dark:text-slate-400"
           >
             <X size={11} /> Clear
           </button>
@@ -226,7 +226,7 @@ export function WQSectionFilterBar({ events, onFilter }) {
               <span className={`h-1.5 w-1.5 rounded-full ${tier === t.id ? 'bg-white/70' : t.dot}`} />
             )}
             {t.label}
-            <span className={`tabular-nums text-[10px] ${tier === t.id ? 'text-blue-200' : 'text-gray-400 dark:text-slate-600'}`}>
+            <span className={`tabular-nums text-[10px] ${tier === t.id ? 'text-blue-200' : 'text-gray-400 dark:text-slate-400'}`}>
               {tierCounts[t.id]}
             </span>
           </button>

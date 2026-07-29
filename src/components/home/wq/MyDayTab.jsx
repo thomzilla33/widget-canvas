@@ -21,7 +21,7 @@ const TIER = {
   },
   headsup: {
     label: 'Heads-up',   sub: 'on radar',
-    dot: 'bg-slate-400', text: 'text-slate-400 dark:text-slate-500',
+    dot: 'bg-slate-400', text: 'text-slate-400 dark:text-slate-400',
     border: 'border-l-slate-300/50 dark:border-l-white/10',
     badge: 'bg-gray-100 text-gray-500 dark:bg-white/[0.07] dark:text-slate-400',
   },
@@ -41,7 +41,7 @@ function ManagerMessage({ msg }) {
   if (!open) return (
     <button
       onClick={() => setOpen(true)}
-      className="flex w-full items-center gap-2 rounded-lg border border-gray-100 px-3 py-1.5 text-left text-[11px] text-gray-400 hover:bg-gray-50 dark:border-white/[0.06] dark:text-slate-500 dark:hover:bg-white/[0.03]"
+      className="flex w-full items-center gap-2 rounded-lg border border-gray-100 px-3 py-1.5 text-left text-[11px] text-gray-400 hover:bg-gray-50 dark:border-white/[0.06] dark:text-slate-400 dark:hover:bg-white/[0.03]"
     >
       <span className="h-4 w-4 shrink-0 rounded-full bg-aims-blue/20 text-center text-[9px] font-bold leading-4 text-aims-blue">P</span>
       Message from {msg.from} · {msg.time}
@@ -53,9 +53,9 @@ function ManagerMessage({ msg }) {
         <div className="flex items-center gap-1.5">
           <span className="grid h-4 w-4 shrink-0 place-items-center rounded-full bg-aims-blue/20 text-[9px] font-bold text-aims-blue">P</span>
           <span className="text-[10px] font-semibold text-gray-700 dark:text-slate-300">{msg.from}</span>
-          <span className="text-[10px] text-gray-400 dark:text-slate-500">· {msg.time}</span>
+          <span className="text-[10px] text-gray-400 dark:text-slate-400">· {msg.time}</span>
         </div>
-        <button onClick={() => setOpen(false)} className="text-[10px] text-gray-400 hover:text-gray-600 dark:text-slate-600 dark:hover:text-slate-400">
+        <button onClick={() => setOpen(false)} className="text-[10px] text-gray-400 hover:text-gray-600 dark:text-slate-400 dark:hover:text-slate-400">
           Hide
         </button>
       </div>
@@ -87,7 +87,7 @@ function ActionButtons({ item, includeTrain = false, onSnooze, onEscalate, onAsk
             }`}
         >
           <Icon size={10} aria-hidden="true" /> {label}
-          {!onClick && <span className="ml-0.5 rounded bg-gray-100 px-1 text-[8px] font-semibold text-gray-400 dark:bg-white/[0.06] dark:text-slate-600">V1.5</span>}
+          {!onClick && <span className="ml-0.5 rounded bg-gray-100 px-1 text-[8px] font-semibold text-gray-400 dark:bg-white/[0.06] dark:text-slate-400">V1.5</span>}
         </button>
       ))}
       <button
@@ -111,8 +111,8 @@ function StartHereCard({ item, includeTrain = false, onApprove, onSnooze, onEsca
       <p className="mb-1 text-xs font-semibold text-gray-900 dark:text-slate-100">{item.title}</p>
       <div className="flex flex-wrap items-center gap-1.5">
         <span className="rounded px-1.5 py-0.5 text-[9px] font-bold text-white" style={{ background: item.studioColor }}>{item.studio}</span>
-        <span className="text-[10px] text-gray-400 dark:text-slate-500">{item.type}</span>
-        <span className="text-[10px] text-gray-400 dark:text-slate-500">·</span>
+        <span className="text-[10px] text-gray-400 dark:text-slate-400">{item.type}</span>
+        <span className="text-[10px] text-gray-400 dark:text-slate-400">·</span>
         <span className="text-[10px] text-gray-500 dark:text-slate-400">{item.dueLabel}</span>
       </div>
       <div className="mt-2.5 space-y-2">
@@ -138,16 +138,16 @@ function QueueItem({ item, expanded, onToggle, onApprove, onSnooze, onEscalate, 
           <p className="truncate text-xs font-medium text-gray-800 dark:text-slate-200">{item.title}</p>
           <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
             <span className="rounded px-1 py-0.5 text-[9px] font-bold text-white" style={{ background: item.studioColor }}>{item.studio}</span>
-            <span className="text-[10px] text-gray-400 dark:text-slate-500">{item.type}</span>
-            <span className="text-[10px] text-gray-400 dark:text-slate-500">·</span>
+            <span className="text-[10px] text-gray-400 dark:text-slate-400">{item.type}</span>
+            <span className="text-[10px] text-gray-400 dark:text-slate-400">·</span>
             <span className="text-[10px] text-gray-500 dark:text-slate-400">{item.dueLabel}</span>
           </div>
         </div>
         <div className="flex shrink-0 items-center gap-1">
           {item.estimatedMinutes > 0 && (
-            <span className="text-[10px] text-gray-400 dark:text-slate-600">{fmtMins(item.estimatedMinutes)}</span>
+            <span className="text-[10px] text-gray-400 dark:text-slate-400">{fmtMins(item.estimatedMinutes)}</span>
           )}
-          <ChevronDown size={12} className={`text-gray-300 transition-transform dark:text-slate-600 ${expanded ? 'rotate-180' : ''}`} aria-hidden="true" />
+          <ChevronDown size={12} className={`text-gray-300 transition-transform dark:text-slate-400 ${expanded ? 'rotate-180' : ''}`} aria-hidden="true" />
         </div>
       </div>
 
@@ -229,7 +229,7 @@ export function MyDayTab({ onEscalate, onAsk }) {
               <div className="mb-1.5 flex items-center gap-1.5">
                 <span className={`h-1.5 w-1.5 rounded-full ${t.dot}`} aria-hidden="true" />
                 <span className={`text-[10px] font-bold uppercase tracking-wide ${t.text}`}>{t.label}</span>
-                <span className="text-[10px] text-gray-400 dark:text-slate-600">· {t.sub}</span>
+                <span className="text-[10px] text-gray-400 dark:text-slate-400">· {t.sub}</span>
                 <span className={`ml-auto rounded-full px-1.5 py-0.5 text-[9px] font-semibold ${t.badge}`}>{items.length}</span>
               </div>
               <div className="space-y-1">
