@@ -59,7 +59,7 @@ export default function WidgetLibraryModal({ zoneLabel, onAdd, onClose, onCreate
                 <Pencil size={14} aria-hidden="true" /> Create new widget
               </Button>
             )}
-            <button onClick={onClose} aria-label="Close" className="grid h-8 w-8 place-items-center rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:text-slate-500 dark:hover:bg-white/10 dark:hover:text-slate-200">
+            <button onClick={onClose} aria-label="Close" className="grid h-8 w-8 place-items-center rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-slate-200">
               <X size={18} />
             </button>
           </div>
@@ -104,7 +104,7 @@ export default function WidgetLibraryModal({ zoneLabel, onAdd, onClose, onCreate
                   {widgets.length === 0 && !onCreateNew ? (
                     <div className="flex flex-col items-center justify-center py-16 text-center">
                       <div className="mb-3 grid h-14 w-14 place-items-center rounded-2xl border border-gray-200 bg-gray-50 dark:border-white/10 dark:bg-white/5">
-                        <LayoutGrid size={24} className="text-gray-400 dark:text-slate-500" />
+                        <LayoutGrid size={24} className="text-gray-400 dark:text-slate-400" />
                       </div>
                       <h3 className="text-sm font-semibold text-gray-900 dark:text-slate-100">No widgets yet</h3>
                       <p className="mt-1 max-w-xs text-xs text-gray-500 dark:text-slate-400">
@@ -195,7 +195,7 @@ function Detail({ widget, onBack, onAdd }) {
   return (
     <div className="flex-1 overflow-auto">
       <div className="flex items-center gap-2 border-b border-gray-200 px-6 py-2.5 dark:border-white/10">
-        <button onClick={onBack} className="grid h-7 w-7 place-items-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:text-slate-500 dark:hover:bg-white/10" aria-label="Back">
+        <button onClick={onBack} className="grid h-7 w-7 place-items-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:text-slate-400 dark:hover:bg-white/10" aria-label="Back">
           <ChevronLeft size={16} />
         </button>
         <WidgetGlyph skeleton={widget.skeleton} source={widget.source} sm />

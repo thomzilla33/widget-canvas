@@ -366,7 +366,7 @@ function CardMenuItem({ icon: Icon, danger, onClick, children }) {
 function LoadMoreBar({ shown, total, remaining, onLoadMore }) {
   return (
     <div className="mt-5 flex items-center justify-center gap-3">
-      <span className="text-xs text-gray-400 dark:text-slate-500">Showing {shown} of {total}</span>
+      <span className="text-xs text-gray-400 dark:text-slate-400">Showing {shown} of {total}</span>
       <Button variant="secondary" size="sm" onClick={onLoadMore}>
         Load {remaining} more
       </Button>

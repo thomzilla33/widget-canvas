@@ -132,12 +132,12 @@ function SystemQueueModal({ title, onClose, children }) {
 
 /* ── Decision panel — the auditable HITL review surface ── */
 function Missing() {
-  return <span className="italic text-gray-400 dark:text-slate-500">Not provided</span>
+  return <span className="italic text-gray-400 dark:text-slate-400">Not provided</span>
 }
 function PanelRow({ icon: Icon, label, children }) {
   return (
     <div>
-      <div className="mb-0.5 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-500">
+      <div className="mb-0.5 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-400">
         <Icon size={12} aria-hidden="true" /> {label}
       </div>
       <div className="text-[12px] leading-relaxed text-gray-700 dark:text-slate-200">{children}</div>
@@ -333,7 +333,7 @@ function HtlBody({ size, full, onExpand, onReview, onDecide }) {
                     </span>
                     <span className="truncate text-gray-600 dark:text-slate-300">{h.title}</span>
                   </div>
-                  <div className="mt-0.5 pl-1 text-[10px] text-gray-400 dark:text-slate-500">
+                  <div className="mt-0.5 pl-1 text-[10px] text-gray-400 dark:text-slate-400">
                     {h.assignee ? `→ ${h.assignee} · ` : h.reason ? `${h.reason} · ` : ''}{h.decidedBy} {h.decidedAt}
                   </div>
                 </li>
@@ -371,7 +371,7 @@ function InboxBody({ size, full, onExpand, onReview, onDecide, notify }) {
             {f.label}
           </button>
         ))}
-        <span className="ml-auto text-[10px] text-gray-400 dark:text-slate-500">{unread} unread</span>
+        <span className="ml-auto text-[10px] text-gray-400 dark:text-slate-400">{unread} unread</span>
       </div>
       {matched.length === 0 ? (
         <Empty>Nothing here</Empty>
@@ -445,8 +445,8 @@ function TasksBody({ size, full, onExpand, notify }) {
               >
                 <Check size={11} aria-hidden="true" />
               </button>
-              <span className={`min-w-0 flex-1 truncate text-[11px] ${t.done ? 'text-gray-400 line-through dark:text-slate-500' : 'text-gray-800 dark:text-slate-100'}`}>{t.title}</span>
-              <span className={`inline-flex shrink-0 items-center gap-1 text-[10px] ${t.overdue && !t.done ? 'text-aims-stale' : 'text-gray-400 dark:text-slate-500'}`}>
+              <span className={`min-w-0 flex-1 truncate text-[11px] ${t.done ? 'text-gray-400 line-through dark:text-slate-400' : 'text-gray-800 dark:text-slate-100'}`}>{t.title}</span>
+              <span className={`inline-flex shrink-0 items-center gap-1 text-[10px] ${t.overdue && !t.done ? 'text-aims-stale' : 'text-gray-400 dark:text-slate-400'}`}>
                 <Clock size={10} aria-hidden="true" /> {t.due}
               </span>
             </li>

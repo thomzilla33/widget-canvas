@@ -106,7 +106,7 @@ export default function DataSourceMarketplace({ currentSourceId, onSelect, onClo
           <button
             onClick={onClose}
             aria-label="Close data sources"
-            className="grid h-8 w-8 place-items-center rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:text-slate-500 dark:hover:bg-white/10 dark:hover:text-slate-200"
+            className="grid h-8 w-8 place-items-center rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-slate-200"
           >
             <X size={18} />
           </button>
@@ -404,7 +404,7 @@ function Detail({ source, isCurrent, onUse, onBack }) {
   return (
     <div className="flex-1 overflow-auto">
       <div className="flex items-center gap-1 border-b border-gray-200 px-6 py-2.5 dark:border-white/10">
-        <button onClick={onBack} className="grid h-7 w-7 place-items-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:text-slate-500 dark:hover:bg-white/10" aria-label="Back">
+        <button onClick={onBack} className="grid h-7 w-7 place-items-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:text-slate-400 dark:hover:bg-white/10" aria-label="Back">
           <ChevronLeft size={16} />
         </button>
         <span className="text-xs text-gray-500 dark:text-slate-400">Data Sources</span>

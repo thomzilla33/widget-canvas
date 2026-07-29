@@ -37,13 +37,13 @@ export default function DataStudio() {
           {/* Browse what's available */}
           <div className="my-6 flex items-center gap-3">
             <span className="h-px flex-1 bg-gray-200 dark:bg-white/10" />
-            <span className="text-[11px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-500">Browse what is available</span>
+            <span className="text-[11px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-400">Browse what is available</span>
             <span className="h-px flex-1 bg-gray-200 dark:bg-white/10" />
           </div>
 
           <div className="mb-1 flex items-baseline gap-2">
             <h3 className="text-sm font-bold text-gray-900 dark:text-slate-100">Available connectors</h3>
-            <span className="text-xs text-gray-400 dark:text-slate-500">{candidates.length}</span>
+            <span className="text-xs text-gray-400 dark:text-slate-400">{candidates.length}</span>
           </div>
           <p className="mb-3 text-xs text-gray-500 dark:text-slate-400">A preview of the catalog. The wizard will pull from this list at step 2.</p>
 
@@ -62,7 +62,7 @@ export default function DataStudio() {
                       <div className="truncate text-[11px] text-gray-500 dark:text-slate-400">{s.category}</div>
                     </div>
                   </div>
-                  <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-gray-200 px-2 py-0.5 text-[10px] font-medium text-gray-400 dark:border-white/10 dark:text-slate-500">
+                  <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-gray-200 px-2 py-0.5 text-[10px] font-medium text-gray-400 dark:border-white/10 dark:text-slate-400">
                     <Circle size={7} aria-hidden="true" /> Not activated
                   </span>
                 </div>

@@ -29,7 +29,7 @@ export default function WidgetRender({ widget, size = 'md', rows, scope, viewAs 
     return (
       <div className="grid h-[88px] place-items-center text-center px-3">
         <div>
-          <div className="text-[11px] font-medium text-gray-400 dark:text-slate-500">No data connected</div>
+          <div className="text-[11px] font-medium text-gray-400 dark:text-slate-400">No data connected</div>
           <button type="button" onClick={() => navigate('/data-studio')} className="mt-0.5 block text-[10px] text-aims-blue hover:underline">Map in Data Studio →</button>
         </div>
       </div>
@@ -258,7 +258,7 @@ export function UsageHeatmapMini({ data, size }) {
       <div className="mb-1.5 flex items-baseline gap-1.5">
         <span className={`num font-bold text-gray-900 dark:text-slate-100 ${size === 'lg' ? 'text-2xl' : 'text-lg'}`}>{cal.streak}</span>
         <span className="text-[11px] text-gray-500 dark:text-slate-400">day streak</span>
-        {size !== 'sm' && <span className="ml-auto text-[10px] text-gray-400 dark:text-slate-500">Longest {cal.longest}</span>}
+        {size !== 'sm' && <span className="ml-auto text-[10px] text-gray-400 dark:text-slate-400">Longest {cal.longest}</span>}
       </div>
       <div className="flex gap-[3px]">
         {cols.map((col, ci) => (
@@ -340,7 +340,7 @@ export function CompositeStatMini({ data, size }) {
                 <span className="truncate">{p.label}</span>
               </span>
               <span className="num shrink-0 font-semibold text-gray-900 dark:text-slate-100">
-                {formatValue(p.value, { abbreviate: true })} <span className="font-normal text-gray-400 dark:text-slate-500">{Math.round((p.value / sum) * 100)}%</span>
+                {formatValue(p.value, { abbreviate: true })} <span className="font-normal text-gray-400 dark:text-slate-400">{Math.round((p.value / sum) * 100)}%</span>
               </span>
             </li>
           ))}
@@ -397,7 +397,7 @@ function ListMini({ data, size }) {
               <div className="flex min-w-0 items-center gap-2">
                 <span className="min-w-0 flex-1 truncate text-xs font-medium text-gray-900 dark:text-slate-100">{r.name}</span>
                 <span className="num shrink-0 text-xs font-semibold text-gray-900 dark:text-slate-100">{r.value}</span>
-                {r.share && r.share !== '—' && <span className="num w-8 shrink-0 text-right text-[10px] text-gray-400 dark:text-slate-500">{r.share}</span>}
+                {r.share && r.share !== '—' && <span className="num w-8 shrink-0 text-right text-[10px] text-gray-400 dark:text-slate-400">{r.share}</span>}
               </div>
               <span className="mt-1 block h-1.5 overflow-hidden rounded-full bg-gray-100 dark:bg-white/10">
                 <span className="block h-full rounded-full" style={{ width: `${max > 0 ? (raw / max) * 100 : 0}%`, background: SERIES[i % SERIES.length] }} />

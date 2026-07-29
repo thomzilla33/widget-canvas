@@ -47,7 +47,7 @@ export function WQClaimsList({ claims = [], conflicts = [], onAllDecided }) {
             Approve all non-conflicted ({nonConflictedUndecided.length})
           </button>
           {conflictCount > 0 && (
-            <span className="text-[10px] text-gray-400 dark:text-slate-600">
+            <span className="text-[10px] text-gray-400 dark:text-slate-400">
               {conflictCount} conflict{conflictCount !== 1 ? 's' : ''} need manual review
             </span>
           )}
@@ -68,7 +68,7 @@ export function WQClaimsList({ claims = [], conflicts = [], onAllDecided }) {
           >
             {/* Claim header: ID + conflict tag + confidence */}
             <div className="mb-2 flex items-center gap-1.5">
-              <span className="rounded bg-gray-100 dark:bg-white/[0.07] px-1.5 py-0.5 font-mono text-[9px] font-bold text-gray-500 dark:text-slate-500">
+              <span className="rounded bg-gray-100 dark:bg-white/[0.07] px-1.5 py-0.5 font-mono text-[9px] font-bold text-gray-500 dark:text-slate-400">
                 {claim.id}
               </span>
               {claim.conflict && (
@@ -76,7 +76,7 @@ export function WQClaimsList({ claims = [], conflicts = [], onAllDecided }) {
                   Conflict
                 </span>
               )}
-              <span className="ml-auto text-[9px] text-gray-400 dark:text-slate-600">
+              <span className="ml-auto text-[9px] text-gray-400 dark:text-slate-400">
                 {Math.round(claim.confidence * 100)}% conf
               </span>
             </div>
@@ -91,7 +91,7 @@ export function WQClaimsList({ claims = [], conflicts = [], onAllDecided }) {
                 <div className="grid grid-cols-2 gap-2">
                   {[conflict.sourceA, conflict.sourceB].map((src, i) => (
                     <div key={i} className="rounded-lg bg-white/80 px-2.5 py-2 dark:bg-white/[0.05]">
-                      <p className="truncate text-[9px] font-semibold text-gray-400 dark:text-slate-500">{src.name}</p>
+                      <p className="truncate text-[9px] font-semibold text-gray-400 dark:text-slate-400">{src.name}</p>
                       <p className="mt-0.5 text-[11px] font-bold text-gray-800 dark:text-slate-200">{src.value}</p>
                     </div>
                   ))}
@@ -154,7 +154,7 @@ export function WQClaimsList({ claims = [], conflicts = [], onAllDecided }) {
       {claims.length > 0 && (
         <div className="flex items-center gap-2 text-[10px]">
           <span className="text-aims-governed font-semibold">{decided}</span>
-          <span className="text-gray-400 dark:text-slate-600">of {claims.length} reviewed</span>
+          <span className="text-gray-400 dark:text-slate-400">of {claims.length} reviewed</span>
           {allDone && (
             <span className="ml-auto font-semibold text-aims-governed">All reviewed ✓</span>
           )}

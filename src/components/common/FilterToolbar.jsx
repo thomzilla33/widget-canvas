@@ -36,7 +36,7 @@ function FilterDropdown({ label, value, onChange, options, align = 'left' }) {
       >
         {isActive ? (
           <span className="flex items-center gap-1.5">
-            <span className="text-gray-400 dark:text-slate-500">{label}</span>
+            <span className="text-gray-400 dark:text-slate-400">{label}</span>
             <span className="flex items-center gap-1 rounded-md border border-aims-blue/35 bg-aims-blue/[0.18] px-1.5 py-px text-[10px] font-bold text-aims-blue dark:border-aims-blue/30 dark:bg-aims-blue/[0.22]">
               <span>{activeLabel}</span>
               <span
@@ -52,7 +52,7 @@ function FilterDropdown({ label, value, onChange, options, align = 'left' }) {
         ) : (
           <span className="pr-1">{label}</span>
         )}
-        <ChevronDown size={11} className={`ml-1 flex-shrink-0 text-gray-400 dark:text-slate-500 transition-transform ${open ? 'rotate-180' : ''}`} />
+        <ChevronDown size={11} className={`ml-1 flex-shrink-0 text-gray-400 dark:text-slate-400 transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
 
       {open && (
@@ -107,9 +107,9 @@ function SortDropdown({ sort }) {
               : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:bg-gray-50 dark:border-white/10 dark:bg-transparent dark:text-slate-400 dark:hover:bg-white/[0.04] dark:hover:border-white/[0.15]'
             }`}
         >
-          <ArrowUpDown size={12} className="text-gray-400 dark:text-slate-500" aria-hidden="true" />
+          <ArrowUpDown size={12} className="text-gray-400 dark:text-slate-400" aria-hidden="true" />
           {currentLabel}
-          <ChevronDown size={11} className={`text-gray-400 dark:text-slate-500 transition-transform ${open ? 'rotate-180' : ''}`} />
+          <ChevronDown size={11} className={`text-gray-400 dark:text-slate-400 transition-transform ${open ? 'rotate-180' : ''}`} />
         </button>
 
         {open && (
@@ -163,7 +163,7 @@ function FiltersSlideout({ filters, draft, onDraftChange, onApply, onClose }) {
         {/* Header */}
         <div className="flex flex-shrink-0 items-center justify-between border-b border-gray-100 px-5 py-4 dark:border-white/[0.07]">
           <div className="flex items-center gap-2">
-            <SlidersHorizontal size={14} className="text-gray-400 dark:text-slate-500" aria-hidden="true" />
+            <SlidersHorizontal size={14} className="text-gray-400 dark:text-slate-400" aria-hidden="true" />
             <h2 className="text-sm font-semibold text-gray-900 dark:text-slate-100">All filters</h2>
           </div>
           <button
@@ -183,7 +183,7 @@ function FiltersSlideout({ filters, draft, onDraftChange, onApply, onClose }) {
             return (
               <div key={f.id}>
                 <div className="mb-2.5 flex items-center justify-between">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-500">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400">
                     {f.label}
                   </span>
                   {currentDraft !== defaultVal && (
@@ -269,7 +269,7 @@ function FiltersSlideout({ filters, draft, onDraftChange, onApply, onClose }) {
 function FilterChip({ label, value, onClear }) {
   return (
     <span className="flex items-center gap-1 rounded-full border border-aims-blue/40 bg-aims-blue/[0.08] px-2.5 py-1 text-[11px] font-semibold text-aims-blue dark:border-aims-blue/30 dark:bg-aims-blue/[0.12]">
-      <span className="text-gray-400 dark:text-slate-500">{label}:</span>
+      <span className="text-gray-400 dark:text-slate-400">{label}:</span>
       <span className="max-w-[112px] truncate">{value}</span>
       <button
         type="button"
@@ -341,7 +341,7 @@ export default function FilterToolbar({
       <div className={`flex items-center gap-2 flex-wrap ${bare ? '' : 'px-6 py-3'}`}>
         {/* Search */}
         <div className="relative w-52 flex-shrink-0">
-          <Search size={13} className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500" aria-hidden="true" />
+          <Search size={13} className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-400" aria-hidden="true" />
           <input
             type="search"
             className="input h-9 w-full pl-8 text-xs"
@@ -403,7 +403,7 @@ export default function FilterToolbar({
           <button
             type="button"
             onClick={clearAll}
-            className="ml-1 text-[11px] font-semibold text-gray-400 transition-colors hover:text-gray-600 dark:text-slate-500 dark:hover:text-slate-300"
+            className="ml-1 text-[11px] font-semibold text-gray-400 transition-colors hover:text-gray-600 dark:text-slate-400 dark:hover:text-slate-300"
           >
             Clear all
           </button>

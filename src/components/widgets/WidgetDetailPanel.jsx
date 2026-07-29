@@ -74,7 +74,7 @@ export default function WidgetDetailPanel({ widget, isAdmin, onClose, onEditFull
 
         {/* Preview */}
         <div>
-          <div className="mb-2 text-[10px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-500">Preview</div>
+          <div className="mb-2 text-[10px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-400">Preview</div>
           <div className="pointer-events-none rounded-lg border border-gray-200 bg-white p-3 dark:border-white/10 dark:bg-[var(--canvas)]">
             <WidgetRender widget={widget} size="md" />
           </div>
@@ -88,7 +88,7 @@ export default function WidgetDetailPanel({ widget, isAdmin, onClose, onEditFull
 
         {/* Used on */}
         <div>
-          <div className="mb-1.5 text-[10px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-500">
+          <div className="mb-1.5 text-[10px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-400">
             Used on {usedOn.length} dashboard{usedOn.length === 1 ? '' : 's'}
           </div>
           {usedOn.length === 0 ? (
@@ -104,7 +104,7 @@ export default function WidgetDetailPanel({ widget, isAdmin, onClose, onEditFull
                   <LayoutDashboard size={11} aria-hidden="true" /> {d.name}
                 </button>
               ))}
-              {usedOn.length > 5 && <span className="text-[11px] text-gray-400 dark:text-slate-500">+{usedOn.length - 5} more</span>}
+              {usedOn.length > 5 && <span className="text-[11px] text-gray-400 dark:text-slate-400">+{usedOn.length - 5} more</span>}
             </div>
           )}
         </div>
@@ -146,7 +146,7 @@ export default function WidgetDetailPanel({ widget, isAdmin, onClose, onEditFull
 function InfoBox({ icon: Icon, label, children }) {
   return (
     <div className="surface-sunken rounded-lg p-3">
-      <div className="mb-1 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-500">
+      <div className="mb-1 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-400">
         <Icon size={11} aria-hidden="true" /> {label}
       </div>
       <p className="text-xs leading-relaxed text-gray-600 dark:text-slate-300">{children}</p>

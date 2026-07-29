@@ -146,7 +146,7 @@ export function SourcePicker({ sourceId, onSelect, onBrowse }) {
       </div>
 
       {filtered.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-gray-200 p-4 text-center text-xs text-gray-400 dark:border-white/10 dark:text-slate-500">
+        <div className="rounded-lg border border-dashed border-gray-200 p-4 text-center text-xs text-gray-400 dark:border-white/10 dark:text-slate-400">
           No connected sources match. Browse the catalog to connect more.
         </div>
       ) : (
@@ -291,7 +291,7 @@ function EntityPickerModal({ entityId, onSelect, onClose }) {
         {/* Search */}
         <div className="shrink-0 px-6 pt-5 pb-3">
           <div className="relative">
-            <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500 pointer-events-none" aria-hidden="true" />
+            <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-400 pointer-events-none" aria-hidden="true" />
             <input
               ref={searchRef}
               type="text"
@@ -308,7 +308,7 @@ function EntityPickerModal({ entityId, onSelect, onClose }) {
               <button
                 type="button"
                 onClick={() => { setQuery(''); setFocusedIdx(-1); searchRef.current?.focus() }}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 transition-colors hover:text-gray-600 dark:text-slate-500 dark:hover:text-slate-300"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 transition-colors hover:text-gray-600 dark:text-slate-400 dark:hover:text-slate-300"
                 aria-label="Clear search"
               >
                 ✕
@@ -339,7 +339,7 @@ function EntityPickerModal({ entityId, onSelect, onClose }) {
         {/* Recently used strip */}
         {recentEntities.length > 0 && (
           <div className="shrink-0 px-6 pb-4">
-            <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-slate-500">Recently used</p>
+            <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-slate-400">Recently used</p>
             <div className="grid grid-cols-3 gap-2">
               {recentEntities.map((e) => (
                 <QuickPickCard key={e.id} entity={e} selected={entityId === e.id} onSelect={onSelect} />
@@ -357,10 +357,10 @@ function EntityPickerModal({ entityId, onSelect, onClose }) {
           className="min-h-0 flex-1 overflow-auto px-6 pb-5"
         >
           {showRecent && recentEntities.length > 0 && (
-            <p className="mb-2.5 text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-slate-500">All entities</p>
+            <p className="mb-2.5 text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-slate-400">All entities</p>
           )}
           {q && filtered.length > 0 && (
-            <p className="mb-2 text-[11px] text-gray-400 dark:text-slate-500">
+            <p className="mb-2 text-[11px] text-gray-400 dark:text-slate-400">
               {filtered.length} result{filtered.length !== 1 ? 's' : ''} for &ldquo;{query}&rdquo;
             </p>
           )}
@@ -387,10 +387,10 @@ function EntityPickerModal({ entityId, onSelect, onClose }) {
 
         {/* Footer */}
         <div className="shrink-0 flex items-center justify-between px-6 py-4" style={{ borderTop: '1px solid var(--border)' }}>
-          <p className="text-[11px] text-gray-400 dark:text-slate-500">
+          <p className="text-[11px] text-gray-400 dark:text-slate-400">
             {filtered.length} of {MODEL_ENTITIES.length} entities · Pre-resolved in Data Studio
           </p>
-          <p className="hidden text-[11px] text-gray-400 dark:text-slate-500 sm:block">
+          <p className="hidden text-[11px] text-gray-400 dark:text-slate-400 sm:block">
             ↑↓ navigate &nbsp;·&nbsp; Enter select &nbsp;·&nbsp; Esc close
           </p>
         </div>
@@ -416,7 +416,7 @@ function QuickPickCard({ entity, selected, onSelect }) {
       </span>
       <div className="min-w-0 flex-1">
         <p className="truncate text-xs font-semibold text-gray-900 dark:text-slate-100">{entity.name}</p>
-        <p className="truncate text-[10px] text-gray-400 dark:text-slate-500">{entity.recordCount.toLocaleString()} records</p>
+        <p className="truncate text-[10px] text-gray-400 dark:text-slate-400">{entity.recordCount.toLocaleString()} records</p>
       </div>
       {selected && <Check size={12} className="shrink-0 text-aims-blue" aria-hidden="true" />}
     </button>
@@ -455,10 +455,10 @@ function EntityCard({ entity, selected, focused, optId, onSelect, onHover }) {
           {selected && <Check size={12} className="shrink-0 text-aims-blue" aria-hidden="true" />}
         </div>
         <div className="mt-0.5 truncate text-[11px] font-medium text-gray-500 dark:text-slate-400">{entity.label}</div>
-        <p className="mt-1.5 line-clamp-1 text-[11px] leading-relaxed text-gray-400 dark:text-slate-500">{entity.description}</p>
+        <p className="mt-1.5 line-clamp-1 text-[11px] leading-relaxed text-gray-400 dark:text-slate-400">{entity.description}</p>
         <div className="mt-2 flex flex-wrap items-center gap-x-1.5 gap-y-1">
-          <span className="tabular-nums text-[10px] text-gray-400 dark:text-slate-500">{entity.recordCount.toLocaleString()} records</span>
-          {entity.poweredBy.length > 0 && <span className="text-[10px] text-gray-300 dark:text-slate-600">·</span>}
+          <span className="tabular-nums text-[10px] text-gray-400 dark:text-slate-400">{entity.recordCount.toLocaleString()} records</span>
+          {entity.poweredBy.length > 0 && <span className="text-[10px] text-gray-300 dark:text-slate-400">·</span>}
           {entity.poweredBy.map((src) => (
             <span key={src} className="rounded-full border border-gray-200 bg-white px-2 py-0.5 text-[10px] text-gray-500 dark:border-white/10 dark:bg-white/5 dark:text-slate-400">{src}</span>
           ))}
@@ -512,7 +512,7 @@ function SelectedEntity({ entity, onChange }) {
         </div>
         <div className="flex flex-wrap items-center gap-1 mt-0.5">
           <span className="text-[11px] text-gray-500 dark:text-slate-400">{entity.label}</span>
-          <span className="text-[10px] text-gray-300 dark:text-slate-600">·</span>
+          <span className="text-[10px] text-gray-300 dark:text-slate-400">·</span>
           {entity.poweredBy.map((src) => (
             <span key={src} className="rounded-full border border-gray-200 bg-white px-1.5 py-0.5 text-[10px] text-gray-500 dark:border-white/10 dark:bg-white/5 dark:text-slate-400">{src}</span>
           ))}
@@ -547,7 +547,7 @@ export function MetricPicker({ source, metricId, onSelect }) {
       {/* Search bar — only when there are enough items to warrant it */}
       {totalItems > 5 && (
         <div className="relative">
-          <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500 pointer-events-none" aria-hidden="true" />
+          <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-400 pointer-events-none" aria-hidden="true" />
           <input
             ref={searchRef}
             type="text"
@@ -561,7 +561,7 @@ export function MetricPicker({ source, metricId, onSelect }) {
           {query && (
             <button
               onClick={() => { setQuery(''); searchRef.current?.focus() }}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded p-0.5 text-gray-400 hover:text-gray-600 dark:text-slate-500 dark:hover:text-slate-300 text-xs"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded p-0.5 text-gray-400 hover:text-gray-600 dark:text-slate-400 dark:hover:text-slate-300 text-xs"
               aria-label="Clear filter"
             >
               ✕
@@ -680,7 +680,7 @@ export function TypeGallery({ typeId, metric, onSelect, compatibleSkeletons = nu
       <div>
         <div className="mb-2 flex items-center gap-2">
           <span className="text-[10px] font-bold uppercase tracking-wide text-gray-500 dark:text-slate-400">Statistical</span>
-          <span className="text-[10px] text-gray-400 dark:text-slate-500">Charts, KPIs, gauges</span>
+          <span className="text-[10px] text-gray-400 dark:text-slate-400">Charts, KPIs, gauges</span>
         </div>
         <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5">
           {statistical.map((t) => <TypeTile key={t.id} t={t} typeId={typeId} metric={metric} onSelect={onSelect} compatible={compat(t)} />)}
@@ -690,7 +690,7 @@ export function TypeGallery({ typeId, metric, onSelect, compatibleSkeletons = nu
       <div>
         <div className="mb-2 flex items-center gap-2">
           <span className="text-[10px] font-bold uppercase tracking-wide text-gray-500 dark:text-slate-400">Data Display</span>
-          <span className="text-[10px] text-gray-400 dark:text-slate-500">Record lists, profile cards, tables</span>
+          <span className="text-[10px] text-gray-400 dark:text-slate-400">Record lists, profile cards, tables</span>
         </div>
         <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5">
           {dataDisplay.map((t) => <TypeTile key={t.id} t={t} typeId={typeId} metric={metric} onSelect={onSelect} compatible={compat(t)} />)}
@@ -701,7 +701,7 @@ export function TypeGallery({ typeId, metric, onSelect, compatibleSkeletons = nu
         <div>
           <div className="mb-2 flex items-center gap-2">
             <span className="text-[10px] font-bold uppercase tracking-wide text-gray-500 dark:text-slate-400">Consumption</span>
-            <span className="text-[10px] text-gray-400 dark:text-slate-500">Credits, tokens, cost</span>
+            <span className="text-[10px] text-gray-400 dark:text-slate-400">Credits, tokens, cost</span>
           </div>
           <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5">
             {consumption.map((t) => <TypeTile key={t.id} t={t} typeId={typeId} metric={metric} onSelect={onSelect} compatible={compat(t)} />)}
@@ -749,9 +749,9 @@ export function SlotPanel({ typeId, measure, dimension, transform }) {
           <span className="flex items-center gap-1.5 text-gray-500 dark:text-slate-400">
             <span className={`grid h-4 w-4 place-items-center rounded text-[9px] font-bold ${ROLE_CHIP[s.role] || ROLE_CHIP.m}`}>{ROLE_GLYPH[s.role] || 'M'}</span>
             {s.label}
-            {s.optional && <span className="text-[10px] text-gray-400 dark:text-slate-500">optional</span>}
+            {s.optional && <span className="text-[10px] text-gray-400 dark:text-slate-400">optional</span>}
           </span>
-          <span className={`truncate font-medium ${s.bound === '—' ? 'text-gray-400 dark:text-slate-500' : 'text-gray-900 dark:text-slate-100'}`}>{s.bound}</span>
+          <span className={`truncate font-medium ${s.bound === '—' ? 'text-gray-400 dark:text-slate-400' : 'text-gray-900 dark:text-slate-100'}`}>{s.bound}</span>
         </div>
       ))}
     </div>
@@ -1098,7 +1098,7 @@ function CardAppearance({ config, onChange, entity }) {
       </p>
 
       <div className="rounded-lg border border-dashed border-gray-200 bg-gray-50/60 p-3 dark:border-white/10 dark:bg-white/[0.02]">
-        <div className="mb-3 text-[10px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-500">Header</div>
+        <div className="mb-3 text-[10px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-400">Header</div>
         <div className="space-y-3">
           <Field label="Title">
             <select className="input" value={titleField} onChange={(e) => onChange({ titleField: e.target.value })}>
@@ -1120,7 +1120,7 @@ function CardAppearance({ config, onChange, entity }) {
       </Field>
 
       <div className="rounded-lg border border-dashed border-gray-200 bg-gray-50/60 p-3 dark:border-white/10 dark:bg-white/[0.02]">
-        <div className="mb-3 text-[10px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-500">Badges (up to 2)</div>
+        <div className="mb-3 text-[10px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-400">Badges (up to 2)</div>
         <div className="grid grid-cols-2 gap-3">
           <Field label="Badge 1">
             <select className="input" value={badge1} onChange={(e) => onChange({ badge1: e.target.value })}>
@@ -1136,7 +1136,7 @@ function CardAppearance({ config, onChange, entity }) {
       </div>
 
       <div className="rounded-lg border border-dashed border-gray-200 bg-gray-50/60 p-3 dark:border-white/10 dark:bg-white/[0.02]">
-        <div className="mb-3 text-[10px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-500">Quick actions (up to 2)</div>
+        <div className="mb-3 text-[10px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-400">Quick actions (up to 2)</div>
         <div className="grid grid-cols-2 gap-3">
           <Field label="Action 1">
             <input className="input" placeholder="e.g. Send email" value={action1} onChange={(e) => onChange({ action1: e.target.value })} />
@@ -1285,7 +1285,7 @@ const DISPLAY_OPTIONS = {
 // Sub-section label
 function AppearanceSectionLabel({ children }) {
   return (
-    <div className="text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-slate-500">
+    <div className="text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-slate-400">
       {children}
     </div>
   )
@@ -1414,7 +1414,7 @@ export function AppearancePanel({
             {(() => {
               const activeDesc = variants.find((v) => v.id === effectiveVariant)?.desc
               return activeDesc ? (
-                <p className="mt-1.5 text-[11px] leading-snug text-gray-400 dark:text-slate-500">{activeDesc}</p>
+                <p className="mt-1.5 text-[11px] leading-snug text-gray-400 dark:text-slate-400">{activeDesc}</p>
               ) : null
             })()}
           </div>
@@ -1438,7 +1438,7 @@ export function AppearancePanel({
                 <span>
                   <span className="text-sm text-gray-700 dark:text-slate-200">{opt.label}</span>
                   {opt.hint && (
-                    <span className="mt-0.5 block text-[11px] leading-snug text-gray-400 dark:text-slate-500">{opt.hint}</span>
+                    <span className="mt-0.5 block text-[11px] leading-snug text-gray-400 dark:text-slate-400">{opt.hint}</span>
                   )}
                 </span>
               </label>

@@ -199,7 +199,7 @@ export default function NewDashboard() {
               </Button>
             )}
             {blockingHint && (
-              <p className="text-[11px] text-gray-400 dark:text-slate-500">{blockingHint}</p>
+              <p className="text-[11px] text-gray-400 dark:text-slate-400">{blockingHint}</p>
             )}
           </div>
         </div>

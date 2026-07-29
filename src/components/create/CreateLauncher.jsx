@@ -69,7 +69,7 @@ export default function CreateLauncher({ kind = 'widget', onPick, onClose }) {
                   </span>
                   <span className="mt-0.5 block text-xs text-gray-500 dark:text-slate-400">{o.desc}</span>
                 </span>
-                <ChevronRight size={16} aria-hidden="true" className="shrink-0 text-gray-300 transition-transform group-hover:translate-x-0.5 group-hover:text-gray-500 dark:text-slate-600" />
+                <ChevronRight size={16} aria-hidden="true" className="shrink-0 text-gray-300 transition-transform group-hover:translate-x-0.5 group-hover:text-gray-500 dark:text-slate-400" />
               </button>
             )
           })}

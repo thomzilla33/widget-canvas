@@ -100,7 +100,7 @@ function NavItem({ label, count, active, onClick }) {
       }`}
     >
       <span className="truncate">{label}</span>
-      <span className={`ml-2 flex-shrink-0 text-[10px] font-bold ${active ? 'text-aims-blue' : 'text-gray-400 dark:text-slate-600'}`}>
+      <span className={`ml-2 flex-shrink-0 text-[10px] font-bold ${active ? 'text-aims-blue' : 'text-gray-400 dark:text-slate-400'}`}>
         {count}
       </span>
     </button>
@@ -135,20 +135,20 @@ function FeaturedCard({ template: t, onClick }) {
         <div className="min-w-0">
           <div className="mb-2 flex flex-wrap items-center gap-1.5">
             <span className="rounded-full bg-aims-blue/10 px-1.5 py-px text-[9px] font-bold text-aims-blue">★ Featured</span>
-            <span className="rounded-full border border-gray-200 px-1.5 py-px text-[9px] font-semibold uppercase tracking-wide text-gray-500 dark:border-white/10 dark:text-slate-500">
+            <span className="rounded-full border border-gray-200 px-1.5 py-px text-[9px] font-semibold uppercase tracking-wide text-gray-500 dark:border-white/10 dark:text-slate-400">
               {t.category}
             </span>
           </div>
           <p className="text-sm font-bold text-gray-900 dark:text-slate-100">{t.name}</p>
           <p className="mt-1 line-clamp-2 text-[11px] leading-relaxed text-gray-500 dark:text-slate-400">{t.desc}</p>
-          <p className="mt-2 text-[10px] text-gray-400 dark:text-slate-600">
+          <p className="mt-2 text-[10px] text-gray-400 dark:text-slate-400">
             <span className="font-semibold">{t.widgets}</span> widgets
           </p>
         </div>
         <div className="mt-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <ComplexityBadge complexity={t.complexity} />
-            <span className="flex items-center gap-1 text-[10px] text-gray-400 dark:text-slate-600">
+            <span className="flex items-center gap-1 text-[10px] text-gray-400 dark:text-slate-400">
               <Users size={10} aria-hidden="true" />
               {t.tenants.toLocaleString()}
             </span>
@@ -157,7 +157,7 @@ function FeaturedCard({ template: t, onClick }) {
             className="flex items-center gap-1 text-[11px] font-semibold transition-colors"
             style={{ color: hovered ? accent : undefined }}
           >
-            <span className={hovered ? '' : 'text-gray-400 dark:text-slate-600'}>
+            <span className={hovered ? '' : 'text-gray-400 dark:text-slate-400'}>
               Use template
             </span>
             <ArrowRight size={11} className="transition-transform group-hover:translate-x-0.5" />
@@ -196,7 +196,7 @@ function TemplateCard({ template: t, onClick }) {
       {/* Meta */}
       <div className="min-w-0 flex-1">
         <div className="mb-1 flex items-center gap-1.5">
-          <span className="rounded-full border border-gray-200 px-1.5 py-px text-[9px] font-semibold uppercase tracking-wide text-gray-500 dark:border-white/10 dark:text-slate-500">
+          <span className="rounded-full border border-gray-200 px-1.5 py-px text-[9px] font-semibold uppercase tracking-wide text-gray-500 dark:border-white/10 dark:text-slate-400">
             {t.category}
           </span>
           {RECENT_IDS.has(t.id) && (
@@ -211,7 +211,7 @@ function TemplateCard({ template: t, onClick }) {
       <div className="mt-3 flex items-center justify-between border-t border-gray-100 pt-2.5 dark:border-white/[0.06]">
         <div className="flex items-center gap-2">
           <ComplexityBadge complexity={t.complexity} />
-          <span className="flex items-center gap-1 text-[10px] text-gray-400 dark:text-slate-600">
+          <span className="flex items-center gap-1 text-[10px] text-gray-400 dark:text-slate-400">
             <Users size={10} aria-hidden="true" />
             {t.tenants.toLocaleString()}
           </span>
@@ -220,7 +220,7 @@ function TemplateCard({ template: t, onClick }) {
           className="flex items-center gap-1 text-[11px] font-semibold transition-colors"
           style={{ color: hovered ? accent : undefined }}
         >
-          <span className={hovered ? '' : 'text-gray-400 dark:text-slate-600'}>Use</span>
+          <span className={hovered ? '' : 'text-gray-400 dark:text-slate-400'}>Use</span>
           <ArrowRight size={10} className="transition-transform group-hover:translate-x-0.5" />
         </span>
       </div>
@@ -380,7 +380,7 @@ export default function CreateDashboardModal({ onClose }) {
             <h2 id="create-dash-mp-title" className="text-sm font-semibold text-gray-900 dark:text-slate-100">
               Dashboard marketplace
             </h2>
-            <p className="mt-0.5 text-xs text-gray-400 dark:text-slate-500">
+            <p className="mt-0.5 text-xs text-gray-400 dark:text-slate-400">
               Browse a curated template to get started fast, or build your own.
             </p>
           </div>
@@ -402,7 +402,7 @@ export default function CreateDashboardModal({ onClose }) {
             <NavItem label="Featured"       count={featuredCount}                    active={activeNav === 'featured'} onClick={() => setActiveNav('featured')} />
             <NavItem label="Recently added" count={RECENT_IDS.size}                  active={activeNav === 'recent'}   onClick={() => setActiveNav('recent')} />
 
-            <p className="mt-3 mb-1 px-2 text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-600">
+            <p className="mt-3 mb-1 px-2 text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400">
               Categories
             </p>
             {categories.map(([cat, cnt]) => (
@@ -415,7 +415,7 @@ export default function CreateDashboardModal({ onClose }) {
             {/* Search + filters bar */}
             <div className="flex flex-shrink-0 items-center gap-2 border-b border-gray-100 px-5 py-3 dark:border-white/[0.06]">
               <div className="relative max-w-sm flex-1">
-                <Search size={13} className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500" />
+                <Search size={13} className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-400" />
                 <input
                   type="search"
                   className="input h-9 w-full pl-8 text-xs"
@@ -457,7 +457,7 @@ export default function CreateDashboardModal({ onClose }) {
                 <section>
                   <div className="mb-3 flex items-baseline gap-2">
                     <h3 className="text-xs font-bold text-gray-900 dark:text-slate-100">Featured by AIMS OS</h3>
-                    <span className="text-[11px] text-gray-400 dark:text-slate-500">
+                    <span className="text-[11px] text-gray-400 dark:text-slate-400">
                       Curated templates to get your team productive fast
                     </span>
                   </div>
@@ -474,7 +474,7 @@ export default function CreateDashboardModal({ onClose }) {
                 <section>
                   <div className="mb-3 flex items-baseline gap-2">
                     <h3 className="text-xs font-bold text-gray-900 dark:text-slate-100">All templates</h3>
-                    <span className="text-[11px] text-gray-400 dark:text-slate-500">
+                    <span className="text-[11px] text-gray-400 dark:text-slate-400">
                       {gridList.length} templates
                     </span>
                   </div>
@@ -490,7 +490,7 @@ export default function CreateDashboardModal({ onClose }) {
                 <div className="flex h-40 items-center justify-center text-center">
                   <div>
                     <p className="text-sm font-medium text-gray-500 dark:text-slate-400">No templates found</p>
-                    <p className="mt-1 text-xs text-gray-400 dark:text-slate-500">Try adjusting your search or filters</p>
+                    <p className="mt-1 text-xs text-gray-400 dark:text-slate-400">Try adjusting your search or filters</p>
                   </div>
                 </div>
               )}
@@ -500,7 +500,7 @@ export default function CreateDashboardModal({ onClose }) {
 
         {/* ── Footer ── */}
         <div className="flex flex-shrink-0 items-center justify-between border-t border-gray-200 px-6 py-3.5 dark:border-white/10">
-          <p className="text-xs text-gray-400 dark:text-slate-500">Prefer to start your own?</p>
+          <p className="text-xs text-gray-400 dark:text-slate-400">Prefer to start your own?</p>
           <div className="flex items-center gap-2">
             <button
               type="button"

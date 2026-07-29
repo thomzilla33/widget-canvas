@@ -14,7 +14,7 @@ const KIND_LABEL = {
 const PRIORITY_COLOR = {
   high: 'bg-red-500/10 text-red-600 dark:text-red-400',
   med:  'bg-amber-500/10 text-amber-700 dark:text-amber-400',
-  low:  'bg-gray-100 text-gray-500 dark:bg-white/[0.06] dark:text-slate-500',
+  low:  'bg-gray-100 text-gray-500 dark:bg-white/[0.06] dark:text-slate-400',
 }
 
 function enrichItem(item) {
@@ -167,7 +167,7 @@ export function AttentionDetail({ item, onApprove, onDecline, onComplete, onDism
           <ScanEyeIcon />
         </div>
         <p className="text-sm font-medium text-gray-500 dark:text-slate-400">Select an item to review</p>
-        <p className="max-w-xs text-xs text-gray-400 dark:text-slate-600">
+        <p className="max-w-xs text-xs text-gray-400 dark:text-slate-400">
           Pick an item from the queue to see context, stakes, and decision options.
         </p>
       </div>
@@ -197,7 +197,7 @@ export function AttentionDetail({ item, onApprove, onDecline, onComplete, onDism
               {kMeta.label}
             </span>
             {md.sourceRef && (
-              <span className="rounded bg-gray-100 dark:bg-white/[0.06] px-1.5 py-0.5 font-mono text-[9px] text-gray-500 dark:text-slate-500">
+              <span className="rounded bg-gray-100 dark:bg-white/[0.06] px-1.5 py-0.5 font-mono text-[9px] text-gray-500 dark:text-slate-400">
                 {md.sourceRef}
               </span>
             )}
@@ -233,7 +233,7 @@ export function AttentionDetail({ item, onApprove, onDecline, onComplete, onDism
 
           {/* Due label */}
           {item.dueLabel && (
-            <p className="mt-2 text-[10px] text-gray-400 dark:text-slate-600">{item.dueLabel}</p>
+            <p className="mt-2 text-[10px] text-gray-400 dark:text-slate-400">{item.dueLabel}</p>
           )}
         </div>
 
@@ -253,7 +253,7 @@ export function AttentionDetail({ item, onApprove, onDecline, onComplete, onDism
               className={`relative flex items-center gap-1.5 py-3 pr-4 text-[11px] font-semibold transition-colors ${
                 wqTab === t.id
                   ? 'text-aims-blue'
-                  : 'text-gray-400 hover:text-gray-600 dark:text-slate-600 dark:hover:text-slate-400'
+                  : 'text-gray-400 hover:text-gray-600 dark:text-slate-400 dark:hover:text-slate-400'
               }`}
             >
               {t.label}
@@ -286,17 +286,17 @@ export function AttentionDetail({ item, onApprove, onDecline, onComplete, onDism
               <span className={`rounded-full px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide ${
                 md.thread?.status === 'open'
                   ? 'bg-green-500/10 text-green-600 dark:text-green-400'
-                  : 'bg-gray-100 text-gray-500 dark:bg-white/[0.06] dark:text-slate-500'
+                  : 'bg-gray-100 text-gray-500 dark:bg-white/[0.06] dark:text-slate-400'
               }`}>
                 {md.thread?.status?.toUpperCase() ?? 'OPEN'}
               </span>
-              <span className="text-[10px] text-gray-400 dark:text-slate-600">
+              <span className="text-[10px] text-gray-400 dark:text-slate-400">
                 {md.thread?.comments?.length ?? 0} messages
               </span>
             </div>
             <div className="flex-1 overflow-y-auto px-7 py-5 space-y-5">
               {(md.thread?.comments ?? []).length === 0 ? (
-                <p className="text-xs text-gray-400 dark:text-slate-600">No messages yet.</p>
+                <p className="text-xs text-gray-400 dark:text-slate-400">No messages yet.</p>
               ) : (md.thread.comments.map(c => (
                 <div key={c.id} className="flex gap-3">
                   <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${
@@ -309,9 +309,9 @@ export function AttentionDetail({ item, onApprove, onDecline, onComplete, onDism
                   <div className="min-w-0 flex-1">
                     <div className="flex items-baseline gap-2">
                       <span className="text-xs font-semibold text-gray-800 dark:text-slate-200">{c.authorName}</span>
-                      <span className="text-[9px] text-gray-400 dark:text-slate-600">{c.timestamp}</span>
+                      <span className="text-[9px] text-gray-400 dark:text-slate-400">{c.timestamp}</span>
                     </div>
-                    <p className="text-[10px] text-gray-400 dark:text-slate-600">{c.authorRole}</p>
+                    <p className="text-[10px] text-gray-400 dark:text-slate-400">{c.authorRole}</p>
                     <p className="mt-1.5 text-xs leading-relaxed text-gray-600 dark:text-slate-400">{c.body}</p>
                   </div>
                 </div>
@@ -326,11 +326,11 @@ export function AttentionDetail({ item, onApprove, onDecline, onComplete, onDism
         {/* Audit tab */}
         {wqTab === 'audit' && (
           <div className="flex-1 overflow-y-auto px-7 py-5">
-            <p className="mb-4 text-[9px] font-semibold uppercase tracking-[0.1em] text-gray-400 dark:text-slate-600">
+            <p className="mb-4 text-[9px] font-semibold uppercase tracking-[0.1em] text-gray-400 dark:text-slate-400">
               Activity log
             </p>
             {(item.auditTrail ?? []).length === 0 ? (
-              <p className="text-xs text-gray-400 dark:text-slate-600">No audit events recorded.</p>
+              <p className="text-xs text-gray-400 dark:text-slate-400">No audit events recorded.</p>
             ) : (
               <div className="space-y-0">
                 {item.auditTrail.map((entry, i) => (
@@ -343,7 +343,7 @@ export function AttentionDetail({ item, onApprove, onDecline, onComplete, onDism
                     </div>
                     <div className="min-w-0 flex-1 pt-0.5">
                       <p className="text-[11px] font-medium text-gray-700 dark:text-slate-300">{entry.action}</p>
-                      <p className="mt-0.5 text-[9px] text-gray-400 dark:text-slate-600">
+                      <p className="mt-0.5 text-[9px] text-gray-400 dark:text-slate-400">
                         {entry.by} · {entry.at}
                       </p>
                     </div>
@@ -397,20 +397,20 @@ export function AttentionDetail({ item, onApprove, onDecline, onComplete, onDism
                 </span>
               )}
               {item.statusLabel && (
-                <span className="rounded bg-gray-100 px-1.5 py-0.5 text-[9px] font-semibold text-gray-500 dark:bg-white/[0.06] dark:text-slate-500">
+                <span className="rounded bg-gray-100 px-1.5 py-0.5 text-[9px] font-semibold text-gray-500 dark:bg-white/[0.06] dark:text-slate-400">
                   {item.statusLabel}
                 </span>
               )}
             </div>
           </div>
-          <p className="mt-1.5 text-[10px] text-gray-400 dark:text-slate-600">{whenOf(item)}</p>
+          <p className="mt-1.5 text-[10px] text-gray-400 dark:text-slate-400">{whenOf(item)}</p>
         </div>
 
         <Divider />
 
         {/* ── Why this came to you ── */}
         <div className="px-7 py-5">
-          <p className="mb-3 text-[9px] font-semibold uppercase tracking-[0.1em] text-gray-400 dark:text-slate-600">
+          <p className="mb-3 text-[9px] font-semibold uppercase tracking-[0.1em] text-gray-400 dark:text-slate-400">
             Why this came to you
           </p>
           <div className="flex items-start gap-3">
@@ -422,7 +422,7 @@ export function AttentionDetail({ item, onApprove, onDecline, onComplete, onDism
               {enrich.triggerReason && (
                 <p className="mt-0.5 text-xs leading-relaxed text-gray-500 dark:text-slate-400">{enrich.triggerReason}</p>
               )}
-              <span className="mt-2 inline-block rounded bg-gray-100 px-1.5 py-0.5 text-[9px] font-semibold text-gray-500 dark:bg-white/[0.06] dark:text-slate-500">
+              <span className="mt-2 inline-block rounded bg-gray-100 px-1.5 py-0.5 text-[9px] font-semibold text-gray-500 dark:bg-white/[0.06] dark:text-slate-400">
                 {enrich.triggerLabel}
               </span>
             </div>
@@ -434,7 +434,7 @@ export function AttentionDetail({ item, onApprove, onDecline, onComplete, onDism
           <>
             <Divider />
             <div className="px-7 py-3.5">
-              <p className="mb-2 text-[9px] font-semibold uppercase tracking-[0.1em] text-gray-400 dark:text-slate-600">
+              <p className="mb-2 text-[9px] font-semibold uppercase tracking-[0.1em] text-gray-400 dark:text-slate-400">
                 Details
               </p>
               <div className="flex flex-wrap gap-1.5">
@@ -471,7 +471,7 @@ export function AttentionDetail({ item, onApprove, onDecline, onComplete, onDism
                 {enrich.stakesWorkflows > 0 && (
                   <div className="flex items-center justify-between rounded-xl border border-gray-200 dark:border-white/[0.08] bg-gray-50/60 dark:bg-white/[0.02] px-4 py-3.5">
                     <div>
-                      <p className="text-[11px] text-gray-500 dark:text-slate-500">
+                      <p className="text-[11px] text-gray-500 dark:text-slate-400">
                         Workflow{enrich.stakesWorkflows !== 1 ? 's' : ''} blocked
                       </p>
                       <span className="text-3xl font-bold tabular-nums text-gray-900 dark:text-white">
@@ -486,7 +486,7 @@ export function AttentionDetail({ item, onApprove, onDecline, onComplete, onDism
                 {enrich.stakesAgents > 0 && (
                   <div className="flex items-center justify-between rounded-xl border border-gray-200 dark:border-white/[0.08] bg-gray-50/60 dark:bg-white/[0.02] px-4 py-3.5">
                     <div>
-                      <p className="text-[11px] text-gray-500 dark:text-slate-500">
+                      <p className="text-[11px] text-gray-500 dark:text-slate-400">
                         Agent{enrich.stakesAgents !== 1 ? 's' : ''} waiting
                       </p>
                       <span className="text-3xl font-bold tabular-nums text-gray-900 dark:text-white">
@@ -508,7 +508,7 @@ export function AttentionDetail({ item, onApprove, onDecline, onComplete, onDism
           <>
             <Divider />
             <div className="px-7 py-5">
-              <p className="mb-2 text-[9px] font-semibold uppercase tracking-[0.1em] text-gray-400 dark:text-slate-600">
+              <p className="mb-2 text-[9px] font-semibold uppercase tracking-[0.1em] text-gray-400 dark:text-slate-400">
                 Context
               </p>
               <p className="text-sm leading-relaxed text-gray-600 dark:text-slate-400">{body}</p>
@@ -521,7 +521,7 @@ export function AttentionDetail({ item, onApprove, onDecline, onComplete, onDism
           <>
             <Divider />
             <div className="px-7 py-4">
-              <p className="mb-2 text-[9px] font-semibold uppercase tracking-[0.1em] text-gray-400 dark:text-slate-600">
+              <p className="mb-2 text-[9px] font-semibold uppercase tracking-[0.1em] text-gray-400 dark:text-slate-400">
                 Related
               </p>
               <button
@@ -536,13 +536,13 @@ export function AttentionDetail({ item, onApprove, onDecline, onComplete, onDism
                     {item.related.label}
                   </p>
                   {(item.related.widgetId || item.related.dashboardId) && (
-                    <p className="text-[9px] text-gray-400 dark:text-slate-600">
+                    <p className="text-[9px] text-gray-400 dark:text-slate-400">
                       {item.related.widgetId ? 'Widget' : 'Dashboard'}
                       {' · '}{item.related.widgetId ?? item.related.dashboardId}
                     </p>
                   )}
                 </div>
-                <ArrowUpRight size={12} className="shrink-0 text-gray-400 dark:text-slate-600" aria-hidden="true" />
+                <ArrowUpRight size={12} className="shrink-0 text-gray-400 dark:text-slate-400" aria-hidden="true" />
               </button>
             </div>
           </>
@@ -558,11 +558,11 @@ export function AttentionDetail({ item, onApprove, onDecline, onComplete, onDism
               </div>
               <div className="min-w-0">
                 <p className="text-xs font-semibold text-gray-800 dark:text-slate-200">{item.actor.name}</p>
-                {item.actor.role  && <p className="text-[10px] text-gray-500 dark:text-slate-500">{item.actor.role}</p>}
-                {item.actor.email && <p className="text-[10px] text-gray-400 dark:text-slate-600">{item.actor.email}</p>}
+                {item.actor.role  && <p className="text-[10px] text-gray-500 dark:text-slate-400">{item.actor.role}</p>}
+                {item.actor.email && <p className="text-[10px] text-gray-400 dark:text-slate-400">{item.actor.email}</p>}
               </div>
               {item.actor.system && (
-                <span className="ml-auto rounded bg-gray-100 px-1.5 py-0.5 text-[9px] font-semibold text-gray-500 dark:bg-white/[0.06] dark:text-slate-500">
+                <span className="ml-auto rounded bg-gray-100 px-1.5 py-0.5 text-[9px] font-semibold text-gray-500 dark:bg-white/[0.06] dark:text-slate-400">
                   Automated
                 </span>
               )}
@@ -575,7 +575,7 @@ export function AttentionDetail({ item, onApprove, onDecline, onComplete, onDism
           <>
             <Divider />
             <div className="px-7 py-5">
-              <p className="mb-3 text-[9px] font-semibold uppercase tracking-[0.1em] text-gray-400 dark:text-slate-600">
+              <p className="mb-3 text-[9px] font-semibold uppercase tracking-[0.1em] text-gray-400 dark:text-slate-400">
                 Similar decisions
               </p>
               <div className="space-y-2">
@@ -586,14 +586,14 @@ export function AttentionDetail({ item, onApprove, onDecline, onComplete, onDism
                   >
                     <div>
                       <p className="text-[10px] text-gray-500 dark:text-slate-400">{h.label}</p>
-                      <p className="text-[9px] text-gray-400 dark:text-slate-600">by {h.by}</p>
+                      <p className="text-[9px] text-gray-400 dark:text-slate-400">by {h.by}</p>
                     </div>
                     <span className={`rounded px-1.5 py-0.5 text-[9px] font-bold ${
                       h.decision === 'Approved' || h.decision === 'Completed' || h.decision === 'Read'
                         ? 'bg-green-500/10 text-aims-governed'
                         : h.decision === 'Declined'
                         ? 'bg-red-500/10 text-red-500 dark:text-red-400'
-                        : 'bg-gray-100 text-gray-500 dark:bg-white/[0.06] dark:text-slate-500'
+                        : 'bg-gray-100 text-gray-500 dark:bg-white/[0.06] dark:text-slate-400'
                     }`}>
                       {h.decision}
                     </span>
@@ -608,7 +608,7 @@ export function AttentionDetail({ item, onApprove, onDecline, onComplete, onDism
         <Divider />
         <div className="px-7 py-4 space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-[9px] font-semibold uppercase tracking-[0.1em] text-gray-400 dark:text-slate-600">
+            <span className="text-[9px] font-semibold uppercase tracking-[0.1em] text-gray-400 dark:text-slate-400">
               Notification ID
             </span>
             <span className="font-mono text-[11px] text-gray-600 dark:text-slate-400">
@@ -619,7 +619,7 @@ export function AttentionDetail({ item, onApprove, onDecline, onComplete, onDism
             </span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-[9px] font-semibold uppercase tracking-[0.1em] text-gray-400 dark:text-slate-600">
+            <span className="text-[9px] font-semibold uppercase tracking-[0.1em] text-gray-400 dark:text-slate-400">
               Received
             </span>
             <span className="text-[11px] text-gray-600 dark:text-slate-400">{whenOf(item)}</span>
@@ -629,7 +629,7 @@ export function AttentionDetail({ item, onApprove, onDecline, onComplete, onDism
         {/* ── Comment ── */}
         <Divider />
         <div className="px-7 py-4">
-          <p className="mb-2 text-[9px] font-semibold uppercase tracking-[0.1em] text-gray-400 dark:text-slate-600">
+          <p className="mb-2 text-[9px] font-semibold uppercase tracking-[0.1em] text-gray-400 dark:text-slate-400">
             Comment
           </p>
           <div className="flex gap-2">
@@ -671,7 +671,7 @@ export function AttentionDetail({ item, onApprove, onDecline, onComplete, onDism
           >
             {attested
               ? <CheckSquare size={14} className="mt-0.5 shrink-0 text-aims-blue" aria-hidden="true" />
-              : <Square      size={14} className="mt-0.5 shrink-0 text-gray-400 dark:text-slate-600" aria-hidden="true" />
+              : <Square      size={14} className="mt-0.5 shrink-0 text-gray-400 dark:text-slate-400" aria-hidden="true" />
             }
             <span className={`text-[11px] leading-snug ${
               attested
@@ -697,7 +697,7 @@ export function AttentionDetail({ item, onApprove, onDecline, onComplete, onDism
           <button
             type="button"
             onClick={() => onDecline(item)}
-            className="mt-2 w-full rounded-lg py-2 text-[12px] font-medium text-gray-400 transition-colors hover:text-gray-600 dark:text-slate-600 dark:hover:text-slate-400"
+            className="mt-2 w-full rounded-lg py-2 text-[12px] font-medium text-gray-400 transition-colors hover:text-gray-600 dark:text-slate-400 dark:hover:text-slate-400"
           >
             {enrich.secondaryLabel}
           </button>
@@ -744,7 +744,7 @@ function WQThreadComposer() {
 
 function ScanEyeIcon() {
   return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400 dark:text-slate-600" aria-hidden="true">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400 dark:text-slate-400" aria-hidden="true">
       <path d="M3 7V5a2 2 0 0 1 2-2h2" />
       <path d="M17 3h2a2 2 0 0 1 2 2v2" />
       <path d="M21 17v2a2 2 0 0 1-2 2h-2" />

@@ -69,7 +69,7 @@ export default function WidgetDetailModal({ widget, isAdmin, onClose, onPlace, o
           {/* Preview with size selector */}
           <div>
             <div className="mb-2 flex items-center justify-between gap-2">
-              <span className="text-[11px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-500">Preview</span>
+              <span className="text-[11px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-400">Preview</span>
               <div className="inline-flex rounded-lg border border-gray-200 p-0.5 dark:border-white/10">
                 {WIDGET_SIZES.map((s) => (
                   <button
@@ -87,7 +87,7 @@ export default function WidgetDetailModal({ widget, isAdmin, onClose, onPlace, o
             <div className={`pointer-events-none mx-auto rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition-all dark:border-white/10 dark:bg-[var(--surface-raised)] ${PREVIEW_WIDTH[size]}`}>
               <WidgetRender widget={widget} size={size} />
             </div>
-            {sizeMeta && <p className="mt-2 text-center text-[11px] text-gray-400 dark:text-slate-500">{sizeMeta.width} · {sizeMeta.detail}</p>}
+            {sizeMeta && <p className="mt-2 text-center text-[11px] text-gray-400 dark:text-slate-400">{sizeMeta.width} · {sizeMeta.detail}</p>}
           </div>
 
           {/* About / Best for */}
@@ -98,7 +98,7 @@ export default function WidgetDetailModal({ widget, isAdmin, onClose, onPlace, o
 
           {/* Where it's used */}
           <div>
-            <div className="mb-1.5 text-[11px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-500">
+            <div className="mb-1.5 text-[11px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-400">
               Used on {usedOn.length} dashboard{usedOn.length === 1 ? '' : 's'}
             </div>
             {usedOn.length === 0 ? (
@@ -115,7 +115,7 @@ export default function WidgetDetailModal({ widget, isAdmin, onClose, onPlace, o
                     <LayoutDashboard size={11} aria-hidden="true" /> {d.name}
                   </button>
                 ))}
-                {usedOn.length > 6 && <span className="text-[11px] text-gray-400 dark:text-slate-500">+{usedOn.length - 6} more</span>}
+                {usedOn.length > 6 && <span className="text-[11px] text-gray-400 dark:text-slate-400">+{usedOn.length - 6} more</span>}
               </div>
             )}
           </div>
@@ -160,7 +160,7 @@ export default function WidgetDetailModal({ widget, isAdmin, onClose, onPlace, o
 function InfoBox({ icon: Icon, label, children }) {
   return (
     <div className="surface-sunken rounded-lg p-3">
-      <div className="mb-1 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-500">
+      <div className="mb-1 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-400">
         <Icon size={12} aria-hidden="true" /> {label}
       </div>
       <p className="text-xs leading-relaxed text-gray-600 dark:text-slate-300">{children}</p>

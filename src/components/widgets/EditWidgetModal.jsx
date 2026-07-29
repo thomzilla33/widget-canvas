@@ -57,27 +57,27 @@ export default function EditWidgetModal({ widget, onClose }) {
         {/* Body */}
         <div className="min-h-0 flex-1 space-y-4 overflow-auto p-4">
           <div>
-            <label htmlFor="ew-name" className="mb-1 block text-[11px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-500">Name</label>
+            <label htmlFor="ew-name" className="mb-1 block text-[11px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-400">Name</label>
             <input id="ew-name" className="input h-9" value={name} onChange={(e) => setName(e.target.value)} autoFocus />
           </div>
           <div>
-            <label htmlFor="ew-cat" className="mb-1 block text-[11px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-500">Category</label>
+            <label htmlFor="ew-cat" className="mb-1 block text-[11px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-400">Category</label>
             <select id="ew-cat" className="input h-9" value={category} onChange={(e) => setCategory(e.target.value)}>
               {CATALOG_CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
             </select>
           </div>
           <div>
-            <div className="mb-1.5 text-[11px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-500">Format &amp; display</div>
+            <div className="mb-1.5 text-[11px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-400">Format &amp; display</div>
             <FormatPanel format={format} setFormat={setFormat} goal={goal} setGoal={setGoal} />
           </div>
           {/* Live preview — reflects name + format + goal as you edit. */}
           <div>
-            <div className="mb-1.5 text-[11px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-500">Preview</div>
+            <div className="mb-1.5 text-[11px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-400">Preview</div>
             <div className="surface-sunken pointer-events-none rounded-lg p-3">
               <WidgetRender widget={preview} size="md" />
             </div>
           </div>
-          <p className="text-[11px] text-gray-400 dark:text-slate-500">
+          <p className="text-[11px] text-gray-400 dark:text-slate-400">
             Source, metric, and chart type are set at creation — to change those, create a new widget.
           </p>
         </div>

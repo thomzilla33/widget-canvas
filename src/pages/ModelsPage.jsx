@@ -151,7 +151,7 @@ function ModelCard({ model }) {
         <div className="border-t border-[var(--border)] px-5 pb-5 pt-4">
           <div className="grid gap-6 sm:grid-cols-2">
             <div>
-              <div className="mb-2.5 text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-slate-500">
+              <div className="mb-2.5 text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400">
                 Entities ({model.entities.length})
               </div>
               <div className="space-y-1.5">
@@ -159,7 +159,7 @@ function ModelCard({ model }) {
               </div>
             </div>
             <div>
-              <div className="mb-2.5 text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-slate-500">
+              <div className="mb-2.5 text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400">
                 Pre-built widgets ({model.widgetTemplates.length})
               </div>
               <div className="space-y-1.5">
@@ -198,9 +198,9 @@ function ComingSoonCard({ name, industry, color, icon }) {
         </div>
         <div>
           <div className="text-sm font-semibold text-gray-900 dark:text-slate-100">{name}</div>
-          <div className="text-[11px] text-gray-400 dark:text-slate-500">{industry} · Coming soon</div>
+          <div className="text-[11px] text-gray-400 dark:text-slate-400">{industry} · Coming soon</div>
         </div>
-        <span className="ml-auto rounded-full bg-white/5 border border-white/10 px-3 py-0.5 text-[10px] font-semibold text-gray-400 dark:text-slate-500">
+        <span className="ml-auto rounded-full bg-white/5 border border-white/10 px-3 py-0.5 text-[10px] font-semibold text-gray-400 dark:text-slate-400">
           Coming soon
         </span>
       </div>

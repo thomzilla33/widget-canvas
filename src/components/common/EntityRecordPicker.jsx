@@ -66,7 +66,7 @@ function EntityRow({ entity, selected, focused, onSelect, onHover, optId }) {
         </div>
       </div>
       {entity.status && (
-        <span className="shrink-0 max-w-[100px] truncate text-right text-[10px] text-gray-400 dark:text-slate-500">
+        <span className="shrink-0 max-w-[100px] truncate text-right text-[10px] text-gray-400 dark:text-slate-400">
           {entity.status}
         </span>
       )}
@@ -169,7 +169,7 @@ export default function EntityRecordPicker({ entityType, value, onChange }) {
 
       {/* Search input */}
       <div className="relative">
-        <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500" aria-hidden="true" />
+        <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-400" aria-hidden="true" />
         <input
           ref={searchRef}
           type="text"
@@ -188,7 +188,7 @@ export default function EntityRecordPicker({ entityType, value, onChange }) {
             type="button"
             onClick={() => { setQuery(''); setFocusedIdx(-1); searchRef.current?.focus() }}
             aria-label="Clear search"
-            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 transition-colors hover:text-gray-600 dark:text-slate-500 dark:hover:text-slate-300"
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 transition-colors hover:text-gray-600 dark:text-slate-400 dark:hover:text-slate-300"
           >
             &#x2715;
           </button>
@@ -226,7 +226,7 @@ export default function EntityRecordPicker({ entityType, value, onChange }) {
         )}
       </div>
 
-      <p className="text-[10px] text-gray-400 dark:text-slate-500">
+      <p className="text-[10px] text-gray-400 dark:text-slate-400">
         {q ? `${filtered.length} of ${pool.length}` : pool.length} {typeName} record{pool.length !== 1 ? 's' : ''} in your workspace
       </p>
     </div>

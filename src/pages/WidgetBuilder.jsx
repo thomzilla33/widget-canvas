@@ -356,7 +356,7 @@ export default function WidgetBuilder() {
                   />
                   {typeId && metric && (
                     <div className="mt-3">
-                      <div className="mb-1.5 text-[11px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-500">Slots</div>
+                      <div className="mb-1.5 text-[11px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-400">Slots</div>
                       <SlotPanel typeId={typeId} measure={metric} dimension={dimension} transform={transform} />
                     </div>
                   )}
@@ -377,7 +377,7 @@ export default function WidgetBuilder() {
 
                     <div>
                       <div className="mb-1.5 text-sm font-medium text-gray-700 dark:text-slate-200">
-                        Description <span className="font-normal text-gray-400 dark:text-slate-500">(optional)</span>
+                        Description <span className="font-normal text-gray-400 dark:text-slate-400">(optional)</span>
                       </div>
                       <input
                         className="input w-full"
@@ -386,7 +386,7 @@ export default function WidgetBuilder() {
                         onChange={(e) => setSubtitle(e.target.value)}
                         maxLength={120}
                       />
-                      <p className="mt-1 text-[11px] text-gray-400 dark:text-slate-500">Shown in the widget library card and detail modal.</p>
+                      <p className="mt-1 text-[11px] text-gray-400 dark:text-slate-400">Shown in the widget library card and detail modal.</p>
                     </div>
 
                     <div>

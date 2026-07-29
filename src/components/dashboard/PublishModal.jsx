@@ -55,7 +55,7 @@ export default function PublishModal({ dashboard, placements, widgetById, onClos
             <Rocket size={16} className="text-aims-blue" />
             <span className="font-semibold text-gray-900 dark:text-slate-100">Publish — {dashboard?.name}</span>
           </div>
-          <button onClick={onClose} aria-label="Close" className="text-gray-400 hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aims-blue/50 dark:text-slate-500 dark:hover:text-slate-200">
+          <button onClick={onClose} aria-label="Close" className="text-gray-400 hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aims-blue/50 dark:text-slate-400 dark:hover:text-slate-200">
             <X size={18} />
           </button>
         </div>

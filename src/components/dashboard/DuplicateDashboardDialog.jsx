@@ -46,7 +46,7 @@ export default function DuplicateDashboardDialog({ dashboard, onConfirm, onClose
           {/* Origin summary */}
           <div className="rounded-lg border border-gray-100 bg-gray-50 px-3 py-2.5 dark:border-white/10 dark:bg-white/5">
             <div className="text-xs font-medium text-gray-700 dark:text-slate-200 truncate">{dashboard.name}</div>
-            <div className="mt-0.5 flex items-center gap-1 text-[11px] text-gray-400 dark:text-slate-500">
+            <div className="mt-0.5 flex items-center gap-1 text-[11px] text-gray-400 dark:text-slate-400">
               <MapPin size={10} aria-hidden="true" />
               <span className="truncate">{placementLabel(dashboard.placement)} · {audienceLabel(dashboard.audience)}</span>
             </div>

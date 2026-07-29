@@ -30,7 +30,7 @@ export function WQConfirmBar({ message, confirmLabel = 'Confirm', cancelLabel = 
 
 export function WQSecondaryLinks({ onDecline, declineLabel = 'Skip for now' }) {
   return (
-    <div className="mt-2 flex items-center justify-center gap-3 text-xs text-gray-400 dark:text-slate-600">
+    <div className="mt-2 flex items-center justify-center gap-3 text-xs text-gray-400 dark:text-slate-400">
       {onDecline && (
         <button
           type="button"
@@ -49,7 +49,7 @@ export function SectionLabel({ children, accent }) {
     <p className={`mb-3 text-[9px] font-semibold uppercase tracking-[0.1em] ${
       accent === 'amber'
         ? 'text-amber-600 dark:text-amber-500/80'
-        : 'text-gray-400 dark:text-slate-600'
+        : 'text-gray-400 dark:text-slate-400'
     }`}>
       {children}
     </p>

@@ -55,7 +55,7 @@ export default function MarketplaceWidgetCard({ entry, onView, onUse }) {
 
       {/* Footer */}
       <div className="mt-auto flex items-center justify-between gap-2 border-t border-gray-100 pt-2.5 dark:border-white/10">
-        <span className="flex items-center gap-1 text-[11px] text-gray-400 dark:text-slate-500">
+        <span className="flex items-center gap-1 text-[11px] text-gray-400 dark:text-slate-400">
           <LayoutGrid size={11} aria-hidden="true" />
           {entry.entityCount} fields
           <span className="mx-1 opacity-40">·</span>

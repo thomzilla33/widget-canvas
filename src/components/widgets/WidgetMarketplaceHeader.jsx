@@ -7,7 +7,7 @@ import { PencilRuler, Sparkles, ChevronRight, Store } from 'lucide-react'
 export default function WidgetMarketplaceHeader({ onScratch, onBrowse }) {
   return (
     <div className="mb-6">
-      <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-slate-500">
+      <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-slate-400">
         Create new
       </p>
 
@@ -25,7 +25,7 @@ export default function WidgetMarketplaceHeader({ onScratch, onBrowse }) {
             <span className="block text-xs font-semibold text-gray-900 dark:text-slate-100">Start from scratch</span>
             <span className="block truncate text-[11px] text-gray-500 dark:text-slate-400">Configure a dataset and widget manually</span>
           </span>
-          <ChevronRight size={14} aria-hidden="true" className="shrink-0 text-gray-300 transition-transform group-hover:translate-x-0.5 group-hover:text-gray-500 dark:text-slate-600" />
+          <ChevronRight size={14} aria-hidden="true" className="shrink-0 text-gray-300 transition-transform group-hover:translate-x-0.5 group-hover:text-gray-500 dark:text-slate-400" />
         </button>
 
         {/* Browse marketplace */}
@@ -40,7 +40,7 @@ export default function WidgetMarketplaceHeader({ onScratch, onBrowse }) {
             <span className="block text-xs font-semibold text-gray-900 dark:text-slate-100">Browse marketplace</span>
             <span className="block truncate text-[11px] text-gray-500 dark:text-slate-400">Find an existing widget to reuse</span>
           </span>
-          <ChevronRight size={14} aria-hidden="true" className="shrink-0 text-gray-300 transition-transform group-hover:translate-x-0.5 group-hover:text-gray-500 dark:text-slate-600" />
+          <ChevronRight size={14} aria-hidden="true" className="shrink-0 text-gray-300 transition-transform group-hover:translate-x-0.5 group-hover:text-gray-500 dark:text-slate-400" />
         </button>
 
         {/* AI Assistant — disabled V1 */}
@@ -65,7 +65,7 @@ export default function WidgetMarketplaceHeader({ onScratch, onBrowse }) {
 
       </div>
 
-      <p className="mt-5 mb-2 text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-slate-500">
+      <p className="mt-5 mb-2 text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-slate-400">
         Widget library
       </p>
     </div>

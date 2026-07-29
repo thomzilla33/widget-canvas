@@ -13,7 +13,7 @@ export default function FeedbackPanel({ mode, widget, entityId, onClose }) {
         <span className="font-semibold text-gray-900 dark:text-slate-100">
           {mode === 'flag' ? 'Flag data issue' : 'Ask about data'}
         </span>
-        <button onClick={onClose} className="text-gray-400 hover:text-gray-700 dark:text-slate-500 dark:hover:text-slate-200">
+        <button onClick={onClose} className="text-gray-400 hover:text-gray-700 dark:text-slate-400 dark:hover:text-slate-200">
           <X size={18} />
         </button>
       </div>

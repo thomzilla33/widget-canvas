@@ -188,7 +188,7 @@ export default function AIGenerateModal({ mode = 'widget', onClose }) {
               <ArrowUp size={16} aria-hidden="true" />
             </button>
           </div>
-          <p className="mt-1.5 px-1 text-[10px] text-gray-400 dark:text-slate-500">Generated from your connected sources — review before creating.</p>
+          <p className="mt-1.5 px-1 text-[10px] text-gray-400 dark:text-slate-400">Generated from your connected sources — review before creating.</p>
         </div>
       </div>
     </div>
@@ -317,7 +317,7 @@ function DashboardResult({ result, widgets, onCreate, onPatch }) {
 
       <div className="surface-sunken grid grid-cols-2 gap-2 rounded-lg p-2.5">
         {shown.length === 0 && (
-          <p className="col-span-2 py-3 text-center text-xs text-gray-400 dark:text-slate-500">
+          <p className="col-span-2 py-3 text-center text-xs text-gray-400 dark:text-slate-400">
             The template’s widgets appear here once the dashboard is created.
           </p>
         )}
@@ -335,7 +335,7 @@ function DashboardResult({ result, widgets, onCreate, onPatch }) {
       </div>
       <div className="mt-2.5 flex flex-wrap items-center gap-2">
         <Button variant="primary" size="sm" onClick={onCreate}><ExternalLink size={13} aria-hidden="true" /> Create &amp; open canvas</Button>
-        <span className="text-[11px] text-gray-400 dark:text-slate-500">or keep refining above</span>
+        <span className="text-[11px] text-gray-400 dark:text-slate-400">or keep refining above</span>
       </div>
     </div>
   )
@@ -348,7 +348,7 @@ function ResultHeader() {
       <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide text-aims-blue">
         <Sparkles size={11} aria-hidden="true" /> AI starting point
       </span>
-      <span className="text-[10px] text-gray-400 dark:text-slate-500">Review before creating</span>
+      <span className="text-[10px] text-gray-400 dark:text-slate-400">Review before creating</span>
     </div>
   )
 }
@@ -359,7 +359,7 @@ function Chip({ label, value, editable, active, onClick }) {
   if (!editable) {
     return (
       <span className={`${base} border-gray-200 bg-gray-50 text-gray-600 dark:border-white/10 dark:bg-white/[0.03] dark:text-slate-300`}>
-        <span className="text-gray-400 dark:text-slate-500">{label}:</span>
+        <span className="text-gray-400 dark:text-slate-400">{label}:</span>
         <span className="font-medium text-gray-700 dark:text-slate-200">{value}</span>
       </span>
     )
@@ -371,7 +371,7 @@ function Chip({ label, value, editable, active, onClick }) {
       aria-label={`Change ${label.toLowerCase()} (currently ${value})`}
       className={`${base} transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aims-blue/40 ${active ? 'border-aims-blue/50 bg-aims-blue/10 text-aims-blue' : 'border-gray-300 text-gray-600 hover:border-aims-blue/40 hover:text-aims-blue dark:border-white/15 dark:text-slate-300 dark:hover:border-aims-blue/40'}`}
     >
-      <span className={active ? 'text-aims-blue/70' : 'text-gray-400 dark:text-slate-500'}>{label}:</span>
+      <span className={active ? 'text-aims-blue/70' : 'text-gray-400 dark:text-slate-400'}>{label}:</span>
       <span className="font-medium">{value}</span>
       <ChevronDown size={11} aria-hidden="true" className={`transition-transform ${active ? 'rotate-180' : ''}`} />
     </button>

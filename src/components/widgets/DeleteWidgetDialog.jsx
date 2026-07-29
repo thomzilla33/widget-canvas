@@ -72,10 +72,10 @@ export default function DeleteWidgetDialog({ widget, usedOn = [], onConfirm, onC
                     <ul className="mt-1.5 space-y-1">
                       {usedOn.slice(0, 6).map((d) => (
                         <li key={d.id} className="flex items-center gap-1.5 text-gray-700 dark:text-slate-200">
-                          <LayoutDashboard size={11} aria-hidden="true" className="shrink-0 text-gray-400 dark:text-slate-500" /> {d.name}
+                          <LayoutDashboard size={11} aria-hidden="true" className="shrink-0 text-gray-400 dark:text-slate-400" /> {d.name}
                         </li>
                       ))}
-                      {n > 6 && <li className="text-gray-400 dark:text-slate-500">+{n - 6} more</li>}
+                      {n > 6 && <li className="text-gray-400 dark:text-slate-400">+{n - 6} more</li>}
                     </ul>
                   </>
                 ) : (

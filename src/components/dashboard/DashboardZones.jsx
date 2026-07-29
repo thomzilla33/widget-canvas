@@ -90,7 +90,7 @@ const WidgetCard = memo(function WidgetCard({ placement: p, widget: w, span, sco
         </span>
         <div className="flex shrink-0 items-center gap-1">
           {w.system && <SystemCountBadge id={w.id} />}
-          {drillable && <Maximize2 size={12} aria-hidden="true" className="text-gray-300 transition-colors group-hover:text-aims-blue dark:text-slate-600" />}
+          {drillable && <Maximize2 size={12} aria-hidden="true" className="text-gray-300 transition-colors group-hover:text-aims-blue dark:text-slate-400" />}
           {p.fixed && <Lock size={12} aria-hidden="true" className="text-gray-500 dark:text-slate-400" />}
         </div>
       </div>

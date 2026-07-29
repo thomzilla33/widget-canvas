@@ -95,7 +95,7 @@ export default function WidgetDrilldownModal({ widget, scope, onClose }) {
           <button
             onClick={onClose}
             aria-label="Close"
-            className="grid h-7 w-7 shrink-0 place-items-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aims-blue/50 dark:text-slate-500 dark:hover:bg-white/10"
+            className="grid h-7 w-7 shrink-0 place-items-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aims-blue/50 dark:text-slate-400 dark:hover:bg-white/10"
           >
             <X size={16} />
           </button>
@@ -114,7 +114,7 @@ export default function WidgetDrilldownModal({ widget, scope, onClose }) {
           </div>
           <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-white/10">
             <table className="w-full text-left text-xs">
-              <thead className="bg-gray-50 text-[10px] uppercase tracking-wide text-gray-400 dark:bg-white/5 dark:text-slate-500">
+              <thead className="bg-gray-50 text-[10px] uppercase tracking-wide text-gray-400 dark:bg-white/5 dark:text-slate-400">
                 <tr>
                   {recordHeaders.map((h, i) => (
                     <th key={h} className={`px-3 py-2 font-semibold ${i > 0 ? 'text-right' : ''}`}>{h}</th>

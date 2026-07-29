@@ -168,7 +168,7 @@ export default function NotificationsMenu({ onClose }) {
           {/* ── Settings view (unchanged) ── */}
           <div className="flex items-center gap-2 border-b border-[var(--border)] px-3 py-3">
             <button
-              className="h-7 w-7 grid place-items-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:text-slate-500 dark:hover:bg-white/10 dark:hover:text-slate-200"
+              className="h-7 w-7 grid place-items-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-slate-200"
               aria-label="Back to notifications"
               onClick={() => setView('list')}
             >

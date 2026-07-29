@@ -119,7 +119,7 @@ export default function CommandPalette({ onClose }) {
             aria-label="Search the workspace"
             className="w-full bg-transparent py-3.5 text-sm text-gray-900 outline-none placeholder:text-gray-400 dark:text-slate-100 dark:placeholder:text-slate-500"
           />
-          <kbd className="shrink-0 rounded border border-gray-200 px-1.5 py-0.5 text-[10px] font-semibold text-gray-400 dark:border-white/15 dark:text-slate-500">
+          <kbd className="shrink-0 rounded border border-gray-200 px-1.5 py-0.5 text-[10px] font-semibold text-gray-400 dark:border-white/15 dark:text-slate-400">
             Esc
           </kbd>
         </div>

@@ -157,7 +157,7 @@ export default function WidgetPreview({ typeId, metric, source, name, subtitle, 
             <Renderer typeId={typeId} metric={metric} display={display} shape={previewOpts} typeConfig={typeConfig} />
           </ChartBoundary>
         ) : (
-          <div className="grid h-full min-h-[220px] place-items-center rounded-lg border-2 border-dashed border-gray-200 text-center text-sm text-gray-400 dark:border-white/10 dark:text-slate-500">
+          <div className="grid h-full min-h-[220px] place-items-center rounded-lg border-2 border-dashed border-gray-200 text-center text-sm text-gray-400 dark:border-white/10 dark:text-slate-400">
             Pick a source, metric, and widget type to preview it live.
           </div>
         )}
@@ -216,7 +216,7 @@ class ChartBoundary extends Component {
   render() {
     if (this.state.error) {
       return (
-        <div className="grid h-full min-h-[220px] place-items-center rounded-lg border-2 border-dashed border-gray-200 text-center text-sm text-gray-400 dark:border-white/10 dark:text-slate-500">
+        <div className="grid h-full min-h-[220px] place-items-center rounded-lg border-2 border-dashed border-gray-200 text-center text-sm text-gray-400 dark:border-white/10 dark:text-slate-400">
           Preview unavailable for this widget type.
         </div>
       )
@@ -333,7 +333,7 @@ function KpiView({ data, display }) {
         <div className="num mt-1 text-sm font-semibold text-aims-governed">{data.kpi.delta} vs last quarter</div>
       )}
       {!showTrend && (
-        <div className="mt-1 text-xs text-gray-400 dark:text-slate-500 italic">Trend hidden</div>
+        <div className="mt-1 text-xs text-gray-400 dark:text-slate-400 italic">Trend hidden</div>
       )}
       {showTarget && goal?.value != null && (
         <div className="mt-1.5 text-xs text-gray-500 dark:text-slate-400">
@@ -415,7 +415,7 @@ function TableView({ data, display, tableConfig }) {
         </tbody>
       </table>
       {(data.recordTotal > 7 || showFooter) && (
-        <div className="border-t border-gray-100 px-3 py-1.5 text-[11px] text-gray-400 dark:border-white/5 dark:text-slate-500">
+        <div className="border-t border-gray-100 px-3 py-1.5 text-[11px] text-gray-400 dark:border-white/5 dark:text-slate-400">
           {showFooter
             ? `${data.recordTotal.toLocaleString()} rows total`
             : `Showing 7 of ${data.recordTotal.toLocaleString()} rows`}
@@ -443,7 +443,7 @@ function ListView({ data, display }) {
               <span className="h-4 w-4 shrink-0 rounded-full" style={{ background: SERIES[i % SERIES.length] }} />
             )}
             <span className="flex-1 truncate text-gray-700 dark:text-slate-200">{b.label}</span>
-            {showTimestamp && <span className="shrink-0 text-[10px] text-gray-400 dark:text-slate-500">{MOCK_TIMESTAMPS[i % MOCK_TIMESTAMPS.length]}</span>}
+            {showTimestamp && <span className="shrink-0 text-[10px] text-gray-400 dark:text-slate-400">{MOCK_TIMESTAMPS[i % MOCK_TIMESTAMPS.length]}</span>}
             <span className="w-8 shrink-0 text-right font-semibold text-gray-900 dark:text-slate-100">{b.value}</span>
           </li>
         ))}
@@ -461,7 +461,7 @@ function ListView({ data, display }) {
             )}
             <div className="truncate text-xs font-medium text-gray-900 dark:text-slate-100">{b.label}</div>
             <div className="num mt-0.5 text-sm font-bold text-gray-700 dark:text-slate-200">{b.value}</div>
-            {showTimestamp && <div className="mt-0.5 text-[10px] text-gray-400 dark:text-slate-500">{MOCK_TIMESTAMPS[i % MOCK_TIMESTAMPS.length]}</div>}
+            {showTimestamp && <div className="mt-0.5 text-[10px] text-gray-400 dark:text-slate-400">{MOCK_TIMESTAMPS[i % MOCK_TIMESTAMPS.length]}</div>}
           </div>
         ))}
       </div>
@@ -481,7 +481,7 @@ function ListView({ data, display }) {
             <span className="block h-full rounded-full" style={{ width: `${max > 0 ? (b.value / max) * 100 : 0}%`, background: SERIES[i % SERIES.length] }} />
           </span>
           <span className="w-8 shrink-0 text-right font-semibold text-gray-900 dark:text-slate-100">{b.value}</span>
-          {showTimestamp && <span className="shrink-0 text-[10px] text-gray-400 dark:text-slate-500">{MOCK_TIMESTAMPS[i % MOCK_TIMESTAMPS.length]}</span>}
+          {showTimestamp && <span className="shrink-0 text-[10px] text-gray-400 dark:text-slate-400">{MOCK_TIMESTAMPS[i % MOCK_TIMESTAMPS.length]}</span>}
         </li>
       ))}
     </ul>
@@ -508,7 +508,7 @@ function CarouselView({ data }) {
         <ChevronLeft size={15} />
       </button>
       <div className="flex-1 rounded-lg border border-gray-200 p-4 dark:border-white/10">
-        <div className="text-[10px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-500">{dimLabel}</div>
+        <div className="text-[10px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-400">{dimLabel}</div>
         <div className="text-sm font-semibold text-gray-900 dark:text-slate-100">{title}</div>
         <div className="num mt-3 text-2xl font-bold text-gray-900 dark:text-slate-100">{metric}</div>
         {detail && <div className="mt-1 text-xs text-gray-500 dark:text-slate-400">{detail}</div>}
@@ -736,7 +736,7 @@ function EntityTableView({ records, sourceId, exposedColumns }) {
           </tbody>
         </table>
       </div>
-      <div className="border-t border-gray-100 px-3 py-1.5 text-[11px] text-gray-400 dark:border-white/5 dark:text-slate-500">
+      <div className="border-t border-gray-100 px-3 py-1.5 text-[11px] text-gray-400 dark:border-white/5 dark:text-slate-400">
         Showing {rows.length} of {records.length.toLocaleString()} records
       </div>
     </div>

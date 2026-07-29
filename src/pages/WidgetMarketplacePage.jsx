@@ -129,7 +129,7 @@ export default function WidgetMarketplacePage() {
 
         {/* Category rail */}
         <aside className="hidden w-[220px] shrink-0 overflow-y-auto border-r border-gray-200 p-4 dark:border-white/10 md:block">
-          <div className="mb-2 text-[10px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-500">
+          <div className="mb-2 text-[10px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-400">
             Categories
           </div>
           <nav className="space-y-0.5" aria-label="Widget categories">
@@ -166,7 +166,7 @@ export default function WidgetMarketplacePage() {
           {/* Active filter chips */}
           {activeFilterCount > 0 && (
             <div className="mt-4 border-t border-gray-200 pt-4 dark:border-white/10">
-              <div className="mb-1.5 text-[10px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-500">
+              <div className="mb-1.5 text-[10px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-400">
                 Active filters
               </div>
               <div className="flex flex-wrap gap-1">
@@ -209,7 +209,7 @@ export default function WidgetMarketplacePage() {
               <h2 className="text-sm font-semibold text-gray-700 dark:text-slate-200">
                 {BUSINESS_CATEGORIES.find((c) => c.id === category)?.label ?? 'All categories'}
                 {filtered.length > 0 && (
-                  <span className="ml-2 font-normal text-gray-400 dark:text-slate-500">
+                  <span className="ml-2 font-normal text-gray-400 dark:text-slate-400">
                     {filtered.length} widget{filtered.length !== 1 ? 's' : ''}
                   </span>
                 )}

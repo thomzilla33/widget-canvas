@@ -365,7 +365,7 @@ export default function UCPView() {
                   />
                   {tabSuggestions.length > 0 && (
                     <>
-                      <div className="px-1 pb-1 pt-2 text-[10px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-500">
+                      <div className="px-1 pb-1 pt-2 text-[10px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-400">
                         <Sparkles size={10} className="mr-1 inline text-aims-blue" aria-hidden="true" />Suggested for {profileType}
                       </div>
                       {tabSuggestions.map((s) => (
@@ -610,7 +610,7 @@ function WidgetFilter({ onApply, onClear }) {
       <button
         title="Filter"
         onClick={() => setOpen((o) => !o)}
-        className="h-6 w-6 grid place-items-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-aims-blue dark:text-slate-500 dark:hover:bg-white/10"
+        className="h-6 w-6 grid place-items-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-aims-blue dark:text-slate-400 dark:hover:bg-white/10"
       >
         <Filter size={13} />
       </button>
@@ -686,7 +686,7 @@ function UCPWidget({
             </span>
           ) : (
             <>
-              <span title="Drag to reorder" className="cursor-move text-gray-300 hover:text-gray-500 dark:text-slate-600 dark:hover:text-slate-400">
+              <span title="Drag to reorder" className="cursor-move text-gray-300 hover:text-gray-500 dark:text-slate-400 dark:hover:text-slate-400">
                 <GripVertical size={14} />
               </span>
               <button
@@ -789,7 +789,7 @@ function ActivityFeed({ entries = [] }) {
               <div className="min-w-0 flex-1">
                 <div className="truncate text-sm font-medium text-gray-900 dark:text-slate-100">{e.title}</div>
                 {e.detail && <div className="truncate text-xs text-gray-500 dark:text-slate-400">{e.detail}</div>}
-                <div className="mt-0.5 text-[11px] text-gray-400 dark:text-slate-500">{e.by} · {e.when}</div>
+                <div className="mt-0.5 text-[11px] text-gray-400 dark:text-slate-400">{e.by} · {e.when}</div>
               </div>
             </li>
           ))}
@@ -837,7 +837,7 @@ function AddWidgetCard({ onClick }) {
   return (
     <button
       onClick={onClick}
-      className="flex min-h-[160px] flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed border-gray-200 text-gray-400 transition-colors hover:border-aims-blue/50 hover:bg-aims-blue/[0.03] hover:text-aims-blue dark:border-white/10 dark:text-slate-500 dark:hover:border-aims-blue/50 dark:hover:bg-aims-blue/[0.06]"
+      className="flex min-h-[160px] flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed border-gray-200 text-gray-400 transition-colors hover:border-aims-blue/50 hover:bg-aims-blue/[0.03] hover:text-aims-blue dark:border-white/10 dark:text-slate-400 dark:hover:border-aims-blue/50 dark:hover:bg-aims-blue/[0.06]"
     >
       <span className="grid h-9 w-9 place-items-center rounded-full border border-current">
         <Plus size={18} />

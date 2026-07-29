@@ -45,7 +45,7 @@ export default function ShareModal({ dashboard, onClose }) {
             <Users size={16} className="text-aims-blue" />
             <span className="font-semibold text-gray-900 dark:text-slate-100">Share — {dashboard?.name}</span>
           </div>
-          <button onClick={onClose} aria-label="Close" className="text-gray-400 hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aims-blue/50 dark:text-slate-500 dark:hover:text-slate-200">
+          <button onClick={onClose} aria-label="Close" className="text-gray-400 hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aims-blue/50 dark:text-slate-400 dark:hover:text-slate-200">
             <X size={18} />
           </button>
         </div>
@@ -114,7 +114,7 @@ export default function ShareModal({ dashboard, onClose }) {
               Has access ({access.length})
             </div>
             {access.length === 0 ? (
-              <div className="rounded-lg border border-dashed border-gray-300 p-5 text-center text-xs text-gray-400 dark:border-white/15 dark:text-slate-500">
+              <div className="rounded-lg border border-dashed border-gray-300 p-5 text-center text-xs text-gray-400 dark:border-white/15 dark:text-slate-400">
                 This dashboard is private. Add people or teams to grant access.
               </div>
             ) : (
@@ -138,7 +138,7 @@ export default function ShareModal({ dashboard, onClose }) {
                       ))}
                     </select>
                     <button
-                      className="h-7 w-7 grid place-items-center rounded-md text-gray-400 hover:text-aims-stale dark:text-slate-500"
+                      className="h-7 w-7 grid place-items-center rounded-md text-gray-400 hover:text-aims-stale dark:text-slate-400"
                       onClick={() => remove(a.key)}
                       aria-label="Remove"
                     >

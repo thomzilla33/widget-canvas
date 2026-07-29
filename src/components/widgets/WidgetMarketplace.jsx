@@ -103,7 +103,7 @@ export default function WidgetMarketplace({ onClose }) {
           <button
             onClick={onClose}
             aria-label="Close marketplace"
-            className="grid h-8 w-8 place-items-center rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:text-slate-500 dark:hover:bg-white/10 dark:hover:text-slate-200"
+            className="grid h-8 w-8 place-items-center rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-slate-200"
           >
             <X size={18} />
           </button>
@@ -346,7 +346,7 @@ function Card({ mw, installed, onInstall, onOpen }) {
           onClick={(e) => { e.stopPropagation(); onOpen() }}
           title="View details"
           aria-label="View details"
-          className="grid h-7 w-7 place-items-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-aims-blue dark:text-slate-500 dark:hover:bg-white/10"
+          className="grid h-7 w-7 place-items-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-aims-blue dark:text-slate-400 dark:hover:bg-white/10"
         >
           <Eye size={14} />
         </button>
@@ -380,7 +380,7 @@ function Detail({ mw, installed, onInstall, onBack }) {
   return (
     <div className="flex-1 overflow-auto">
       <div className="flex items-center gap-2 border-b border-gray-200 px-6 py-2.5 dark:border-white/10">
-        <button onClick={onBack} className="grid h-7 w-7 place-items-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:text-slate-500 dark:hover:bg-white/10" aria-label="Back">
+        <button onClick={onBack} className="grid h-7 w-7 place-items-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:text-slate-400 dark:hover:bg-white/10" aria-label="Back">
           <ChevronLeft size={16} />
         </button>
         <WidgetGlyph skeleton={mw.skeleton} source={mw.source} sm />

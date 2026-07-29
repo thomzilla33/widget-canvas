@@ -133,7 +133,7 @@ function NavItem({ label, count, active, onClick }) {
       }`}
     >
       <span className="truncate">{label}</span>
-      <span className={`ml-2 flex-shrink-0 text-[10px] font-bold ${active ? 'text-aims-blue' : 'text-gray-400 dark:text-slate-600'}`}>
+      <span className={`ml-2 flex-shrink-0 text-[10px] font-bold ${active ? 'text-aims-blue' : 'text-gray-400 dark:text-slate-400'}`}>
         {count}
       </span>
     </button>
@@ -217,7 +217,7 @@ function FeaturedWidgetCard({ widget: w, onClick }) {
         <div className="min-w-0">
           <div className="mb-2 flex flex-wrap items-center gap-1.5">
             <span className="rounded-full bg-aims-blue/10 px-1.5 py-px text-[9px] font-bold text-aims-blue">★ Featured</span>
-            <span className="rounded-full border border-gray-200 px-1.5 py-px text-[9px] font-semibold uppercase tracking-wide text-gray-500 dark:border-white/10 dark:text-slate-500">
+            <span className="rounded-full border border-gray-200 px-1.5 py-px text-[9px] font-semibold uppercase tracking-wide text-gray-500 dark:border-white/10 dark:text-slate-400">
               {w.category}
             </span>
             {w.governed && (
@@ -228,12 +228,12 @@ function FeaturedWidgetCard({ widget: w, onClick }) {
           </div>
           <p className="text-sm font-bold text-gray-900 dark:text-slate-100">{w.name}</p>
           <p className="mt-1 line-clamp-2 text-[11px] leading-relaxed text-gray-500 dark:text-slate-400">{w.description}</p>
-          <p className="mt-2 text-[10px] text-gray-400 dark:text-slate-600">
+          <p className="mt-2 text-[10px] text-gray-400 dark:text-slate-400">
             Source: <span className="font-semibold">{w.source}</span>
           </p>
         </div>
         <div className="mt-3 flex items-center justify-between">
-          <span className="flex items-center gap-1 text-[10px] text-gray-400 dark:text-slate-600">
+          <span className="flex items-center gap-1 text-[10px] text-gray-400 dark:text-slate-400">
             <Users size={10} aria-hidden="true" />
             {(w.stats?.installs ?? 0).toLocaleString()} installs
           </span>
@@ -241,7 +241,7 @@ function FeaturedWidgetCard({ widget: w, onClick }) {
             className="flex items-center gap-1 text-[11px] font-semibold transition-colors"
             style={{ color: hovered ? accent : undefined }}
           >
-            <span className={hovered ? '' : 'text-gray-400 dark:text-slate-600'}>Use widget</span>
+            <span className={hovered ? '' : 'text-gray-400 dark:text-slate-400'}>Use widget</span>
             <ArrowRight size={11} className="transition-transform group-hover:translate-x-0.5" />
           </span>
         </div>
@@ -278,7 +278,7 @@ function WidgetCard({ widget: w, onClick }) {
       {/* Meta */}
       <div className="min-w-0 flex-1">
         <div className="mb-1 flex flex-wrap items-center gap-1">
-          <span className="rounded-full border border-gray-200 px-1.5 py-px text-[9px] font-semibold uppercase tracking-wide text-gray-500 dark:border-white/10 dark:text-slate-500">
+          <span className="rounded-full border border-gray-200 px-1.5 py-px text-[9px] font-semibold uppercase tracking-wide text-gray-500 dark:border-white/10 dark:text-slate-400">
             {w.category}
           </span>
           {w.governed && (
@@ -286,7 +286,7 @@ function WidgetCard({ widget: w, onClick }) {
               <ShieldCheck size={7} />Gov
             </span>
           )}
-          <span className="rounded-full border border-gray-200 px-1.5 py-px text-[9px] font-medium text-gray-500 dark:border-white/10 dark:text-slate-500">
+          <span className="rounded-full border border-gray-200 px-1.5 py-px text-[9px] font-medium text-gray-500 dark:border-white/10 dark:text-slate-400">
             {w.skeleton}
           </span>
         </div>
@@ -294,7 +294,7 @@ function WidgetCard({ widget: w, onClick }) {
         <p className="mt-0.5 line-clamp-2 text-[11px] leading-relaxed text-gray-500 dark:text-slate-400">{w.description}</p>
       </div>
       <div className="mt-3 flex items-center justify-between border-t border-gray-100 pt-2.5 dark:border-white/[0.06]">
-        <span className="flex items-center gap-1 text-[10px] text-gray-400 dark:text-slate-600">
+        <span className="flex items-center gap-1 text-[10px] text-gray-400 dark:text-slate-400">
           <Users size={10} aria-hidden="true" />
           {(w.stats?.installs ?? 0).toLocaleString()}
         </span>
@@ -302,7 +302,7 @@ function WidgetCard({ widget: w, onClick }) {
           className="flex items-center gap-1 text-[11px] font-semibold transition-colors"
           style={{ color: hovered ? accent : undefined }}
         >
-          <span className={hovered ? '' : 'text-gray-400 dark:text-slate-600'}>Install</span>
+          <span className={hovered ? '' : 'text-gray-400 dark:text-slate-400'}>Install</span>
           <ArrowRight size={10} className="transition-transform group-hover:translate-x-0.5" />
         </span>
       </div>
@@ -403,7 +403,7 @@ export default function CreateWidgetModal({ onClose }) {
             <h2 id="create-widget-mp-title" className="text-sm font-semibold text-gray-900 dark:text-slate-100">
               Widget marketplace
             </h2>
-            <p className="mt-0.5 text-xs text-gray-400 dark:text-slate-500">
+            <p className="mt-0.5 text-xs text-gray-400 dark:text-slate-400">
               Install a governed, pre-built widget or describe what you need with AI.
             </p>
           </div>
@@ -424,7 +424,7 @@ export default function CreateWidgetModal({ onClose }) {
             <NavItem label="All widgets"    count={MARKETPLACE_WIDGETS.length} active={activeNav === 'all'} onClick={() => setActiveNav('all')} />
             <NavItem label="Featured"       count={featuredCount}               active={activeNav === 'featured'} onClick={() => setActiveNav('featured')} />
 
-            <p className="mt-3 mb-1 px-2 text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-600">
+            <p className="mt-3 mb-1 px-2 text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400">
               Categories
             </p>
             {categories.map(([cat, cnt]) => (
@@ -437,7 +437,7 @@ export default function CreateWidgetModal({ onClose }) {
             {/* Search + filters */}
             <div className="flex flex-shrink-0 items-center gap-2 border-b border-gray-100 px-5 py-3 dark:border-white/[0.06]">
               <div className="relative max-w-sm flex-1">
-                <Search size={13} className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500" />
+                <Search size={13} className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-400" />
                 <input
                   type="search"
                   className="input h-9 w-full pl-8 text-xs"
@@ -472,7 +472,7 @@ export default function CreateWidgetModal({ onClose }) {
                 <section>
                   <div className="mb-3 flex items-baseline gap-2">
                     <h3 className="text-xs font-bold text-gray-900 dark:text-slate-100">Featured by AIMS OS</h3>
-                    <span className="text-[11px] text-gray-400 dark:text-slate-500">
+                    <span className="text-[11px] text-gray-400 dark:text-slate-400">
                       Governed and ready to install
                     </span>
                   </div>
@@ -489,7 +489,7 @@ export default function CreateWidgetModal({ onClose }) {
                 <section>
                   <div className="mb-3 flex items-baseline gap-2">
                     <h3 className="text-xs font-bold text-gray-900 dark:text-slate-100">All widgets</h3>
-                    <span className="text-[11px] text-gray-400 dark:text-slate-500">{gridList.length} widgets</span>
+                    <span className="text-[11px] text-gray-400 dark:text-slate-400">{gridList.length} widgets</span>
                   </div>
                   <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                     {gridList.map(w => (
@@ -503,7 +503,7 @@ export default function CreateWidgetModal({ onClose }) {
                 <div className="flex h-40 items-center justify-center text-center">
                   <div>
                     <p className="text-sm font-medium text-gray-500 dark:text-slate-400">No widgets found</p>
-                    <p className="mt-1 text-xs text-gray-400 dark:text-slate-500">Try adjusting your search or filters</p>
+                    <p className="mt-1 text-xs text-gray-400 dark:text-slate-400">Try adjusting your search or filters</p>
                   </div>
                 </div>
               )}
@@ -513,7 +513,7 @@ export default function CreateWidgetModal({ onClose }) {
 
         {/* ── Footer ── */}
         <div className="flex flex-shrink-0 items-center justify-between border-t border-gray-200 px-6 py-3.5 dark:border-white/10">
-          <p className="text-xs text-gray-400 dark:text-slate-500">Prefer to start your own?</p>
+          <p className="text-xs text-gray-400 dark:text-slate-400">Prefer to start your own?</p>
           <div className="flex items-center gap-2">
             <button
               type="button"

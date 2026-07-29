@@ -118,11 +118,11 @@ export default function EntityContextHeader({ placement, entity, viewerRole, onC
           <span className="inline-flex items-center gap-1 text-[13px] text-gray-500 dark:text-slate-400">
             <Icon size={13} aria-hidden="true" /> {base.kind}
           </span>
-          <span aria-hidden="true" className="text-gray-300 dark:text-slate-600">·</span>
+          <span aria-hidden="true" className="text-gray-300 dark:text-slate-400">·</span>
           <span className="inline-flex items-center gap-1 text-[13px] text-gray-500 dark:text-slate-400">
             <Briefcase size={13} aria-hidden="true" /> {info.company}
           </span>
-          <span aria-hidden="true" className="hidden text-gray-300 sm:inline dark:text-slate-600">·</span>
+          <span aria-hidden="true" className="hidden text-gray-300 sm:inline dark:text-slate-400">·</span>
           <span className="hidden text-[13px] text-gray-500 sm:inline dark:text-slate-400">{info.owner}</span>
           <span className="ml-1 inline-flex items-center rounded-full border border-aims-blue/30 bg-aims-blue/10 px-2 py-0.5 text-xs font-medium text-aims-blue">
             {info.status}
@@ -131,7 +131,7 @@ export default function EntityContextHeader({ placement, entity, viewerRole, onC
 
         {/* Action row + AI + expand */}
         <div className="ml-auto flex shrink-0 items-center gap-1.5">
-          <span className="hidden items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] font-medium text-gray-400 sm:inline-flex dark:text-slate-500" title="Locked — part of the template, always shown">
+          <span className="hidden items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] font-medium text-gray-400 sm:inline-flex dark:text-slate-400" title="Locked — part of the template, always shown">
             <Lock size={11} aria-hidden="true" /> Locked
           </span>
           <button
@@ -209,9 +209,9 @@ function IconBtn({ label, onClick, expanded, disabled, children }) {
 function DetailField({ icon: Icon, label, value }) {
   return (
     <div className="flex items-start gap-2">
-      <Icon size={14} className="mt-0.5 shrink-0 text-gray-400 dark:text-slate-500" aria-hidden="true" />
+      <Icon size={14} className="mt-0.5 shrink-0 text-gray-400 dark:text-slate-400" aria-hidden="true" />
       <div className="min-w-0">
-        <div className="text-[10px] font-semibold uppercase tracking-wide text-gray-400 dark:text-slate-500">{label}</div>
+        <div className="text-[10px] font-semibold uppercase tracking-wide text-gray-400 dark:text-slate-400">{label}</div>
         <div className="truncate text-sm text-gray-700 dark:text-slate-200">{value}</div>
       </div>
     </div>
@@ -235,7 +235,7 @@ function MoreMenu({ info, entityId, canContact, navigate, onClose }) {
           <MenuItem icon={Copy} onClick={() => copy(info.phone)}>Copy phone</MenuItem>
         </>
       ) : (
-        <div className="px-3 py-1.5 text-[11px] text-gray-400 dark:text-slate-500">Contact details restricted for this role</div>
+        <div className="px-3 py-1.5 text-[11px] text-gray-400 dark:text-slate-400">Contact details restricted for this role</div>
       )}
     </PopoverPanel>
   )
@@ -248,7 +248,7 @@ function MenuItem({ icon: Icon, onClick, children }) {
       onClick={onClick}
       className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm text-gray-700 hover:bg-gray-50 dark:text-slate-200 dark:hover:bg-white/5"
     >
-      <Icon size={14} className="text-gray-400 dark:text-slate-500" aria-hidden="true" /> {children}
+      <Icon size={14} className="text-gray-400 dark:text-slate-400" aria-hidden="true" /> {children}
     </button>
   )
 }

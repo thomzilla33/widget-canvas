@@ -166,7 +166,7 @@ export default function DashboardCanvas() {
               <span>
                 {`${dashboardKindLabel(dashboard)} · ${audienceLabel(dashboard.audience)}${placements.length ? ` · ${placements.length} widget${placements.length === 1 ? '' : 's'}${lockedCount ? `, ${lockedCount} locked` : ''}` : ''}`}
               </span>
-              <span aria-hidden="true" className="text-gray-300 dark:text-slate-600">·</span>
+              <span aria-hidden="true" className="text-gray-300 dark:text-slate-400">·</span>
               {published && dirty ? (
                 <span
                   className="inline-flex items-center gap-1 rounded-full border border-amber-300/50 bg-amber-500/10 px-2 py-0.5 text-[11px] font-semibold text-aims-ungoverned"
@@ -410,7 +410,7 @@ export default function DashboardCanvas() {
 /* ── Autosave feedback — edits persist immediately; this just confirms it ── */
 function SaveIndicator({ state }) {
   return (
-    <span className="inline-flex items-center gap-1 text-[11px] text-gray-400 dark:text-slate-500" aria-live="polite">
+    <span className="inline-flex items-center gap-1 text-[11px] text-gray-400 dark:text-slate-400" aria-live="polite">
       {state === 'saving' ? (
         <><RefreshCw size={11} className="animate-spin" aria-hidden="true" /> Saving…</>
       ) : (
@@ -482,7 +482,7 @@ function AddWidgetCardDisabled() {
   return (
     <div className="rounded-xl border border-gray-200 bg-white dark:border-white/[0.08] dark:bg-[var(--surface)]">
       <div className="flex flex-col items-center gap-4 px-6 py-12 text-center">
-        <span className="grid h-12 w-12 place-items-center rounded-xl bg-gray-100 text-gray-400 dark:bg-white/[0.05] dark:text-slate-500">
+        <span className="grid h-12 w-12 place-items-center rounded-xl bg-gray-100 text-gray-400 dark:bg-white/[0.05] dark:text-slate-400">
           <LayoutGrid size={22} strokeWidth={1.5} aria-hidden="true" />
         </span>
         <span className="flex flex-col items-center gap-1.5">
@@ -625,7 +625,7 @@ function CanvasTile({ placement: p, widget: w, selected, dragging, onSelect, onU
             else if (e.key === 'Enter' || e.key === ' ') { e.stopPropagation() } // don't fall through to tile-select
           }}
           onDragStart={(e) => { e.preventDefault(); e.stopPropagation() }}
-          className={`absolute bottom-0 right-0 z-10 grid h-6 w-6 cursor-nwse-resize place-items-center rounded-tl-md rounded-br-lg text-gray-400 transition-opacity hover:text-aims-blue focus-visible:opacity-100 focus-visible:text-aims-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aims-blue/50 dark:text-slate-500 ${
+          className={`absolute bottom-0 right-0 z-10 grid h-6 w-6 cursor-nwse-resize place-items-center rounded-tl-md rounded-br-lg text-gray-400 transition-opacity hover:text-aims-blue focus-visible:opacity-100 focus-visible:text-aims-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aims-blue/50 dark:text-slate-400 ${
             resizing ? 'opacity-100 text-aims-blue' : 'opacity-0 group-hover:opacity-100 group-focus-within:opacity-100'
           }`}
         >
@@ -646,7 +646,7 @@ function CanvasTile({ placement: p, widget: w, selected, dragging, onSelect, onU
             else if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); e.stopPropagation(); onMove(p.pid, 1) }
             else if (e.key === 'Enter' || e.key === ' ') { e.stopPropagation() } // grip isn't an action; don't select the tile
           }}
-          className="shrink-0 cursor-grab rounded text-gray-300 hover:text-gray-500 focus-visible:text-aims-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aims-blue/50 group-hover:text-gray-400 dark:text-slate-600"
+          className="shrink-0 cursor-grab rounded text-gray-300 hover:text-gray-500 focus-visible:text-aims-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aims-blue/50 group-hover:text-gray-400 dark:text-slate-400"
         >
           <GripVertical size={13} aria-hidden="true" />
         </button>
@@ -654,7 +654,7 @@ function CanvasTile({ placement: p, widget: w, selected, dragging, onSelect, onU
         {p.fixed ? (
           <Lock size={12} aria-hidden="true" className="shrink-0 text-gray-500 dark:text-slate-400" />
         ) : (
-          <Unlock size={12} aria-hidden="true" className="shrink-0 text-gray-300 dark:text-slate-600" />
+          <Unlock size={12} aria-hidden="true" className="shrink-0 text-gray-300 dark:text-slate-400" />
         )}
       </div>
       <div className="mt-2">
@@ -734,7 +734,7 @@ function ConfigPanel({ placement, widget, onChange, onDetail, onRemap, onFeedbac
         {/* Independent col/row spinners */}
         <div className="mt-2 grid grid-cols-2 gap-2">
           <div>
-            <div className="mb-0.5 text-[10px] font-medium uppercase tracking-wide text-gray-500 dark:text-slate-500">Width (cols)</div>
+            <div className="mb-0.5 text-[10px] font-medium uppercase tracking-wide text-gray-500 dark:text-slate-400">Width (cols)</div>
             <div className="flex items-center overflow-hidden rounded-lg border border-gray-300 dark:border-white/15">
               <button
                 onClick={() => { const { cols: c, rows: r } = placementDims(placement); onChange({ cols: Math.max(1, c - 1), rows: r }) }}
@@ -748,7 +748,7 @@ function ConfigPanel({ placement, widget, onChange, onDetail, onRemap, onFeedbac
             </div>
           </div>
           <div>
-            <div className="mb-0.5 text-[10px] font-medium uppercase tracking-wide text-gray-500 dark:text-slate-500">Height (rows)</div>
+            <div className="mb-0.5 text-[10px] font-medium uppercase tracking-wide text-gray-500 dark:text-slate-400">Height (rows)</div>
             <div className="flex items-center overflow-hidden rounded-lg border border-gray-300 dark:border-white/15">
               <button
                 onClick={() => { const { cols: c, rows: r } = placementDims(placement); onChange({ cols: c, rows: Math.max(1, r - 1) }) }}

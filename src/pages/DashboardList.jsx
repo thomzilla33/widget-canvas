@@ -250,7 +250,7 @@ export default function DashboardList() {
           </div>
           {hasMore && (
             <div className="mt-5 flex items-center justify-center gap-3">
-              <span className="text-xs text-gray-400 dark:text-slate-500">Showing {shownPage.length} of {shown.length}</span>
+              <span className="text-xs text-gray-400 dark:text-slate-400">Showing {shownPage.length} of {shown.length}</span>
               <Button variant="secondary" size="sm" onClick={loadMore}>Load {remaining} more</Button>
             </div>
           )}

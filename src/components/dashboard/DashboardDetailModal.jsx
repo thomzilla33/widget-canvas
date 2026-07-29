@@ -262,11 +262,11 @@ export default function DashboardDetailModal({ dashboard, isAdmin, onClose, onOp
 
           {/* Canvas blueprint */}
           <div data-section>
-            <div className="mb-2 text-[11px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-500">
+            <div className="mb-2 text-[11px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-400">
               Canvas preview · {count} widget{count === 1 ? '' : 's'}
             </div>
             {layout.length === 0 ? (
-              <div className="surface-sunken flex min-h-[80px] items-center justify-center rounded-xl text-xs text-gray-400 dark:text-slate-500">
+              <div className="surface-sunken flex min-h-[80px] items-center justify-center rounded-xl text-xs text-gray-400 dark:text-slate-400">
                 No widgets yet
               </div>
             ) : (

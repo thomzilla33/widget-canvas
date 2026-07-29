@@ -138,7 +138,7 @@ export default function UcpConcierge({ entity, open, onClose }) {
             </button>
             {menuOpen && (
               <PopoverPanel onClose={() => setMenuOpen(false)} align="left" className="top-full w-64 p-1.5">
-                <div className="px-1 pb-1 pt-0.5 text-[10px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-500">Concierge agent</div>
+                <div className="px-1 pb-1 pt-0.5 text-[10px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-400">Concierge agent</div>
                 {AGENTS.map((a) => (
                   <button
                     key={a.id}
@@ -157,7 +157,7 @@ export default function UcpConcierge({ entity, open, onClose }) {
               </PopoverPanel>
             )}
           </div>
-          <div className="ml-auto flex items-center gap-0.5 text-gray-400 dark:text-slate-500">
+          <div className="ml-auto flex items-center gap-0.5 text-gray-400 dark:text-slate-400">
             <IconBtn label="New chat" onClick={() => { setMsgs([msgs[0]]); setDraft('') }}><PenSquare size={16} /></IconBtn>
             <IconBtn label="Search"><Search size={16} /></IconBtn>
             <IconBtn label="More"><MoreHorizontal size={16} /></IconBtn>

@@ -284,7 +284,7 @@ export default function PlacementForm({ initial, onChange }) {
               </div>
             )}
             {!isAdmin && (
-              <p className="mt-1.5 flex items-center gap-1 text-[11px] text-gray-400 dark:text-slate-500">
+              <p className="mt-1.5 flex items-center gap-1 text-[11px] text-gray-400 dark:text-slate-400">
                 <Lock size={11} aria-hidden="true" />
                 Need a different tab? Ask a workspace admin.
               </p>

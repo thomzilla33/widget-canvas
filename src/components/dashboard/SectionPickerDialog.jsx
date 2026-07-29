@@ -184,7 +184,7 @@ export default function SectionPickerDialog({ onSelect, onClose }) {
                     {item.label}
                   </span>
                   {item.desc && (
-                    <span className="block truncate text-[11px] text-gray-400 dark:text-slate-500">
+                    <span className="block truncate text-[11px] text-gray-400 dark:text-slate-400">
                       {item.desc}
                     </span>
                   )}

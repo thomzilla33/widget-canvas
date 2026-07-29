@@ -52,10 +52,10 @@ function CustomerCard({ md }) {
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-semibold text-gray-900 dark:text-slate-100">{md.entityName}</p>
           <div className="mt-0.5 flex items-center gap-2">
-            <span className="text-[10px] text-gray-500 dark:text-slate-500">{md.recordId}</span>
+            <span className="text-[10px] text-gray-500 dark:text-slate-400">{md.recordId}</span>
             {md.sourceSystem && <>
               <span className="text-gray-300 dark:text-white/10">·</span>
-              <span className="text-[10px] text-gray-500 dark:text-slate-500">{md.sourceSystem}</span>
+              <span className="text-[10px] text-gray-500 dark:text-slate-400">{md.sourceSystem}</span>
             </>}
           </div>
         </div>
@@ -151,10 +151,10 @@ function HTLContinuation({ event, md, onResolve, onDecline, isClient }) {
         <p className="text-sm leading-relaxed text-gray-600 dark:text-slate-400">{event.description}</p>
         {md.model && (
           <div className="mt-3 flex items-center gap-2">
-            <span className="rounded bg-gray-100 px-1.5 py-0.5 text-[9px] font-semibold text-gray-500 dark:bg-white/[0.06] dark:text-slate-500">
+            <span className="rounded bg-gray-100 px-1.5 py-0.5 text-[9px] font-semibold text-gray-500 dark:bg-white/[0.06] dark:text-slate-400">
               {md.model}
             </span>
-            <span className="text-[10px] text-gray-400 dark:text-slate-600">
+            <span className="text-[10px] text-gray-400 dark:text-slate-400">
               Confidence: {Math.round((md.confidence ?? 0) * 100)}%
             </span>
           </div>
@@ -169,11 +169,11 @@ function HTLContinuation({ event, md, onResolve, onDecline, isClient }) {
         <div className="rounded-xl border border-gray-100 bg-gray-50 dark:border-white/[0.07] dark:bg-white/[0.025] overflow-hidden">
           <div className="border-b border-gray-100 dark:border-white/[0.05] px-4 py-3 space-y-1">
             <div className="flex gap-2 text-[10px]">
-              <span className="text-gray-400 dark:text-slate-600 w-5 shrink-0">To</span>
+              <span className="text-gray-400 dark:text-slate-400 w-5 shrink-0">To</span>
               <span className="text-gray-700 dark:text-slate-300">{draft.to}</span>
             </div>
             <div className="flex gap-2 text-[10px]">
-              <span className="text-gray-400 dark:text-slate-600 w-5 shrink-0">Re</span>
+              <span className="text-gray-400 dark:text-slate-400 w-5 shrink-0">Re</span>
               <span className="text-gray-700 dark:text-slate-300">{draft.subject}</span>
             </div>
           </div>
@@ -235,7 +235,7 @@ function HTLHandoff({ event, md, onResolve, onDecline, isClient }) {
       )}
       {pickingTeam && (
         <div className="space-y-2">
-          <p className="text-[10px] font-semibold text-gray-500 dark:text-slate-500 uppercase tracking-wide">Pick teammate</p>
+          <p className="text-[10px] font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide">Pick teammate</p>
           <div className="space-y-1 max-h-36 overflow-y-auto">
             {TEAM_ROSTER.filter(m => !m.ooo).map(member => (
               <button
@@ -249,7 +249,7 @@ function HTLHandoff({ event, md, onResolve, onDecline, isClient }) {
                 </div>
                 <div className="min-w-0">
                   <p className="text-xs font-medium text-gray-800 dark:text-slate-200">{member.name}</p>
-                  <p className="text-[10px] text-gray-400 dark:text-slate-600">{member.role}</p>
+                  <p className="text-[10px] text-gray-400 dark:text-slate-400">{member.role}</p>
                 </div>
                 <ChevronRight size={12} className="ml-auto text-gray-300 dark:text-white/20" />
               </button>
@@ -324,7 +324,7 @@ function GovPromotion({ event, md, onResolve, onDecline }) {
       {phase === 'idle' && (
         <div className="space-y-2">
           {!allDecided && (
-            <p className="text-center text-[10px] text-gray-400 dark:text-slate-600">
+            <p className="text-center text-[10px] text-gray-400 dark:text-slate-400">
               Review all {md.claims?.length ?? 0} claims above to enable submission
             </p>
           )}
@@ -365,7 +365,7 @@ function GovPromotion({ event, md, onResolve, onDecline }) {
         {/* Pipeline steps */}
         {md.pipelineSteps?.length > 0 && (
           <div className="mt-4">
-            <p className="mb-2 text-[9px] font-semibold uppercase tracking-[0.1em] text-gray-400 dark:text-slate-600">Pipeline</p>
+            <p className="mb-2 text-[9px] font-semibold uppercase tracking-[0.1em] text-gray-400 dark:text-slate-400">Pipeline</p>
             <div className="flex flex-wrap items-center">
               {md.pipelineSteps.map((step, idx) => (
                 <div key={step.id} className="flex items-center">
@@ -374,7 +374,7 @@ function GovPromotion({ event, md, onResolve, onDecline }) {
                       ? 'bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-400'
                       : step.status === 'active'
                       ? 'bg-aims-blue/10 text-aims-blue ring-1 ring-inset ring-aims-blue/40'
-                      : 'bg-gray-100 text-gray-400 dark:bg-white/[0.04] dark:text-slate-600'
+                      : 'bg-gray-100 text-gray-400 dark:bg-white/[0.04] dark:text-slate-400'
                   }`}>
                     {step.status === 'complete' && <CheckCircle2 size={8} />}
                     {step.status === 'active' && (
@@ -393,7 +393,7 @@ function GovPromotion({ event, md, onResolve, onDecline }) {
               ))}
             </div>
             {md.destination && (
-              <div className="mt-2 flex items-center gap-1.5 text-[10px] text-gray-500 dark:text-slate-500">
+              <div className="mt-2 flex items-center gap-1.5 text-[10px] text-gray-500 dark:text-slate-400">
                 <span className="text-gray-300 dark:text-white/20">→</span>
                 <span className="font-medium text-gray-700 dark:text-slate-300">{md.destination}</span>
               </div>
@@ -427,7 +427,7 @@ function GovReview({ event, md, onResolve, onDecline }) {
       {phase === 'idle' && (
         <div className="space-y-2">
           {!allDecided && (
-            <p className="text-center text-[10px] text-gray-400 dark:text-slate-600">
+            <p className="text-center text-[10px] text-gray-400 dark:text-slate-400">
               Review all {md.claims?.length ?? 0} claims above to enable submission
             </p>
           )}
@@ -464,7 +464,7 @@ function GovReview({ event, md, onResolve, onDecline }) {
             </div>
             <div>
               <p className="text-xs font-semibold text-gray-800 dark:text-slate-200">{md.requestedBy.name}</p>
-              <p className="text-[10px] text-gray-500 dark:text-slate-500">{md.requestedBy.role}</p>
+              <p className="text-[10px] text-gray-500 dark:text-slate-400">{md.requestedBy.role}</p>
             </div>
           </div>
         )}
@@ -569,7 +569,7 @@ function GovBreakGlass({ event, md, onResolve, onDecline }) {
             <CheckCircle2 size={13} className="text-aims-governed shrink-0" />
             <div>
               <p className="text-xs font-medium text-gray-800 dark:text-slate-200">{md.firstApprover}</p>
-              <p className="text-[10px] text-gray-500 dark:text-slate-500">Approved · {new Date(md.firstApprovalTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+              <p className="text-[10px] text-gray-500 dark:text-slate-400">Approved · {new Date(md.firstApprovalTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
             </div>
           </div>
           <div className="flex items-center gap-2.5 rounded-lg border border-aims-blue/20 bg-aims-blue/[0.04] px-3 py-2.5 dark:border-aims-blue/20">
@@ -586,9 +586,9 @@ function GovBreakGlass({ event, md, onResolve, onDecline }) {
         <Divider />
         <div>
           <SectionLabel>Last break-glass event</SectionLabel>
-          <div className="text-[11px] text-gray-500 dark:text-slate-500 space-y-0.5">
+          <div className="text-[11px] text-gray-500 dark:text-slate-400 space-y-0.5">
             <p>{md.lastBreakGlass.date} · {md.lastBreakGlass.requester}</p>
-            <p className="text-gray-400 dark:text-slate-600">{md.lastBreakGlass.outcome}</p>
+            <p className="text-gray-400 dark:text-slate-400">{md.lastBreakGlass.outcome}</p>
           </div>
         </div>
       </>}
@@ -632,7 +632,7 @@ function GovChangeRequest({ event, md, onResolve, onDecline }) {
       )}
       {phase === 'modifying' && (
         <div className="space-y-2">
-          <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400 dark:text-slate-600">Modified value</p>
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400 dark:text-slate-400">Modified value</p>
           <input
             type="text"
             value={modifiedValue}
@@ -685,11 +685,11 @@ function GovChangeRequest({ event, md, onResolve, onDecline }) {
             {(md.submitter ?? '?').charAt(0)}
           </div>
           <span className="text-xs font-medium text-gray-700 dark:text-slate-200">{md.submitter}</span>
-          {md.submitterRole && <span className="text-[10px] text-gray-400 dark:text-slate-600">· {md.submitterRole}</span>}
+          {md.submitterRole && <span className="text-[10px] text-gray-400 dark:text-slate-400">· {md.submitterRole}</span>}
         </div>
         <p className="text-xs leading-relaxed text-gray-600 dark:text-slate-400">{md.rationale}</p>
         {md.changeType && (
-          <span className="mt-2 inline-block rounded bg-gray-100 px-1.5 py-0.5 text-[9px] font-semibold text-gray-500 dark:bg-white/[0.06] dark:text-slate-500">
+          <span className="mt-2 inline-block rounded bg-gray-100 px-1.5 py-0.5 text-[9px] font-semibold text-gray-500 dark:bg-white/[0.06] dark:text-slate-400">
             {md.changeType}
           </span>
         )}
@@ -706,11 +706,11 @@ function GovChangeRequest({ event, md, onResolve, onDecline }) {
             { side: 'Proposed', src: md.sourceB },
           ].map(({ side, src }) => (
             <div key={side} className={`rounded-xl border p-3 ${side === 'Proposed' ? 'border-aims-blue/30 bg-aims-blue/[0.03] dark:border-aims-blue/20' : 'border-gray-100 bg-gray-50/60 dark:border-white/[0.07] dark:bg-white/[0.02]'}`}>
-              <p className="text-[9px] font-semibold uppercase tracking-wide text-gray-400 dark:text-slate-600">{side}</p>
+              <p className="text-[9px] font-semibold uppercase tracking-wide text-gray-400 dark:text-slate-400">{side}</p>
               <p className="mt-1.5 text-[13px] font-bold text-gray-900 dark:text-slate-100">{src?.value}</p>
-              <p className="mt-1 text-[9px] text-gray-400 dark:text-slate-600 truncate">{src?.name}</p>
+              <p className="mt-1 text-[9px] text-gray-400 dark:text-slate-400 truncate">{src?.name}</p>
               {src?.confidence && (
-                <p className="mt-1 text-[9px] text-gray-400 dark:text-slate-600">{Math.round(src.confidence * 100)}% conf</p>
+                <p className="mt-1 text-[9px] text-gray-400 dark:text-slate-400">{Math.round(src.confidence * 100)}% conf</p>
               )}
             </div>
           ))}
@@ -754,7 +754,7 @@ function TrainMe({ event, md, onResolve, onDecline }) {
       {phase === 'idle' && (
         <div className="space-y-2">
           {!allReviewed && (
-            <p className="text-center text-[10px] text-gray-400 dark:text-slate-600">
+            <p className="text-center text-[10px] text-gray-400 dark:text-slate-400">
               Review all {samples.length} samples above to enable submission
             </p>
           )}
@@ -814,7 +814,7 @@ function TrainMe({ event, md, onResolve, onDecline }) {
         <p className="text-xs leading-relaxed text-gray-600 dark:text-slate-400 mb-3">{md.note}</p>
         <div className="flex items-center gap-3 rounded-xl border border-gray-100 bg-gray-50/60 px-4 py-3 dark:border-white/[0.07] dark:bg-white/[0.025]">
           <div className="text-center">
-            <p className="text-[9px] font-semibold uppercase tracking-wide text-gray-400 dark:text-slate-600">Current</p>
+            <p className="text-[9px] font-semibold uppercase tracking-wide text-gray-400 dark:text-slate-400">Current</p>
             <p className="mt-1 text-xl font-bold text-gray-500 dark:text-slate-400">{md.currentValue}</p>
           </div>
           <ChevronRight size={16} className="text-gray-300 dark:text-white/20 mx-2 shrink-0" />
@@ -824,7 +824,7 @@ function TrainMe({ event, md, onResolve, onDecline }) {
           </div>
           {md.affectedAgents?.length > 0 && (
             <div className="ml-auto text-right">
-              <p className="text-[9px] text-gray-400 dark:text-slate-600">Affects</p>
+              <p className="text-[9px] text-gray-400 dark:text-slate-400">Affects</p>
               <p className="text-[10px] font-semibold text-gray-600 dark:text-slate-400">{md.affectedAgents.length} agents</p>
             </div>
           )}
@@ -845,7 +845,7 @@ function TrainMe({ event, md, onResolve, onDecline }) {
                 d === 'reject'  ? 'border-red-200 bg-red-50/40 dark:border-red-900/40 dark:bg-red-950/20' :
                 'border-gray-100 bg-white dark:border-white/[0.07] dark:bg-transparent'
               }`}>
-                <p className="mb-1 text-[10px] font-semibold text-gray-500 dark:text-slate-500">{sample.label}</p>
+                <p className="mb-1 text-[10px] font-semibold text-gray-500 dark:text-slate-400">{sample.label}</p>
                 <p className="text-xs leading-relaxed text-gray-700 dark:text-slate-200">{sample.summary}</p>
                 <div className="mt-3 flex items-center gap-1.5">
                   <button
@@ -975,11 +975,11 @@ function InboundQuestion({ event, md, onResolve, onDecline }) {
             <div className="min-w-0 flex-1">
               <div className="flex items-baseline gap-2">
                 <p className="text-xs font-semibold text-gray-800 dark:text-slate-200">{first.authorName}</p>
-                <span className="text-[10px] text-gray-400 dark:text-slate-600">{first.timestamp}</span>
+                <span className="text-[10px] text-gray-400 dark:text-slate-400">{first.timestamp}</span>
               </div>
-              <p className="text-[10px] text-gray-500 dark:text-slate-500">{first.authorRole}</p>
+              <p className="text-[10px] text-gray-500 dark:text-slate-400">{first.authorRole}</p>
               {first.channel && (
-                <span className="mt-1 inline-flex items-center gap-1 rounded bg-gray-100 px-1.5 py-0.5 text-[9px] font-semibold text-gray-500 dark:bg-white/[0.06] dark:text-slate-500">
+                <span className="mt-1 inline-flex items-center gap-1 rounded bg-gray-100 px-1.5 py-0.5 text-[9px] font-semibold text-gray-500 dark:bg-white/[0.06] dark:text-slate-400">
                   <MessageSquare size={9} /> {first.channel}
                 </span>
               )}
@@ -989,7 +989,7 @@ function InboundQuestion({ event, md, onResolve, onDecline }) {
           <p className="text-xs leading-relaxed text-gray-700 dark:text-slate-300">{first.body}</p>
         </div>
         {comments.length > 1 && (
-          <p className="mt-2 text-[10px] text-gray-400 dark:text-slate-600">
+          <p className="mt-2 text-[10px] text-gray-400 dark:text-slate-400">
             {comments.length} messages in this thread
           </p>
         )}
@@ -1049,7 +1049,7 @@ function QuestionSurface({ event, md, onResolve, onDecline }) {
           </div>
           <div>
             <p className="text-xs font-semibold text-gray-800 dark:text-slate-200">{event.askedByName}</p>
-            <div className="flex items-center gap-1.5 text-[10px] text-gray-400 dark:text-slate-600">
+            <div className="flex items-center gap-1.5 text-[10px] text-gray-400 dark:text-slate-400">
               <span>{event.askedByRole}</span>
               <span>·</span>
               <span>{event.askedAt}</span>
@@ -1071,7 +1071,7 @@ function QuestionSurface({ event, md, onResolve, onDecline }) {
         <Divider />
         <div>
           <SectionLabel>Context</SectionLabel>
-          <p className="text-xs leading-relaxed text-gray-500 dark:text-slate-500">{event.whyText}</p>
+          <p className="text-xs leading-relaxed text-gray-500 dark:text-slate-400">{event.whyText}</p>
         </div>
       </>}
 
@@ -1145,14 +1145,14 @@ function GenericWQSurface({ event, md, onResolve, onDecline }) {
         <div className="grid grid-cols-2 gap-x-6 gap-y-4">
           {md.assignedBy && (
             <div>
-              <p className="text-[9px] font-semibold uppercase tracking-wide text-gray-400 dark:text-slate-600">Assigned by</p>
+              <p className="text-[9px] font-semibold uppercase tracking-wide text-gray-400 dark:text-slate-400">Assigned by</p>
               <p className="mt-0.5 text-[11px] font-medium text-gray-700 dark:text-slate-300">{md.assignedBy}</p>
-              {md.assignedByRole && <p className="text-[9px] text-gray-400 dark:text-slate-600">{md.assignedByRole}</p>}
+              {md.assignedByRole && <p className="text-[9px] text-gray-400 dark:text-slate-400">{md.assignedByRole}</p>}
             </div>
           )}
           {md.submissionTarget && (
             <div>
-              <p className="text-[9px] font-semibold uppercase tracking-wide text-gray-400 dark:text-slate-600">Submit to</p>
+              <p className="text-[9px] font-semibold uppercase tracking-wide text-gray-400 dark:text-slate-400">Submit to</p>
               <p className="mt-0.5 text-[11px] font-medium text-gray-700 dark:text-slate-300">{md.submissionTarget}</p>
             </div>
           )}
@@ -1237,7 +1237,7 @@ function GenericWQSurface({ event, md, onResolve, onDecline }) {
 function Row({ label, value, accent }) {
   return (
     <div>
-      <p className="text-[9px] font-semibold uppercase tracking-wide text-gray-400 dark:text-slate-600">{label}</p>
+      <p className="text-[9px] font-semibold uppercase tracking-wide text-gray-400 dark:text-slate-400">{label}</p>
       <p className={`mt-0.5 text-[11px] font-medium ${accent ? 'text-aims-blue' : 'text-gray-700 dark:text-slate-300'}`}>{value}</p>
     </div>
   )

@@ -30,7 +30,7 @@ const STUDIO_LABEL = {
 const GROUP_STYLES = {
   overdue: { labelCls: 'text-red-500 dark:text-red-400',     dot: 'bg-red-400',                    badge: 'bg-red-500/10 text-red-600 dark:bg-red-400/10 dark:text-red-400'         },
   today:   { labelCls: 'text-amber-600 dark:text-amber-400', dot: 'bg-amber-400',                  badge: 'bg-amber-500/10 text-amber-700 dark:bg-amber-400/10 dark:text-amber-400' },
-  next:    { labelCls: 'text-gray-400 dark:text-slate-600',  dot: 'bg-gray-300 dark:bg-slate-700', badge: 'bg-gray-100 text-gray-500 dark:bg-white/[0.05] dark:text-slate-600'       },
+  next:    { labelCls: 'text-gray-400 dark:text-slate-400',  dot: 'bg-gray-300 dark:bg-slate-700', badge: 'bg-gray-100 text-gray-500 dark:bg-white/[0.05] dark:text-slate-400'       },
 }
 
 // ── Style resolver ───────────────────────────────────────────────────────────
@@ -41,7 +41,7 @@ function resolveStyle(item) {
       actnow:   { bg: 'bg-red-500/10 dark:bg-red-400/15',     ic: 'text-red-500 dark:text-red-400',    dot: 'bg-red-500' },
       critical: { bg: 'bg-amber-500/10 dark:bg-amber-400/15', ic: 'text-amber-500 dark:text-amber-400', dot: 'bg-amber-400' },
       action:   { bg: 'bg-aims-blue/10',                      ic: 'text-aims-blue',                    dot: 'bg-[#00b5d9]' },
-      headsup:  { bg: 'bg-gray-100 dark:bg-white/[0.06]',     ic: 'text-gray-400 dark:text-slate-500',  dot: null },
+      headsup:  { bg: 'bg-gray-100 dark:bg-white/[0.06]',     ic: 'text-gray-400 dark:text-slate-400',  dot: null },
     }
     const s = tiers[item.tier] ?? tiers.action
     return { Icon, iconBg: s.bg, iconColor: s.ic, dot: s.dot }
@@ -62,7 +62,7 @@ function resolveStyle(item) {
     return {
       Icon: isErr ? CircleAlert : ListChecks,
       iconBg: isErr ? 'bg-red-500/10' : 'bg-gray-100 dark:bg-white/[0.06]',
-      iconColor: isErr ? 'text-red-500 dark:text-red-400' : 'text-gray-400 dark:text-slate-500',
+      iconColor: isErr ? 'text-red-500 dark:text-red-400' : 'text-gray-400 dark:text-slate-400',
       dot: isErr ? 'bg-red-500' : null,
     }
   }
@@ -70,11 +70,11 @@ function resolveStyle(item) {
     return {
       Icon: Mail,
       iconBg: item.unread ? 'bg-aims-blue/10' : 'bg-gray-100 dark:bg-white/[0.06]',
-      iconColor: item.unread ? 'text-aims-blue' : 'text-gray-400 dark:text-slate-500',
+      iconColor: item.unread ? 'text-aims-blue' : 'text-gray-400 dark:text-slate-400',
       dot: item.unread ? 'bg-[#00b5d9]' : null,
     }
   }
-  return { Icon: FileText, iconBg: 'bg-gray-100 dark:bg-white/[0.06]', iconColor: 'text-gray-400 dark:text-slate-500', dot: null }
+  return { Icon: FileText, iconBg: 'bg-gray-100 dark:bg-white/[0.06]', iconColor: 'text-gray-400 dark:text-slate-400', dot: null }
 }
 
 // ── Data helpers ─────────────────────────────────────────────────────────────
@@ -137,13 +137,13 @@ function buildTags(item) {
       tags.push({ label: 'Mission Critical', cls: 'rounded-full px-2 py-[2px] text-[10px] font-semibold leading-tight bg-amber-400/[0.22] text-amber-700 dark:bg-amber-400/[0.18] dark:text-amber-400' })
     }
     if (item.blastRadius > 0) {
-      tags.push({ label: `${item.blastRadius} ${item.blastRadius === 1 ? 'flow' : 'flows'} blocked`, cls: 'text-[10px] text-gray-400 dark:text-slate-600' })
+      tags.push({ label: `${item.blastRadius} ${item.blastRadius === 1 ? 'flow' : 'flows'} blocked`, cls: 'text-[10px] text-gray-400 dark:text-slate-400' })
     }
   } else {
     const badge = kindBadge(item)
     if (badge) tags.push({ label: badge, cls: `rounded-full px-2 py-[2px] text-[10px] font-semibold leading-tight ${kindBadgeColor(item)}` })
     const detail = itemDetail(item)
-    if (detail) tags.push({ label: detail, cls: 'text-[10px] text-gray-400 dark:text-slate-500' })
+    if (detail) tags.push({ label: detail, cls: 'text-[10px] text-gray-400 dark:text-slate-400' })
   }
   return tags
 }
@@ -188,7 +188,7 @@ function QueueItemCard({ item, isActive, onClick }) {
               {title}
             </p>
             {when && (
-              <span className="mt-px shrink-0 tabular-nums text-[10px] text-gray-400 dark:text-slate-600">
+              <span className="mt-px shrink-0 tabular-nums text-[10px] text-gray-400 dark:text-slate-400">
                 {dot ? '• ' : ''}{when}
               </span>
             )}
@@ -196,7 +196,7 @@ function QueueItemCard({ item, isActive, onClick }) {
 
           {/* Description snippet */}
           {snippet && (
-            <p className="mt-1 line-clamp-2 text-[11px] leading-relaxed text-gray-500 dark:text-slate-500">
+            <p className="mt-1 line-clamp-2 text-[11px] leading-relaxed text-gray-500 dark:text-slate-400">
               {snippet}
             </p>
           )}
@@ -319,10 +319,10 @@ export function AttentionQueue({ items, totalCount, selectedId, onSelect, search
         {groups.length === 0 ? (
           <div className="flex flex-col items-center gap-2 px-4 py-12 text-center">
             <CheckAllIcon />
-            <p className="text-sm font-medium text-gray-400 dark:text-slate-500">
+            <p className="text-sm font-medium text-gray-400 dark:text-slate-400">
               {isFiltered ? 'No results' : 'All clear'}
             </p>
-            <p className="text-xs text-gray-300 dark:text-slate-700">
+            <p className="text-xs text-gray-300 dark:text-slate-500">
               {isFiltered
                 ? 'Try a different search or filter.'
                 : 'Nothing needs your attention right now.'}
@@ -331,7 +331,7 @@ export function AttentionQueue({ items, totalCount, selectedId, onSelect, search
               <button
                 type="button"
                 onClick={() => { onSearch(''); onFilterCat('all') }}
-                className="mt-1 rounded-lg border border-gray-200 px-3 py-1 text-[11px] text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:border-white/[0.07] dark:text-slate-500"
+                className="mt-1 rounded-lg border border-gray-200 px-3 py-1 text-[11px] text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:border-white/[0.07] dark:text-slate-400"
               >
                 Clear filters
               </button>
@@ -375,7 +375,7 @@ export function AttentionQueue({ items, totalCount, selectedId, onSelect, search
 function CheckAllIcon() {
   return (
     <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gray-100 dark:bg-white/[0.04]">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400 dark:text-slate-600">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400 dark:text-slate-400">
         <polyline points="20 6 9 17 4 12" />
       </svg>
     </div>
