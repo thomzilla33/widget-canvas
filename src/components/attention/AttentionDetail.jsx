@@ -4,17 +4,17 @@ import { WQDecisionSurface } from '../workqueue/WQDecisionSurface.jsx'
 import { WQ_EVENT_DATA } from '../../data/wqEventData.js'
 
 const KIND_LABEL = {
-  gov:   { label: 'Policy · Governance', color: 'bg-aims-blue/10 text-aims-blue' },
-  htl:   { label: 'Human in the Loop',   color: 'bg-purple-500/10 text-purple-600 dark:text-purple-400' },
-  task:  { label: 'Task',                color: 'bg-gray-100 text-gray-600 dark:bg-white/[0.07] dark:text-slate-400' },
-  inbox: { label: 'Message',             color: 'bg-gray-100 text-gray-600 dark:bg-white/[0.07] dark:text-slate-400' },
-  wq:    { label: 'My Day · Work Queue', color: 'bg-amber-500/10 text-amber-600 dark:text-amber-400' },
+  gov:   { label: 'Policy · Governance', color: 'bg-aims-blue/[0.15] text-aims-blue dark:bg-aims-blue/[0.20]' },
+  htl:   { label: 'Human in the Loop',   color: 'bg-purple-500/[0.15] text-purple-600 dark:bg-purple-400/[0.20] dark:text-purple-300' },
+  task:  { label: 'Task',                color: 'bg-white/[0.08] text-slate-300 dark:bg-white/[0.10] dark:text-slate-300' },
+  inbox: { label: 'Message',             color: 'bg-white/[0.08] text-slate-300 dark:bg-white/[0.10] dark:text-slate-300' },
+  wq:    { label: 'My Day · Work Queue', color: 'bg-amber-500/[0.18] text-amber-600 dark:bg-amber-400/[0.22] dark:text-amber-300' },
 }
 
 const PRIORITY_COLOR = {
-  high: 'bg-red-500/10 text-red-600 dark:text-red-400',
-  med:  'bg-amber-500/10 text-amber-700 dark:text-amber-400',
-  low:  'bg-gray-100 text-gray-500 dark:bg-white/[0.06] dark:text-slate-400',
+  high: 'bg-red-500/[0.18] text-red-600 dark:bg-red-400/[0.20] dark:text-red-300',
+  med:  'bg-amber-500/[0.18] text-amber-700 dark:bg-amber-400/[0.20] dark:text-amber-300',
+  low:  'bg-white/[0.08] text-slate-500 dark:bg-white/[0.10] dark:text-slate-300',
 }
 
 function enrichItem(item) {
@@ -397,7 +397,11 @@ export function AttentionDetail({ item, onApprove, onDecline, onComplete, onDism
                 </span>
               )}
               {item.statusLabel && (
-                <span className="rounded-full bg-gray-100 px-2.5 py-1 text-[11px] font-semibold text-gray-500 dark:bg-white/[0.06] dark:text-slate-400">
+                <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${
+                  /due|overdue|urgent|now/i.test(item.statusLabel)
+                    ? 'bg-amber-400/[0.22] text-amber-700 dark:bg-amber-400/[0.22] dark:text-amber-300'
+                    : 'bg-gray-100 text-gray-600 dark:bg-white/[0.14] dark:text-slate-300'
+                }`}>
                   {item.statusLabel}
                 </span>
               )}
@@ -427,7 +431,7 @@ export function AttentionDetail({ item, onApprove, onDecline, onComplete, onDism
               {enrich.triggerReason && (
                 <p className="mt-0.5 text-xs leading-relaxed text-gray-500 dark:text-slate-400">{enrich.triggerReason}</p>
               )}
-              <span className="mt-2 inline-block rounded bg-gray-100 px-1.5 py-0.5 text-[9px] font-semibold text-gray-500 dark:bg-white/[0.06] dark:text-slate-400">
+              <span className="mt-2 inline-block rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-semibold text-gray-600 dark:bg-white/[0.12] dark:text-slate-300">
                 {enrich.triggerLabel}
               </span>
             </div>
@@ -649,7 +653,7 @@ export function AttentionDetail({ item, onApprove, onDecline, onComplete, onDism
               type="button"
               disabled={!note.trim()}
               onClick={() => setNote('')}
-              className="rounded-lg border border-gray-200 dark:border-white/[0.07] px-3 py-2 text-[12px] font-medium text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-white/5 disabled:opacity-40 transition-colors"
+              className="rounded-lg border border-gray-200 dark:border-white/[0.18] px-3 py-2 text-[12px] font-medium text-gray-600 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-white/[0.08] disabled:opacity-40 transition-colors"
             >
               Post
             </button>

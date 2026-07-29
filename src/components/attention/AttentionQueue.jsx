@@ -127,21 +127,21 @@ function buildTags(item) {
   if (item._kind === 'wq') {
     if (item.dueLabel) {
       const tier = WQ_TIER[item.tier] ?? WQ_TIER.action
-      tags.push({ label: item.dueLabel, cls: `rounded-full px-2 py-[2px] text-[10px] font-semibold leading-tight ${tier.badge}` })
+      tags.push({ label: item.dueLabel, cls: `rounded-full px-2 py-[3px] text-[10px] font-semibold leading-tight ${tier.badge}` })
     }
     if (item.studio) {
       const c = item.studioColor ?? '#888'
-      tags.push({ label: STUDIO_LABEL[item.studio] ?? item.studio, cls: 'rounded-full px-2 py-[2px] text-[10px] font-semibold leading-tight', style: { backgroundColor: c + '30', color: c } })
+      tags.push({ label: STUDIO_LABEL[item.studio] ?? item.studio, cls: 'rounded-full px-2 py-[3px] text-[10px] font-semibold leading-tight', style: { backgroundColor: c + '30', color: c } })
     }
     if (item.missionCritical) {
-      tags.push({ label: 'Mission Critical', cls: 'rounded-full px-2 py-[2px] text-[10px] font-semibold leading-tight bg-amber-400/[0.22] text-amber-700 dark:bg-amber-400/[0.18] dark:text-amber-400' })
+      tags.push({ label: 'Mission Critical', cls: 'rounded-full px-2 py-[3px] text-[10px] font-semibold leading-tight bg-amber-400/[0.22] text-amber-700 dark:bg-amber-400/[0.18] dark:text-amber-400' })
     }
     if (item.blastRadius > 0) {
       tags.push({ label: `${item.blastRadius} ${item.blastRadius === 1 ? 'flow' : 'flows'} blocked`, cls: 'text-[10px] text-gray-400 dark:text-slate-400' })
     }
   } else {
     const badge = kindBadge(item)
-    if (badge) tags.push({ label: badge, cls: `rounded-full px-2 py-[2px] text-[10px] font-semibold leading-tight ${kindBadgeColor(item)}` })
+    if (badge) tags.push({ label: badge, cls: `rounded-full px-2 py-[3px] text-[10px] font-semibold leading-tight ${kindBadgeColor(item)}` })
     const detail = itemDetail(item)
     if (detail) tags.push({ label: detail, cls: 'text-[10px] text-gray-400 dark:text-slate-400' })
   }
@@ -273,7 +273,7 @@ export function AttentionQueue({ items, totalCount, selectedId, onSelect, search
           </span>
         </div>
         {/* Search */}
-        <div className="relative flex h-8 items-center rounded-lg border-[0.5px] border-[var(--border)] bg-white dark:bg-[var(--surface-raised)]">
+        <div className="relative flex h-8 items-center rounded-lg border border-white/[0.10] bg-white dark:bg-[var(--surface-raised)]">
           <Search size={12} className="pointer-events-none absolute left-2.5 text-[var(--muted-foreground)]" />
           <input
             type="search"
