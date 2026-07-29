@@ -181,7 +181,7 @@ export function HomeHero({ onCopilotOpen, copilotOpen = false }) {
 
   const showSpotlight = pending > 0
   const showCalm      = !showSpotlight
-  const showDefer     = dayPhase === 'evening' && pending > 0
+  const showDefer     = pending > 0
   const subline       = buildSubline(dayPhase, pending, resolvedToday)
 
   const safeIdx = Math.min(spotlightIdx, Math.max(0, items.length - 1))
@@ -194,9 +194,10 @@ export function HomeHero({ onCopilotOpen, copilotOpen = false }) {
   }
 
   // Resolve a spotlight item: remove it + record the action for live counts + flash
-  function resolve(id, actionLabel) {
+  // counted=false for defer (not actually resolved, just snoozed)
+  function resolve(id, actionLabel, counted = true) {
     defer(id)
-    setHeroResolved(n => n + 1)
+    if (counted) setHeroResolved(n => n + 1)
     setLastAction(actionLabel)
     clearTimeout(lastActionTimerRef.current)
     lastActionTimerRef.current = setTimeout(() => setLastAction(null), 3000)
@@ -356,7 +357,7 @@ export function HomeHero({ onCopilotOpen, copilotOpen = false }) {
               </button>
               <button
                 type="button"
-                onClick={() => resolve(current.id, current.secondaryAction.label)}
+                onClick={() => navigate('/home/attention')}
                 className="flex items-center gap-1.5 rounded-lg border border-white/[0.22] bg-white/[0.11] px-3.5 py-1.5 text-[11px] font-medium text-white/80 backdrop-blur-sm transition-all hover:bg-white/[0.20] hover:text-white active:scale-95"
                 style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.28)' }}
               >
@@ -366,7 +367,7 @@ export function HomeHero({ onCopilotOpen, copilotOpen = false }) {
               {showDefer && (
                 <button
                   type="button"
-                  onClick={() => resolve(current.id, 'Deferred')}
+                  onClick={() => resolve(current.id, 'Deferred to tomorrow', false)}
                   className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] text-white/35 transition-colors hover:text-white/60"
                 >
                   <Clock size={11} aria-hidden="true" />
