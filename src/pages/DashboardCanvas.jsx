@@ -135,6 +135,15 @@ export default function DashboardCanvas() {
       return [...without.slice(0, at), prev[from], ...without.slice(at)]
     })
   }
+  // Revert the canvas layout to the template seed for this dashboard by clearing
+  // the persisted layout. dashboardLayout() falls back to the template when layout is null.
+  function resetLayout() {
+    updateDashboard(id, { layout: null, dirty: false })
+    setSelectedPid(null)
+    flashSaved()
+    setMoreOpen(false)
+  }
+
   // Keyboard reorder: move a placement ±1 in the order (the accessible path for the grip).
   function movePlacement(pid, delta) {
     commit((prev) => {
@@ -222,6 +231,10 @@ export default function DashboardCanvas() {
                         Re-publish
                       </MenuItem>
                     )}
+                    <hr className="my-1 border-gray-200 dark:border-white/10" />
+                    <MenuItem icon={RefreshCw} onClick={resetLayout}>
+                      Reset to defaults
+                    </MenuItem>
                   </PopoverPanel>
                 )}
               </div>

@@ -1,26 +1,46 @@
 import { createContext, useContext, useState } from 'react'
 import { dashboards as seedDashboards } from '../data/mock.js'
 
-// Shared in-memory dashboard list. Seeded from mock data; NewDashboard appends
-// to it and DashboardList reads from it.
+const LAYOUTS_KEY = 'aims-canvas-layouts'
+
+function readLayouts() {
+  try { return JSON.parse(localStorage.getItem(LAYOUTS_KEY) ?? '{}') } catch { return {} }
+}
+
+function writeLayout(id, layout) {
+  try {
+    const all = readLayouts()
+    if (layout == null) { delete all[id] } else { all[id] = layout }
+    localStorage.setItem(LAYOUTS_KEY, JSON.stringify(all))
+  } catch {}
+}
+
+function initDashboards() {
+  const saved = readLayouts()
+  return seedDashboards.map((d) => saved[d.id] ? { ...d, layout: saved[d.id] } : d)
+}
+
+// Shared in-memory dashboard list. Seeded from mock data; layouts restored from
+// localStorage so canvas edits survive page reload.
 const DashboardsContext = createContext(null)
 
 export function DashboardsProvider({ children }) {
-  const [dashboards, setDashboards] = useState(seedDashboards)
+  const [dashboards, setDashboards] = useState(initDashboards)
 
   // Immutable add — newest first.
   function addDashboard(dashboard) {
     setDashboards((prev) => [dashboard, ...prev])
   }
 
-  // Immutable patch by id.
+  // Immutable patch by id. Persists layout changes to localStorage.
   function updateDashboard(id, patch) {
+    if ('layout' in patch) writeLayout(id, patch.layout ?? null)
     setDashboards((prev) => prev.map((d) => (d.id === id ? { ...d, ...patch } : d)))
   }
 
-  // Immutable remove by id. Widgets are catalog-level and survive — only the
-  // dashboard (its layout/placement) is dropped.
+  // Immutable remove by id. Clears any persisted layout for the dashboard.
   function removeDashboard(id) {
+    writeLayout(id, null)
     setDashboards((prev) => prev.filter((d) => d.id !== id))
   }
 
