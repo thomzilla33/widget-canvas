@@ -520,6 +520,8 @@ export const TEMPLATE_SEED = {
     { size: 'sm', widgetId: 'w-htl' },
     { size: 'sm', widgetId: 'w-tasks' },
     { size: 'sm', widgetId: 'w-workflows' },
+    { size: 'sm', widgetId: 'w-advisor' },
+    { size: 'sm', widgetId: 'w-myday' },
   ],
   // AI Consumption — the Wispr-style insights board: 3 headline tiles, then the
   // activity calendar and the spend breakdown full-width (tiles evenly, no gaps).
