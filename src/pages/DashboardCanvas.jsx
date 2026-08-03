@@ -20,6 +20,7 @@ import FeedbackPanel from '../components/ucp/FeedbackPanel.jsx'
 import { useWidgets } from '../state/WidgetsContext.jsx'
 import { useDashboards } from '../state/DashboardsContext.jsx'
 import { useRole } from '../state/RoleContext.jsx'
+import { useScope, scopeAtLeast } from '../state/ScopeContext.jsx'
 import { WIDGET_SIZES, dashboardKindLabel } from '../data/mock.js'
 import { dashboardLayout, placementDims, colsToDetail, SIZE_PRESETS } from '../data/layout.js'
 import { vizRecommendation, vizInterchangeable } from '../data/preview.js'
@@ -32,6 +33,7 @@ const GRID_GAP = 12 // gap-3
 // Columns the grid actually renders at the current viewport (Tailwind sm=640, lg=1024).
 const gridColsAtViewport = () => (window.innerWidth >= 1024 ? 3 : window.innerWidth >= 640 ? 2 : 1)
 const QUICK_ACTIONS = ['Create Task', 'Escalate / Handoff', 'Notify']
+const QUICK_ACTIONS_V2 = ['Ask your PA']
 
 // Collision-proof placement id, namespaced to the dashboard. Event-handler path,
 // so Date.now() is fine; the array index disambiguates two adds in the same ms.
@@ -684,6 +686,8 @@ function CanvasTile({ placement: p, widget: w, selected, dragging, onSelect, onU
 
 /* ── Config panel body (placement-level: size, fixed/flexible, audience, quick actions) ── */
 function ConfigPanel({ placement, widget, onChange, onDetail, onRemap, onFeedback, onAsk }) {
+  const { scope } = useScope()
+  const showV2 = scopeAtLeast(scope, 'v2')
   function toggleQuickAction(qa) {
     const has = placement.quickActions.includes(qa)
     onChange({ quickActions: has ? placement.quickActions.filter((x) => x !== qa) : [...placement.quickActions, qa] })
@@ -813,6 +817,12 @@ function ConfigPanel({ placement, widget, onChange, onDetail, onRemap, onFeedbac
         <div className="mb-1.5 text-sm font-medium text-gray-700 dark:text-slate-200">Quick Actions</div>
         <div className="space-y-1.5">
           {QUICK_ACTIONS.map((qa) => (
+            <label key={qa} className="flex cursor-pointer items-center gap-2 text-sm text-gray-700 dark:text-slate-200">
+              <input type="checkbox" className="checkbox" checked={placement.quickActions.includes(qa)} onChange={() => toggleQuickAction(qa)} />
+              {qa}
+            </label>
+          ))}
+          {showV2 && QUICK_ACTIONS_V2.map((qa) => (
             <label key={qa} className="flex cursor-pointer items-center gap-2 text-sm text-gray-700 dark:text-slate-200">
               <input type="checkbox" className="checkbox" checked={placement.quickActions.includes(qa)} onChange={() => toggleQuickAction(qa)} />
               {qa}
