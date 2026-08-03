@@ -6,7 +6,7 @@ import {
 } from 'lucide-react'
 import { useWorkQueue, REASSIGN_TARGETS, REJECT_REASONS, DECISION_VERB } from '../../state/WorkQueueContext.jsx'
 import { useScope, scopeAtLeast } from '../../state/ScopeContext.jsx'
-import { HOME_WORKFLOWS } from '../../data/home.js'
+import { HOME_WORKFLOWS, HOME_ADVISOR_INSIGHTS, MY_DAY_QUEUE } from '../../data/home.js'
 import { useFocusTrap } from '../../hooks/useFocusTrap.js'
 import UndoToast from '../home/UndoToast.jsx'
 import { Button } from '@/components/ui/Button'
@@ -18,7 +18,7 @@ import { Button } from '@/components/ui/Button'
 // HITL decisions are auditable: a row opens a Decision panel (full context + Approve /
 // Reject-with-reason / Reassign-to-someone). Resolving flashes an Undo toast and records
 // the decision (kept as history). The Inbox human-touch rows use the same panel.
-const TITLES = { 'w-htl': 'Human-in-the-Loop', 'w-inbox': 'Inbox', 'w-tasks': 'My Tasks', 'w-workflows': 'Workflow Tracker' }
+const TITLES = { 'w-htl': 'Human-in-the-Loop', 'w-inbox': 'Inbox', 'w-tasks': 'My Tasks', 'w-workflows': 'Workflow Tracker', 'w-advisor': 'AIMS Advisor', 'w-myday': "Today's Focus" }
 
 export default function SystemWidget({ id, size = 'md' }) {
   const { resolveHtl, undoHtl } = useWorkQueue()
@@ -48,7 +48,7 @@ export default function SystemWidget({ id, size = 'md' }) {
     setToast(null)
   }
 
-  const Body = id === 'w-htl' ? HtlBody : id === 'w-inbox' ? InboxBody : id === 'w-tasks' ? TasksBody : id === 'w-workflows' ? WorkflowTrackerBody : null
+  const Body = id === 'w-htl' ? HtlBody : id === 'w-inbox' ? InboxBody : id === 'w-tasks' ? TasksBody : id === 'w-workflows' ? WorkflowTrackerBody : id === 'w-advisor' ? AdvisorBody : id === 'w-myday' ? MyDayBody : null
   if (!Body) return null
   const handlers = { onReview: setReviewing, onDecide: decide, notify }
   return (
@@ -74,6 +74,8 @@ const COUNT_TONE = {
   'w-inbox': 'bg-aims-blue/15 text-aims-blue',
   'w-tasks': 'bg-gray-200 text-gray-600 dark:bg-white/10 dark:text-slate-300',
   'w-workflows': 'bg-red-500/15 text-red-600 dark:text-red-400',
+  'w-advisor': 'bg-amber-500/15 text-aims-aging',
+  'w-myday': 'bg-red-500/15 text-red-600 dark:text-red-400',
 }
 export function SystemCountBadge({ id }) {
   const { htl, inbox, tasks } = useWorkQueue()
@@ -83,6 +85,8 @@ export function SystemCountBadge({ id }) {
   else if (id === 'w-inbox') n = pendingHtl.length + inbox.filter((i) => !i.dismissed && !i.read).length
   else if (id === 'w-tasks') n = tasks.filter((t) => !t.done).length
   else if (id === 'w-workflows') n = HOME_WORKFLOWS.filter((w) => w.status === 'failed' || w.humanTouchPending).length
+  else if (id === 'w-advisor') n = HOME_ADVISOR_INSIGHTS.filter((i) => i.type === 'warning' || i.type === 'action').length
+  else if (id === 'w-myday') n = MY_DAY_QUEUE.filter((i) => i.tier === 'critical').length
   if (!n) return null
   return (
     <span className={`num grid h-4 min-w-[16px] shrink-0 place-items-center rounded-full px-1 text-[10px] font-bold tabular-nums ${COUNT_TONE[id] || COUNT_TONE['w-tasks']}`}>
@@ -498,6 +502,98 @@ function WorkflowTrackerBody({ size, full, onExpand, notify }) {
         })}
       </ul>
       {!full && onExpand && HOME_WORKFLOWS.length > visible.length && <ViewAll n={HOME_WORKFLOWS.length} onClick={onExpand} />}
+    </div>
+  )
+}
+
+/* ── AIMS Advisor: AI-generated platform insights ── */
+const ADVISOR_TYPE_META = {
+  warning: { dot: 'bg-aims-aging', bar: 'bg-amber-500/10 border-amber-300/30', statCls: 'text-aims-aging' },
+  action:  { dot: 'bg-aims-blue', bar: 'bg-aims-blue/5 border-aims-blue/20', statCls: 'text-aims-blue' },
+  success: { dot: 'bg-aims-governed', bar: 'bg-aims-governed/5 border-aims-governed/20', statCls: 'text-aims-governed' },
+  info:    { dot: 'bg-gray-400', bar: 'bg-gray-50 border-gray-200 dark:bg-white/5 dark:border-white/10', statCls: 'text-gray-500 dark:text-slate-400' },
+}
+function AdvisorBody({ size, full, onExpand, notify }) {
+  const visible = full ? HOME_ADVISOR_INSIGHTS : HOME_ADVISOR_INSIGHTS.slice(0, rowMax(size))
+  const actionable = HOME_ADVISOR_INSIGHTS.filter((i) => i.type === 'warning' || i.type === 'action').length
+  return (
+    <div>
+      {actionable > 0 && (
+        <div className="mb-1.5 flex items-center gap-1.5 rounded-md bg-amber-500/10 px-2 py-1">
+          <AlertTriangle size={11} aria-hidden="true" className="shrink-0 text-aims-aging" />
+          <span className="text-[10px] font-medium text-aims-aging">{actionable} insight{actionable === 1 ? '' : 's'} need attention</span>
+        </div>
+      )}
+      <ul className="space-y-1.5">
+        {visible.map((ins) => {
+          const meta = ADVISOR_TYPE_META[ins.type] || ADVISOR_TYPE_META.info
+          return (
+            <li key={ins.id} className={`rounded-lg border p-2 ${meta.bar}`}>
+              <div className="flex min-w-0 items-center gap-1.5">
+                <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${meta.dot}`} />
+                <span className={`text-[12px] font-bold tabular-nums ${meta.statCls}`}>{ins.stat}</span>
+                <span className="text-[10px] text-gray-500 dark:text-slate-400">{ins.statLabel}</span>
+              </div>
+              <div className="mt-0.5 line-clamp-1 text-[11px] font-medium text-gray-900 dark:text-slate-100">{ins.title}</div>
+              <p className="mt-0.5 line-clamp-1 text-[10px] text-gray-500 dark:text-slate-400">{ins.description}</p>
+              <button
+                onClick={() => notify(ins.cta)}
+                className="mt-1 inline-flex items-center gap-1 rounded border border-gray-200 px-1.5 py-0.5 text-[10px] font-medium text-gray-600 hover:bg-gray-100 dark:border-white/10 dark:text-slate-300 dark:hover:bg-white/10"
+              >
+                {ins.cta}
+              </button>
+            </li>
+          )
+        })}
+      </ul>
+      {!full && onExpand && HOME_ADVISOR_INSIGHTS.length > visible.length && <ViewAll n={HOME_ADVISOR_INSIGHTS.length} onClick={onExpand} />}
+    </div>
+  )
+}
+
+/* ── Today's Focus: compact read-only summary of My Day queue ── */
+const MYDAY_TIER = {
+  critical: { dot: 'bg-red-500', badge: 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-300/30' },
+  action:   { dot: 'bg-amber-400', badge: 'bg-amber-500/10 text-aims-aging border-amber-300/30' },
+  headsup:  { dot: 'bg-slate-400', badge: 'bg-gray-100 text-gray-500 dark:bg-white/10 dark:text-slate-400 border-gray-200 dark:border-white/10' },
+}
+function MyDayBody({ size, full, onExpand }) {
+  const sorted = [...MY_DAY_QUEUE].sort((a, b) => {
+    const order = { critical: 0, action: 1, headsup: 2 }
+    return (order[a.tier] ?? 3) - (order[b.tier] ?? 3)
+  })
+  const visible = full ? sorted : sorted.slice(0, rowMax(size))
+  const criticals = sorted.filter((i) => i.tier === 'critical').length
+  return (
+    <div>
+      {criticals > 0 && (
+        <div className="mb-1.5 flex items-center gap-1.5 rounded-md bg-red-500/10 px-2 py-1">
+          <AlertTriangle size={11} aria-hidden="true" className="shrink-0 text-red-600 dark:text-red-400" />
+          <span className="text-[10px] font-medium text-red-600 dark:text-red-400">{criticals} critical item{criticals === 1 ? '' : 's'} need attention</span>
+        </div>
+      )}
+      <ul className="space-y-1">
+        {visible.map((item) => {
+          const tier = MYDAY_TIER[item.tier] || MYDAY_TIER.headsup
+          return (
+            <li key={item.id} className="flex min-w-0 items-start gap-1.5 rounded-md px-1.5 py-1 hover:bg-gray-50 dark:hover:bg-white/5">
+              <span className={`mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full ${tier.dot}`} />
+              <div className="min-w-0 flex-1">
+                <div className="flex min-w-0 items-center gap-1.5">
+                  <span className="min-w-0 flex-1 truncate text-[11px] font-medium text-gray-900 dark:text-slate-100">{item.title}</span>
+                  <span className={`shrink-0 rounded border px-1 py-0.5 text-[9px] font-semibold uppercase tracking-wide ${tier.badge}`}>{item.tier}</span>
+                </div>
+                <div className="mt-0.5 flex items-center gap-1.5 text-[10px] text-gray-400 dark:text-slate-400">
+                  <span className="truncate">{item.dueLabel}</span>
+                  <span className="shrink-0 text-gray-300 dark:text-white/20">·</span>
+                  <span className="shrink-0 flex items-center gap-0.5"><Clock size={9} aria-hidden="true" /> {item.estimatedMinutes}m</span>
+                </div>
+              </div>
+            </li>
+          )
+        })}
+      </ul>
+      {!full && onExpand && sorted.length > visible.length && <ViewAll n={sorted.length} onClick={onExpand} />}
     </div>
   )
 }
