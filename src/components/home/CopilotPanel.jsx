@@ -1,59 +1,154 @@
 import { useRef, useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useScope, scopeAtLeast } from '../../state/ScopeContext.jsx'
 import gsap from 'gsap'
 import {
   Sparkles, X, ArrowUp, Mic, PenSquare, Search, MoreHorizontal,
+  AlertTriangle, Clock, ArrowUpRight, ListChecks,
 } from 'lucide-react'
 import { HOME_COPILOTS, GOV_EVENTS, HOME_WORKFLOWS, HTL_ITEMS } from '../../data/home.js'
+import { matchWQIntent, getWQItems, summarizeIntent } from '../../utils/wqIntents.js'
 
 // ── Context-aware suggestions ─────────────────────────────────────────────────
 const blockingGov = GOV_EVENTS.filter(g => g.blocking)
 const failingWf   = HOME_WORKFLOWS.filter(w => w.status === 'failed')
 const urgentHtl   = HTL_ITEMS.filter(i => i.priority === 'high')
 
-function buildSuggestions() {
+// V2-only: require PA integration
+const WQ_SUGGESTIONS = [
+  'Do I have any open critical tasks?',
+  ...(urgentHtl.length > 0 ? ['Show my pending approvals'] : []),
+]
+
+// V1 base suggestions — no PA/WQ dependency
+function buildBaseSuggestions() {
   const s = []
   if (blockingGov.length > 0)
     s.push(`Summarize the ${blockingGov.length} blocked governance event${blockingGov.length !== 1 ? 's' : ''}`)
   if (failingWf.length > 0)
     s.push(`What's causing ${failingWf[0].name} to fail?`)
-  if (urgentHtl.length > 0)
-    s.push(`Draft a response for the high-priority HITL pause`)
   s.push('What should I focus on today?')
-  return s.slice(0, 3)
+  return s
+}
+const BASE_SUGGESTIONS = buildBaseSuggestions()
+
+
+// ── WQ result widget ──────────────────────────────────────────────────────────
+const SEVERITY_DOT = {
+  Blocking: 'bg-red-500',
+  Standard: 'bg-aims-blue',
+  Low:      'bg-gray-300 dark:bg-slate-600',
 }
 
-const SUGGESTIONS = buildSuggestions()
+function WQResultCard({ items, summary, onNavigate }) {
+  const shown    = items.slice(0, 4)
+  const overflow = items.length - shown.length
 
-function demoReply(q) {
+  return (
+    <div className="mt-1 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-white/[0.08] dark:bg-[var(--surface-raised)]">
+      {/* Summary bar */}
+      <div className="flex items-center gap-2 border-b border-gray-100 bg-gray-50/80 px-3 py-2 dark:border-white/[0.06] dark:bg-white/[0.03]">
+        <ListChecks size={12} className="shrink-0 text-aims-blue" aria-hidden="true" />
+        <p className="flex-1 text-[12px] font-medium text-gray-700 dark:text-slate-200">{summary}</p>
+      </div>
+
+      {items.length === 0 ? (
+        <p className="px-3 py-4 text-center text-[12px] text-gray-400 dark:text-slate-500">Nothing to action right now.</p>
+      ) : (
+        <>
+          {/* Item rows */}
+          <div className="divide-y divide-gray-50 dark:divide-white/[0.04]">
+            {shown.map(item => (
+              <div key={item.id} className="flex items-center gap-2.5 px-3 py-2.5">
+                {/* Severity dot */}
+                <span
+                  className={`mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full ${SEVERITY_DOT[item.severity] ?? SEVERITY_DOT.Standard}`}
+                  aria-hidden="true"
+                />
+                {/* Title + meta */}
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-[12px] font-medium text-gray-800 dark:text-slate-100">{item.title}</p>
+                  <div className="flex items-center gap-1.5 mt-0.5">
+                    <span className="rounded bg-gray-100 px-1 py-px text-[9px] font-semibold text-gray-500 dark:bg-white/[0.07] dark:text-slate-400">
+                      {item.wqType}
+                    </span>
+                    {item.estimatedMinutes && (
+                      <span className="flex items-center gap-0.5 text-[9px] text-gray-400 dark:text-slate-500">
+                        <Clock size={8} aria-hidden="true" /> ~{item.estimatedMinutes}m
+                      </span>
+                    )}
+                  </div>
+                </div>
+                {/* Open action */}
+                <button
+                  type="button"
+                  onClick={() => onNavigate(item)}
+                  className="shrink-0 flex items-center gap-0.5 rounded-md border border-gray-200 px-2 py-1 text-[10px] font-medium text-gray-500 hover:border-aims-blue/40 hover:bg-aims-blue/5 hover:text-aims-blue dark:border-white/[0.08] dark:text-slate-400 dark:hover:border-aims-blue/30 dark:hover:text-aims-blue"
+                >
+                  Open <ArrowUpRight size={9} className="ml-0.5" aria-hidden="true" />
+                </button>
+              </div>
+            ))}
+          </div>
+
+          {/* Footer */}
+          <div className="border-t border-gray-100 px-3 py-2 dark:border-white/[0.06]">
+            <button
+              type="button"
+              onClick={() => onNavigate(null)}
+              className="text-[11px] font-medium text-aims-blue hover:underline"
+            >
+              {overflow > 0 ? `+${overflow} more · ` : ''}View all in Work Queue
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
+
+// ── Reply builder ─────────────────────────────────────────────────────────────
+function buildReply(q, showWQ) {
+  const intent = showWQ ? matchWQIntent(q) : null
+  if (intent) {
+    const items   = getWQItems(intent)
+    const summary = summarizeIntent(intent, items)
+    return { type: 'wq-result', intent, items, summary }
+  }
+  // Prose fallbacks
   const ql = q.toLowerCase()
   if (/governance|blocked|block/.test(ql))
-    return `There ${blockingGov.length === 1 ? 'is' : 'are'} ${blockingGov.length} governance event${blockingGov.length !== 1 ? 's' : ''} blocking workflows right now. The most critical is "${blockingGov[0]?.title}". I recommend reviewing it in the Governance section. (Demo — canned response)`
+    return { type: 'text', text: `There ${blockingGov.length === 1 ? 'is' : 'are'} ${blockingGov.length} governance event${blockingGov.length !== 1 ? 's' : ''} blocking workflows right now. The most critical is "${blockingGov[0]?.title}". I recommend reviewing it in the Governance section. (Demo — canned response)` }
   if (/failing|fail|workflow/.test(ql))
-    return `"${failingWf[0]?.name}" failed with: "${failingWf[0]?.error}". Most likely a credential timeout. Want me to draft a retry runbook? (Demo — canned response)`
-  if (/hitl|human.*loop|pause|high.priority/.test(ql))
-    return `You have ${urgentHtl.length} high-priority HITL items. The most urgent is "${urgentHtl[0]?.title}" from ${urgentHtl[0]?.source}. Want me to draft a response? (Demo — canned response)`
+    return { type: 'text', text: `"${failingWf[0]?.name}" failed with: "${failingWf[0]?.error}". Most likely a credential timeout. Want me to draft a retry runbook? (Demo — canned response)` }
   if (/focus|today|priority|should i/.test(ql))
-    return `Based on your workspace: resolve the ${blockingGov.length} governance block first (it's affecting the most workflows), then clear the ${urgentHtl.length} HITL items. The failing workflow can wait until after standup. (Demo — canned response)`
-  return `For "${q}": everything in your workspace is within range except the governance blocks and HITL queue. Ask me about any specific area for more detail. (Demo — canned response)`
+    return { type: 'text', text: `Based on your workspace: resolve the ${blockingGov.length} governance block first (it's affecting the most workflows), then clear the ${urgentHtl.length} HITL items. The failing workflow can wait until after standup. (Demo — canned response)` }
+  return { type: 'text', text: `For "${q}": everything in your workspace is within range except the governance blocks and HITL queue. Ask me about any specific area for more detail. (Demo — canned response)` }
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
 export function CopilotPanel({ isOpen, onClose }) {
-  const asideRef  = useRef(null)
-  const innerRef  = useRef(null)
-  const scrollRef = useRef(null)
-  const inputRef  = useRef(null)
+  const navigate   = useNavigate()
+  const { scope }  = useScope()
+  const showV2     = scopeAtLeast(scope, 'v2')
+  const suggestions = showV2
+    ? [...WQ_SUGGESTIONS, ...BASE_SUGGESTIONS].slice(0, 4)
+    : BASE_SUGGESTIONS.slice(0, 4)
+  const asideRef   = useRef(null)
+  const innerRef   = useRef(null)
+  const scrollRef  = useRef(null)
+  const inputRef   = useRef(null)
 
   const [msgs,   setMsgs]   = useState([{
+    type: 'text',
     from: 'agent',
-    text: 'Hi — I\'m your AIMS Copilot. Ask me about your workflows, governance events, or HITL queue.',
+    text: 'Hi — I\'m your AIMS Copilot. Ask me about your work queue, workflows, or governance events.',
   }])
   const [input,  setInput]  = useState('')
   const [typing, setTyping] = useState(false)
 
   const onlyGreeting = msgs.length === 1
 
-  // Inner content slide-in on open
   useEffect(() => {
     if (!isOpen || !innerRef.current) return
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
@@ -73,15 +168,21 @@ export function CopilotPanel({ isOpen, onClose }) {
   function send(text) {
     const q = (text ?? input).trim()
     if (!q) return
-    setMsgs(m => [...m, { from: 'user', text: q }])
+    setMsgs(m => [...m, { type: 'text', from: 'user', text: q }])
     setInput('')
     setTyping(true)
     scrollToEnd()
     setTimeout(() => {
-      setMsgs(m => [...m, { from: 'agent', text: demoReply(q) }])
+      const reply = buildReply(q, showV2)
+      setMsgs(m => [...m, { ...reply, from: 'agent' }])
       setTyping(false)
       scrollToEnd()
     }, 700)
+  }
+
+  function handleNavigate(item) {
+    navigate('/home/attention', item ? { state: { selectId: item.id } } : undefined)
+    onClose()
   }
 
   return (
@@ -123,6 +224,14 @@ export function CopilotPanel({ isOpen, onClose }) {
                 <div className="max-w-[85%] rounded-2xl rounded-br-md bg-aims-blue/10 px-3.5 py-2.5 text-[13px] leading-relaxed text-gray-800 dark:bg-aims-blue/15 dark:text-slate-100">
                   {m.text}
                 </div>
+              ) : m.type === 'wq-result' ? (
+                <div className="w-full max-w-[96%]">
+                  <WQResultCard
+                    items={m.items}
+                    summary={m.summary}
+                    onNavigate={handleNavigate}
+                  />
+                </div>
               ) : (
                 <div className="max-w-[92%] text-[13px] leading-relaxed text-gray-700 dark:text-slate-200">
                   {m.text}
@@ -146,7 +255,7 @@ export function CopilotPanel({ isOpen, onClose }) {
               For you
             </p>
             <div className="flex flex-col gap-1.5">
-              {SUGGESTIONS.map((s, i) => (
+              {suggestions.map((s, i) => (
                 <button
                   key={i}
                   type="button"
