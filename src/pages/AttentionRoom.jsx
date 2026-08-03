@@ -1,11 +1,167 @@
 import { useState, useMemo, useRef, useCallback, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { ArrowLeft } from 'lucide-react'
+import { Sparkles, X, ArrowUp, ArrowUpRight, Clock, ListChecks } from 'lucide-react'
 import { buildItems, rank, totalUrgent } from '../components/home/attention/attentionModel.js'
+import { WQ_ACTIONABLE_STATES } from '../data/workqueue.js'
+import { matchWQIntent, getWQItems, summarizeIntent } from '../utils/wqIntents.js'
 import { AttentionQueue } from '../components/attention/AttentionQueue.jsx'
 import { AttentionDetail } from '../components/attention/AttentionDetail.jsx'
 import { getResolved, markResolved, unmarkResolved } from '../state/resolvedStore.js'
 import UndoToast from '../components/home/UndoToast.jsx'
+import { useScope, scopeAtLeast } from '../state/ScopeContext.jsx'
+
+// ── PA query strip for the Work Queue list ────────────────────────────────────
+const SEVERITY_DOT = {
+  Blocking: 'bg-red-500',
+  Standard: 'bg-aims-blue',
+  Low:      'bg-gray-300 dark:bg-slate-600',
+}
+
+function PAQueryWidget({ onSelectItem }) {
+  const [phase,  setPhase]  = useState('idle')   // idle | typing | result
+  const [query,  setQuery]  = useState('')
+  const [result, setResult] = useState(null)
+  const inputRef = useRef(null)
+
+  function open() {
+    setPhase('typing')
+    requestAnimationFrame(() => inputRef.current?.focus())
+  }
+
+  function dismiss() {
+    setPhase('idle')
+    setQuery('')
+    setResult(null)
+  }
+
+  function submit() {
+    const q = query.trim()
+    if (!q) return
+    const intent = matchWQIntent(q)
+    const items   = intent ? getWQItems(intent) : []
+    const summary = intent
+      ? summarizeIntent(intent, items)
+      : `No Work Queue results for "${q}". Try "critical tasks", "approvals", or "HTL items".`
+    setResult({ items, summary, intent })
+    setPhase('result')
+  }
+
+  if (phase === 'idle') {
+    return (
+      <div className="shrink-0 border-b border-gray-200/60 dark:border-white/[0.06] px-3 py-2">
+        <button
+          type="button"
+          onClick={open}
+          className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 text-[11px] font-medium text-gray-500 transition-colors hover:border-aims-blue/30 hover:bg-aims-blue/[0.04] hover:text-aims-blue dark:border-white/[0.08] dark:bg-white/[0.03] dark:text-slate-400 dark:hover:border-aims-blue/30 dark:hover:text-aims-blue"
+        >
+          <Sparkles size={11} className="text-aims-blue/70" aria-hidden="true" />
+          Ask PA about this queue…
+        </button>
+      </div>
+    )
+  }
+
+  if (phase === 'typing') {
+    return (
+      <div className="shrink-0 border-b border-gray-200/60 dark:border-white/[0.06] px-3 py-2">
+        <div className="flex items-center gap-2 rounded-xl border border-aims-blue/40 bg-white px-3 py-2 shadow-sm dark:border-aims-blue/30 dark:bg-white/[0.05]">
+          <Sparkles size={11} className="shrink-0 text-aims-blue" aria-hidden="true" />
+          <input
+            ref={inputRef}
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            onKeyDown={e => {
+              if (e.key === 'Enter') { e.preventDefault(); submit() }
+              if (e.key === 'Escape') dismiss()
+            }}
+            placeholder="e.g. critical tasks, pending approvals, HTL items…"
+            className="min-w-0 flex-1 bg-transparent text-[12px] text-gray-800 outline-none placeholder:text-gray-400 dark:text-slate-100 dark:placeholder:text-slate-500"
+          />
+          <button
+            type="button"
+            onClick={submit}
+            disabled={!query.trim()}
+            aria-label="Ask"
+            className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-aims-blue text-white disabled:opacity-40"
+          >
+            <ArrowUp size={10} aria-hidden="true" />
+          </button>
+          <button type="button" onClick={dismiss} aria-label="Cancel" className="text-gray-400 hover:text-gray-600 dark:text-slate-500 dark:hover:text-slate-300">
+            <X size={13} aria-hidden="true" />
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  // result phase
+  const { items, summary } = result
+  const shown    = items.slice(0, 3)
+  const overflow = items.length - shown.length
+
+  return (
+    <div className="shrink-0 border-b border-gray-200/60 dark:border-white/[0.06] px-3 py-2.5 space-y-2">
+      {/* Query chip + dismiss */}
+      <div className="flex items-center gap-1.5">
+        <Sparkles size={11} className="shrink-0 text-aims-blue" aria-hidden="true" />
+        <span className="min-w-0 flex-1 truncate text-[11px] font-medium text-gray-500 dark:text-slate-400 italic">"{query}"</span>
+        <button
+          type="button"
+          onClick={open}
+          className="shrink-0 text-[10px] text-aims-blue hover:underline"
+        >
+          Edit
+        </button>
+        <button type="button" onClick={dismiss} aria-label="Dismiss" className="shrink-0 text-gray-400 hover:text-gray-600 dark:text-slate-500 dark:hover:text-slate-300">
+          <X size={12} aria-hidden="true" />
+        </button>
+      </div>
+
+      {/* Result card */}
+      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-white/[0.08] dark:bg-[var(--surface-raised)]">
+        <div className="flex items-center gap-2 border-b border-gray-100 bg-gray-50/80 px-3 py-1.5 dark:border-white/[0.06] dark:bg-white/[0.03]">
+          <ListChecks size={11} className="shrink-0 text-aims-blue" aria-hidden="true" />
+          <p className="flex-1 text-[11px] font-medium text-gray-700 dark:text-slate-200">{summary}</p>
+        </div>
+        {items.length === 0 ? (
+          <p className="px-3 py-3 text-center text-[11px] text-gray-400 dark:text-slate-500">Nothing matched.</p>
+        ) : (
+          <>
+            <div className="divide-y divide-gray-50 dark:divide-white/[0.04]">
+              {shown.map(item => (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => onSelectItem(item)}
+                  className="flex w-full items-center gap-2 px-3 py-2 text-left hover:bg-gray-50 dark:hover:bg-white/[0.03]"
+                >
+                  <span className={`mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full ${SEVERITY_DOT[item.severity] ?? SEVERITY_DOT.Standard}`} aria-hidden="true" />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-[11px] font-medium text-gray-800 dark:text-slate-100">{item.title}</p>
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                      <span className="rounded bg-gray-100 px-1 py-px text-[9px] font-semibold text-gray-500 dark:bg-white/[0.07] dark:text-slate-400">{item.wqType}</span>
+                      {item.estimatedMinutes && (
+                        <span className="flex items-center gap-0.5 text-[9px] text-gray-400 dark:text-slate-500">
+                          <Clock size={8} aria-hidden="true" /> ~{item.estimatedMinutes}m
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <ArrowUpRight size={10} className="shrink-0 text-gray-400" aria-hidden="true" />
+                </button>
+              ))}
+            </div>
+            {overflow > 0 && (
+              <div className="border-t border-gray-100 px-3 py-1.5 dark:border-white/[0.06]">
+                <span className="text-[10px] text-gray-400 dark:text-slate-500">+{overflow} more in queue</span>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
 
 const FILTER_TABS = [
   { id: 'all',       label: 'All'       },
@@ -18,6 +174,8 @@ const FILTER_TABS = [
 export default function AttentionRoom() {
   const navigate  = useNavigate()
   const location  = useLocation()
+  const { scope } = useScope()
+  const showPAStrip = scopeAtLeast(scope, 'v2')
 
   const [done,      setDone]      = useState(() => getResolved())
   const [declined,  setDeclined]  = useState(new Set())
@@ -93,7 +251,10 @@ export default function AttentionRoom() {
     return items
   }, [allItems, search, filterCat])
 
-  const urgent = totalUrgent(allItems, read)
+  // D4: actionable count excludes Awaiting External
+  const actionableItems  = allItems.filter(i => i._kind !== 'wq' || WQ_ACTIONABLE_STATES.has(i.status ?? 'Open'))
+  const awaitingCount    = allItems.filter(i => i._kind === 'wq' && i.status === 'Awaiting External').length
+  const urgent           = totalUrgent(allItems, read)
 
   function showToast(message, undo) {
     setToast({ message, undo })
@@ -164,53 +325,31 @@ export default function AttentionRoom() {
   return (
     <div className="flex h-full flex-col overflow-hidden bg-[var(--canvas)]">
 
-      {/* ── Page Header — title + subline only ── */}
-      <div className="flex shrink-0 items-center gap-3 border-b border-gray-200 dark:border-white/[0.07] bg-[var(--canvas)] px-5 pt-4 pb-3.5">
-        <button
-          type="button"
-          onClick={() => navigate('/home')}
-          aria-label="Back to Home"
-          className="grid h-6 w-6 shrink-0 place-items-center rounded text-[var(--muted-foreground)] hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
-        >
-          <ArrowLeft size={16} />
-        </button>
-        <div className="min-w-0 flex-1">
-          <h1
-            className="text-[18px] font-semibold leading-tight text-[var(--foreground)]"
-            style={{ letterSpacing: '0.25px' }}
-          >
-            Work Queue
-          </h1>
-          <p className="flex items-center gap-1.5 text-[11px] text-[var(--muted-foreground)]">
-            {allItems.length === 0 ? 'All clear' : `${allItems.length} items in queue`}
-            {urgent > 0 && (
-              <span className="rounded-full bg-red-500/10 px-1.5 py-[1px] text-[10px] font-bold text-red-600 dark:text-red-400">
-                {urgent} urgent
-              </span>
-            )}
-          </p>
-        </div>
-      </div>
-
-      {/* Two-pane body — resizable */}
+      {/* Two-pane body — resizable, flush to top */}
       <div ref={containerRef} className="flex min-h-0 flex-1 overflow-hidden">
 
         {/* Left pane */}
         <div
-          className="flex h-full shrink-0 flex-col overflow-hidden border-r border-gray-200 dark:border-white/[0.10]"
+          className="flex h-full shrink-0 flex-col overflow-hidden"
           style={{ width: `${leftPct}%`, minWidth: 260, maxWidth: '65%' }}
         >
-          <AttentionQueue
-            items={filteredItems}
-            totalCount={allItems.length}
-            selectedId={selectedItem?.id ?? null}
-            onSelect={handleSelect}
-            search={search}
-            filterCat={filterCat}
-            onSearch={setSearch}
-            onFilterCat={setFilterCat}
-            tabCounts={tabCounts}
-          />
+          {showPAStrip && <PAQueryWidget onSelectItem={item => handleSelect({ id: item.id })} />}
+          <div className="min-h-0 flex-1 overflow-hidden">
+            <AttentionQueue
+              items={filteredItems}
+              totalCount={actionableItems.length}
+              awaitingCount={awaitingCount}
+              urgent={urgent}
+              onBack={() => navigate('/home')}
+              selectedId={selectedItem?.id ?? null}
+              onSelect={handleSelect}
+              search={search}
+              filterCat={filterCat}
+              onSearch={setSearch}
+              onFilterCat={setFilterCat}
+              tabCounts={tabCounts}
+            />
+          </div>
         </div>
 
         {/* Drag handle */}
@@ -223,7 +362,7 @@ export default function AttentionRoom() {
         </div>
 
         {/* Right pane */}
-        <div className="min-w-0 flex-1 overflow-hidden">
+        <div className="min-w-0 flex-1 overflow-hidden bg-white/[0.015] dark:bg-white/[0.015]">
           <AttentionDetail
             item={selectedItem}
             onApprove={handleApprove}
