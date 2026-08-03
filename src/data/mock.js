@@ -511,13 +511,13 @@ export const TEMPLATE_SEED = {
     { zone: 'sidebar', widgetId: 'w-aims-candidatefacts' },
     { zone: 'bottom', widgetId: 'w-aims-leadfeed' },
   ],
-  // System-default work surface — ships seeded with Inbox, My Tasks and the HITL queue.
-  // Three equal interactive columns (triage board) — same size so they tile the row
-  // evenly with no leftover gap.
+  // System-default work surface — ships seeded with Inbox, HTL, Tasks, and Workflow Tracker.
+  // Four equal interactive columns (triage board).
   't-workspace-home': [
     { size: 'sm', widgetId: 'w-inbox' },
     { size: 'sm', widgetId: 'w-htl' },
     { size: 'sm', widgetId: 'w-tasks' },
+    { size: 'sm', widgetId: 'w-workflows' },
   ],
   // AI Consumption — the Wispr-style insights board: 3 headline tiles, then the
   // activity calendar and the spend breakdown full-width (tiles evenly, no gaps).
