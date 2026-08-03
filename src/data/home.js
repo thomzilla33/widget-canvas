@@ -197,6 +197,8 @@ export const HOME_WORKFLOWS = [
     lastRun: '4 min ago',
     runsToday: 24,
     source: 'HubSpot',
+    lastOutput: 'Enriched 3 leads — Acme Corp., BrightPath Inc., NovaTech LLC. Avg confidence 0.87.',
+    humanTouchPending: false,
   },
   {
     id: 'wf2',
@@ -207,6 +209,8 @@ export const HOME_WORKFLOWS = [
     lastRun: '6 hours ago',
     runsToday: 1,
     source: 'Salesforce',
+    lastOutput: 'Synced 4,218 records. 0 errors. Delta applied to 11 models.',
+    humanTouchPending: false,
   },
   {
     id: 'wf3',
@@ -218,6 +222,8 @@ export const HOME_WORKFLOWS = [
     runsToday: 3,
     source: 'Survey Data View',
     error: 'NPS field missing after schema update',
+    lastOutput: null,
+    humanTouchPending: false,
   },
   {
     id: 'wf4',
@@ -228,6 +234,8 @@ export const HOME_WORKFLOWS = [
     lastRun: '2 days ago',
     runsToday: 0,
     source: 'Zendesk',
+    lastOutput: 'Routed 7 tickets before pause. Reason: HTL queue threshold exceeded.',
+    humanTouchPending: true,
   },
   {
     id: 'wf5',
@@ -238,6 +246,8 @@ export const HOME_WORKFLOWS = [
     lastRun: 'Just now',
     runsToday: 17,
     source: 'Salesforce',
+    lastOutput: 'Sent 17 notifications. Avg latency 1.2s. No errors.',
+    humanTouchPending: false,
   },
 ]
 

@@ -2,8 +2,11 @@ import { useState, useEffect, useRef } from 'react'
 import {
   Check, X, CornerUpRight, Plus, Clock, Sparkles, CheckCircle2,
   FileText, ScrollText, ListChecks, ChevronRight, History,
+  AlertTriangle, RefreshCw,
 } from 'lucide-react'
 import { useWorkQueue, REASSIGN_TARGETS, REJECT_REASONS, DECISION_VERB } from '../../state/WorkQueueContext.jsx'
+import { useScope, scopeAtLeast } from '../../state/ScopeContext.jsx'
+import { HOME_WORKFLOWS } from '../../data/home.js'
 import { useFocusTrap } from '../../hooks/useFocusTrap.js'
 import UndoToast from '../home/UndoToast.jsx'
 import { Button } from '@/components/ui/Button'
@@ -15,7 +18,7 @@ import { Button } from '@/components/ui/Button'
 // HITL decisions are auditable: a row opens a Decision panel (full context + Approve /
 // Reject-with-reason / Reassign-to-someone). Resolving flashes an Undo toast and records
 // the decision (kept as history). The Inbox human-touch rows use the same panel.
-const TITLES = { 'w-htl': 'Human-in-the-Loop', 'w-inbox': 'Inbox', 'w-tasks': 'My Tasks' }
+const TITLES = { 'w-htl': 'Human-in-the-Loop', 'w-inbox': 'Inbox', 'w-tasks': 'My Tasks', 'w-workflows': 'Workflow Tracker' }
 
 export default function SystemWidget({ id, size = 'md' }) {
   const { resolveHtl, undoHtl } = useWorkQueue()
@@ -45,7 +48,7 @@ export default function SystemWidget({ id, size = 'md' }) {
     setToast(null)
   }
 
-  const Body = id === 'w-htl' ? HtlBody : id === 'w-inbox' ? InboxBody : id === 'w-tasks' ? TasksBody : null
+  const Body = id === 'w-htl' ? HtlBody : id === 'w-inbox' ? InboxBody : id === 'w-tasks' ? TasksBody : id === 'w-workflows' ? WorkflowTrackerBody : null
   if (!Body) return null
   const handlers = { onReview: setReviewing, onDecide: decide, notify }
   return (
@@ -70,6 +73,7 @@ const COUNT_TONE = {
   'w-htl': 'bg-amber-500/15 text-aims-aging',
   'w-inbox': 'bg-aims-blue/15 text-aims-blue',
   'w-tasks': 'bg-gray-200 text-gray-600 dark:bg-white/10 dark:text-slate-300',
+  'w-workflows': 'bg-red-500/15 text-red-600 dark:text-red-400',
 }
 export function SystemCountBadge({ id }) {
   const { htl, inbox, tasks } = useWorkQueue()
@@ -78,6 +82,7 @@ export function SystemCountBadge({ id }) {
   if (id === 'w-htl') n = pendingHtl.length
   else if (id === 'w-inbox') n = pendingHtl.length + inbox.filter((i) => !i.dismissed && !i.read).length
   else if (id === 'w-tasks') n = tasks.filter((t) => !t.done).length
+  else if (id === 'w-workflows') n = HOME_WORKFLOWS.filter((w) => w.status === 'failed' || w.humanTouchPending).length
   if (!n) return null
   return (
     <span className={`num grid h-4 min-w-[16px] shrink-0 place-items-center rounded-full px-1 text-[10px] font-bold tabular-nums ${COUNT_TONE[id] || COUNT_TONE['w-tasks']}`}>
@@ -347,13 +352,23 @@ function HtlBody({ size, full, onExpand, onReview, onDecide }) {
 }
 
 /* ── Inbox: native items + pending HITL (the "human-touch" tag) ── */
-const INBOX_FILTERS = [
+const INBOX_FILTERS_V1 = [
   { id: 'all', label: 'All' },
   { id: 'needs', label: 'Needs you' },
   { id: 'mention', label: 'Mentions' },
 ]
+const INBOX_FILTERS_V2 = [
+  { id: 'all', label: 'All' },
+  { id: 'workflow', label: 'Workflow' },
+  { id: 'customer', label: 'Customer' },
+  { id: 'internal', label: 'Internal' },
+  { id: 'needs', label: 'Needs you' },
+]
 function InboxBody({ size, full, onExpand, onReview, onDecide, notify }) {
   const { inbox, htl, markRead, dismiss, restoreInbox } = useWorkQueue()
+  const { scope } = useScope()
+  const showV2 = scopeAtLeast(scope, 'v2')
+  const activeFilters = showV2 ? INBOX_FILTERS_V2 : INBOX_FILTERS_V1
   const [filter, setFilter] = useState('all')
   const dismissItem = (i) => { dismiss(i.id); notify(`Dismissed: ${i.title}`, () => restoreInbox(i.id)) }
   // Unified list: native inbox items + pending HITL decisions (human-touch).
@@ -361,12 +376,20 @@ function InboxBody({ size, full, onExpand, onReview, onDecide, notify }) {
   const nativeItems = inbox.filter((i) => !i.dismissed).map((i) => ({ ...i, humanTouch: false }))
   const all = [...htlItems, ...nativeItems]
   const unread = htlItems.length + nativeItems.filter((i) => !i.read).length
-  const matched = all.filter((i) => (filter === 'all' ? true : filter === 'needs' ? i.humanTouch : i.kind === 'mention'))
+  const matched = all.filter((i) => {
+    if (filter === 'all') return true
+    if (filter === 'needs') return i.humanTouch
+    if (filter === 'mention') return i.kind === 'mention'
+    if (filter === 'workflow') return i.humanTouch || i.origin === 'workflow'
+    if (filter === 'customer') return i.origin === 'contact'
+    if (filter === 'internal') return i.origin === 'system'
+    return true
+  })
   const visible = full ? matched : matched.slice(0, rowMax(size))
   return (
     <div>
       <div className="mb-1.5 flex flex-wrap items-center gap-1">
-        {INBOX_FILTERS.map((f) => (
+        {activeFilters.map((f) => (
           <button key={f.id} onClick={() => setFilter(f.id)} className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${filter === f.id ? 'bg-aims-blue text-white' : 'text-gray-500 hover:bg-gray-100 dark:text-slate-400 dark:hover:bg-white/10'}`}>
             {f.label}
           </button>
@@ -406,6 +429,75 @@ function InboxBody({ size, full, onExpand, onReview, onDecide, notify }) {
         </ul>
       )}
       {!full && onExpand && matched.length > visible.length && <ViewAll n={matched.length} onClick={onExpand} />}
+    </div>
+  )
+}
+
+/* ── Workflow Tracker: live status of active workflows ── */
+const WORKFLOW_STATUS_META = {
+  running:   { label: 'Running',   cls: 'bg-aims-blue/10 text-aims-blue border-aims-blue/20',                                          dot: 'bg-aims-blue' },
+  completed: { label: 'Completed', cls: 'bg-aims-governed/10 text-aims-governed border-aims-governed/20',                              dot: 'bg-aims-governed' },
+  failed:    { label: 'Failed',    cls: 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-300/30',                              dot: 'bg-red-500' },
+  paused:    { label: 'Paused',    cls: 'bg-gray-100 text-gray-500 dark:bg-white/5 dark:text-slate-400 border-gray-200 dark:border-white/10', dot: 'bg-gray-400 dark:bg-slate-500' },
+}
+function WorkflowTrackerBody({ size, full, onExpand, notify }) {
+  const { scope } = useScope()
+  const showV2 = scopeAtLeast(scope, 'v2')
+  const visible = full ? HOME_WORKFLOWS : HOME_WORKFLOWS.slice(0, rowMax(size))
+  const needsAttention = HOME_WORKFLOWS.filter((w) => w.status === 'failed' || w.humanTouchPending).length
+  return (
+    <div>
+      {needsAttention > 0 && (
+        <div className="mb-1.5 flex items-center gap-1.5 rounded-md bg-amber-500/10 px-2 py-1">
+          <AlertTriangle size={11} aria-hidden="true" className="shrink-0 text-aims-aging" />
+          <span className="text-[10px] font-medium text-aims-aging">{needsAttention} need{needsAttention === 1 ? 's' : ''} attention</span>
+        </div>
+      )}
+      <ul className="space-y-1.5">
+        {visible.map((wf) => {
+          const meta = WORKFLOW_STATUS_META[wf.status] || WORKFLOW_STATUS_META.paused
+          return (
+            <li key={wf.id} className="rounded-lg border border-gray-200 p-2 dark:border-white/10">
+              <div className="flex min-w-0 items-center gap-1.5">
+                <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${meta.dot}`} />
+                <span className="min-w-0 flex-1 truncate text-[11px] font-medium text-gray-900 dark:text-slate-100">{wf.name}</span>
+                <span className={`shrink-0 rounded border px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide ${meta.cls}`}>{meta.label}</span>
+              </div>
+              {wf.status === 'running' && (
+                <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-gray-200 dark:bg-white/10">
+                  <div className="h-full rounded-full bg-aims-blue transition-all" style={{ width: `${wf.progress}%` }} />
+                </div>
+              )}
+              {wf.status === 'failed' && wf.error && (
+                <p className="mt-0.5 text-[10px] text-red-600 dark:text-red-400">{wf.error}</p>
+              )}
+              {showV2 && wf.lastOutput && wf.status !== 'failed' && (
+                <p className="mt-0.5 line-clamp-1 text-[10px] text-gray-500 dark:text-slate-400">{wf.lastOutput}</p>
+              )}
+              <div className="mt-1 flex min-w-0 items-center gap-1 text-[10px] text-gray-400 dark:text-slate-400">
+                <span className="truncate">{wf.trigger}</span>
+                <span className="shrink-0 text-gray-300 dark:text-white/20">·</span>
+                <span className="shrink-0">{wf.lastRun}</span>
+                {showV2 && wf.humanTouchPending && (
+                  <span className="ml-auto shrink-0 rounded border border-amber-300/50 bg-amber-500/10 px-1 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-aims-aging">HTL pending</span>
+                )}
+              </div>
+              {(wf.status === 'failed' || wf.status === 'paused') && (
+                <div className="mt-1.5">
+                  <button
+                    onClick={() => notify(`${wf.status === 'failed' ? 'Retrying' : 'Resuming'}: ${wf.name}`)}
+                    className="inline-flex items-center gap-1 rounded-md border border-gray-200 px-1.5 py-0.5 text-[10px] font-medium text-gray-600 hover:bg-gray-50 dark:border-white/10 dark:text-slate-300 dark:hover:bg-white/5"
+                  >
+                    <RefreshCw size={10} aria-hidden="true" />
+                    {wf.status === 'failed' ? 'Retry' : 'Resume'}
+                  </button>
+                </div>
+              )}
+            </li>
+          )
+        })}
+      </ul>
+      {!full && onExpand && HOME_WORKFLOWS.length > visible.length && <ViewAll n={HOME_WORKFLOWS.length} onClick={onExpand} />}
     </div>
   )
 }

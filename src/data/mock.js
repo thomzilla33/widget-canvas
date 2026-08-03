@@ -58,6 +58,7 @@ export const widgets = [
   W({ id: 'w-tasks', name: 'My Tasks', skeleton: 'Feed', category: 'Operational', freshness: 'live', usedIn: 0, source: 'AIMS OS', system: true }),
   W({ id: 'w-inbox', name: 'Inbox', skeleton: 'Feed', category: 'Operational', freshness: 'live', usedIn: 0, source: 'AIMS OS', system: true }),
   W({ id: 'w-htl', name: 'Human-in-the-Loop', skeleton: 'Feed', category: 'AIMS OS', freshness: 'live', usedIn: 0, source: 'AIMS OS — Agentic Studio', system: true }),
+  W({ id: 'w-workflows', name: 'Workflow Tracker', skeleton: 'Feed', category: 'AIMS OS', freshness: 'live', usedIn: 0, source: 'AIMS OS — Agentic Studio', system: true }),
 
   // ── AIMS OS — our own platform activity (the V1 differentiator) ──
   W({ id: 'w-aims-hitl', name: 'Human-in-the-Loops', skeleton: 'KPI', category: 'AIMS OS', freshness: 'live', usedIn: 3, source: 'AIMS OS — Agentic Studio' }),
