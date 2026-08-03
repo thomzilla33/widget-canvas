@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   Check, X, CornerUpRight, Plus, Clock, Sparkles, CheckCircle2,
   FileText, ScrollText, ListChecks, ChevronRight, History,
@@ -7,6 +8,7 @@ import {
 import { useWorkQueue, REASSIGN_TARGETS, REJECT_REASONS, DECISION_VERB } from '../../state/WorkQueueContext.jsx'
 import { useScope, scopeAtLeast } from '../../state/ScopeContext.jsx'
 import { HOME_WORKFLOWS, HOME_ADVISOR_INSIGHTS, MY_DAY_QUEUE } from '../../data/home.js'
+import { entities } from '../../data/mock.js'
 import { useFocusTrap } from '../../hooks/useFocusTrap.js'
 import UndoToast from '../home/UndoToast.jsx'
 import { Button } from '@/components/ui/Button'
@@ -18,7 +20,14 @@ import { Button } from '@/components/ui/Button'
 // HITL decisions are auditable: a row opens a Decision panel (full context + Approve /
 // Reject-with-reason / Reassign-to-someone). Resolving flashes an Undo toast and records
 // the decision (kept as history). The Inbox human-touch rows use the same panel.
-const TITLES = { 'w-htl': 'Human-in-the-Loop', 'w-inbox': 'Inbox', 'w-tasks': 'My Tasks', 'w-workflows': 'Workflow Tracker', 'w-advisor': 'AIMS Advisor', 'w-myday': "Today's Focus" }
+const TITLES = { 'w-htl': 'Human-in-the-Loop', 'w-inbox': 'Inbox', 'w-tasks': 'My Tasks', 'w-workflows': 'Workflow Tracker', 'w-advisor': 'AIMS Advisor', 'w-myday': "Today's Focus", 'w-ucp': 'My Accounts' }
+
+// Prototype mock owner — in prod this comes from the auth session.
+const MOCK_OWNER = 'Priya Nair'
+const UCP_ACCOUNTS = entities.filter((e) => e.type === 'Account' && e.owner === MOCK_OWNER)
+const UCP_ALERT_TERMS = ['risk', 'churn', 'trial', 'renewal']
+const ucpHasAlert = (acc) =>
+  acc.health === 'inactive' || UCP_ALERT_TERMS.some((t) => acc.status.toLowerCase().includes(t))
 
 export default function SystemWidget({ id, size = 'md' }) {
   const { resolveHtl, undoHtl } = useWorkQueue()
@@ -48,7 +57,7 @@ export default function SystemWidget({ id, size = 'md' }) {
     setToast(null)
   }
 
-  const Body = id === 'w-htl' ? HtlBody : id === 'w-inbox' ? InboxBody : id === 'w-tasks' ? TasksBody : id === 'w-workflows' ? WorkflowTrackerBody : id === 'w-advisor' ? AdvisorBody : id === 'w-myday' ? MyDayBody : null
+  const Body = id === 'w-htl' ? HtlBody : id === 'w-inbox' ? InboxBody : id === 'w-tasks' ? TasksBody : id === 'w-workflows' ? WorkflowTrackerBody : id === 'w-advisor' ? AdvisorBody : id === 'w-myday' ? MyDayBody : id === 'w-ucp' ? UcpBody : null
   if (!Body) return null
   const handlers = { onReview: setReviewing, onDecide: decide, notify }
   return (
@@ -76,6 +85,7 @@ const COUNT_TONE = {
   'w-workflows': 'bg-red-500/15 text-red-600 dark:text-red-400',
   'w-advisor': 'bg-amber-500/15 text-aims-aging',
   'w-myday': 'bg-red-500/15 text-red-600 dark:text-red-400',
+  'w-ucp': 'bg-amber-500/15 text-aims-aging',
 }
 export function SystemCountBadge({ id }) {
   const { htl, inbox, tasks } = useWorkQueue()
@@ -87,6 +97,7 @@ export function SystemCountBadge({ id }) {
   else if (id === 'w-workflows') n = HOME_WORKFLOWS.filter((w) => w.status === 'failed' || w.humanTouchPending).length
   else if (id === 'w-advisor') n = HOME_ADVISOR_INSIGHTS.filter((i) => i.type === 'warning' || i.type === 'action').length
   else if (id === 'w-myday') n = MY_DAY_QUEUE.filter((i) => i.tier === 'critical').length
+  else if (id === 'w-ucp') n = UCP_ACCOUNTS.filter(ucpHasAlert).length
   if (!n) return null
   return (
     <span className={`num grid h-4 min-w-[16px] shrink-0 place-items-center rounded-full px-1 text-[10px] font-bold tabular-nums ${COUNT_TONE[id] || COUNT_TONE['w-tasks']}`}>
@@ -502,6 +513,67 @@ function WorkflowTrackerBody({ size, full, onExpand, notify }) {
         })}
       </ul>
       {!full && onExpand && HOME_WORKFLOWS.length > visible.length && <ViewAll n={HOME_WORKFLOWS.length} onClick={onExpand} />}
+    </div>
+  )
+}
+
+/* ── UCP: owned accounts with health + status + Open profile ── */
+const UCP_STATUS_META = {
+  renewal: { cls: 'bg-amber-500/10 text-aims-aging border-amber-300/30' },
+  trial:   { cls: 'bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-300/30' },
+  risk:    { cls: 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-300/30' },
+  churn:   { cls: 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-300/30' },
+  default: { cls: 'bg-gray-100 text-gray-500 dark:bg-white/5 dark:text-slate-400 border-gray-200 dark:border-white/10' },
+}
+function ucpStatusMeta(status) {
+  const s = status.toLowerCase()
+  if (s.includes('renewal')) return UCP_STATUS_META.renewal
+  if (s.includes('trial')) return UCP_STATUS_META.trial
+  if (s.includes('risk')) return UCP_STATUS_META.risk
+  if (s.includes('churn')) return UCP_STATUS_META.churn
+  return UCP_STATUS_META.default
+}
+function UcpBody({ size, full, onExpand }) {
+  const navigate = useNavigate()
+  const accounts = UCP_ACCOUNTS
+  const visible = full ? accounts : accounts.slice(0, rowMax(size))
+  const alertCount = accounts.filter(ucpHasAlert).length
+  return (
+    <div>
+      {alertCount > 0 && (
+        <div className="mb-1.5 flex items-center gap-1.5 rounded-md bg-amber-500/10 px-2 py-1">
+          <AlertTriangle size={11} aria-hidden="true" className="shrink-0 text-aims-aging" />
+          <span className="text-[10px] font-medium text-aims-aging">{alertCount} account{alertCount === 1 ? '' : 's'} need attention</span>
+        </div>
+      )}
+      {accounts.length === 0 ? (
+        <Empty>No accounts assigned to you yet</Empty>
+      ) : (
+        <ul className="space-y-1">
+          {visible.map((acc) => {
+            const sm = ucpStatusMeta(acc.status)
+            return (
+              <li key={acc.id} className="group flex min-w-0 items-center gap-2 rounded-md px-1.5 py-1.5 hover:bg-gray-50 dark:hover:bg-white/5">
+                <span className={`h-2 w-2 shrink-0 rounded-full ${acc.health === 'active' ? 'bg-aims-governed' : 'bg-gray-300 dark:bg-slate-600'}`} />
+                <div className="min-w-0 flex-1">
+                  <div className="flex min-w-0 items-center gap-1.5">
+                    <span className="min-w-0 flex-1 truncate text-[11px] font-medium text-gray-900 dark:text-slate-100">{acc.name}</span>
+                    <span className={`shrink-0 rounded border px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide ${sm.cls}`}>{acc.status}</span>
+                  </div>
+                  <div className="truncate text-[10px] text-gray-400 dark:text-slate-400">{acc.company}</div>
+                </div>
+                <button
+                  onClick={() => navigate(`/ucp/${acc.id}`)}
+                  className="shrink-0 rounded-md border border-gray-200 px-1.5 py-0.5 text-[10px] font-medium text-gray-500 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-gray-100 dark:border-white/10 dark:text-slate-400 dark:hover:bg-white/10"
+                >
+                  Open →
+                </button>
+              </li>
+            )
+          })}
+        </ul>
+      )}
+      {!full && onExpand && accounts.length > visible.length && <ViewAll n={accounts.length} onClick={onExpand} />}
     </div>
   )
 }

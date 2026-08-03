@@ -61,6 +61,7 @@ export const widgets = [
   W({ id: 'w-workflows', name: 'Workflow Tracker', skeleton: 'Feed', category: 'AIMS OS', freshness: 'live', usedIn: 0, source: 'AIMS OS — Agentic Studio', system: true }),
   W({ id: 'w-advisor', name: 'AIMS Advisor', skeleton: 'Feed', category: 'AIMS OS', freshness: 'live', usedIn: 0, source: 'AIMS OS — Platform', system: true }),
   W({ id: 'w-myday', name: "Today's Focus", skeleton: 'Feed', category: 'Operational', freshness: 'live', usedIn: 0, source: 'AIMS OS', system: true }),
+  W({ id: 'w-ucp', name: 'My Accounts', skeleton: 'Feed', category: 'Operational', freshness: 'live', usedIn: 0, source: 'AIMS OS — UCP', system: true }),
 
   // ── AIMS OS — our own platform activity (the V1 differentiator) ──
   W({ id: 'w-aims-hitl', name: 'Human-in-the-Loops', skeleton: 'KPI', category: 'AIMS OS', freshness: 'live', usedIn: 3, source: 'AIMS OS — Agentic Studio' }),

@@ -20,7 +20,7 @@ export default function WidgetRender({ widget, size = 'md', rows, scope, viewAs 
     ? `${scope.range || ''}|${Object.values(scope.filters || {}).filter((v) => v && v !== 'All').join(',')}|${scope.rollup || ''}|${scope.env || ''}|${liveTick}`
     : ''
   // System work widgets render from live queue state, not widgetSample — skip the compute.
-  const sysId = widget?.id === 'w-tasks' || widget?.id === 'w-inbox' || widget?.id === 'w-htl' || widget?.id === 'w-workflows' || widget?.id === 'w-advisor' || widget?.id === 'w-myday'
+  const sysId = widget?.id === 'w-tasks' || widget?.id === 'w-inbox' || widget?.id === 'w-htl' || widget?.id === 'w-workflows' || widget?.id === 'w-advisor' || widget?.id === 'w-myday' || widget?.id === 'w-ucp'
   const data = useMemo(
     () => (!widget || sysId ? null : widgetSample(widget, scope)),
     [widget, scopeKey, sysId],
