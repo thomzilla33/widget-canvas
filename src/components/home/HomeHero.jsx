@@ -4,7 +4,7 @@ import { HomeItemPanel } from './HomeItemPanel.jsx'
 import gsap from 'gsap'
 import {
   Sparkles, ShieldAlert, ArrowUpRight, AlertCircle, Zap, ExternalLink,
-  CheckCircle2, ChevronLeft, ChevronRight, Clock, Bot, Mail,
+  CheckCircle2, ChevronLeft, ChevronRight, ChevronDown, Clock, Bot, Mail,
 } from 'lucide-react'
 import { HOME_AGENTS, HTL_ITEMS, HOME_WORKFLOWS, HOME_INBOX, GOV_EVENTS } from '../../data/home.js'
 import { HomeQuickActions } from './HomeQuickActions.jsx'
@@ -132,7 +132,32 @@ const CHIPS = [
 export function HomeHero({ onCopilotOpen, copilotOpen = false }) {
   const heroRef      = useRef(null)
   const spotlightRef = useRef(null)
+  const bodyRef      = useRef(null)
   const navigate     = useNavigate()
+
+  const [collapsed, setCollapsed] = useState(() => {
+    try { return localStorage.getItem('aims-hero-collapsed') === '1' } catch { return false }
+  })
+
+  function toggleCollapse() {
+    setCollapsed(c => !c)
+  }
+
+  useEffect(() => {
+    try { localStorage.setItem('aims-hero-collapsed', collapsed ? '1' : '0') } catch {}
+    if (!bodyRef.current) return
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      gsap.set(bodyRef.current, { height: collapsed ? 0 : 'auto', opacity: collapsed ? 0 : 1 })
+      return
+    }
+    if (collapsed) {
+      gsap.killTweensOf(bodyRef.current)
+      gsap.to(bodyRef.current, { height: 0, opacity: 0, duration: 0.28, ease: 'power2.inOut' })
+    } else {
+      gsap.killTweensOf(bodyRef.current)
+      gsap.to(bodyRef.current, { height: 'auto', opacity: 1, duration: 0.32, ease: 'power2.out' })
+    }
+  }, [collapsed])
 
   const dayPhase = getDayPhase()
 
@@ -268,24 +293,55 @@ export function HomeHero({ onCopilotOpen, copilotOpen = false }) {
             }
           </p>
         </div>
-        <button
-          type="button"
-          onClick={onCopilotOpen}
-          aria-pressed={copilotOpen}
-          className={`hero-copilot-btn mt-1 flex shrink-0 items-center gap-2 rounded-xl border px-4 py-2.5 text-[12px] font-semibold text-white backdrop-blur-xl transition-all ${
-            copilotOpen
-              ? 'border-white/40 bg-white/[0.22] hover:bg-white/[0.28] hover:border-white/50'
-              : 'border-white/[0.18] bg-white/[0.12] hover:bg-white/[0.20] hover:border-white/30'
-          }`}
-          style={{
-            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.40), inset 0 0 0 0.5px rgba(255,255,255,0.08)',
-            backgroundImage: 'linear-gradient(145deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.02) 55%)',
-          }}
-        >
-          <Sparkles size={13} aria-hidden="true" />
-          {copilotOpen ? 'Close PA' : 'Ask your PA'}
-        </button>
+        <div className="mt-1 flex shrink-0 items-center gap-2">
+          <button
+            type="button"
+            onClick={onCopilotOpen}
+            aria-pressed={copilotOpen}
+            className={`hero-copilot-btn flex items-center gap-2 rounded-xl border px-4 py-2.5 text-[12px] font-semibold text-white backdrop-blur-xl transition-all ${
+              copilotOpen
+                ? 'border-white/40 bg-white/[0.22] hover:bg-white/[0.28] hover:border-white/50'
+                : 'border-white/[0.18] bg-white/[0.12] hover:bg-white/[0.20] hover:border-white/30'
+            }`}
+            style={{
+              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.40), inset 0 0 0 0.5px rgba(255,255,255,0.08)',
+              backgroundImage: 'linear-gradient(145deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.02) 55%)',
+            }}
+          >
+            <Sparkles size={13} aria-hidden="true" />
+            {copilotOpen ? 'Close PA' : 'Ask your PA'}
+          </button>
+          {/* Collapse toggle */}
+          <button
+            type="button"
+            onClick={toggleCollapse}
+            aria-label={collapsed ? 'Expand banner' : 'Collapse banner'}
+            aria-expanded={!collapsed}
+            className="hero-copilot-btn relative flex h-9 w-9 items-center justify-center rounded-xl border border-white/[0.18] bg-white/[0.08] text-white/55 transition-all hover:border-white/30 hover:bg-white/[0.15] hover:text-white/90"
+            style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.30)' }}
+          >
+            <ChevronDown
+              size={14}
+              className={`transition-transform duration-300 ${collapsed ? 'rotate-180' : ''}`}
+              aria-hidden="true"
+            />
+            {/* Amber dot when collapsed with pending items */}
+            {collapsed && pending > 0 && (
+              <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-amber-400 ring-1 ring-blue-900/80" aria-hidden="true" />
+            )}
+          </button>
+        </div>
       </div>
+
+      {/* ── Collapsible body ── */}
+      <div
+        ref={bodyRef}
+        style={{
+          overflow: 'hidden',
+          height: collapsed ? 0 : 'auto',
+          opacity: collapsed ? 0 : 1,
+        }}
+      >
 
       {/* ── SPOTLIGHT ── */}
       {showSpotlight && current && (
@@ -445,6 +501,8 @@ export function HomeHero({ onCopilotOpen, copilotOpen = false }) {
       <div className="relative mt-4">
         <HomeQuickActions variant="hero" phase={dayPhase} showSpotlight={showSpotlight} />
       </div>
+
+      </div>{/* end collapsible body */}
 
       {/* Detail panel — portal, renders over the whole app */}
       {panelItem && (
