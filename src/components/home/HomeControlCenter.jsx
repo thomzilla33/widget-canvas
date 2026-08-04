@@ -10,6 +10,7 @@ import { PendingOutputsCard }      from './PendingOutputsCard.jsx'
 import { PendingOutputsProvider }  from '../../state/PendingOutputsContext.jsx'
 import { useRole }                 from '../../state/RoleContext.jsx'
 import { WorkQueueHomeSection }    from './WorkQueueHomeSection.jsx'
+import { HomeCanvas }              from './HomeCanvas.jsx'
 
 export function HomeControlCenter({ onCopilotOpen, copilotOpen = false }) {
   const rootRef = useRef(null)
@@ -57,6 +58,11 @@ export function HomeControlCenter({ onCopilotOpen, copilotOpen = false }) {
             <AgentCatalog />
           </div>
         )}
+
+        {/* Personalized widget canvas — user-configurable, persisted to localStorage */}
+        <div className="home-card">
+          <HomeCanvas />
+        </div>
       </div>
     </PendingOutputsProvider>
   )
