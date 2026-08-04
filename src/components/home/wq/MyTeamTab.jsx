@@ -1,33 +1,10 @@
 import { useState } from 'react'
 import { createPortal } from 'react-dom'
-import { UserPlus, Bell, RefreshCw, AlertTriangle } from 'lucide-react'
-import { TEAM_ROSTER, WQ_TIER } from '../../../data/workqueue.js'
+import { UserPlus, Bell, RefreshCw, AlertTriangle, Zap } from 'lucide-react'
+import { TEAM_ROSTER } from '../../../data/workqueue.js'
 import UndoToast from '../UndoToast.jsx'
 
-const TIER_NAMES = {
-  actnow:   'blocking',
-  critical: 'critical',
-  action:   'action required',
-  headsup:  'heads-up',
-}
-
-function TierDot({ tier, count }) {
-  if (!count) return null
-  const t = WQ_TIER[tier]
-  return (
-    <span
-      title={`${count} ${TIER_NAMES[tier] ?? tier}`}
-      className={`inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[9px] font-bold ${t.badge}`}
-    >
-      <span className={`h-1.5 w-1.5 rounded-full ${t.dot}`} aria-hidden="true" />
-      {count}
-    </span>
-  )
-}
-
 function TeamMemberRow({ member, onAction }) {
-  const total = Object.values(member.events).reduce((s, n) => s + n, 0)
-
   return (
     <div className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-white/[0.02]">
       {/* Avatar */}
@@ -48,12 +25,18 @@ function TeamMemberRow({ member, onAction }) {
           )}
         </div>
         <p className="text-[10px] text-gray-400 dark:text-slate-400">{member.role}</p>
-        <div className="mt-1 flex items-center gap-1">
-          <TierDot tier="actnow"   count={member.events.actnow} />
-          <TierDot tier="critical" count={member.events.critical} />
-          <TierDot tier="action"   count={member.events.action} />
-          <TierDot tier="headsup"  count={member.events.headsup} />
-          {total === 0 && <span className="text-[10px] text-gray-300 dark:text-slate-400">No open events</span>}
+        <div className="mt-1 flex items-center gap-1.5">
+          {member.events.blocking > 0 && (
+            <span
+              title={`${member.events.blocking} blocking`}
+              className="inline-flex items-center gap-0.5 rounded-full bg-red-500/20 px-1.5 py-0.5 text-[9px] font-bold text-red-700 dark:bg-red-400/25 dark:text-red-400"
+            >
+              <Zap size={7} aria-hidden="true" />{member.events.blocking} blocking
+            </span>
+          )}
+          <span className="text-[10px] text-gray-400 dark:text-slate-400">
+            {member.events.total > 0 ? `${member.events.total} total` : 'No open events'}
+          </span>
         </div>
       </div>
 
@@ -116,16 +99,16 @@ export function MyTeamTab({ isManager }) {
     )
   }
 
-  const actnowTotal = TEAM_ROSTER.reduce((s, m) => s + m.events.actnow, 0)
+  const blockingTotal = TEAM_ROSTER.reduce((s, m) => s + m.events.blocking, 0)
 
   return (
     <>
       <div className="flex flex-1 flex-col overflow-hidden">
-        {actnowTotal > 0 && (
-          <div className="flex items-center gap-2 border-b border-red-100 bg-red-50/60 px-4 py-2 dark:border-red-400/10 dark:bg-red-400/5">
-            <AlertTriangle size={12} className="shrink-0 text-red-500" aria-hidden="true" />
-            <p className="text-[11px] text-red-600 dark:text-red-400">
-              {actnowTotal} blocking event{actnowTotal !== 1 ? 's' : ''} across your team require immediate attention.
+        {blockingTotal > 0 && (
+          <div className="flex items-center gap-2 border-b border-red-200 bg-red-50 px-4 py-2.5 dark:border-red-400/20 dark:bg-red-400/[0.09]">
+            <AlertTriangle size={12} className="shrink-0 text-red-500 dark:text-red-400" aria-hidden="true" />
+            <p className="text-[11px] font-medium text-red-700 dark:text-red-400">
+              {blockingTotal} blocking event{blockingTotal !== 1 ? 's' : ''} across your team require immediate attention.
             </p>
           </div>
         )}

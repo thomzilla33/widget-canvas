@@ -9,7 +9,6 @@ import { AgentCatalog }            from './AgentCatalog.jsx'
 import { PendingOutputsCard }      from './PendingOutputsCard.jsx'
 import { PendingOutputsProvider }  from '../../state/PendingOutputsContext.jsx'
 import { useRole }                 from '../../state/RoleContext.jsx'
-import { WorkQueueHomeSection }    from './WorkQueueHomeSection.jsx'
 import { HomeCanvas }              from './HomeCanvas.jsx'
 
 export function HomeControlCenter({ onCopilotOpen, copilotOpen = false }) {
@@ -29,37 +28,33 @@ export function HomeControlCenter({ onCopilotOpen, copilotOpen = false }) {
     return () => ctx.revert()
   }, [])
 
-  const leftFlex  = copilotOpen ? 'lg:flex-[3]' : 'lg:flex-[2]'
-  const rightFlex = copilotOpen ? 'lg:flex-[2]' : 'lg:flex-1'
-
   return (
     <PendingOutputsProvider>
-      <div ref={rootRef} className="flex flex-col gap-6">
+      <div ref={rootRef} className="flex flex-col gap-5">
         <HomeHero onCopilotOpen={onCopilotOpen} copilotOpen={copilotOpen} />
 
-        <div className={`flex flex-col gap-4 lg:flex-row`}>
-          {/* Left column */}
-          <div className={`flex min-w-0 flex-col gap-4 ${leftFlex}`}>
-            <div className="home-card h-[480px]"><WorkQueuesCard /></div>
-            <div className="home-card h-[360px]"><WorkflowsCard /></div>
-          </div>
-          {/* Right column */}
-          <div className={`flex min-w-0 flex-col gap-4 ${rightFlex}`}>
-            <div className="home-card h-[480px]">
-              {isAdmin ? <MyTeamCard /> : <MyAgentsCard />}
-            </div>
-            <div className="home-card h-[360px]"><PendingOutputsCard /></div>
+        {/* Primary work surface — My Work (65%) | My Team (35%) */}
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[65fr_35fr]">
+          <div className="home-card h-[520px]"><WorkQueuesCard /></div>
+          <div className="home-card h-[520px]">
+            {isAdmin ? <MyTeamCard /> : <MyAgentsCard />}
           </div>
         </div>
 
-        {/* Full-width Agent Catalog — Admin only */}
+        {/* Secondary panels — below the fold */}
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <div className="home-card h-[360px]"><WorkflowsCard /></div>
+          <div className="home-card h-[360px]"><PendingOutputsCard /></div>
+        </div>
+
+        {/* Agent Catalog — Admin only */}
         {isAdmin && (
           <div className="home-card">
             <AgentCatalog />
           </div>
         )}
 
-        {/* Personalized widget canvas — user-configurable, persisted to localStorage */}
+        {/* My Widgets — V2 */}
         <div className="home-card">
           <HomeCanvas />
         </div>

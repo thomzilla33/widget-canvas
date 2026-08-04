@@ -1,120 +1,62 @@
 import { useState } from 'react'
 import {
-  GitBranch, Zap, ChevronDown, UserPlus, ArrowUpRight, SkipForward,
-  Eye, XCircle, CheckCircle2, MessageSquare, ThumbsUp, Pencil,
+  GitBranch, Zap, ChevronDown, UserPlus, ArrowUpRight, Clock,
 } from 'lucide-react'
-import { WQ_TIER } from '../../../data/workqueue.js'
+import { WQ_SEVERITY } from '../../../data/workqueue.js'
 import { useRole } from '../../../state/RoleContext.jsx'
 
-const SECONDARY_ICON = {
-  Review:      Eye,
-  Reject:      XCircle,
-  Approve:     CheckCircle2,
-  Resolve:     CheckCircle2,
-  Respond:     MessageSquare,
-  Acknowledge: ThumbsUp,
+const STATUS_CHIP = {
+  'Claimed':           'bg-teal-50 text-teal-600 dark:bg-teal-400/10 dark:text-teal-400',
+  'In Progress':       'bg-aims-blue/10 text-aims-blue dark:bg-aims-blue/[0.12]',
+  'Awaiting External': 'bg-gray-100 text-gray-500 dark:bg-white/[0.05] dark:text-slate-400',
 }
 
 function fmtMins(m) {
   return m < 60 ? `~${m}m` : `~${Math.floor(m / 60)}h ${m % 60 ? `${m % 60}m` : ''}`
 }
 
-// ── Inline correction editor ──────────────────────────────────────────────────
-function CorrectionEditor({ original, onConfirm, onCancel }) {
-  const [text, setText] = useState(original)
-  const trimmed = text.trim()
+// ── D6: Snooze time-picker dropdown ──────────────────────────────────────────
+const SNOOZE_OPTIONS = [
+  { label: 'In 1 hour' },
+  { label: 'In 4 hours' },
+  { label: 'Tonight 9 PM' },
+  { label: 'Tomorrow 9 AM' },
+]
+
+function SnoozeDropdown({ onSnooze }) {
+  const [open, setOpen] = useState(false)
   return (
-    <div className="mt-2 rounded-lg border border-blue-200 bg-blue-50 p-2.5 dark:border-aims-blue/20 dark:bg-aims-blue/[0.07]">
-      <p className="mb-1.5 text-[10px] font-semibold text-blue-700 dark:text-blue-300">Corrected statement</p>
-      <textarea
-        value={text}
-        onChange={e => setText(e.target.value)}
-        rows={3}
-        className="w-full resize-none rounded-lg border border-blue-200 bg-white px-2.5 py-1.5 text-[11px] leading-relaxed text-gray-700 outline-none focus:border-aims-blue focus:ring-1 focus:ring-aims-blue/30 dark:border-aims-blue/20 dark:bg-slate-800 dark:text-slate-200"
-        aria-label="Correction text"
-      />
-      {trimmed === '' && (
-        <p className="mt-1 text-[10px] text-red-500">Correction cannot be empty.</p>
-      )}
-      <div className="mt-2 flex gap-1.5">
-        <button
-          type="button"
-          disabled={trimmed === ''}
-          onClick={() => trimmed && onConfirm(trimmed)}
-          className="inline-flex items-center gap-1 rounded-md bg-aims-blue px-2.5 py-1 text-[10px] font-semibold text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-40"
-        >
-          <CheckCircle2 size={9} /> Save correction
-        </button>
-        <button
-          type="button"
-          onClick={onCancel}
-          className="inline-flex items-center gap-1 rounded-md border border-gray-200 px-2.5 py-1 text-[10px] font-medium text-gray-400 transition-colors hover:bg-gray-50 dark:border-white/10 dark:hover:bg-white/[0.04]"
-        >
-          Cancel
-        </button>
-      </div>
-    </div>
-  )
-}
-
-// ── Attestation action row (Approval-type events only) ─────────────────────────
-function AttestationActions({ event, onApprove, onReject, onCorrect, onEscalate }) {
-  const [correcting, setCorrecting] = useState(false)
-
-  function startCorrect(e) { e.stopPropagation(); setCorrecting(true) }
-  function handleConfirm(text) { setCorrecting(false); onCorrect?.(event.id, text) }
-  function handleCancel()  { setCorrecting(false) }
-
-  const statement = event.statement ?? event.title
-
-  return (
-    <div>
-      <div className="flex flex-wrap gap-1.5">
-        <button
-          type="button"
-          onClick={(e) => { e.stopPropagation(); onApprove?.(event.id) }}
-          className="inline-flex items-center gap-1 rounded-md bg-emerald-500 px-2.5 py-1 text-[10px] font-semibold text-white transition-colors hover:bg-emerald-600"
-        >
-          <CheckCircle2 size={9} /> Approve
-        </button>
-        <button
-          type="button"
-          onClick={(e) => { e.stopPropagation(); onReject?.(event.id) }}
-          className="inline-flex items-center gap-1 rounded-md border border-red-200 px-2.5 py-1 text-[10px] font-semibold text-red-500 transition-colors hover:bg-red-50 dark:border-red-400/20 dark:text-red-400 dark:hover:bg-red-400/10"
-        >
-          <XCircle size={9} /> Reject
-        </button>
-        <button
-          type="button"
-          onClick={startCorrect}
-          className="inline-flex items-center gap-1 rounded-md border border-blue-200 px-2.5 py-1 text-[10px] font-semibold text-blue-600 transition-colors hover:bg-blue-50 dark:border-aims-blue/20 dark:text-blue-400 dark:hover:bg-aims-blue/[0.08]"
-        >
-          <Pencil size={9} /> Correct
-        </button>
-        <button
-          type="button"
-          onClick={(e) => { e.stopPropagation(); onEscalate?.(event) }}
-          className="inline-flex items-center gap-1 rounded-md border border-gray-200 px-2 py-0.5 text-[10px] font-medium text-gray-400 hover:bg-gray-50 dark:border-white/10 dark:text-slate-400 dark:hover:bg-white/[0.04]"
-        >
-          <ArrowUpRight size={9} /> Escalate
-        </button>
-      </div>
-      {correcting && (
-        <CorrectionEditor
-          original={statement}
-          onConfirm={handleConfirm}
-          onCancel={handleCancel}
-        />
+    <div className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        className="inline-flex items-center gap-1 rounded-md border border-gray-200 px-2 py-0.5 text-[10px] font-medium text-gray-500 hover:bg-gray-50 dark:border-white/10 dark:text-slate-400 dark:hover:bg-white/[0.05]"
+      >
+        <Clock size={9} aria-hidden="true" /> Snooze
+        <ChevronDown size={7} className={`transition-transform ${open ? 'rotate-180' : ''}`} aria-hidden="true" />
+      </button>
+      {open && (
+        <div className="absolute bottom-full left-0 z-50 mb-1 min-w-[132px] rounded-lg border border-gray-200 bg-white py-1 shadow-lg dark:border-white/10 dark:bg-[var(--surface-raised)]">
+          {SNOOZE_OPTIONS.map(opt => (
+            <button
+              key={opt.label}
+              type="button"
+              onClick={() => { onSnooze(opt); setOpen(false) }}
+              className="block w-full px-3 py-1.5 text-left text-[11px] text-gray-600 hover:bg-gray-50 dark:text-slate-300 dark:hover:bg-white/[0.05]"
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
       )}
     </div>
   )
 }
 
 // ── EventCard ─────────────────────────────────────────────────────────────────
-export function EventCard({ event, expanded, onToggle, onOpen, onEscalate, onSkip, onTrace, onApprove, onReject, onCorrect }) {
-  const t = WQ_TIER[event.tier] || WQ_TIER.headsup
+export function EventCard({ event, expanded, onToggle, onOpen, onEscalate, onSkip, onTrace }) {
+  const s = WQ_SEVERITY[event.severity] ?? WQ_SEVERITY.Standard
   const { isAdmin } = useRole()
-  const isApproval = event.type === 'Approval'
 
   function stopAndCall(fn) {
     return (e) => { e.stopPropagation(); fn?.() }
@@ -122,8 +64,8 @@ export function EventCard({ event, expanded, onToggle, onOpen, onEscalate, onSki
 
   return (
     <div
-      className={`cursor-pointer border-l-[3px] transition-colors ${t.border} ${
-        expanded ? 'bg-gray-50 dark:bg-white/[0.04]' : 'hover:bg-gray-50 dark:hover:bg-white/[0.02]'
+      className={`cursor-pointer border-l-[3px] transition-colors ${s.border} ${
+        expanded ? s.expanded : s.rowBg
       }`}
       onClick={onToggle}
     >
@@ -143,11 +85,21 @@ export function EventCard({ event, expanded, onToggle, onOpen, onEscalate, onSki
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-1">
             <span className="rounded-full border border-gray-200 px-1.5 py-0.5 text-[9px] font-medium text-gray-500 dark:border-white/10 dark:text-slate-400">
-              {event.type}
+              {event.wqType}
             </span>
-            {event.missionCritical && (
-              <span className="flex items-center gap-0.5 rounded-full bg-red-500/10 px-1.5 py-0.5 text-[9px] font-bold text-red-600 dark:text-red-400">
-                <Zap size={8} aria-hidden="true" /> Critical
+            {STATUS_CHIP[event.status] && (
+              <span className={`rounded-full px-1.5 py-0.5 text-[9px] font-semibold ${STATUS_CHIP[event.status]}`}>
+                {event.status === 'Awaiting External' ? 'Awaiting' : event.status}
+              </span>
+            )}
+            {event.severity === 'Blocking' && (
+              <span className={`flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[9px] font-bold ${s.chip}`}>
+                <Zap size={8} aria-hidden="true" /> Blocking
+              </span>
+            )}
+            {event.customer && (
+              <span className="rounded-full border border-blue-200 bg-blue-50 px-1.5 py-0.5 text-[9px] font-semibold text-blue-600 dark:border-blue-400/20 dark:bg-blue-400/[0.07] dark:text-blue-400">
+                Customer
               </span>
             )}
             {event.blastRadius > 0 && (
@@ -186,67 +138,34 @@ export function EventCard({ event, expanded, onToggle, onOpen, onEscalate, onSki
         </div>
       </div>
 
-      {/* Expanded action panel */}
+      {/* D6: Routing zone — type-invariant, reversible routing verbs only */}
       {expanded && (
         <div className="border-t border-gray-100 px-3 pb-3 pt-2.5 dark:border-white/[0.06]" onClick={e => e.stopPropagation()}>
-          {isApproval ? (
-            /* Attestation actions for Approval-type events */
-            <AttestationActions
-              event={event}
-              onApprove={onApprove}
-              onReject={onReject}
-              onCorrect={onCorrect}
-              onEscalate={onEscalate}
-            />
-          ) : (
-            /* Standard actions for non-Approval events */
-            <>
-              <button
-                type="button"
-                onClick={() => onOpen?.(event)}
-                className="btn-primary mb-2 w-full justify-center text-xs"
-              >
-                {event.quickActions?.primary ?? 'Open'}
-              </button>
-              <div className="flex flex-wrap gap-1">
-                {(event.quickActions?.secondary ?? []).map(action => {
-                  const Icon = SECONDARY_ICON[action]
-                  return (
-                    <button
-                      key={action}
-                      type="button"
-                      onClick={() => onOpen?.(event, action)}
-                      className="inline-flex items-center gap-1 rounded-md border border-gray-200 px-2 py-0.5 text-[10px] font-medium text-gray-500 hover:bg-gray-50 dark:border-white/10 dark:text-slate-400 dark:hover:bg-white/[0.05]"
-                    >
-                      {Icon && <Icon size={9} aria-hidden="true" />} {action}
-                    </button>
-                  )
-                })}
-                <button
-                  type="button"
-                  onClick={() => onEscalate?.(event)}
-                  className="inline-flex items-center gap-1 rounded-md border border-red-200 px-2 py-0.5 text-[10px] font-medium text-red-500 hover:bg-red-50 dark:border-red-400/20 dark:text-red-400 dark:hover:bg-red-400/10"
-                >
-                  <ArrowUpRight size={9} aria-hidden="true" /> Escalate
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onSkip?.(event.id)}
-                  className="inline-flex items-center gap-1 rounded-md border border-gray-200 px-2 py-0.5 text-[10px] font-medium text-gray-400 hover:bg-gray-50 dark:border-white/10 dark:text-slate-400 dark:hover:bg-white/[0.04]"
-                >
-                  <SkipForward size={9} aria-hidden="true" /> Skip
-                </button>
-                <button
-                  type="button"
-                  disabled
-                  title="Assign to team member — coming in V1.5"
-                  className="inline-flex cursor-not-allowed items-center gap-1 rounded-md border border-gray-200 px-2 py-0.5 text-[10px] font-medium text-gray-400 opacity-40 dark:border-white/10 dark:text-slate-400"
-                >
-                  <UserPlus size={9} aria-hidden="true" /> Assign
-                </button>
-              </div>
-            </>
-          )}
+          <button
+            type="button"
+            onClick={() => onOpen?.(event)}
+            className="btn-primary mb-2 w-full justify-center text-xs"
+          >
+            Open <ArrowUpRight size={10} aria-hidden="true" className="ml-0.5" />
+          </button>
+          <div className="flex flex-wrap gap-1">
+            <SnoozeDropdown onSnooze={(opt) => onSkip?.(event.id, opt)} />
+            <button
+              type="button"
+              onClick={() => onEscalate?.(event)}
+              className="inline-flex items-center gap-1 rounded-md border border-red-200 px-2 py-0.5 text-[10px] font-medium text-red-500 hover:bg-red-50 dark:border-red-400/20 dark:text-red-400 dark:hover:bg-red-400/10"
+            >
+              <ArrowUpRight size={9} aria-hidden="true" /> Escalate
+            </button>
+            <button
+              type="button"
+              disabled
+              title="Reassign to team member — coming in V1.5"
+              className="inline-flex cursor-not-allowed items-center gap-1 rounded-md border border-gray-200 px-2 py-0.5 text-[10px] font-medium text-gray-400 opacity-40 dark:border-white/10 dark:text-slate-400"
+            >
+              <UserPlus size={9} aria-hidden="true" /> Reassign
+            </button>
+          </div>
         </div>
       )}
     </div>
