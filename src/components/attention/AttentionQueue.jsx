@@ -2,22 +2,20 @@ import { useEffect, useRef } from 'react'
 import {
   ShieldAlert, ShieldCheck, Bot, ListChecks, Mail, CircleAlert,
   Eye, RefreshCw, CheckSquare, BookOpen, MessageSquare, Bell,
-  ArrowRight, HelpCircle, FileText, Search, X,
+  ArrowLeft, ArrowRight, HelpCircle, FileText, Search, X,
 } from 'lucide-react'
 import { groupItems } from '../home/attention/attentionModel.js'
-import { WQ_TIER } from '../../data/workqueue.js'
 
 // ── Type → icon (WQ items) ───────────────────────────────────────────────────
 const TYPE_ICONS = {
-  Approval:    ShieldCheck,
-  Review:      Eye,
-  Remap:       RefreshCw,
-  Task:        CheckSquare,
-  Train:       BookOpen,
-  Respond:     MessageSquare,
-  Acknowledge: Bell,
-  Handoff:     ArrowRight,
-  Question:    HelpCircle,
+  'HTL Continuation': ListChecks,
+  'Handoff':          ArrowRight,
+  'Ask':              HelpCircle,
+  'Train Me':         BookOpen,
+  'Promotion':        ShieldCheck,
+  'Review':           Eye,
+  'Break Glass':      ShieldAlert,
+  'Operations':       CheckSquare,
 }
 
 const STUDIO_LABEL = {
@@ -36,15 +34,11 @@ const GROUP_STYLES = {
 // ── Style resolver ───────────────────────────────────────────────────────────
 function resolveStyle(item) {
   if (item._kind === 'wq') {
-    const Icon = TYPE_ICONS[item.type] ?? FileText
-    const tiers = {
-      actnow:   { bg: 'bg-red-500/10 dark:bg-red-400/15',     ic: 'text-red-500 dark:text-red-400',    dot: 'bg-red-500' },
-      critical: { bg: 'bg-amber-500/10 dark:bg-amber-400/15', ic: 'text-amber-500 dark:text-amber-400', dot: 'bg-amber-400' },
-      action:   { bg: 'bg-aims-blue/10',                      ic: 'text-aims-blue',                    dot: 'bg-[#00b5d9]' },
-      headsup:  { bg: 'bg-gray-100 dark:bg-white/[0.06]',     ic: 'text-gray-400 dark:text-slate-400',  dot: null },
-    }
-    const s = tiers[item.tier] ?? tiers.action
-    return { Icon, iconBg: s.bg, iconColor: s.ic, dot: s.dot }
+    const Icon = TYPE_ICONS[item.wqType] ?? FileText
+    const sv = item.severity === 'Blocking'
+      ? { bg: 'bg-red-500/10 dark:bg-red-400/15', ic: 'text-red-500 dark:text-red-400',  dot: 'bg-red-500'   }
+      : { bg: 'bg-aims-blue/10',                   ic: 'text-aims-blue',                  dot: 'bg-[#00b5d9]' }
+    return { Icon, iconBg: sv.bg, iconColor: sv.ic, dot: sv.dot }
   }
   if (item._kind === 'gov') {
     return {
@@ -93,9 +87,9 @@ function itemSnippet(item) {
 
 // ── Tag builders ─────────────────────────────────────────────────────────────
 function kindBadge(item) {
-  if (item._kind === 'wq')    return item.type ?? 'Work'
+  if (item._kind === 'wq')    return item.wqType ?? 'Work'
   if (item._kind === 'gov')   return item.statusLabel ?? 'Policy'
-  if (item._kind === 'htl')   return 'Agent pause'
+  if (item._kind === 'htl')   return 'Needs review'
   if (item._kind === 'task')  return item.due ?? 'Task'
   if (item._kind === 'inbox') return item.unread ? 'Unread' : 'Message'
   return null
@@ -105,8 +99,7 @@ function kindBadgeColor(item) {
   if (item._kind === 'gov' && item.blocking) return 'bg-red-500/[0.15] text-red-600 dark:bg-red-400/[0.18] dark:text-red-400'
   if (item._kind === 'gov')                  return 'bg-aims-blue/[0.15] text-aims-blue'
   if (item._kind === 'htl')                  return 'bg-purple-500/[0.22] text-purple-600 dark:bg-purple-400/[0.22] dark:text-purple-300'
-  if (item._kind === 'wq' && item.tier === 'actnow')   return 'bg-red-500/[0.15] text-red-600 dark:bg-red-400/[0.18] dark:text-red-400'
-  if (item._kind === 'wq' && item.tier === 'critical') return 'bg-amber-400/[0.22] text-amber-700 dark:bg-amber-400/[0.18] dark:text-amber-400'
+  if (item._kind === 'wq' && item.severity === 'Blocking') return 'bg-red-500/[0.15] text-red-600 dark:bg-red-400/[0.18] dark:text-red-400'
   if (item.due === 'Overdue' || item.status === 'error') return 'bg-red-500/[0.15] text-red-600 dark:bg-red-400/[0.18] dark:text-red-400'
   if (item.due === 'Today')                  return 'bg-amber-400/[0.22] text-amber-700 dark:bg-amber-400/[0.18] dark:text-amber-400'
   if (item._kind === 'inbox' && item.unread) return 'bg-aims-blue/[0.15] text-aims-blue'
@@ -114,8 +107,8 @@ function kindBadgeColor(item) {
 }
 
 function itemDetail(item) {
-  if (item._kind === 'gov' && item.blocking) return `Blocking · ${item.impact?.workflows ?? 0}w paused`
-  if (item._kind === 'gov')                  return `${item.impact?.workflows ?? 0}w · ${item.impact?.agents ?? 0}a`
+  if (item._kind === 'gov' && item.blocking) return `Blocking · ${item.impact?.workflows ?? 0} workflows`
+  if (item._kind === 'gov')                  return `${item.impact?.workflows ?? 0} workflows`
   if (item._kind === 'htl' && item.source)   return item.source
   if (item._kind === 'inbox' && item.from)   return `From ${item.from}`
   if (item._kind === 'task' && item.assignee) return item.assignee
@@ -125,16 +118,21 @@ function itemDetail(item) {
 function buildTags(item) {
   const tags = []
   if (item._kind === 'wq') {
+    if (item.severity === 'Blocking') {
+      tags.push({ label: 'Blocking', cls: 'rounded-full px-2 py-[3px] text-[10px] font-semibold leading-tight bg-red-500/10 text-red-600 dark:bg-red-400/15 dark:text-red-400' })
+    }
+    if (item.customer) {
+      tags.push({ label: 'Customer', cls: 'rounded-full border border-blue-200 px-2 py-[3px] text-[10px] font-semibold leading-tight bg-blue-50 text-blue-600 dark:border-blue-400/20 dark:bg-blue-400/[0.07] dark:text-blue-400' })
+    }
     if (item.dueLabel) {
-      const tier = WQ_TIER[item.tier] ?? WQ_TIER.action
-      tags.push({ label: item.dueLabel, cls: `rounded-full px-2 py-[3px] text-[10px] font-semibold leading-tight ${tier.badge}` })
+      const dueCls = item.severity === 'Blocking'
+        ? 'rounded-full px-2 py-[3px] text-[10px] font-semibold leading-tight bg-red-500/10 text-red-600 dark:bg-red-400/10 dark:text-red-400'
+        : 'rounded-full px-2 py-[3px] text-[10px] font-semibold leading-tight bg-gray-100 text-gray-500 dark:bg-white/[0.07] dark:text-slate-400'
+      tags.push({ label: item.dueLabel, cls: dueCls })
     }
     if (item.studio) {
       const c = item.studioColor ?? '#888'
       tags.push({ label: STUDIO_LABEL[item.studio] ?? item.studio, cls: 'rounded-full px-2 py-[3px] text-[10px] font-semibold leading-tight', style: { backgroundColor: c + '30', color: c } })
-    }
-    if (item.missionCritical) {
-      tags.push({ label: 'Mission Critical', cls: 'rounded-full px-2 py-[3px] text-[10px] font-semibold leading-tight bg-amber-400/[0.22] text-amber-700 dark:bg-amber-400/[0.18] dark:text-amber-400' })
     }
     if (item.blastRadius > 0) {
       tags.push({ label: `${item.blastRadius} ${item.blastRadius === 1 ? 'flow' : 'flows'} blocked`, cls: 'text-[10px] text-gray-400 dark:text-slate-400' })
@@ -163,8 +161,8 @@ function QueueItemCard({ item, isActive, onClick }) {
       onClick={onClick}
       className={`group w-full text-left rounded-xl border px-3 py-3 transition-all duration-150 ${
         isActive
-          ? 'border-aims-blue/40 bg-aims-blue/[0.08] shadow-sm dark:border-aims-blue/50 dark:bg-aims-blue/[0.12] ring-1 ring-inset ring-aims-blue/20'
-          : 'border-gray-200/80 bg-white shadow-sm hover:border-gray-300 hover:shadow dark:border-white/[0.08] dark:bg-[var(--surface-raised)] dark:hover:border-white/[0.16]'
+          ? 'border-aims-blue/40 bg-aims-blue/[0.08] dark:border-aims-blue/50 dark:bg-aims-blue/[0.12] ring-1 ring-inset ring-aims-blue/20'
+          : 'border-gray-200/80 bg-white hover:border-gray-300 dark:border-white/[0.08] dark:bg-[var(--surface-raised)] dark:hover:border-white/[0.16]'
       }`}
       aria-pressed={isActive}
     >
@@ -231,7 +229,7 @@ const QUEUE_TABS = [
 ]
 
 // ── Queue list ───────────────────────────────────────────────────────────────
-export function AttentionQueue({ items, totalCount, selectedId, onSelect, search, filterCat, onSearch, onFilterCat, tabCounts = {} }) {
+export function AttentionQueue({ items, totalCount, awaitingCount = 0, urgent, onBack, selectedId, onSelect, search, filterCat, onSearch, onFilterCat, tabCounts = {} }) {
   const groups    = groupItems(items)
   const flatItems = groups.flatMap(g => g.items)
   const selIdx    = flatItems.findIndex(i => i.id === selectedId)
@@ -258,19 +256,41 @@ export function AttentionQueue({ items, totalCount, selectedId, onSelect, search
   return (
     <div
       ref={queueRef}
-      className="flex h-full w-full flex-col bg-gray-50 dark:bg-[var(--surface)]"
+      className="flex h-full w-full flex-col bg-gray-50 dark:bg-[var(--canvas)]"
       onKeyDown={handleKeyDown}
       tabIndex={-1}
       aria-label="Attention queue"
     >
-      {/* ── Internal panel header: Queue label + search + filter chips ── */}
-      <div className="shrink-0 border-b border-gray-200/80 dark:border-white/[0.07] bg-gray-50 dark:bg-[var(--surface)] px-3 pt-3 pb-2.5 flex flex-col gap-2">
-        {/* Queue [N] label */}
-        <div className="flex items-center gap-1.5">
-          <span className="text-[11px] font-semibold text-[var(--muted-foreground)]">Queue</span>
-          <span className="rounded-full bg-aims-blue/10 px-1.5 py-0.5 text-[10px] font-bold text-aims-blue">
-            {totalCount}
-          </span>
+      {/* ── Panel header: back + title + search + filter chips ── */}
+      <div className="shrink-0 border-b border-gray-200/80 dark:border-white/[0.07] bg-gray-50 dark:bg-[var(--canvas)] px-3 pt-3 pb-2.5 flex flex-col gap-2">
+        {/* Back button + Work Queue title + counts */}
+        <div className="flex items-center gap-2">
+          {onBack && (
+            <button
+              type="button"
+              onClick={onBack}
+              aria-label="Back to Home"
+              className="grid h-5 w-5 shrink-0 place-items-center rounded text-[var(--muted-foreground)] hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
+            >
+              <ArrowLeft size={13} />
+            </button>
+          )}
+          <span className="text-[13px] font-semibold leading-tight text-[var(--foreground)]">Work Queue</span>
+          <div className="ml-auto flex items-center gap-1.5">
+            <span className="rounded-full bg-aims-blue/10 px-1.5 py-0.5 text-[10px] font-bold text-aims-blue">
+              {totalCount} open
+            </span>
+            {awaitingCount > 0 && (
+              <span className="rounded-full bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium text-gray-500 dark:bg-white/[0.05] dark:text-slate-400">
+                {awaitingCount} waiting on others
+              </span>
+            )}
+            {urgent > 0 && (
+              <span className="rounded-full bg-red-500/10 px-1.5 py-0.5 text-[10px] font-bold text-red-600 dark:text-red-400">
+                {urgent} urgent
+              </span>
+            )}
+          </div>
         </div>
         {/* Search */}
         <div className="relative flex h-8 items-center rounded-lg border border-white/[0.10] bg-white dark:bg-[var(--surface-raised)]">

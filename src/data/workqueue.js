@@ -58,7 +58,7 @@ export const MY_WORK_EVENTS = [
       { action: 'Escalated to human queue', by: 'SupportBot v2', at: '12:02 PM' },
       { action: 'Webchat session started', by: 'Marcus Webb', at: '11:54 AM' },
     ],
-    quickActions: { primary: 'Take ownership', secondary: ['Reassign'] },
+    quickActions: { primary: 'Assign to me', secondary: ['Reassign'] },
   },
   { id: 'wq-4',
     wqType: 'Handoff', severity: 'Blocking', urgencyScore: 4320,
@@ -74,7 +74,7 @@ export const MY_WORK_EVENTS = [
       { action: 'Deprecation notice received', by: 'Model Registry', at: 'Jul 19, 11:00 AM' },
       { action: 'Routed to Agent Ops', by: 'System', at: 'Jul 19, 11:01 AM' },
     ],
-    quickActions: { primary: 'Open Review', secondary: ['Escalate'] },
+    quickActions: { primary: 'Open review', secondary: ['Escalate'] },
   },
 
   // ── Ask ───────────────────────────────────────────────────────────────────
@@ -161,7 +161,7 @@ export const MY_WORK_EVENTS = [
       { action: 'First approval granted', by: 'Ana Restrepo', at: 'Jul 21, 2:15 PM' },
       { action: 'Access request submitted', by: 'Felipe Vargas', at: 'Jul 21, 2:00 PM' },
     ],
-    quickActions: { primary: 'Authorize', secondary: ['Reject', 'Escalate'] },
+    quickActions: { primary: 'Approve', secondary: ['Reject', 'Escalate'] },
     // D3 Quorum modifier — Break Glass requires multi-approver gate
     quorum: {
       required: 2,
@@ -204,7 +204,7 @@ export const MY_WORK_EVENTS = [
     auditTrail: [
       { action: 'Schema drift detected', by: 'Data Studio', at: 'Jul 20, 3:12 PM' },
     ],
-    quickActions: { primary: 'Open remap', secondary: ['Escalate'] },
+    quickActions: { primary: 'Remap now', secondary: ['Escalate'] },
   },
   { id: 'wq-10',
     wqType: 'Operations', severity: 'Standard', urgencyScore: 20160,
@@ -221,7 +221,7 @@ export const MY_WORK_EVENTS = [
       { action: 'Governance tasks assigned to Thomas G.', by: 'System', at: 'Jul 14, 9:05 AM' },
       { action: '2-week reminder sent', by: 'System', at: 'Jul 25, 8:00 AM' },
     ],
-    quickActions: { primary: 'Review Checklist', secondary: ['Escalate'] },
+    quickActions: { primary: 'Review checklist', secondary: ['Escalate'] },
   },
 
   // ── Review ────────────────────────────────────────────────────────────────
