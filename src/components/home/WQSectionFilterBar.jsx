@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { Search, ChevronDown, X, ArrowUpDown } from 'lucide-react'
 
 const STUDIOS = ['GOV', 'AGNT', 'DATA', 'TASK']
-const TYPES   = ['Approval', 'Review', 'Remap', 'Respond', 'Resolve', 'Acknowledge', 'Train', 'Task', 'Question']
+const TYPES   = ['HTL Continuation', 'Handoff', 'Ask', 'Train Me', 'Promotion', 'Review', 'Break Glass', 'Operations']
 const SORTS   = [
   { id: 'priority', label: 'Priority' },
   { id: 'time',     label: 'Est. time' },
@@ -10,10 +10,8 @@ const SORTS   = [
 ]
 const TIERS = [
   { id: 'all',      label: 'All' },
-  { id: 'actnow',   label: 'Act Now',  dot: 'bg-red-500' },
-  { id: 'critical', label: 'Critical', dot: 'bg-red-400' },
-  { id: 'action',   label: 'Action',   dot: 'bg-amber-400' },
-  { id: 'headsup',  label: 'Heads-up', dot: 'bg-slate-400' },
+  { id: 'Blocking', label: 'Blocking', dot: 'bg-red-500' },
+  { id: 'Standard', label: 'Standard', dot: 'bg-gray-400' },
 ]
 
 function FilterDropdown({ label, items, selected, onToggle, open, onOpen, counts }) {
@@ -89,8 +87,8 @@ export function WQSectionFilterBar({ events, onFilter }) {
     let result = events.filter(e => {
       const matchQ  = !q        || e.title.toLowerCase().includes(lower)
       const matchSt = !st.length || st.includes(e.studio)
-      const matchTy = !ty.length || ty.includes(e.type)
-      const matchT  = t === 'all' || e.tier === t
+      const matchTy = !ty.length || ty.includes(e.wqType)
+      const matchT  = t === 'all' || e.severity === t
       return matchQ && matchSt && matchTy && matchT
     })
     if (sort === 'time')   result = [...result].sort((a, b) => a.estimatedMinutes - b.estimatedMinutes)
@@ -121,12 +119,12 @@ export function WQSectionFilterBar({ events, onFilter }) {
   const hasChips    = studios.length > 0 || types.length > 0
 
   const tierCounts = TIERS.reduce((acc, t) => {
-    acc[t.id] = t.id === 'all' ? events.length : events.filter(e => e.tier === t.id).length
+    acc[t.id] = t.id === 'all' ? events.length : events.filter(e => e.severity === t.id).length
     return acc
   }, {})
 
-  const studioCounts = STUDIOS.reduce((acc, s) => { acc[s] = events.filter(e => e.studio === s).length; return acc }, {})
-  const typeCounts   = TYPES.reduce((acc, t)   => { acc[t] = events.filter(e => e.type === t).length;   return acc }, {})
+  const studioCounts = STUDIOS.reduce((acc, s) => { acc[s] = events.filter(e => e.studio === s).length;   return acc }, {})
+  const typeCounts   = TYPES.reduce((acc, t)   => { acc[t] = events.filter(e => e.wqType === t).length;   return acc }, {})
 
   return (
     <div

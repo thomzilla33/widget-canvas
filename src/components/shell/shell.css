@@ -115,10 +115,7 @@ body {
   flex-direction: column;
   overflow: hidden;
   min-width: 0;
-  border-radius: 12px;
   background: var(--main-bg);
-  border: 1px solid var(--shell-sidebar-border);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.18), 0 8px 24px rgba(0, 0, 0, 0.22);
 }
 .views {
   flex: 1;

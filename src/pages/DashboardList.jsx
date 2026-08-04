@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useLoadMore } from '../hooks/useLoadMore.js'
-import { MapPin, FileBarChart, Sparkles, MoreHorizontal, Eye, Pencil, Trash2, Copy, Plus } from 'lucide-react'
-import { PageHeader, Badge, EmptyState } from '../components/common/index.jsx'
+import { MapPin, FileBarChart, Sparkles, MoreHorizontal, Eye, Pencil, Trash2, Copy, Plus, ArrowRight } from 'lucide-react'
+import { Badge, EmptyState } from '../components/common/index.jsx'
 import { Tag } from '@/components/ui/Tag'
 import { Button } from '@/components/ui/Button'
 import { CardContainer } from '@/components/ui/CardContainer'
@@ -49,6 +49,8 @@ export default function DashboardList() {
   const [status, setStatus] = useState('All')
   const [kind, setKind] = useState('All')
   const [owner, setOwner] = useState('All')
+  const [showArchived, setShowArchived] = useState(false)
+  const [onlyMine, setOnlyMine] = useState(false)
   const [sortBy, setSortBy] = useState('recent')
   const [sortDir, setSortDir] = useState('desc')
 
@@ -112,26 +114,40 @@ export default function DashboardList() {
         </div>
       )}
 
-      <PageHeader
-        title="Dashboards"
-        description={`${dashboards.length} dashboards · ${publishedCount} published`}
-        actions={
-          isAdmin ? (
-            <Button onClick={() => setLauncher(true)} icon={<Sparkles size={15} />}>
-              Create dashboard
-            </Button>
-          ) : null
-        }
-      />
+      <div className="px-6 pt-2 pb-4 flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-[22px] font-bold tracking-tight text-gray-900 dark:text-slate-100">Dashboards</h1>
+          <p className="mt-1 text-[13px] text-gray-500 dark:text-slate-400">{dashboards.length} dashboards · {publishedCount} published</p>
+        </div>
+        {isAdmin && (
+          <Button onClick={() => setLauncher(true)} icon={<Sparkles size={15} />} className="shrink-0">
+            Create dashboard
+          </Button>
+        )}
+      </div>
 
       <FilterToolbar
         searchValue={search}
         onSearch={setSearch}
         searchPlaceholder="Search dashboards…"
         filters={[
-          { id: 'status', label: 'Status', value: status, onChange: setStatus, options: STATUS_OPTIONS },
-          { id: 'kind', label: 'Kind', value: kind, onChange: setKind, options: KIND_OPTIONS },
-          { id: 'owner', label: 'Owner', value: owner, onChange: setOwner, options: ownerOptions },
+          { id: 'status', label: 'Status', type: 'chips', value: status, onChange: setStatus, options: STATUS_OPTIONS },
+          {
+            id: '_opts',
+            label: 'Options',
+            type: 'toggles',
+            toggleOptions: [
+              { value: 'showArchived', label: 'Show archived items' },
+              { value: 'onlyMine',    label: 'Only my items' },
+            ],
+            toggleValues: { showArchived, onlyMine },
+            onToggleChange: (key, val) => {
+              if (key === 'showArchived') setShowArchived(val)
+              if (key === 'onlyMine')    setOnlyMine(val)
+            },
+          },
+          { id: 'owner', label: 'Assign', type: 'avatars', value: owner, onChange: setOwner, options: ownerOptions },
+          { id: 'kind',  label: 'Kind',   type: 'checkboxes', value: kind, onChange: setKind, options: KIND_OPTIONS },
         ]}
         sort={{
           value: sortBy,

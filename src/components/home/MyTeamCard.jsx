@@ -9,8 +9,8 @@ export function MyTeamCard() {
   const navigate = useNavigate()
   const { isAdmin } = useRole()
 
-  const actnowTotal = isAdmin
-    ? TEAM_ROSTER.reduce((s, m) => s + m.events.actnow, 0)
+  const blockingTotal = isAdmin
+    ? TEAM_ROSTER.reduce((s, m) => s + m.events.blocking, 0)
     : 0
 
   return (
@@ -18,7 +18,7 @@ export function MyTeamCard() {
       <CardHeader
         icon={<Users size={14} />}
         title="My Team"
-        badge={actnowTotal || undefined}
+        badge={blockingTotal || undefined}
         action={{ label: 'See all', onClick: () => navigate('/profiles') }}
       />
       <MyTeamTab isManager={isAdmin} />

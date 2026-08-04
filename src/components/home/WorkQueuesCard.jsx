@@ -45,7 +45,7 @@ export function WorkQueuesCard() {
     showToast(`Escalated "${event?.title?.slice(0, 40) ?? 'event'}".`)
   }
 
-  const workBadge  = MY_WORK_EVENTS.filter(e => ['actnow', 'critical'].includes(e.tier)).length
+  const workBadge  = MY_WORK_EVENTS.filter(e => e.severity === 'Blocking').length
   const focusBadge = MY_DAY_QUEUE.length
   const badge      = tab === 'work' ? (workBadge || undefined) : (focusBadge || undefined)
 

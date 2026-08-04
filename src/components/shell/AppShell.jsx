@@ -144,8 +144,7 @@ function AppShellInner() {
           onItemClick={id => navigate(ID_TO_PATH[id])}
           defaultCollapsed={true}
         />
-        <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column',
-                      padding: '0 0 8px 0' }}>
+        <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
           <main className="main">
             <div className="views">
               <Outlet />

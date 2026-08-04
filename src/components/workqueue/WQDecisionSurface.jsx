@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Bot, Building2, CheckCircle2, ChevronRight, Clock, MessageSquare, ShieldAlert, Shuffle, User2 } from 'lucide-react'
-import { WQConfirmBar, WQSecondaryLinks, SectionLabel, Divider } from './WQPrimitives.jsx'
+import { WQConfirmBar, SectionLabel, Divider } from './WQPrimitives.jsx'
 import { WQClaimsList } from './WQClaimsList.jsx'
 import { TEAM_ROSTER } from '../../data/workqueue.js'
 
@@ -98,7 +98,6 @@ function HTLContinuation({ event, md, onResolve, onDecline, isClient }) {
               Block
             </button>
           </div>
-          <WQSecondaryLinks onDecline={onDecline} declineLabel="Skip for now" />
         </div>
       )}
       {phase === 'confirm-approve' && (
@@ -211,7 +210,6 @@ function HTLHandoff({ event, md, onResolve, onDecline, isClient }) {
           <button type="button" onClick={() => setPickingTeam(true)} className="w-full rounded-lg border border-gray-200 py-2 text-xs font-medium text-gray-600 hover:bg-gray-50 dark:border-white/[0.08] dark:text-slate-300 dark:hover:bg-white/[0.04]">
             Reassign to teammate
           </button>
-          <WQSecondaryLinks onDecline={onDecline} />
         </div>
       )}
       {phase === 'acknowledged' && (
@@ -336,7 +334,6 @@ function GovPromotion({ event, md, onResolve, onDecline }) {
           >
             Submit attestation
           </button>
-          <WQSecondaryLinks onDecline={onDecline} declineLabel="Escalate" />
         </div>
       )}
       {phase === 'confirm-submit' && (
@@ -352,6 +349,12 @@ function GovPromotion({ event, md, onResolve, onDecline }) {
 
   return (
     <Surface footer={footer}>
+      {/* D3 archetype + Package modifier badge */}
+      <div className="flex items-center gap-2">
+        <span className="rounded-full bg-purple-50 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-purple-600 dark:bg-purple-400/10 dark:text-purple-400">Adjudicate</span>
+        <span className="rounded-full bg-purple-50/60 px-2 py-0.5 text-[9px] font-semibold text-purple-500 dark:bg-purple-400/[0.07] dark:text-purple-400">Package · {md.claims?.length ?? 0} items</span>
+      </div>
+
       <div>
         <SectionLabel>Situation</SectionLabel>
         <p className="text-sm leading-relaxed text-gray-600 dark:text-slate-400">{event.description}</p>
@@ -439,7 +442,6 @@ function GovReview({ event, md, onResolve, onDecline }) {
           >
             Submit review
           </button>
-          <WQSecondaryLinks onDecline={onDecline} declineLabel="Escalate" />
         </div>
       )}
       {phase === 'confirm-submit' && (
@@ -509,7 +511,6 @@ function GovBreakGlass({ event, md, onResolve, onDecline }) {
           <button type="button" onClick={() => setPhase('confirm-deny')} className="w-full rounded-lg border border-red-200/60 py-2 text-xs font-medium text-red-500 hover:bg-red-50/50 dark:border-red-900/30 dark:text-red-400 dark:hover:bg-red-950/20">
             Deny access
           </button>
-          <WQSecondaryLinks onDecline={onDecline} declineLabel="Skip for now" />
         </div>
       )}
       {phase === 'confirm-approve' && (
@@ -544,6 +545,12 @@ function GovBreakGlass({ event, md, onResolve, onDecline }) {
 
   return (
     <Surface footer={footer}>
+      {/* D3 archetype + Quorum modifier badge */}
+      <div className="flex items-center gap-2">
+        <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-amber-600 dark:bg-amber-400/10 dark:text-amber-400">Adjudicate</span>
+        <span className="rounded-full bg-amber-50/60 px-2 py-0.5 text-[9px] font-semibold text-amber-500 dark:bg-amber-400/[0.07] dark:text-amber-400">Quorum · {md.approvalReceived + 1} of {md.approvalRequired}</span>
+      </div>
+
       {/* Access request */}
       <div>
         <SectionLabel accent="amber">Access request</SectionLabel>
@@ -619,7 +626,6 @@ function GovChangeRequest({ event, md, onResolve, onDecline }) {
               Reject
             </button>
           </div>
-          <WQSecondaryLinks onDecline={onDecline} declineLabel="Request more info" />
         </div>
       )}
       {phase === 'confirm-accept' && (
@@ -773,7 +779,6 @@ function TrainMe({ event, md, onResolve, onDecline }) {
           >
             Reject all changes
           </button>
-          <WQSecondaryLinks onDecline={onDecline} />
         </div>
       )}
       {phase === 'confirm-promote' && (
@@ -879,9 +884,10 @@ function TrainMe({ event, md, onResolve, onDecline }) {
 // ── 8. Inbound Question ───────────────────────────────────────────────────────
 
 function InboundQuestion({ event, md, onResolve, onDecline }) {
-  const [phase, setPhase]     = useState('idle') // idle | composing | confirm-send
-  const [reply, setReply]     = useState('')
-  const [toast, setToast]     = useState(null)
+  const [phase, setPhase]         = useState('idle') // idle | composing | confirm-send | confirm-close | declining | confirm-decline
+  const [reply, setReply]         = useState('')
+  const [declineReason, setDeclineReason] = useState('')
+  const [toast, setToast]         = useState(null)
 
   const thread   = md.thread ?? {}
   const comments = thread.comments ?? []
@@ -915,7 +921,14 @@ function InboundQuestion({ event, md, onResolve, onDecline }) {
               </button>
             )}
           </div>
-          <WQSecondaryLinks onDecline={onDecline} declineLabel="Skip for now" />
+          {/* D7: Decline with reason — keeps Ask from being an unbounded channel */}
+          <button
+            type="button"
+            onClick={() => setPhase('declining')}
+            className="w-full rounded-lg border border-gray-200 py-2 text-xs font-medium text-gray-500 hover:bg-gray-50 dark:border-white/[0.08] dark:text-slate-400 dark:hover:bg-white/[0.04]"
+          >
+            Decline with reason
+          </button>
         </div>
       )}
       {phase === 'composing' && (
@@ -957,6 +970,47 @@ function InboundQuestion({ event, md, onResolve, onDecline }) {
           confirmLabel="Close thread"
           onCancel={() => setPhase('idle')}
           onConfirm={() => onResolve('Thread closed — customer notified')}
+        />
+      )}
+      {phase === 'declining' && (
+        <div className="space-y-2">
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400 dark:text-slate-400">
+            Reason for declining
+          </p>
+          <textarea
+            value={declineReason}
+            onChange={e => setDeclineReason(e.target.value)}
+            rows={3}
+            className="input w-full resize-none text-xs"
+            placeholder="Explain why you can't handle this request — your reason will be sent back to the requester…"
+            autoFocus
+          />
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => { setDeclineReason(''); setPhase('idle') }}
+              className="flex-1 rounded-lg border border-gray-200 py-2 text-xs text-gray-500 dark:border-white/[0.08] dark:text-slate-400"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              disabled={!declineReason.trim()}
+              onClick={() => setPhase('confirm-decline')}
+              className="flex-1 rounded-lg border border-red-200 py-2 text-xs font-medium text-red-500 hover:bg-red-50 disabled:opacity-40 disabled:cursor-not-allowed dark:border-red-400/20 dark:text-red-400"
+            >
+              Confirm decline
+            </button>
+          </div>
+        </div>
+      )}
+      {phase === 'confirm-decline' && (
+        <WQConfirmBar
+          message="Decline and notify the requester? Your reason will be returned as a Respond task in their queue."
+          confirmLabel="Decline"
+          danger
+          onCancel={() => setPhase('declining')}
+          onConfirm={() => onDecline('Declined — requester notified. A Respond task has been queued for them.')}
         />
       )}
     </>
@@ -1001,8 +1055,9 @@ function InboundQuestion({ event, md, onResolve, onDecline }) {
 // ── 9. Question (person-to-person) ────────────────────────────────────────────
 
 function QuestionSurface({ event, md, onResolve, onDecline }) {
-  const [response, setResponse] = useState('')
-  const [phase, setPhase]       = useState('idle') // idle | confirm-send
+  const [response,      setResponse]      = useState('')
+  const [declineReason, setDeclineReason] = useState('')
+  const [phase, setPhase]                 = useState('idle') // idle | confirm-send | declining | confirm-decline
 
   const footer = (
     <>
@@ -1024,7 +1079,14 @@ function QuestionSurface({ event, md, onResolve, onDecline }) {
           >
             Send response
           </button>
-          <WQSecondaryLinks onDecline={onDecline} declineLabel="Skip for now" />
+          {/* D7: Decline with reason — keeps Ask from being an unbounded channel */}
+          <button
+            type="button"
+            onClick={() => setPhase('declining')}
+            className="w-full rounded-lg border border-gray-200 py-2 text-xs font-medium text-gray-500 hover:bg-gray-50 dark:border-white/[0.08] dark:text-slate-400 dark:hover:bg-white/[0.04]"
+          >
+            Decline with reason
+          </button>
         </div>
       )}
       {phase === 'confirm-send' && (
@@ -1033,6 +1095,47 @@ function QuestionSurface({ event, md, onResolve, onDecline }) {
           confirmLabel="Send"
           onCancel={() => setPhase('idle')}
           onConfirm={() => onResolve(`Response sent to ${event.askedByName}`)}
+        />
+      )}
+      {phase === 'declining' && (
+        <div className="space-y-2">
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400 dark:text-slate-400">
+            Reason for declining
+          </p>
+          <textarea
+            value={declineReason}
+            onChange={e => setDeclineReason(e.target.value)}
+            rows={3}
+            className="input w-full resize-none text-xs"
+            placeholder="Explain why you can't answer this — your reason will be sent to the asker as a Respond task…"
+            autoFocus
+          />
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => { setDeclineReason(''); setPhase('idle') }}
+              className="flex-1 rounded-lg border border-gray-200 py-2 text-xs text-gray-500 dark:border-white/[0.08] dark:text-slate-400"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              disabled={!declineReason.trim()}
+              onClick={() => setPhase('confirm-decline')}
+              className="flex-1 rounded-lg border border-red-200 py-2 text-xs font-medium text-red-500 hover:bg-red-50 disabled:opacity-40 disabled:cursor-not-allowed dark:border-red-400/20 dark:text-red-400"
+            >
+              Confirm decline
+            </button>
+          </div>
+        </div>
+      )}
+      {phase === 'confirm-decline' && (
+        <WQConfirmBar
+          message={`Decline and notify ${event.askedByName ?? 'the asker'}? Your reason will be returned as a Respond task in their queue.`}
+          confirmLabel="Decline"
+          danger
+          onCancel={() => setPhase('declining')}
+          onConfirm={() => onDecline(`Declined — ${event.askedByName ?? 'asker'} has been notified. A Respond task has been queued for them.`)}
         />
       )}
     </>
@@ -1113,7 +1216,6 @@ function GenericWQSurface({ event, md, onResolve, onDecline }) {
           ))}
         </div>
       )}
-      <WQSecondaryLinks onDecline={onDecline} />
     </div>
   )
 

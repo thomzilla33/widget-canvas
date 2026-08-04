@@ -1,6 +1,9 @@
 import { useState, useRef, useEffect } from 'react'
 import { createPortal } from 'react-dom'
-import { Search, SlidersHorizontal, ChevronDown, X, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react'
+import {
+  Search, SlidersHorizontal, ChevronDown, ChevronUp,
+  X, ArrowUpDown, ArrowUp, ArrowDown, Check,
+} from 'lucide-react'
 
 // ── Shared close-on-outside-click hook ──────────────────────────────────────
 function useClickOutside(ref, handler) {
@@ -134,134 +137,312 @@ function SortDropdown({ sort }) {
   )
 }
 
-// ── Filters Slideout — DS pattern ─────────────────────────────────────────────
-// Draft state: changes inside the slideout only commit on Apply.
+// ── Filters Slideout — rich multi-type panel ──────────────────────────────────
+// Supported filter types (set via filter.type):
+//   'radio'      — radio buttons, single-select (default)
+//   'chips'      — pill buttons, single-select
+//   'checkboxes' — checkbox list, supports optional o.color dot
+//   'avatars'    — avatar circles with initials, single-select
+//   'toggles'    — boolean toggle switches; uses filter.toggleOptions + draft object
+//
+// Draft state: changes inside the slideout only commit on "Apply filters".
 // Cancel / Escape / backdrop → discard draft, list unchanged.
 function FiltersSlideout({ filters, draft, onDraftChange, onApply, onClose }) {
-  // Trap escape key
+  const [collapsed, setCollapsed] = useState({})
+
   useEffect(() => {
     function onKey(e) { if (e.key === 'Escape') onClose() }
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
   }, [onClose])
 
-  const hasAnyActive = filters.some(f => draft[f.id] !== (f.options[0]?.value ?? 'All'))
+  function toggleSection(id) {
+    setCollapsed(prev => ({ ...prev, [id]: !prev[id] }))
+  }
+
+  // 2-letter initials from full name
+  function nameInitials(name) {
+    return (name ?? '').split(' ').map(w => w[0] ?? '').join('').toUpperCase().slice(0, 2)
+  }
+
+  // Deterministic avatar color from name string
+  const AVATAR_PALETTE = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4', '#EC4899', '#F97316']
+  function avatarColor(name) {
+    let h = 0
+    for (let i = 0; i < (name ?? '').length; i++) h = name.charCodeAt(i) + ((h << 5) - h)
+    return AVATAR_PALETTE[Math.abs(h) % AVATAR_PALETTE.length]
+  }
+
+  const hasAnyActive = filters.some(f => {
+    if (f.type === 'toggles') return Object.values(draft[f.id] ?? {}).some(Boolean)
+    return draft[f.id] !== (f.options?.[0]?.value ?? 'All')
+  })
+
+  // ── section header with collapsible chevron ───────────────────────────────
+  function SectionHeader({ id, label }) {
+    return (
+      <button
+        type="button"
+        onClick={() => toggleSection(id)}
+        className="flex w-full items-center justify-between py-0.5"
+      >
+        <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-500">
+          {label}
+        </span>
+        <ChevronUp
+          size={13}
+          className={`flex-shrink-0 text-gray-300 dark:text-slate-600 transition-transform duration-150 ${collapsed[id] ? 'rotate-180' : ''}`}
+        />
+      </button>
+    )
+  }
+
+  // ── chips — pill multi-select (click same chip to deselect back to default)
+  function renderChips(f) {
+    const defaultVal = f.options?.[0]?.value ?? 'All'
+    const cur = draft[f.id] ?? defaultVal
+    return (
+      <div className="flex flex-wrap gap-2 pt-3">
+        {(f.options ?? []).slice(1).map(o => {
+          const sel = cur === o.value
+          return (
+            <button
+              key={o.value}
+              type="button"
+              onClick={() => onDraftChange(prev => ({ ...prev, [f.id]: sel ? defaultVal : o.value }))}
+              className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
+                sel
+                  ? 'border-aims-blue bg-aims-blue/[0.10] text-aims-blue dark:bg-aims-blue/[0.15]'
+                  : 'border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50 dark:border-white/[0.12] dark:text-slate-400 dark:hover:border-white/[0.22] dark:hover:bg-white/[0.05]'
+              }`}
+            >
+              {o.label}
+            </button>
+          )
+        })}
+      </div>
+    )
+  }
+
+  // ── checkboxes — square checkbox list, optional o.color dot
+  function renderCheckboxes(f) {
+    const defaultVal = f.options?.[0]?.value ?? 'All'
+    const cur = draft[f.id] ?? defaultVal
+    return (
+      <div className="space-y-px pt-2">
+        {(f.options ?? []).slice(1).map(o => {
+          const sel = cur === o.value
+          return (
+            <button
+              key={o.value}
+              type="button"
+              onClick={() => onDraftChange(prev => ({ ...prev, [f.id]: sel ? defaultVal : o.value }))}
+              className="flex w-full items-center gap-3 rounded-lg px-2 py-2.5 text-left text-xs transition-colors hover:bg-gray-50 dark:hover:bg-white/[0.04]"
+            >
+              <span className={`flex h-4 w-4 flex-shrink-0 items-center justify-center rounded border transition-colors ${
+                sel ? 'border-aims-blue bg-aims-blue' : 'border-gray-300 dark:border-white/[0.20]'
+              }`}>
+                {sel && <Check size={10} strokeWidth={3} className="text-white" />}
+              </span>
+              {o.color && (
+                <span className="h-2 w-2 flex-shrink-0 rounded-full" style={{ background: o.color }} />
+              )}
+              <span className={`flex-1 ${sel ? 'font-semibold text-aims-blue' : 'text-gray-700 dark:text-slate-300'}`}>
+                {o.label}
+              </span>
+            </button>
+          )
+        })}
+      </div>
+    )
+  }
+
+  // ── avatars — colored circles with initials, single-select
+  function renderAvatars(f) {
+    const defaultVal = f.options?.[0]?.value ?? 'All'
+    const cur = draft[f.id] ?? defaultVal
+    const people = (f.options ?? []).slice(1)
+    const visible = people.slice(0, 9)
+    const overflow = people.length - visible.length
+    return (
+      <div className="flex flex-wrap items-center gap-2 pt-3">
+        {visible.map(o => {
+          const sel = cur === o.value
+          const ini = nameInitials(o.label)
+          const bg  = avatarColor(o.label)
+          return (
+            <button
+              key={o.value}
+              type="button"
+              title={o.label}
+              onClick={() => onDraftChange(prev => ({ ...prev, [f.id]: sel ? defaultVal : o.value }))}
+              style={{ background: bg }}
+              className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full text-[11px] font-bold text-white transition-all ${
+                sel
+                  ? 'ring-2 ring-aims-blue ring-offset-2 ring-offset-white dark:ring-offset-[var(--surface)]'
+                  : 'opacity-75 hover:opacity-100'
+              }`}
+            >
+              {ini}
+            </button>
+          )
+        })}
+        {overflow > 0 && (
+          <span className="text-[11px] text-gray-400 dark:text-slate-500">+{overflow} more</span>
+        )}
+      </div>
+    )
+  }
+
+  // ── toggles — boolean switch list; uses f.toggleOptions + draft[f.id] object
+  function renderToggles(f) {
+    const draftObj = draft[f.id] ?? {}
+    return (
+      <div className="space-y-4 pt-3">
+        {(f.toggleOptions ?? []).map(opt => {
+          const on = draftObj[opt.value] ?? false
+          return (
+            <div key={opt.value} className="flex items-center justify-between gap-3">
+              <span className="text-xs text-gray-700 dark:text-slate-300">{opt.label}</span>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={on}
+                onClick={() => onDraftChange(prev => ({
+                  ...prev,
+                  [f.id]: { ...(prev[f.id] ?? {}), [opt.value]: !on },
+                }))}
+                className={`relative inline-flex h-5 w-[34px] flex-shrink-0 cursor-pointer rounded-full transition-colors duration-200 ${
+                  on ? 'bg-aims-blue' : 'bg-gray-200 dark:bg-white/[0.15]'
+                }`}
+              >
+                <span className={`absolute top-[3px] h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform duration-200 ${
+                  on ? 'translate-x-[16px]' : 'translate-x-[3px]'
+                }`} />
+              </button>
+            </div>
+          )
+        })}
+      </div>
+    )
+  }
+
+  // ── radio — default, existing style
+  function renderRadio(f) {
+    const defaultVal = f.options?.[0]?.value ?? 'All'
+    const cur = draft[f.id] ?? defaultVal
+    return (
+      <div className="space-y-0.5 pt-1">
+        {(f.options ?? []).map(o => {
+          const sel = cur === o.value
+          return (
+            <button
+              key={o.value}
+              type="button"
+              onClick={() => onDraftChange(prev => ({ ...prev, [f.id]: o.value }))}
+              className={`flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-left text-xs transition-colors ${
+                sel
+                  ? 'bg-aims-blue/[0.08] text-aims-blue dark:bg-aims-blue/[0.12]'
+                  : 'text-gray-700 hover:bg-gray-50 dark:text-slate-300 dark:hover:bg-white/[0.04]'
+              }`}
+            >
+              <span className={`flex h-3.5 w-3.5 flex-shrink-0 items-center justify-center rounded-full border transition-colors ${
+                sel ? 'border-aims-blue bg-aims-blue' : 'border-gray-300 dark:border-white/20'
+              }`}>
+                {sel && <span className="h-1.5 w-1.5 rounded-full bg-white" />}
+              </span>
+              <span className={sel ? 'font-semibold' : ''}>{o.label}</span>
+            </button>
+          )
+        })}
+      </div>
+    )
+  }
+
+  function renderContent(f) {
+    switch (f.type) {
+      case 'chips':      return renderChips(f)
+      case 'checkboxes': return renderCheckboxes(f)
+      case 'avatars':    return renderAvatars(f)
+      case 'toggles':    return renderToggles(f)
+      default:           return renderRadio(f)
+    }
+  }
+
+  function clearDraft() {
+    const reset = {}
+    filters.forEach(f => {
+      if (f.type === 'toggles') {
+        const cleared = {}
+        ;(f.toggleOptions ?? []).forEach(o => { cleared[o.value] = false })
+        reset[f.id] = cleared
+      } else {
+        reset[f.id] = f.options?.[0]?.value ?? 'All'
+      }
+    })
+    onDraftChange(reset)
+  }
 
   return createPortal(
-    <div className="fixed inset-0 z-50 flex justify-end" role="dialog" aria-modal="true" aria-label="All filters">
-      {/* Dim overlay */}
+    <div className="fixed inset-0 z-50 flex justify-end" role="dialog" aria-modal="true" aria-label="All Filters">
+      {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-[2px] transition-opacity"
+        className="absolute inset-0 bg-black/50 backdrop-blur-[2px]"
         onClick={onClose}
         aria-hidden="true"
       />
 
-      {/* Slideout panel */}
-      <div className="relative z-10 flex h-full w-80 flex-col bg-white shadow-2xl dark:bg-[var(--surface)]"
-        style={{ borderLeft: '1px solid rgba(255,255,255,0.07)' }}
+      {/* Panel */}
+      <div
+        className="relative z-10 flex h-full w-[320px] flex-col bg-white shadow-2xl dark:bg-[var(--surface)]"
+        style={{ borderLeft: '1px solid rgba(255,255,255,0.06)' }}
       >
         {/* Header */}
         <div className="flex flex-shrink-0 items-center justify-between border-b border-gray-100 px-5 py-4 dark:border-white/[0.07]">
-          <div className="flex items-center gap-2">
-            <SlidersHorizontal size={14} className="text-gray-400 dark:text-slate-400" aria-hidden="true" />
-            <h2 className="text-sm font-semibold text-gray-900 dark:text-slate-100">All filters</h2>
-          </div>
+          <h2 className="text-sm font-semibold text-gray-900 dark:text-slate-100">All Filters</h2>
           <button
             onClick={onClose}
             aria-label="Close filters"
-            className="grid h-7 w-7 place-items-center rounded-md text-gray-400 hover:bg-gray-100 dark:hover:bg-white/[0.07]"
+            className="grid h-7 w-7 place-items-center rounded-md text-gray-400 transition-colors hover:bg-gray-100 dark:text-slate-400 dark:hover:bg-white/[0.07]"
           >
             <X size={15} />
           </button>
         </div>
 
         {/* Body — scrollable filter sections */}
-        <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4 space-y-6">
-          {filters.map(f => {
-            const defaultVal = f.options[0]?.value ?? 'All'
-            const currentDraft = draft[f.id] ?? defaultVal
-            return (
-              <div key={f.id}>
-                <div className="mb-2.5 flex items-center justify-between">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400">
-                    {f.label}
-                  </span>
-                  {currentDraft !== defaultVal && (
-                    <button
-                      type="button"
-                      onClick={() => onDraftChange(prev => ({ ...prev, [f.id]: defaultVal }))}
-                      className="text-[10px] font-medium text-aims-blue hover:underline"
-                    >
-                      Clear
-                    </button>
-                  )}
-                </div>
-                <div className="space-y-0.5">
-                  {f.options.map(o => {
-                    const selected = currentDraft === o.value
-                    return (
-                      <button
-                        key={o.value}
-                        type="button"
-                        onClick={() => onDraftChange(prev => ({ ...prev, [f.id]: o.value }))}
-                        className={`flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-left text-xs transition-colors ${
-                          selected
-                            ? 'bg-aims-blue/[0.08] text-aims-blue dark:bg-aims-blue/[0.12]'
-                            : 'text-gray-700 hover:bg-gray-50 dark:text-slate-300 dark:hover:bg-white/[0.04]'
-                        }`}
-                      >
-                        {/* Radio indicator */}
-                        <span className={`flex h-3.5 w-3.5 flex-shrink-0 items-center justify-center rounded-full border transition-colors ${
-                          selected
-                            ? 'border-aims-blue bg-aims-blue'
-                            : 'border-gray-300 dark:border-white/20'
-                        }`}>
-                          {selected && <span className="h-1.5 w-1.5 rounded-full bg-white" />}
-                        </span>
-                        <span className={selected ? 'font-semibold' : ''}>{o.label}</span>
-                      </button>
-                    )
-                  })}
-                </div>
-              </div>
-            )
-          })}
+        <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">
+          {filters.map((f, idx) => (
+            <div key={f.id}>
+              {idx > 0 && (
+                <div className="my-4 border-t border-gray-100 dark:border-white/[0.06]" />
+              )}
+              <SectionHeader id={f.id} label={f.label} />
+              {!collapsed[f.id] && renderContent(f)}
+            </div>
+          ))}
         </div>
 
         {/* Footer */}
         <div className="flex flex-shrink-0 items-center justify-between gap-3 border-t border-gray-100 px-5 py-4 dark:border-white/[0.07]">
           <button
             type="button"
-            onClick={() => {
-              const reset = {}
-              filters.forEach(f => { reset[f.id] = f.options[0]?.value ?? 'All' })
-              onDraftChange(reset)
-            }}
             disabled={!hasAnyActive}
+            onClick={clearDraft}
             className="text-xs font-semibold text-gray-500 transition-colors hover:text-gray-700 disabled:opacity-40 dark:text-slate-400 dark:hover:text-slate-200"
           >
-            Reset all
+            Clear all
           </button>
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="h-9 rounded-lg border border-gray-200 px-4 text-xs font-semibold text-gray-700 transition-colors hover:bg-gray-50 dark:border-white/10 dark:text-slate-300 dark:hover:bg-white/[0.04]"
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              onClick={onApply}
-              className="h-9 rounded-lg bg-aims-blue px-5 text-xs font-semibold text-white transition-opacity hover:opacity-90"
-            >
-              Apply
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={onApply}
+            className="h-9 rounded-lg bg-aims-blue px-5 text-xs font-semibold text-white transition-opacity hover:opacity-90"
+          >
+            Apply filters
+          </button>
         </div>
       </div>
     </div>,
-    document.body
+    document.body,
   )
 }
 
@@ -286,9 +467,10 @@ function FilterChip({ label, value, onClear }) {
 // ── FilterToolbar ─────────────────────────────────────────────────────────────
 // Props:
 //   searchValue / onSearch / searchPlaceholder — controlled search input
-//   filters  — [{ id, label, value, onChange, options:[{value,label}] }]
+//   filters  — [{id, label, value, onChange, options, type?}]
+//              type 'toggles' also needs: toggleOptions, toggleValues, onToggleChange
 //   sort     — { value, onChange, options, dir?, onToggleDir? }
-//   inlineCount — how many filters to show inline (rest only in slideout)
+//   inlineCount — how many non-toggle filters to show inline (default 2)
 //   bare     — drop the border-b chrome for inline use
 export default function FilterToolbar({
   searchValue,
@@ -302,38 +484,61 @@ export default function FilterToolbar({
   const [slideoutOpen, setSlideoutOpen] = useState(false)
   const [draft, setDraft]               = useState({})
 
-  const inline     = filters.slice(0, inlineCount)
-  const activeCount = filters.filter(f => f.value !== (f.options[0]?.value ?? 'All')).length
+  // Show non-toggle filters as inline dropdowns
+  const nonToggleFilters = filters.filter(f => f.type !== 'toggles')
+  const inline           = nonToggleFilters.slice(0, inlineCount)
+
+  // Count all active (non-default) filter values including toggles
+  const activeCount = filters.reduce((n, f) => {
+    if (f.type === 'toggles') {
+      return n + Object.values(f.toggleValues ?? {}).filter(Boolean).length
+    }
+    return n + (f.value !== (f.options?.[0]?.value ?? 'All') ? 1 : 0)
+  }, 0)
 
   function openSlideout() {
-    // Initialise draft from current committed values
     const d = {}
-    filters.forEach(f => { d[f.id] = f.value })
+    filters.forEach(f => {
+      if (f.type === 'toggles') {
+        d[f.id] = { ...(f.toggleValues ?? {}) }
+      } else {
+        d[f.id] = f.value
+      }
+    })
     setDraft(d)
     setSlideoutOpen(true)
   }
 
   function applyDraft() {
-    filters.forEach(f => { if (draft[f.id] !== undefined) f.onChange(draft[f.id]) })
+    filters.forEach(f => {
+      if (f.type === 'toggles') {
+        Object.entries(draft[f.id] ?? {}).forEach(([key, val]) => f.onToggleChange?.(key, val))
+      } else if (draft[f.id] !== undefined) {
+        f.onChange(draft[f.id])
+      }
+    })
     setSlideoutOpen(false)
   }
 
   function cancelSlideout() {
     setSlideoutOpen(false)
-    // draft is discarded — committed values unchanged
   }
 
   function clearFilter(filterId) {
     const f = filters.find(x => x.id === filterId)
-    if (f) f.onChange(f.options[0]?.value ?? 'All')
+    if (f && f.type !== 'toggles') f.onChange(f.options?.[0]?.value ?? 'All')
   }
 
   function clearAll() {
-    filters.forEach(f => f.onChange(f.options[0]?.value ?? 'All'))
+    filters.forEach(f => {
+      if (f.type !== 'toggles') f.onChange(f.options?.[0]?.value ?? 'All')
+    })
   }
 
-  // Active filters that have a non-default value
-  const activeFilters = filters.filter(f => f.value !== (f.options[0]?.value ?? 'All'))
+  // Active filter chips shown below the bar — exclude toggles
+  const activeFilters = filters.filter(f =>
+    f.type !== 'toggles' && f.value !== (f.options?.[0]?.value ?? 'All'),
+  )
 
   return (
     <div className={bare ? '' : 'border-b border-gray-100 dark:border-white/[0.06]'}>
@@ -351,14 +556,14 @@ export default function FilterToolbar({
           />
         </div>
 
-        {/* Inline filter dropdowns */}
+        {/* Inline filter dropdowns (non-toggle only) */}
         {inline.map(f => (
           <FilterDropdown key={f.id} {...f} />
         ))}
 
         {/* Right side */}
         <div className="ml-auto flex items-center gap-2">
-          {/* All filters button — always visible when there are filters */}
+          {/* All filters button */}
           {filters.length > 0 && (
             <button
               type="button"

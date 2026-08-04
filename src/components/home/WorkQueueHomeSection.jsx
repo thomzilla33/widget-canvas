@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
-import { ListChecks, ArrowRight, CheckCircle2 } from 'lucide-react'
-import { MY_WORK_EVENTS, WQ_TIER, WQ_TIER_ORDER } from '../../data/workqueue.js'
+import { ListChecks, ArrowRight, CheckCircle2, Zap } from 'lucide-react'
+import { MY_WORK_EVENTS, WQ_TYPE, WQ_SEVERITY, WQ_ACTIONABLE_STATES } from '../../data/workqueue.js'
 import { EventCard } from './wq/EventCard.jsx'
 import UndoToast from './UndoToast.jsx'
 
@@ -17,9 +17,11 @@ export function WorkQueueHomeSection() {
 
   const visible = MY_WORK_EVENTS.filter(e => !skipped.has(e.id) && !resolved.has(e.id))
 
-  const urgentCount = MY_WORK_EVENTS.filter(
-    e => !skipped.has(e.id) && !resolved.has(e.id) && ['actnow', 'critical'].includes(e.tier)
-  ).length
+  // D4: actionable = Open + Claimed + In Progress; Awaiting External excluded from headline
+  const isActionable  = e => WQ_ACTIONABLE_STATES.has(e.status ?? 'Open')
+  const actionableCount = visible.filter(isActionable).length
+  const awaitingCount   = visible.filter(e => e.status === 'Awaiting External').length
+  const urgentCount     = visible.filter(e => isActionable(e) && e.severity === 'Blocking').length
 
   function showToast(msg, undo) {
     setToast({ message: msg, undo })
@@ -43,16 +45,22 @@ export function WorkQueueHomeSection() {
     })
   }
 
-  const capped   = visible.slice(0, MAX_TOTAL)
+  const sorted   = [...visible].sort((a, b) => a.urgencyScore - b.urgencyScore)
+  const capped   = sorted.slice(0, MAX_TOTAL)
   const overflow = visible.length - capped.length
 
-  const grouped = WQ_TIER_ORDER
-    .map(tier => ({ tier, items: capped.filter(e => e.tier === tier) }))
-    .filter(g => g.items.length > 0)
+  const typeMap = {}
+  capped.forEach(e => {
+    if (!typeMap[e.wqType]) typeMap[e.wqType] = []
+    typeMap[e.wqType].push(e)
+  })
+  const grouped = Object.entries(typeMap)
+    .map(([wqType, items]) => ({ wqType, items, minScore: items[0].urgencyScore }))
+    .sort((a, b) => a.minScore - b.minScore)
 
   return (
     <>
-      <div className="card flex flex-col overflow-hidden">
+      <div className="flex flex-col overflow-hidden">
 
         {/* ── Header ───────────────────────────────────────────────────────── */}
         <div className="flex items-center gap-4 px-5 pt-5 pb-4">
@@ -69,8 +77,13 @@ export function WorkQueueHomeSection() {
                 </span>
               )}
               <span className="rounded-full bg-gray-100 px-1.5 py-0.5 text-[10px] font-semibold text-gray-500 dark:bg-white/[0.06] dark:text-slate-400">
-                {visible.length} items
+                {actionableCount} actionable
               </span>
+              {awaitingCount > 0 && (
+                <span className="rounded-full bg-gray-50 px-1.5 py-0.5 text-[10px] font-medium text-gray-400 dark:bg-white/[0.03] dark:text-slate-500">
+                  {awaitingCount} awaiting
+                </span>
+              )}
             </div>
             <p className="mt-0.5 text-xs text-gray-400 dark:text-slate-400">
               Decisions and actions that need your attention — approvals, agent reviews, questions, and tasks.
@@ -96,15 +109,19 @@ export function WorkQueueHomeSection() {
             </div>
           ) : (
             <>
-              {grouped.map(({ tier, items }) => {
-                const t = WQ_TIER[tier]
+              {grouped.map(({ wqType, items }) => {
+                const blockingCount = items.filter(e => e.severity === 'Blocking').length
                 return (
-                  <div key={tier}>
-                    <div className={`flex items-center gap-2 border-l-2 bg-gray-50/60 px-5 py-2 dark:bg-white/[0.015] ${t.border}`}>
-                      <span className={`h-1.5 w-1.5 rounded-full ${t.dot}`} aria-hidden="true" />
-                      <span className={`text-[10px] font-bold uppercase tracking-wider ${t.text}`}>{t.label}</span>
-                      <span className="text-[10px] text-gray-400 dark:text-slate-400">· {t.sub}</span>
-                      <span className={`ml-auto rounded-full px-1.5 py-0.5 text-[9px] font-bold ${t.badge}`}>{items.length}</span>
+                  <div key={wqType}>
+                    <div className={`flex items-center gap-2 border-l-2 bg-gray-50/60 px-5 py-2 dark:bg-white/[0.015] ${blockingCount > 0 ? 'border-l-red-400' : 'border-l-gray-200 dark:border-l-white/[0.08]'}`}>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-gray-600 dark:text-slate-300">{wqType}</span>
+                      <span className="text-[10px] text-gray-400 dark:text-slate-400">· {WQ_TYPE[wqType]?.archetype}</span>
+                      {blockingCount > 0 && (
+                        <span className="flex items-center gap-0.5 rounded-full bg-red-500/10 px-1.5 py-0.5 text-[9px] font-bold text-red-600 dark:text-red-400">
+                          <Zap size={8} aria-hidden="true" /> {blockingCount}
+                        </span>
+                      )}
+                      <span className="ml-auto rounded-full bg-gray-100 px-1.5 py-0.5 text-[9px] font-bold text-gray-500 dark:bg-white/[0.06] dark:text-slate-400">{items.length}</span>
                     </div>
                     <div className="divide-y divide-gray-50 dark:divide-white/[0.03]">
                       {items.map(event => (
@@ -117,9 +134,6 @@ export function WorkQueueHomeSection() {
                           onEscalate={() => navigate('/home/attention')}
                           onSkip={skip}
                           onTrace={() => {}}
-                          onApprove={id => resolveItem(id, 'Approved')}
-                          onReject={id  => resolveItem(id, 'Rejected')}
-                          onCorrect={id => resolveItem(id, 'Correction submitted')}
                         />
                       ))}
                     </div>
@@ -133,7 +147,7 @@ export function WorkQueueHomeSection() {
                     onClick={() => navigate('/home/attention')}
                     className="text-[11px] text-aims-blue hover:underline"
                   >
-                    +{overflow} more — see all in Attention Room
+                    +{overflow} more · Go to Work Queue
                   </button>
                 </div>
               )}

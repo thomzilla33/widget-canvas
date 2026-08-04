@@ -1,39 +1,148 @@
 import { useState } from 'react'
 import { createPortal } from 'react-dom'
-import { X, GitBranch, Clock } from 'lucide-react'
-import { WQ_TIER } from '../../data/workqueue.js'
+import { X, GitBranch, Clock, CheckCircle2, Circle, Users } from 'lucide-react'
+import { WQ_SEVERITY } from '../../data/workqueue.js'
+
+const MODAL_STATUS_CHIP = {
+  'Claimed':           'bg-teal-50 text-teal-600 dark:bg-teal-400/10 dark:text-teal-400',
+  'In Progress':       'bg-aims-blue/10 text-aims-blue',
+  'Awaiting External': 'bg-gray-100 text-gray-500 dark:bg-white/[0.05] dark:text-slate-400',
+}
+
+// ── D3 Package modifier — Promotion multi-item attestation ────────────────────
+function PackageDecisionSurface({ event }) {
+  const items = event.package?.items ?? []
+  const [decisions, setDecisions] = useState({})
+
+  function decide(id, verdict) {
+    setDecisions(prev => ({ ...prev, [id]: verdict }))
+  }
+
+  const decidedCount = Object.keys(decisions).length
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400 dark:text-slate-400">Package · {decidedCount} of {items.length} reviewed</p>
+        <span className="rounded-full bg-purple-50 px-2 py-0.5 text-[9px] font-bold text-purple-600 dark:bg-purple-400/10 dark:text-purple-400">
+          Package
+        </span>
+      </div>
+      <div className="space-y-2">
+        {items.map(item => {
+          const v = decisions[item.id]
+          return (
+            <div key={item.id} className={`rounded-lg border px-3 py-2.5 transition-colors ${
+              v === 'approve' ? 'border-emerald-200 bg-emerald-50/50 dark:border-emerald-900/30 dark:bg-emerald-950/20'
+              : v === 'reject' ? 'border-red-200 bg-red-50/40 dark:border-red-900/30 dark:bg-red-950/20'
+              : 'border-gray-100 dark:border-white/[0.06]'
+            }`}>
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0 flex-1">
+                  <p className="text-[11px] font-medium text-gray-800 dark:text-slate-200">{item.label}</p>
+                  <p className="mt-0.5 text-[10px] leading-relaxed text-gray-500 dark:text-slate-400">{item.description}</p>
+                </div>
+                <div className="flex shrink-0 gap-1">
+                  <button
+                    type="button"
+                    onClick={() => decide(item.id, 'approve')}
+                    className={`rounded px-2 py-0.5 text-[10px] font-semibold transition-colors ${
+                      v === 'approve'
+                        ? 'bg-emerald-500 text-white'
+                        : 'border border-gray-200 text-gray-400 hover:border-emerald-400 hover:text-emerald-600 dark:border-white/10 dark:text-slate-400'
+                    }`}
+                  >
+                    ✓
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => decide(item.id, 'reject')}
+                    className={`rounded px-2 py-0.5 text-[10px] font-semibold transition-colors ${
+                      v === 'reject'
+                        ? 'bg-red-500 text-white'
+                        : 'border border-gray-200 text-gray-400 hover:border-red-400 hover:text-red-600 dark:border-white/10 dark:text-slate-400'
+                    }`}
+                  >
+                    ✗
+                  </button>
+                </div>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+      {decidedCount < items.length && (
+        <p className="text-[10px] text-gray-400 dark:text-slate-400">Review all {items.length} items to enable submission</p>
+      )}
+    </div>
+  )
+}
+
+// ── D3 Quorum modifier — Break Glass multi-approver gate ──────────────────────
+function QuorumDecisionSurface({ event }) {
+  const q = event.quorum ?? {}
+  const approvers = q.approvers ?? []
+  const signed = approvers.filter(a => a.signed).length
+  const deadline = q.deadline ? new Date(q.deadline).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : null
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400 dark:text-slate-400">Quorum · {signed} of {q.required} approved</p>
+        <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[9px] font-bold text-amber-600 dark:bg-amber-400/10 dark:text-amber-400">
+          Quorum
+        </span>
+      </div>
+
+      {/* Approver state */}
+      <div className="space-y-1.5">
+        {approvers.map((a, i) => (
+          <div key={i} className={`flex items-center gap-2.5 rounded-lg border px-3 py-2 ${
+            a.signed
+              ? 'border-emerald-200/60 bg-emerald-50/40 dark:border-emerald-900/30 dark:bg-emerald-950/20'
+              : 'border-aims-blue/20 bg-aims-blue/[0.04] dark:border-aims-blue/20'
+          }`}>
+            {a.signed
+              ? <CheckCircle2 size={12} className="shrink-0 text-emerald-500" />
+              : <Circle size={12} className="shrink-0 text-aims-blue" />
+            }
+            <div className="min-w-0 flex-1">
+              <p className="text-[11px] font-semibold text-gray-800 dark:text-slate-200">{a.name}</p>
+              <p className="text-[10px] text-gray-500 dark:text-slate-400">{a.role}</p>
+            </div>
+            {a.signed
+              ? <span className="text-[10px] text-emerald-600 dark:text-emerald-400">{a.signedAt}</span>
+              : <span className="text-[10px] text-aims-blue">Pending</span>
+            }
+          </div>
+        ))}
+      </div>
+
+      {/* Rules */}
+      <div className="space-y-1 text-[10px] text-gray-400 dark:text-slate-400">
+        {q.declineRule && <p>Rule: {q.declineRule}</p>}
+        {deadline && <p>Window closes: {deadline}</p>}
+      </div>
+    </div>
+  )
+}
 
 // Decision surface varies by event type
 function DecisionSurface({ event, onPrimary, onSecondary, defaultDecision, onTrainDecision }) {
-  const { type, quickActions } = event
+  const { wqType, quickActions } = event
 
-  // Approval — radio: approve / reject with note
-  if (type === 'Approval') {
-    const rejectFirst = defaultDecision === 'reject'
-    return (
-      <div className="space-y-3">
-        <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400 dark:text-slate-400">Decision</p>
-        <div className="space-y-2">
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input type="radio" name="decision" defaultChecked={!rejectFirst} className="text-aims-blue" />
-            <span className="text-xs text-gray-800 dark:text-slate-200">Approve</span>
-          </label>
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input type="radio" name="decision" defaultChecked={rejectFirst} className="text-red-500" />
-            <span className="text-xs text-gray-800 dark:text-slate-200">Reject</span>
-          </label>
-        </div>
-        <textarea
-          rows={2}
-          placeholder="Add a note (optional)…"
-          className="input w-full resize-none text-xs"
-        />
-      </div>
-    )
+  // D3 Package modifier — Promotion
+  if (wqType === 'Promotion') {
+    return <PackageDecisionSurface event={event} />
+  }
+
+  // D3 Quorum modifier — Break Glass
+  if (wqType === 'Break Glass') {
+    return <QuorumDecisionSurface event={event} />
   }
 
   // Review — action buttons
-  if (type === 'Review') {
+  if (wqType === 'Review') {
     return (
       <div className="space-y-3">
         <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400 dark:text-slate-400">Review action</p>
@@ -54,8 +163,8 @@ function DecisionSurface({ event, onPrimary, onSecondary, defaultDecision, onTra
     )
   }
 
-  // Train — rate samples
-  if (type === 'Train') {
+  // Train Me — rate samples
+  if (wqType === 'Train Me') {
     return (
       <div className="space-y-3">
         <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400 dark:text-slate-400">Training feedback</p>
@@ -88,7 +197,7 @@ function DecisionSurface({ event, onPrimary, onSecondary, defaultDecision, onTra
 
 export function EventModal({ event, onClose, onPrimary, onEscalate, onTrace }) {
   const [attested, setAttested] = useState(false)
-  const t = WQ_TIER[event.tier] || WQ_TIER.headsup
+  const s = WQ_SEVERITY[event.severity] ?? WQ_SEVERITY.Standard
   const intent = event._intent?.toLowerCase()
 
   function handlePrimary() {
@@ -112,15 +221,22 @@ export function EventModal({ event, onClose, onPrimary, onEscalate, onTrace }) {
       <div className="relative flex w-full max-w-2xl flex-col rounded-2xl border border-gray-200 bg-white shadow-2xl dark:border-white/10 dark:bg-[var(--surface-raised)]">
 
         {/* Header */}
-        <div className={`flex items-start gap-3 border-b border-l-4 px-5 py-4 dark:border-white/[0.06] ${t.border}`}>
+        <div className={`flex items-start gap-3 border-b border-l-4 px-5 py-4 dark:border-white/[0.06] ${s.border}`}>
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-1.5">
               <span className="rounded px-1.5 py-0.5 text-[9px] font-bold text-white" style={{ background: event.studioColor }}>{event.studio}</span>
-              <span className="rounded-full border border-gray-200 px-1.5 py-0.5 text-[10px] font-medium text-gray-500 dark:border-white/10 dark:text-slate-400">{event.type}</span>
-              {event.missionCritical && (
-                <span className="rounded-full bg-red-500/10 px-1.5 py-0.5 text-[9px] font-bold text-red-600 dark:text-red-400">Mission critical</span>
+              <span className="rounded-full border border-gray-200 px-1.5 py-0.5 text-[10px] font-medium text-gray-500 dark:border-white/10 dark:text-slate-400">{event.wqType}</span>
+              {MODAL_STATUS_CHIP[event.status] && (
+                <span className={`rounded-full px-1.5 py-0.5 text-[9px] font-semibold ${MODAL_STATUS_CHIP[event.status]}`}>
+                  {event.status === 'Awaiting External' ? 'Awaiting' : event.status}
+                </span>
               )}
-              <span className={`ml-auto rounded-full px-1.5 py-0.5 text-[9px] font-bold ${t.badge}`}>{t.label}</span>
+              {event.severity === 'Blocking' && (
+                <span className="rounded-full bg-red-500/10 px-1.5 py-0.5 text-[9px] font-bold text-red-600 dark:text-red-400">Blocking</span>
+              )}
+              {event.customer && (
+                <span className="rounded-full border border-blue-200 bg-blue-50 px-1.5 py-0.5 text-[9px] font-semibold text-blue-600 dark:border-blue-400/20 dark:bg-blue-400/[0.07] dark:text-blue-400">Customer</span>
+              )}
             </div>
             <h2 className="mt-1 text-sm font-semibold leading-snug text-gray-900 dark:text-slate-100">{event.title}</h2>
             {event.sourceWorkflow && (
@@ -192,13 +308,6 @@ export function EventModal({ event, onClose, onPrimary, onEscalate, onTrace }) {
             </span>
           </label>
           <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() => onEscalate?.(event)}
-              className="btn-secondary text-xs"
-            >
-              Escalate
-            </button>
             <div className="flex-1" />
             <button type="button" onClick={onClose} className="btn-secondary text-xs">Cancel</button>
             <button

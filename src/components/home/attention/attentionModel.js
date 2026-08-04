@@ -45,11 +45,11 @@ export function rank(item) {
   if (item._kind === 'gov'   && item.blocking)               return -1
   if (item.status === 'error')                               return 0
   if (item._kind === 'gov')                                  return 0.5
-  if (item._kind === 'wq'    && item.tier === 'critical')    return 1.5
-  if (item._kind === 'task'  && item.due === 'Overdue')      return 1
-  if (item._kind === 'htl')                                  return 2
-  if (item._kind === 'inbox' && item.unread && item.action)  return 3
-  if (item._kind === 'wq'    && item.tier === 'action')      return 3.5
+  if (item._kind === 'wq'    && item.severity === 'Blocking') return 1.5
+  if (item._kind === 'task'  && item.due === 'Overdue')       return 1
+  if (item._kind === 'htl')                                   return 2
+  if (item._kind === 'inbox' && item.unread && item.action)   return 3
+  if (item._kind === 'wq'    && item.severity === 'Standard') return 3.5
   if (item._kind === 'task'  && item.due === 'Today')        return 4
   if (item._kind === 'inbox' && item.unread)                 return 4.5
   if (item._kind === 'wq')                                   return 5.5
@@ -74,7 +74,7 @@ export function totalUrgent(allItems, read) {
     (i._kind === 'task' && i.due === 'Overdue' && i.status !== 'error') ||
     i._kind === 'htl' ||
     (i._kind === 'inbox' && i.unread && !read.has(i.id) && i.action) ||
-    (i._kind === 'wq' && (i.tier === 'actnow' || i.tier === 'critical'))
+    (i._kind === 'wq' && i.severity === 'Blocking')
   ).length
 }
 
@@ -93,7 +93,7 @@ export function groupItems(allItems) {
       (item._kind === 'task' && item.due === 'Overdue') ||
       item.status === 'error' ||
       (item._kind === 'gov' && item.blocking) ||
-      (item._kind === 'wq' && item.tier === 'actnow')
+      (item._kind === 'wq' && item.severity === 'Blocking')
     ) {
       overdue.push(item)
     } else if (
@@ -101,7 +101,7 @@ export function groupItems(allItems) {
       item._kind === 'htl' ||
       (item._kind === 'gov' && !item.blocking) ||
       (item._kind === 'inbox' && item.unread && item.action) ||
-      (item._kind === 'wq' && (item.tier === 'critical' || item.tier === 'action'))
+      (item._kind === 'wq' && item.severity === 'Standard')
     ) {
       today.push(item)
     } else {

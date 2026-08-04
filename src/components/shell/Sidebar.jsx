@@ -10,9 +10,9 @@ import * as LucideIcons from "lucide-react"
  */
 
 const ACTIVE_GRADIENT  = "radial-gradient(circle at 61% 68%, rgba(33,115,255,1) 29%, rgba(9,226,171,1) 61%)"
-const ACTIVE_SHADOW    = "8px 8px 20px 0px rgba(82,163,255,0.38)"
+const ACTIVE_SHADOW    = "0px 4px 12px 0px rgba(82,163,255,0.30)"
 const HOVER_SHADOW     = "0px 0px 20px 0px rgba(33,115,255,0.50)"
-const CONTAINER_SHADOW = "8px 8px 16px 0px rgba(0,0,0,0.08)"
+const CONTAINER_SHADOW = "none"
 
 function NavIcon({ name, size = 16, color }) {
   const Icon = LucideIcons[name]

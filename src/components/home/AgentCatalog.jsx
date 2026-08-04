@@ -32,7 +32,7 @@ function CategoryDropdown({ category, onChange }) {
   function select(id) { onChange(id); setOpen(false) }
 
   return (
-    <div ref={ref} className="relative">
+    <div ref={ref} className="card relative">
       <button
         type="button"
         onClick={() => setOpen(v => !v)}
