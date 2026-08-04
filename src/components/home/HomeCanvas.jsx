@@ -88,11 +88,6 @@ export function HomeCanvas() {
           <div className="flex items-center gap-2">
             <LayoutGrid size={14} className="text-gray-400 dark:text-slate-400" aria-hidden="true" />
             <h2 className="text-[13px] font-semibold text-gray-700 dark:text-slate-200">My Widgets</h2>
-            {hasWidgets && (
-              <span className="flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-gray-100 px-1.5 text-[10px] font-bold tabular-nums text-gray-500 dark:bg-white/10 dark:text-slate-400">
-                {placements.length}
-              </span>
-            )}
           </div>
           <button
             type="button"
