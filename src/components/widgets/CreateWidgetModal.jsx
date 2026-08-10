@@ -133,9 +133,11 @@ function NavItem({ label, count, active, onClick }) {
       }`}
     >
       <span className="truncate">{label}</span>
-      <span className={`ml-2 flex-shrink-0 text-[10px] font-bold ${active ? 'text-aims-blue' : 'text-gray-400 dark:text-slate-400'}`}>
-        {count}
-      </span>
+      {count !== undefined && (
+        <span className={`ml-2 flex-shrink-0 text-[10px] font-bold ${active ? 'text-aims-blue' : 'text-gray-400 dark:text-slate-400'}`}>
+          {count}
+        </span>
+      )}
     </button>
   )
 }
@@ -318,7 +320,7 @@ export default function CreateWidgetModal({ onClose }) {
   const { addWidget }  = useWidgets()
 
   const [aiOpen, setAiOpen]         = useState(false)
-  const [activeNav, setActiveNav]   = useState('all')
+  const [activeNav, setActiveNav]   = useState('scratch')
   const [search, setSearch]         = useState('')
   const [skeleton, setSkeleton]     = useState('all-skeleton')
   const [sort, setSort]             = useState('popular')
@@ -421,6 +423,8 @@ export default function CreateWidgetModal({ onClose }) {
             className="flex w-[200px] flex-shrink-0 flex-col gap-0.5 overflow-auto border-r border-gray-100 px-2 py-3 dark:border-white/[0.06]"
             aria-label="Widget categories"
           >
+            <NavItem label="Start from scratch" active={activeNav === 'scratch'} onClick={() => setActiveNav('scratch')} />
+            <div className="my-2 border-t border-gray-100 dark:border-white/[0.06]" />
             <NavItem label="All widgets"    count={MARKETPLACE_WIDGETS.length} active={activeNav === 'all'} onClick={() => setActiveNav('all')} />
             <NavItem label="Featured"       count={featuredCount}               active={activeNav === 'featured'} onClick={() => setActiveNav('featured')} />
 
@@ -434,80 +438,115 @@ export default function CreateWidgetModal({ onClose }) {
 
           {/* ── Main content ── */}
           <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-            {/* Search + filters */}
-            <div className="flex flex-shrink-0 items-center gap-2 border-b border-gray-100 px-5 py-3 dark:border-white/[0.06]">
-              <div className="relative max-w-sm flex-1">
-                <Search size={13} className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-400" />
-                <input
-                  type="search"
-                  className="input h-9 w-full pl-8 text-xs"
-                  placeholder="Search the catalog…"
-                  value={search}
-                  onChange={e => setSearch(e.target.value)}
-                />
+
+            {activeNav === 'scratch' ? (
+              /* ── Scratch view ── */
+              <div className="flex flex-1 flex-col items-center justify-center gap-5 px-8 py-12">
+                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gray-100 dark:bg-white/[0.08]">
+                  <PencilRuler size={28} className="text-gray-500 dark:text-slate-300" aria-hidden="true" />
+                </div>
+                <div className="text-center">
+                  <p className="text-sm font-semibold text-gray-900 dark:text-slate-100">Build a custom widget</p>
+                  <p className="mt-1.5 max-w-xs text-xs leading-relaxed text-gray-500 dark:text-slate-400">
+                    Map your own data source and metric in the widget builder. Full control, no template constraints.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => { navigate('/widgets/new'); onClose() }}
+                  className="flex h-9 items-center gap-1.5 rounded-lg bg-aims-blue px-6 text-xs font-semibold text-white transition-opacity hover:opacity-90"
+                >
+                  <PencilRuler size={13} aria-hidden="true" />
+                  Open widget builder
+                </button>
+                <p className="text-xs text-gray-400 dark:text-slate-400">
+                  Or{' '}
+                  <button
+                    type="button"
+                    onClick={() => setActiveNav('all')}
+                    className="text-aims-blue hover:underline"
+                  >
+                    browse the marketplace
+                  </button>
+                  {' '}to install a governed widget.
+                </p>
               </div>
-              <SimpleDropdown
-                label="Type"
-                value={skeleton}
-                onChange={setSkeleton}
-                options={skeletonOptions}
-              />
-              <div className="ml-auto">
-                <SimpleDropdown
-                  label="Sort:"
-                  value={sort}
-                  onChange={setSort}
-                  options={[
-                    { value: 'popular', label: 'Most popular' },
-                    { value: 'name', label: 'Name A–Z' },
-                  ]}
-                />
-              </div>
-            </div>
-
-            {/* Scrollable content */}
-            <div className="min-h-0 flex-1 space-y-6 overflow-auto px-5 py-5">
-              {/* Featured */}
-              {featuredList.length > 0 && (
-                <section>
-                  <div className="mb-3 flex items-baseline gap-2">
-                    <h3 className="text-xs font-bold text-gray-900 dark:text-slate-100">Featured by AIMS OS</h3>
-                    <span className="text-[11px] text-gray-400 dark:text-slate-400">
-                      Governed and ready to install
-                    </span>
+            ) : (
+              <>
+                {/* Search + filters */}
+                <div className="flex flex-shrink-0 items-center gap-2 border-b border-gray-100 px-5 py-3 dark:border-white/[0.06]">
+                  <div className="relative max-w-sm flex-1">
+                    <Search size={13} className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-400" />
+                    <input
+                      type="search"
+                      className="input h-9 w-full pl-8 text-xs"
+                      placeholder="Search the catalog…"
+                      value={search}
+                      onChange={e => setSearch(e.target.value)}
+                    />
                   </div>
-                  <div className="grid gap-3 md:grid-cols-2">
-                    {featuredList.map(w => (
-                      <FeaturedWidgetCard key={w.id} widget={w} onClick={() => installWidget(w)} />
-                    ))}
-                  </div>
-                </section>
-              )}
-
-              {/* All widgets */}
-              {gridList.length > 0 && (
-                <section>
-                  <div className="mb-3 flex items-baseline gap-2">
-                    <h3 className="text-xs font-bold text-gray-900 dark:text-slate-100">All widgets</h3>
-                    <span className="text-[11px] text-gray-400 dark:text-slate-400">{gridList.length} widgets</span>
-                  </div>
-                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                    {gridList.map(w => (
-                      <WidgetCard key={w.id} widget={w} onClick={() => installWidget(w)} />
-                    ))}
-                  </div>
-                </section>
-              )}
-
-              {filtered.length === 0 && (
-                <div className="flex h-40 items-center justify-center text-center">
-                  <div>
-                    <p className="text-sm font-medium text-gray-500 dark:text-slate-400">No widgets found</p>
-                    <p className="mt-1 text-xs text-gray-400 dark:text-slate-400">Try adjusting your search or filters</p>
+                  <SimpleDropdown
+                    label="Type"
+                    value={skeleton}
+                    onChange={setSkeleton}
+                    options={skeletonOptions}
+                  />
+                  <div className="ml-auto">
+                    <SimpleDropdown
+                      label="Sort:"
+                      value={sort}
+                      onChange={setSort}
+                      options={[
+                        { value: 'popular', label: 'Most popular' },
+                        { value: 'name', label: 'Name A–Z' },
+                      ]}
+                    />
                   </div>
                 </div>
-              )}
-            </div>
+
+                {/* Scrollable content */}
+                <div className="min-h-0 flex-1 space-y-6 overflow-auto px-5 py-5">
+                  {featuredList.length > 0 && (
+                    <section>
+                      <div className="mb-3 flex items-baseline gap-2">
+                        <h3 className="text-xs font-bold text-gray-900 dark:text-slate-100">Featured by AIMS OS</h3>
+                        <span className="text-[11px] text-gray-400 dark:text-slate-400">
+                          Governed and ready to install
+                        </span>
+                      </div>
+                      <div className="grid gap-3 md:grid-cols-2">
+                        {featuredList.map(w => (
+                          <FeaturedWidgetCard key={w.id} widget={w} onClick={() => installWidget(w)} />
+                        ))}
+                      </div>
+                    </section>
+                  )}
+
+                  {gridList.length > 0 && (
+                    <section>
+                      <div className="mb-3 flex items-baseline gap-2">
+                        <h3 className="text-xs font-bold text-gray-900 dark:text-slate-100">All widgets</h3>
+                        <span className="text-[11px] text-gray-400 dark:text-slate-400">{gridList.length} widgets</span>
+                      </div>
+                      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                        {gridList.map(w => (
+                          <WidgetCard key={w.id} widget={w} onClick={() => installWidget(w)} />
+                        ))}
+                      </div>
+                    </section>
+                  )}
+
+                  {filtered.length === 0 && (
+                    <div className="flex h-40 items-center justify-center text-center">
+                      <div>
+                        <p className="text-sm font-medium text-gray-500 dark:text-slate-400">No widgets found</p>
+                        <p className="mt-1 text-xs text-gray-400 dark:text-slate-400">Try adjusting your search or filters</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
           </div>
         </div>
 
