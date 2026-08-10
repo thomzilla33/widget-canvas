@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "deploy": "vite build && cp dist/index.html dist/404.html && gh-pages -d dist --dotfiles"
+    "deploy": "vite build && cp dist/index.html dist/404.html && gh-pages -d dist --dotfiles --repo https://github.com/thomzilla33/widget-canvas.git"
   },
   "dependencies": {
     "class-variance-authority": "^0.7.1",

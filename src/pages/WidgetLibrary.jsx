@@ -15,7 +15,6 @@ import FlagDetailModal from '../components/widgets/FlagDetailModal.jsx'
 import WidgetDetailModal from '../components/widgets/WidgetDetailModal.jsx'
 import WidgetDetailPanel from '../components/widgets/WidgetDetailPanel.jsx'
 import DeleteWidgetDialog from '../components/widgets/DeleteWidgetDialog.jsx'
-import CreateWidgetModal from '../components/widgets/CreateWidgetModal.jsx'
 import { useStaggerReveal } from '../hooks/useReveal.js'
 import { useScope, scopeAtLeast } from '../state/ScopeContext.jsx'
 
@@ -67,7 +66,6 @@ export default function WidgetLibrary() {
   const [detailWidget, setDetailWidget] = useState(null) // Tier 2 — widget detail (not the builder)
   const [deletingWidget, setDeletingWidget] = useState(null) // CRUD D — staged delete dialog
   const [menuId, setMenuId] = useState(null) // per-card ⋯ actions menu (by widget id)
-  const [widgetCreateOpen, setWidgetCreateOpen] = useState(false)
   const gridReveal = useStaggerReveal('widgets')
   const { scope } = useScope()
   const showV15 = scopeAtLeast(scope, 'v1.5')
@@ -103,7 +101,7 @@ export default function WidgetLibrary() {
           studioId="widgets"
           built={{ count: widgets.length, label: 'widgets' }}
           ctaLabel={isAdmin ? 'Create widget' : undefined}
-          onCta={isAdmin ? () => setWidgetCreateOpen(true) : undefined}
+          onCta={isAdmin ? () => navigate('/widgets/new') : undefined}
         />
       </div>
       <PageHeader
@@ -111,7 +109,7 @@ export default function WidgetLibrary() {
         description={`${widgets.length} widgets · ${governedCount} governed`}
         actions={
           isAdmin ? (
-            <Button onClick={() => setWidgetCreateOpen(true)} icon={<Sparkles size={15} />}>
+            <Button onClick={() => navigate('/widgets/new')} icon={<Sparkles size={15} />}>
               Create widget
             </Button>
           ) : null
@@ -341,7 +339,6 @@ export default function WidgetLibrary() {
 
 
 
-      {widgetCreateOpen && <CreateWidgetModal onClose={() => setWidgetCreateOpen(false)} />}
     </div>
   )
 }

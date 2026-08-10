@@ -7,13 +7,13 @@ import { useModalEnter } from '../../hooks/useReveal.js'
 // recommended default. `onPick(mode)` where mode ∈ 'ai' | 'blank' | 'marketplace'.
 const OPTIONS = {
   widget: [
-    { mode: 'ai', icon: Sparkles, title: 'Describe it with AI', desc: 'Type what you need — get a live preview to refine.', recommended: true },
-    { mode: 'blank', icon: PencilRuler, title: 'Start from scratch', desc: 'Map a source and metric yourself in the builder.' },
-    { mode: 'marketplace', icon: Store, title: 'Browse the marketplace', desc: 'Install a pre-built, governed widget.' },
+    { mode: ‘blank’, icon: PencilRuler, title: ‘Start from scratch’, desc: ‘Map a source and metric yourself in the builder.’ },
+    { mode: ‘ai’, icon: Sparkles, title: ‘Describe it with AI’, desc: ‘Type what you need — get a live preview to refine.’, recommended: true },
+    { mode: ‘marketplace’, icon: Store, title: ‘Browse the marketplace’, desc: ‘Install a pre-built, governed widget.’ },
   ],
   dashboard: [
-    { mode: 'ai', icon: Sparkles, title: 'Describe it with AI', desc: 'Say who it’s for — get a starting layout to refine.', recommended: true },
-    { mode: 'blank', icon: PencilRuler, title: 'Start from scratch', desc: 'Choose where it lives, then build on a blank canvas.' },
+    { mode: ‘blank’, icon: PencilRuler, title: ‘Start from scratch’, desc: ‘Choose where it lives, then build on a blank canvas.’ },
+    { mode: ‘ai’, icon: Sparkles, title: ‘Describe it with AI’, desc: ‘Say who it’s for — get a starting layout to refine.’, recommended: true },
   ],
 }
 

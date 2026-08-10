@@ -9,7 +9,6 @@ import { CardContainer } from '@/components/ui/CardContainer'
 import { PopoverPanel } from '../components/common/Popover.jsx'
 import StudioWelcome from '../components/common/StudioWelcome.jsx'
 import FilterToolbar from '../components/common/FilterToolbar.jsx'
-import CreateDashboardModal from '../components/dashboard/CreateDashboardModal.jsx'
 import DeleteDashboardDialog from '../components/dashboard/DeleteDashboardDialog.jsx'
 import DuplicateDashboardDialog from '../components/dashboard/DuplicateDashboardDialog.jsx'
 import DashboardDetailModal from '../components/dashboard/DashboardDetailModal.jsx'
@@ -36,7 +35,13 @@ const KIND_OPTIONS = [
 export default function DashboardList() {
   const navigate = useNavigate()
   const location = useLocation()
-  const { dashboards, updateDashboard, removeDashboard, duplicateDashboard } = useDashboards()
+  const { dashboards, addDashboard, updateDashboard, removeDashboard, duplicateDashboard } = useDashboards()
+
+  function createBlankDashboard() {
+    const id = `d-blank-${Date.now().toString(36)}`
+    addDashboard({ id, template: null, name: 'Untitled dashboard', entity: 'Report', audience: 'Manager', placement: null, status: 'draft', widgets: 0, updated: 'just now' })
+    navigate(`/dashboard/${id}/canvas`)
+  }
 
   // Placement mode: arriving from widget builder with a widget to place
   const pendingPlace = location.state?.pendingPlace || null
@@ -54,7 +59,7 @@ export default function DashboardList() {
   const [sortBy, setSortBy] = useState('recent')
   const [sortDir, setSortDir] = useState('desc')
 
-  const [launcher, setLauncher] = useState(false)
+
   const gridReveal = useStaggerReveal('dashboards') // reveal the card grid once on entry
 
   // Owner filter — distinct owners across the catalog (enterprise scale).
@@ -91,7 +96,7 @@ export default function DashboardList() {
           studioId="dashboards"
           built={{ count: dashboards.length, label: 'dashboards' }}
           ctaLabel={isAdmin ? 'Create dashboard' : undefined}
-          onCta={isAdmin ? () => setLauncher(true) : undefined}
+          onCta={isAdmin ? () => createBlankDashboard() : undefined}
         />
       </div>
       {pendingPlace && (
@@ -120,7 +125,7 @@ export default function DashboardList() {
           <p className="mt-1 text-[13px] text-gray-500 dark:text-slate-400">{dashboards.length} dashboards · {publishedCount} published</p>
         </div>
         {isAdmin && (
-          <Button onClick={() => setLauncher(true)} icon={<Sparkles size={15} />} className="shrink-0">
+          <Button onClick={() => createBlankDashboard()} icon={<Sparkles size={15} />} className="shrink-0">
             Create dashboard
           </Button>
         )}
@@ -274,7 +279,6 @@ export default function DashboardList() {
         )}
       </div>
 
-      {launcher && <CreateDashboardModal onClose={() => setLauncher(false)} />}
 
       {deletingDashboard && (
         <DeleteDashboardDialog
