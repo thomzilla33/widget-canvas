@@ -107,8 +107,19 @@ export default function EntityContextHeader({ placement, entity, viewerRole, onC
   const Icon = base.icon
   const lower = base.kind.toLowerCase()
 
+  // When no real entity is bound (canvas editing mode), flag as sample data
+  const isSample = !entity
+
   return (
     <div className="card mb-3 p-0">
+      {isSample && (
+        <div className="flex items-center gap-1.5 border-b border-gray-100 px-4 py-1.5 dark:border-white/[0.06]">
+          <span className="h-1.5 w-1.5 rounded-full bg-amber-400" aria-hidden="true" />
+          <span className="text-[11px] text-gray-400 dark:text-slate-500">
+            Sample data — this is how it looks with real records
+          </span>
+        </div>
+      )}
       <div className="flex flex-wrap items-center gap-3 p-4">
         <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-aims-blue text-sm font-bold text-white">
           {initialsOf(name)}

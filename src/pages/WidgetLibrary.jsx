@@ -20,6 +20,7 @@ import { useScope, scopeAtLeast } from '../state/ScopeContext.jsx'
 
 import StudioWelcome from '../components/common/StudioWelcome.jsx'
 import FilterToolbar from '../components/common/FilterToolbar.jsx'
+import CreateWidgetModal from '../components/widgets/CreateWidgetModal.jsx'
 import { useWidgets } from '../state/WidgetsContext.jsx'
 import { useDashboards } from '../state/DashboardsContext.jsx'
 import { useRole } from '../state/RoleContext.jsx'
@@ -69,6 +70,15 @@ export default function WidgetLibrary() {
   const gridReveal = useStaggerReveal('widgets')
   const { scope } = useScope()
   const showV15 = scopeAtLeast(scope, 'v1.5')
+  const [widgetModalOpen, setWidgetModalOpen] = useState(false)
+
+  function handleCreateWidget() {
+    if (scopeAtLeast(scope, 'v1.5')) {
+      setWidgetModalOpen(true)
+    } else {
+      navigate('/widgets/new')
+    }
+  }
 
   const catOptions = [{ value: 'All', label: 'All categories' }, ...CATALOG_CATEGORIES.map((c) => ({ value: c, label: c }))]
   const typeOptions = [{ value: 'All', label: 'All types' }, ...Array.from(new Set(widgets.map((w) => w.skeleton))).map((t) => ({ value: t, label: t }))]
@@ -101,7 +111,7 @@ export default function WidgetLibrary() {
           studioId="widgets"
           built={{ count: widgets.length, label: 'widgets' }}
           ctaLabel={isAdmin ? 'Create widget' : undefined}
-          onCta={isAdmin ? () => navigate('/widgets/new') : undefined}
+          onCta={isAdmin ? () => handleCreateWidget() : undefined}
         />
       </div>
       <PageHeader
@@ -109,7 +119,7 @@ export default function WidgetLibrary() {
         description={`${widgets.length} widgets · ${governedCount} governed`}
         actions={
           isAdmin ? (
-            <Button onClick={() => navigate('/widgets/new')} icon={<Sparkles size={15} />}>
+            <Button onClick={() => handleCreateWidget()} icon={<Sparkles size={15} />}>
               Create widget
             </Button>
           ) : null
@@ -338,7 +348,9 @@ export default function WidgetLibrary() {
       )}
 
 
-
+      {widgetModalOpen && (
+        <CreateWidgetModal onClose={() => setWidgetModalOpen(false)} />
+      )}
     </div>
   )
 }

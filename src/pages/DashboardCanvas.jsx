@@ -261,9 +261,9 @@ export default function DashboardCanvas() {
                 <AddWidgetCardDisabled />
               </div>
             ) : (
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="flex flex-col gap-3">
                 <AddWidgetCard onClick={() => setAddOpen(true)} />
-                <div className="flex items-center sm:col-span-1 lg:col-span-2">
+                <div className="flex justify-center">
                   <Button variant="secondary" onClick={() => setSuggestOpen(true)}>
                     <Sparkles size={15} aria-hidden="true" /> Suggest widgets
                   </Button>

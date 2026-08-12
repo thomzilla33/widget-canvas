@@ -16,8 +16,10 @@ import { useStaggerReveal } from '../hooks/useReveal.js'
 import { audienceLabel } from '../data/audiences.js'
 import { useDashboards } from '../state/DashboardsContext.jsx'
 import { useRole } from '../state/RoleContext.jsx'
+import { useScope, scopeAtLeast } from '../state/ScopeContext.jsx'
 import { placementLabel, DEACTIVATED_OWNERS, dashboardKind } from '../data/mock.js'
 import { widgetCount } from '../data/layout.js'
+import CreateDashboardModal from '../components/dashboard/CreateDashboardModal.jsx'
 
 const STATUS_OPTIONS = [
   { value: 'All', label: 'All statuses' },
@@ -36,11 +38,21 @@ export default function DashboardList() {
   const navigate = useNavigate()
   const location = useLocation()
   const { dashboards, addDashboard, updateDashboard, removeDashboard, duplicateDashboard } = useDashboards()
+  const { scope } = useScope()
+  const [createModalOpen, setCreateModalOpen] = useState(false)
 
   function createBlankDashboard() {
     const id = `d-blank-${Date.now().toString(36)}`
     addDashboard({ id, template: null, name: 'Untitled dashboard', entity: 'Report', audience: 'Manager', placement: null, status: 'draft', widgets: 0, updated: 'just now' })
     navigate(`/dashboard/${id}/canvas`)
+  }
+
+  function handleCreate() {
+    if (scopeAtLeast(scope, 'v1.5')) {
+      setCreateModalOpen(true)
+    } else {
+      createBlankDashboard()
+    }
   }
 
   // Placement mode: arriving from widget builder with a widget to place
@@ -96,7 +108,7 @@ export default function DashboardList() {
           studioId="dashboards"
           built={{ count: dashboards.length, label: 'dashboards' }}
           ctaLabel={isAdmin ? 'Create dashboard' : undefined}
-          onCta={isAdmin ? () => createBlankDashboard() : undefined}
+          onCta={isAdmin ? () => handleCreate() : undefined}
         />
       </div>
       {pendingPlace && (
@@ -125,7 +137,7 @@ export default function DashboardList() {
           <p className="mt-1 text-[13px] text-gray-500 dark:text-slate-400">{dashboards.length} dashboards · {publishedCount} published</p>
         </div>
         {isAdmin && (
-          <Button onClick={() => createBlankDashboard()} icon={<Sparkles size={15} />} className="shrink-0">
+          <Button onClick={() => handleCreate()} icon={<Sparkles size={15} />} className="shrink-0">
             Create dashboard
           </Button>
         )}
@@ -308,6 +320,10 @@ export default function DashboardList() {
           onOpen={() => { setDetailDashboard(null); navigate(`/dashboard/${detailDashboard.id}`) }}
           onEdit={() => { setDetailDashboard(null); navigate(`/dashboard/${detailDashboard.id}/canvas`) }}
         />
+      )}
+
+      {createModalOpen && (
+        <CreateDashboardModal onClose={() => setCreateModalOpen(false)} />
       )}
     </div>
   )

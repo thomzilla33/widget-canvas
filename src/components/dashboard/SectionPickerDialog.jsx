@@ -110,9 +110,9 @@ export default function SectionPickerDialog({ onSelect, onClose }) {
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px]" onClick={onClose} aria-hidden="true" />
 
-      {/* Dialog */}
-      <div className="relative z-10 w-full max-w-[440px] rounded-2xl bg-white shadow-2xl dark:bg-[var(--surface)]"
-        style={{ border: '1px solid rgba(255,255,255,0.07)' }}
+      {/* Dialog — min-height keeps the footer anchored when the list shrinks at sub-levels */}
+      <div className="relative z-10 flex w-full max-w-[440px] flex-col rounded-2xl bg-white shadow-2xl dark:bg-[var(--surface)]"
+        style={{ border: '1px solid rgba(255,255,255,0.07)', minHeight: 420 }}
       >
         {/* Header */}
         <div className="flex items-start justify-between px-6 pt-6 pb-1">
@@ -198,8 +198,8 @@ export default function SectionPickerDialog({ onSelect, onClose }) {
           })}
         </div>
 
-        {/* Footer */}
-        <div className="flex items-center justify-end gap-2 border-t border-gray-100 px-6 py-4 dark:border-white/[0.07]">
+        {/* Footer — mt-auto keeps it pinned to the bottom regardless of list height */}
+        <div className="mt-auto flex items-center justify-end gap-2 border-t border-gray-100 px-6 py-4 dark:border-white/[0.07]">
           <button
             type="button"
             onClick={onClose}

@@ -10,20 +10,22 @@ const TIERS_META = {
 
 const CHANGELOG = {
   'v1': [
-    'Widget catalog with search and filters',
-    'Detail panel — right slide-over, no backdrop',
-    'Widget Builder — create & edit (3-step flow)',
-    'Custom W×H sizing with S/M/L presets',
+    'Widget catalog — search, filters, detail panel',
+    'Widget Builder — create & edit, S/M/L sizing',
+    'Dashboard list — search, status & kind filters',
+    '"Create" buttons → direct navigation (no modal)',
   ],
   'v1.5': [
     '"Needs Attention" banner with open flags',
-    'Remap flow for widgets with schema drift',
+    'Remap flow for schema-drifted widgets',
     '"Review & resolve" action per flag',
+    '"Create" buttons → options modal (scratch / AI / marketplace)',
   ],
   'v2': [
-    'Per-widget change history',
-    'Real-time flag notifications',
-    'Bulk remap from the attention banner',
+    'Copilot Panel — AI-suggested responses',
+    '"Ask your PA" quick action on the canvas',
+    'Widget inbox — V2 filters + Human-in-the-Loop indicators',
+    'PA query strip in the Attention Room',
   ],
 }
 
