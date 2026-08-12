@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useLocation, useParams } from 'react-router-dom'
-import { Check, ExternalLink, RefreshCw } from 'lucide-react'
+import { Check, ExternalLink, RefreshCw, AlertTriangle, ArrowRight } from 'lucide-react'
 import { PageHeader } from '../components/common/index.jsx'
 import { Button } from '@/components/ui/Button'
 import { useWidgets } from '../state/WidgetsContext.jsx'
@@ -86,6 +86,7 @@ export default function WidgetBuilder() {
   const [ungovernedAck, setUngovernedAck] = useState(false)
   const [saved, setSaved] = useState(null) // null | widgetId string
   const [previewSize, setPreviewSize] = useState('lg')
+  const [showLeaveConfirm, setShowLeaveConfirm] = useState(false)
 
   // Format & goal (KPI/Gauge/StatRow appearance)
   const [format, setFormatState] = useState({ style: 'auto', decimals: 0, abbreviate: true, prefix: '', suffix: '' })
@@ -277,6 +278,16 @@ export default function WidgetBuilder() {
   }
 
 
+  const hasUnsavedChanges = !isEditMode && !!(datasetConfig?.sourceId || typeId || name.trim().length > 0)
+
+  function handleCancel() {
+    if (!hasUnsavedChanges) {
+      navigate('/widgets')
+    } else {
+      setShowLeaveConfirm(true)
+    }
+  }
+
   if (saved) return <SavedConfirmation name={name} widgetId={saved} navigate={navigate} onReset={resetAll} />
 
   const dimension = dimensionById(dimensionId)
@@ -292,7 +303,27 @@ export default function WidgetBuilder() {
         description={isEditMode ? 'Update the data source, type, and appearance.' : 'Map an entity and metric, pick a widget type, and preview it live.'}
         actions={
           <>
-            <Button variant="secondary" onClick={() => navigate('/widgets')}>Cancel</Button>
+            <Button variant="secondary" onClick={handleCancel}>Cancel</Button>
+            {tab === 'data' && !dataComplete && (
+              <Button variant="secondary" disabled title="Complete the dataset configuration first">
+                Widget <ArrowRight size={14} />
+              </Button>
+            )}
+            {tab === 'data' && dataComplete && (
+              <Button variant="secondary" onClick={() => setTab('widget')}>
+                Widget <ArrowRight size={14} />
+              </Button>
+            )}
+            {tab === 'widget' && !widgetComplete && (
+              <Button variant="secondary" disabled title="Name your widget first">
+                Appearance <ArrowRight size={14} />
+              </Button>
+            )}
+            {tab === 'widget' && widgetComplete && (
+              <Button variant="secondary" onClick={() => setTab('appearance')}>
+                Appearance <ArrowRight size={14} />
+              </Button>
+            )}
             <Button variant="primary" disabled={!canSave} onClick={handleSave}>
               <Check size={16} /> {isEditMode ? 'Save changes' : 'Save to catalog'}
             </Button>
@@ -524,6 +555,30 @@ export default function WidgetBuilder() {
           </div>
         </div>
       </div>
+
+      {/* ── Unsaved changes confirmation dialog (#09) ── */}
+      {showLeaveConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowLeaveConfirm(false)} />
+          <div className="relative z-10 w-full max-w-sm rounded-2xl border border-gray-200 bg-white p-6 shadow-2xl dark:border-white/10 dark:bg-[var(--surface)]">
+            <div className="mb-4 grid h-12 w-12 place-items-center rounded-xl bg-amber-50 dark:bg-amber-500/10">
+              <AlertTriangle size={24} className="text-amber-500" />
+            </div>
+            <h2 className="text-base font-semibold text-gray-900 dark:text-slate-100">Leave without saving?</h2>
+            <p className="mt-1.5 text-sm text-gray-500 dark:text-slate-400">
+              Your widget isn't saved yet. If you leave now, your configuration will be lost.
+            </p>
+            <div className="mt-5 flex flex-col gap-2">
+              <Button variant="secondary" className="w-full" onClick={() => setShowLeaveConfirm(false)}>
+                Keep editing
+              </Button>
+              <Button variant="primary" className="w-full" onClick={() => navigate('/widgets')}>
+                Leave without saving
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -569,26 +624,36 @@ function BuilderTabs({ tab, setTab, dataComplete, widgetComplete }) {
 }
 
 function SavedConfirmation({ name, widgetId, navigate, onReset }) {
+  const displayName = name || 'Untitled widget'
   return (
     <div className="h-full grid place-items-center px-6">
-      <div className="max-w-sm text-center">
-        <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl border border-green-200 bg-green-50 dark:border-green-500/25 dark:bg-green-500/10">
-          <Check size={28} className="text-aims-governed" />
+      <div className="w-full max-w-sm">
+        {/* Success icon */}
+        <div className="mb-5 flex flex-col items-center text-center">
+          <div className="grid h-16 w-16 place-items-center rounded-2xl border border-green-200 bg-green-50 shadow-sm dark:border-green-500/25 dark:bg-green-500/10">
+            <Check size={32} className="text-aims-governed" />
+          </div>
+          <h2 className="mt-4 text-xl font-bold text-gray-900 dark:text-slate-100">Widget saved</h2>
+          <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">Your widget is now in the library.</p>
         </div>
-        <h2 className="mt-4 text-lg font-semibold text-gray-900 dark:text-slate-100">Saved to catalog</h2>
-        <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">
-          "{name || 'Untitled widget'}" is now in the Widget Library. Add it to a dashboard to make it visible to your team.
-        </p>
-        <div className="mt-5 flex flex-col items-center gap-2">
+
+        {/* Widget name pill */}
+        <div className="mb-5 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-center dark:border-white/10 dark:bg-white/[0.03]">
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400 dark:text-slate-500">Saved as</p>
+          <p className="mt-0.5 truncate text-base font-semibold text-gray-900 dark:text-slate-100">"{displayName}"</p>
+        </div>
+
+        {/* Actions */}
+        <div className="flex flex-col gap-2">
           <Button
             variant="primary"
             className="w-full"
-            onClick={() => navigate('/dashboards', { state: { pendingPlace: { id: widgetId, name: name || 'Untitled widget' } } })}
+            onClick={() => navigate('/dashboards', { state: { pendingPlace: { id: widgetId, name: displayName } } })}
           >
             Add to a dashboard
           </Button>
-          <div className="flex w-full gap-2">
-            <Button variant="secondary" className="flex-1" onClick={onReset}>Create new widget</Button>
+          <div className="flex gap-2">
+            <Button variant="secondary" className="flex-1" onClick={onReset}>New widget</Button>
             <Button variant="secondary" className="flex-1" onClick={() => navigate('/widgets')}>Back to library</Button>
           </div>
         </div>

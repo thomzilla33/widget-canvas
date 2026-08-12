@@ -19,10 +19,10 @@ const OPERATION_TYPES = [
 ]
 
 const SHAPE_FILTERS = [
-  { id: 'all',    label: 'All' },
-  { id: DATASET_SHAPE.GROUPED, label: 'Grouped' },
-  { id: DATASET_SHAPE.SINGLE,  label: 'Single value' },
-  { id: DATASET_SHAPE.FULL,    label: 'Record set' },
+  { id: 'all',    label: 'All', hint: undefined },
+  { id: DATASET_SHAPE.GROUPED, label: 'Grouped',      hint: 'Values split by a dimension (e.g. revenue by region)' },
+  { id: DATASET_SHAPE.SINGLE,  label: 'Single value', hint: 'One aggregated number (e.g. total deals)' },
+  { id: DATASET_SHAPE.FULL,    label: 'Record set',   hint: 'Individual rows — best for tables and lists' },
 ]
 
 const INLINE_LIMIT = 4
@@ -49,14 +49,14 @@ const EMPTY_CONFIG = {
 // ── Shape badge ────────────────────────────────────────────────────────────────
 function ShapeBadge({ shape }) {
   const map = {
-    [DATASET_SHAPE.GROUPED]: { label: 'Grouped',      cls: 'bg-cyan-500/15 text-cyan-400' },
-    [DATASET_SHAPE.SINGLE]:  { label: 'Single value', cls: 'bg-amber-500/15 text-amber-400' },
-    [DATASET_SHAPE.FULL]:    { label: 'Record set',   cls: 'bg-purple-500/15 text-purple-400' },
+    [DATASET_SHAPE.GROUPED]: { label: 'Grouped',      cls: 'bg-cyan-500/15 text-cyan-400', title: 'Grouped: values broken down by a dimension (e.g. revenue by region)' },
+    [DATASET_SHAPE.SINGLE]:  { label: 'Single value', cls: 'bg-amber-500/15 text-amber-400', title: 'Single value: one aggregated number (e.g. total open deals)' },
+    [DATASET_SHAPE.FULL]:    { label: 'Record set',   cls: 'bg-purple-500/15 text-purple-400', title: 'Record set: individual rows — best for tables and lists' },
   }
   const s = map[shape]
   if (!s) return null
   return (
-    <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${s.cls}`}>
+    <span title={s.title} className={`shrink-0 cursor-help rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${s.cls}`}>
       {s.label}
     </span>
   )
@@ -111,10 +111,11 @@ function LibraryCard({ icon: Icon, iconColor, name, description, badge, selected
 }
 
 // ── Sidebar category list ──────────────────────────────────────────────────────
-function SidebarCategory({ label, count, active, onClick }) {
+function SidebarCategory({ label, count, active, onClick, hint }) {
   return (
     <button
       onClick={onClick}
+      title={hint}
       className={`flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-left text-xs font-medium transition-colors ${
         active
           ? 'bg-blue-500/15 text-blue-300'
@@ -160,10 +161,10 @@ function DatasetPickerModal({ currentId, onSelect, onClose }) {
   const selectedDs = PRESET_DATASETS.find(d => d.id === localId)
 
   const sidebarItems = [
-    { id: 'all', label: 'All' },
-    { id: DATASET_SHAPE.GROUPED, label: 'Grouped' },
-    { id: DATASET_SHAPE.SINGLE,  label: 'Single value' },
-    { id: DATASET_SHAPE.FULL,    label: 'Record set' },
+    { id: 'all',                 label: 'All',          hint: undefined },
+    { id: DATASET_SHAPE.GROUPED, label: 'Grouped',      hint: 'Values split by a dimension (e.g. revenue by region)' },
+    { id: DATASET_SHAPE.SINGLE,  label: 'Single value', hint: 'One aggregated number (e.g. total deals)' },
+    { id: DATASET_SHAPE.FULL,    label: 'Record set',   hint: 'Individual rows — best for tables and lists' },
   ]
 
   return (
@@ -178,6 +179,7 @@ function DatasetPickerModal({ currentId, onSelect, onClose }) {
             count={counts[item.id]}
             active={shapeFilter === item.id}
             onClick={() => setShapeFilter(item.id)}
+            hint={item.hint}
           />
         ))}
       </div>

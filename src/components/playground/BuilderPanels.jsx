@@ -668,36 +668,69 @@ function TypeTile({ t, typeId, metric, onSelect, compatible }) {
 }
 
 export function TypeGallery({ typeId, metric, onSelect, compatibleSkeletons = null }) {
+  const [catFilter, setCatFilter] = useState('all')
+
   const statistical = WIDGET_TYPES.filter((t) => STATISTICAL_CATS.has(t.category))
   const dataDisplay = WIDGET_TYPES.filter((t) => DATA_DISPLAY_CATS.has(t.category))
   const consumption = WIDGET_TYPES.filter((t) => CONSUMPTION_CATS.has(t.category))
 
-  // compatible(t): null if no filter, true/false based on compatibleSkeletons
   const compat = (t) => compatibleSkeletons === null ? null : compatibleSkeletons.includes(t.id)
+
+  const cats = [
+    { id: 'all',          label: 'All' },
+    { id: 'statistical',  label: 'Statistical' },
+    { id: 'data-display', label: 'Data display' },
+    ...(consumption.length > 0 ? [{ id: 'consumption', label: 'Consumption' }] : []),
+  ]
+
+  const showStatistical = catFilter === 'all' || catFilter === 'statistical'
+  const showDataDisplay = catFilter === 'all' || catFilter === 'data-display'
+  const showConsumption = catFilter === 'all' || catFilter === 'consumption'
 
   return (
     <div className="space-y-4">
-      <div>
-        <div className="mb-2 flex items-center gap-2">
-          <span className="text-[10px] font-bold uppercase tracking-wide text-gray-500 dark:text-slate-400">Statistical</span>
-          <span className="text-[10px] text-gray-400 dark:text-slate-400">Charts, KPIs, gauges</span>
-        </div>
-        <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5">
-          {statistical.map((t) => <TypeTile key={t.id} t={t} typeId={typeId} metric={metric} onSelect={onSelect} compatible={compat(t)} />)}
-        </div>
+      {/* Category filter chips */}
+      <div className="flex flex-wrap gap-1.5">
+        {cats.map((c) => (
+          <button
+            key={c.id}
+            onClick={() => setCatFilter(c.id)}
+            className={`rounded-full border px-2.5 py-0.5 text-[11px] font-medium transition-colors ${
+              catFilter === c.id
+                ? 'border-aims-blue bg-aims-blue text-white'
+                : 'border-gray-200 text-gray-500 hover:border-aims-blue/40 dark:border-white/10 dark:text-slate-400'
+            }`}
+          >
+            {c.label}
+          </button>
+        ))}
       </div>
 
-      <div>
-        <div className="mb-2 flex items-center gap-2">
-          <span className="text-[10px] font-bold uppercase tracking-wide text-gray-500 dark:text-slate-400">Data Display</span>
-          <span className="text-[10px] text-gray-400 dark:text-slate-400">Record lists, profile cards, tables</span>
+      {showStatistical && (
+        <div>
+          <div className="mb-2 flex items-center gap-2">
+            <span className="text-[10px] font-bold uppercase tracking-wide text-gray-500 dark:text-slate-400">Statistical</span>
+            <span className="text-[10px] text-gray-400 dark:text-slate-400">Charts, KPIs, gauges</span>
+          </div>
+          <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5">
+            {statistical.map((t) => <TypeTile key={t.id} t={t} typeId={typeId} metric={metric} onSelect={onSelect} compatible={compat(t)} />)}
+          </div>
         </div>
-        <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5">
-          {dataDisplay.map((t) => <TypeTile key={t.id} t={t} typeId={typeId} metric={metric} onSelect={onSelect} compatible={compat(t)} />)}
-        </div>
-      </div>
+      )}
 
-      {consumption.length > 0 && (
+      {showDataDisplay && (
+        <div>
+          <div className="mb-2 flex items-center gap-2">
+            <span className="text-[10px] font-bold uppercase tracking-wide text-gray-500 dark:text-slate-400">Data Display</span>
+            <span className="text-[10px] text-gray-400 dark:text-slate-400">Record lists, profile cards, tables</span>
+          </div>
+          <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5">
+            {dataDisplay.map((t) => <TypeTile key={t.id} t={t} typeId={typeId} metric={metric} onSelect={onSelect} compatible={compat(t)} />)}
+          </div>
+        </div>
+      )}
+
+      {showConsumption && consumption.length > 0 && (
         <div>
           <div className="mb-2 flex items-center gap-2">
             <span className="text-[10px] font-bold uppercase tracking-wide text-gray-500 dark:text-slate-400">Consumption</span>
@@ -1303,6 +1336,7 @@ export function AppearancePanel({
   cardConfig, setCardConfig,
 }) {
   const [showFormat, setShowFormat] = useState(false)
+  const [showDisplay, setShowDisplay] = useState(false)
 
   if (!typeId) {
     return (
@@ -1421,28 +1455,38 @@ export function AppearancePanel({
         )}
       </div>
 
-      {/* ── Display toggles ── */}
+      {/* ── Display toggles (collapsible) ── */}
       {displayOpts.length > 0 && (
         <>
           <div className="border-t border-gray-100 dark:border-white/5" />
-          <div className="space-y-3">
-            <AppearanceSectionLabel>Display</AppearanceSectionLabel>
-            {displayOpts.map((opt) => (
-              <label key={opt.id} className="flex cursor-pointer items-start gap-2.5">
-                <input
-                  type="checkbox"
-                  className="checkbox mt-0.5 shrink-0"
-                  checked={!!effectiveOpts[opt.id]}
-                  onChange={(e) => toggleOpt(opt.id, e.target.checked)}
-                />
-                <span>
-                  <span className="text-sm text-gray-700 dark:text-slate-200">{opt.label}</span>
-                  {opt.hint && (
-                    <span className="mt-0.5 block text-[11px] leading-snug text-gray-400 dark:text-slate-400">{opt.hint}</span>
-                  )}
-                </span>
-              </label>
-            ))}
+          <div className="rounded-lg border border-gray-200 dark:border-white/10">
+            <button
+              className="flex w-full items-center justify-between px-3 py-2.5 text-sm font-medium text-gray-700 dark:text-slate-200"
+              onClick={() => setShowDisplay((v) => !v)}
+            >
+              <span>Display options</span>
+              <ChevronDown size={14} className={`text-gray-400 transition-transform duration-200 ${showDisplay ? 'rotate-180' : ''}`} />
+            </button>
+            {showDisplay && (
+              <div className="border-t border-gray-200 p-3 space-y-3 dark:border-white/10">
+                {displayOpts.map((opt) => (
+                  <label key={opt.id} className="flex cursor-pointer items-start gap-2.5">
+                    <input
+                      type="checkbox"
+                      className="checkbox mt-0.5 shrink-0"
+                      checked={!!effectiveOpts[opt.id]}
+                      onChange={(e) => toggleOpt(opt.id, e.target.checked)}
+                    />
+                    <span>
+                      <span className="text-sm text-gray-700 dark:text-slate-200">{opt.label}</span>
+                      {opt.hint && (
+                        <span className="mt-0.5 block text-[11px] leading-snug text-gray-400 dark:text-slate-400">{opt.hint}</span>
+                      )}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            )}
           </div>
         </>
       )}

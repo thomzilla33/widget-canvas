@@ -30,9 +30,11 @@ export function DescribeComposer({ placeholder = 'Describe what you want to buil
           onKeyDown={(e) => e.key === 'Enter' && run()}
           aria-label="Describe what to build"
         />
-        <Button variant="primary" size="default" onClick={() => run()} disabled={!text.trim()} className="shrink-0">
-          Generate <ArrowRight size={15} aria-hidden="true" />
-        </Button>
+        <div className={!text.trim() ? 'cursor-not-allowed' : undefined} title={!text.trim() ? 'Type a description or pick an example above' : undefined}>
+          <Button variant="primary" size="default" onClick={() => run()} disabled={!text.trim()} className="shrink-0">
+            Generate <ArrowRight size={15} aria-hidden="true" />
+          </Button>
+        </div>
       </div>
 
       {examples.length > 0 && (
