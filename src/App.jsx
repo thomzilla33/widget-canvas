@@ -16,6 +16,7 @@ import UCPView from './pages/UCPView.jsx'
 import ModelsPage from './pages/ModelsPage.jsx'
 import AttentionRoom from './pages/AttentionRoom.jsx'
 import DataStudio from './pages/DataStudio.jsx'
+import NotificationsPage from './pages/NotificationsPage.jsx'
 
 // U7.2 — builder routes are admin-only; viewers are redirected to the read-only list.
 function AdminRoute({ children }) {
@@ -44,6 +45,7 @@ export default function App() {
         <Route path="/models" element={<ModelsPage />} />
         <Route path="/home/attention" element={<AttentionRoom />} />
         <Route path="/data-studio" element={<DataStudio />} />
+        <Route path="/notifications" element={<NotificationsPage />} />
         <Route path="*" element={<Navigate to="/dashboards" replace />} />
       </Route>
     </Routes>
