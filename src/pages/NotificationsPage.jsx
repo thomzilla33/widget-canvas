@@ -1,11 +1,14 @@
 import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
-  ArrowLeft, Search, ChevronDown, ChevronLeft, ChevronRight,
-  SlidersHorizontal, ArrowUpDown, BellOff,
+  ArrowLeft, ChevronDown, ChevronLeft, ChevronRight,
+  BellOff,
   Bot, GitBranch, User, Plug, Shield,
 } from 'lucide-react'
 import { useNotifications } from '../state/NotificationsContext.jsx'
+import { CardContainer } from '../components/ui/CardContainer.jsx'
+import { Tag } from '../components/ui/Tag.jsx'
+import { Button } from '../components/ui/Button.jsx'
 
 // ── Shared constants (mirror panel) ─────────────────────────────────────────
 const SOURCE_META = {
@@ -17,10 +20,10 @@ const SOURCE_META = {
 }
 
 const SEV = {
-  info:     { label: 'Info',     cls: 'bg-blue-500/10 text-blue-400 dark:text-blue-300'         },
-  success:  { label: 'Success',  cls: 'bg-emerald-500/10 text-emerald-500 dark:text-emerald-400' },
-  warning:  { label: 'Warning',  cls: 'bg-amber-500/10 text-amber-500 dark:text-amber-400'      },
-  critical: { label: 'Critical', cls: 'bg-red-500/10 text-red-500 dark:text-red-400'            },
+  info:     { label: 'Info',     tagVariant: 'informative' },
+  success:  { label: 'Success',  tagVariant: 'success'     },
+  warning:  { label: 'Warning',  tagVariant: 'alert'       },
+  critical: { label: 'Critical', tagVariant: 'error'       },
 }
 
 const DAY_LABELS = { today: 'Latest', yesterday: 'Yesterday', earlier: 'Earlier' }
@@ -34,16 +37,10 @@ function NotifRow({ notif, onRead }) {
   const { Icon } = src
 
   return (
-    <div
-      className={`flex items-start gap-4 rounded-xl border px-5 py-4 transition-colors cursor-default ${
-        notif.unread
-          ? 'border-[var(--border)] bg-[var(--accent)]'
-          : 'border-[var(--border)] bg-[var(--surface-raised)] dark:bg-white/[0.03]'
-      }`}
-    >
-      {/* Source icon */}
+    <CardContainer className="flex items-start gap-4 px-5 py-4">
+      {/* Source icon — 4px corner radius per DS Highlight Icon */}
       <span
-        className="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-full"
+        className="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-[4px]"
         style={{ background: `${src.color}18`, color: src.color }}
       >
         <Icon size={16} strokeWidth={1.75} />
@@ -61,26 +58,19 @@ function NotifRow({ notif, onRead }) {
         <p className="mt-0.5 text-xs text-gray-500 dark:text-slate-400 line-clamp-2">
           {notif.desc}
         </p>
-        <div className="mt-2 flex items-center gap-2">
-          {/* Source chip */}
-          <span
-            className="inline-flex h-[18px] items-center rounded px-1.5 text-[10px] font-semibold border"
-            style={{ borderColor: `${src.color}50`, color: src.color }}
-          >
-            {src.label}
-          </span>
-          {/* Severity chip */}
-          <span className={`inline-flex h-[18px] items-center rounded px-1.5 text-[10px] font-semibold ${sev.cls}`}>
-            {sev.label}
-          </span>
+        <div className="mt-2 flex items-center gap-1.5">
+          {/* Source tag — secondary (no colored border) */}
+          <Tag variant="secondary" size="sm">{src.label}</Tag>
+          {/* Severity tag — semantic DS variant */}
+          <Tag variant={sev.tagVariant} size="sm">{sev.label}</Tag>
         </div>
       </div>
 
-      {/* Right: time + unread dot + CTAs */}
+      {/* Right: unread dot + timestamp + CTAs */}
       <div className="flex shrink-0 flex-col items-end justify-between gap-4 pl-4 self-stretch">
         <div className="flex items-center gap-2">
           {notif.unread && (
-            <span className="h-2 w-2 rounded-full bg-aims-blue shrink-0" />
+            <span className="h-2 w-2 rounded-full bg-[#00B5D9] dark:bg-[#7DD3FC] shrink-0" />
           )}
           <span className="text-[12px] text-gray-400 dark:text-slate-500 whitespace-nowrap">
             {notif.time}
@@ -88,31 +78,21 @@ function NotifRow({ notif, onRead }) {
         </div>
 
         {notif.ctas?.length > 0 && (
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
             {notif.ctas.map((cta, i) => (
-              <button
+              <Button
                 key={i}
+                variant="tertiary"
+                size="sm"
                 onClick={onRead}
-                className="text-[12px] font-semibold text-aims-blue hover:opacity-70 transition-opacity whitespace-nowrap"
               >
                 {cta}
-              </button>
+              </Button>
             ))}
           </div>
         )}
       </div>
-    </div>
-  )
-}
-
-// ── Toolbar dropdown button ───────────────────────────────────────────────────
-function ToolbarBtn({ children, icon: Icon }) {
-  return (
-    <button className="flex items-center gap-1.5 h-8 px-3 rounded-lg border border-[var(--border)] text-sm text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors whitespace-nowrap">
-      {Icon && <Icon size={13} />}
-      {children}
-      <ChevronDown size={12} className="opacity-60" />
-    </button>
+    </CardContainer>
   )
 }
 
@@ -122,7 +102,6 @@ export default function NotificationsPage() {
   const { items, markRead } = useNotifications()
 
   const [filter, setFilter] = useState('all')   // 'all' | 'unread' | 'assigned'
-  const [search, setSearch] = useState('')
   const [page,   setPage]   = useState(1)
 
   const filtered = useMemo(() => (
@@ -132,12 +111,7 @@ export default function NotificationsPage() {
         filter === 'assigned' ? n.assignedToMe :
         true
       )
-      .filter((n) => {
-        if (!search) return true
-        const q = search.toLowerCase()
-        return n.title.toLowerCase().includes(q) || n.desc.toLowerCase().includes(q)
-      })
-  ), [items, filter, search])
+  ), [items, filter])
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
   const paged      = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
@@ -153,11 +127,6 @@ export default function NotificationsPage() {
 
   function handleFilterChange(id) {
     setFilter(id)
-    setPage(1)
-  }
-
-  function handleSearch(e) {
-    setSearch(e.target.value)
     setPage(1)
   }
 
@@ -179,39 +148,6 @@ export default function NotificationsPage() {
         <h1 className="text-xl font-semibold text-gray-900 dark:text-slate-100">
           Notifications
         </h1>
-      </div>
-
-      {/* ── Toolbar ── */}
-      <div className="flex items-center gap-2 px-6 py-3 border-b border-[var(--border)] flex-wrap">
-        {/* Search */}
-        <div className="relative">
-          <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-          <input
-            type="search"
-            placeholder="Search notifications"
-            value={search}
-            onChange={handleSearch}
-            className="h-8 w-56 pl-8 pr-3 rounded-lg border border-[var(--border)] bg-transparent text-sm text-gray-800 dark:text-slate-200 placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-aims-blue"
-          />
-        </div>
-
-        <ToolbarBtn>Source</ToolbarBtn>
-        <ToolbarBtn>Studio</ToolbarBtn>
-
-        <div className="flex-1" />
-
-        <button className="flex items-center gap-1.5 h-8 px-3 rounded-lg border border-[var(--border)] text-sm text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
-          <SlidersHorizontal size={13} /> All filters
-        </button>
-
-        <button
-          title="Toggle sort direction"
-          className="grid h-8 w-8 place-items-center rounded-lg border border-[var(--border)] text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
-        >
-          <ArrowUpDown size={13} />
-        </button>
-
-        <ToolbarBtn>Newest first</ToolbarBtn>
       </div>
 
       {/* ── Filter chips ── */}
