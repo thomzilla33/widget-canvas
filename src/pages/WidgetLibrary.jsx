@@ -57,6 +57,7 @@ export default function WidgetLibrary() {
     return m
   }, [dashboards])
   const [cat, setCat] = useState('All') // category
+  const [placement, setPlacement] = useState('All') // profile type
   const [type, setType] = useState('All') // tile type
   const [fresh, setFresh] = useState('All') // freshness state
   const [search, setSearch] = useState('')
@@ -80,6 +81,14 @@ export default function WidgetLibrary() {
     }
   }
 
+  const PLACEMENT_OPTIONS = [
+    { value: 'All',      label: 'All profiles' },
+    { value: 'Contact',  label: 'Contact' },
+    { value: 'Company',  label: 'Company' },
+    { value: 'Employee', label: 'Employee' },
+    { value: 'Deal',     label: 'Deal' },
+    { value: 'Report',   label: 'Standalone' },
+  ]
   const catOptions = [{ value: 'All', label: 'All categories' }, ...CATALOG_CATEGORIES.map((c) => ({ value: c, label: c }))]
   const typeOptions = [{ value: 'All', label: 'All types' }, ...Array.from(new Set(widgets.map((w) => w.skeleton))).map((t) => ({ value: t, label: t }))]
   const freshOptions = [
@@ -90,6 +99,9 @@ export default function WidgetLibrary() {
     .filter(
       (w) =>
         (cat === 'All' || w.category === cat) &&
+        (placement === 'All'
+          || (placement === 'Report' && w.placement?.surface !== 'profile')
+          || w.placement?.profileType === placement) &&
         (type === 'All' || w.skeleton === type) &&
         (fresh === 'All' || w.freshness === fresh) &&
         (!search || w.name.toLowerCase().includes(search.toLowerCase())),
@@ -131,9 +143,10 @@ export default function WidgetLibrary() {
         onSearch={setSearch}
         searchPlaceholder="Search widgets…"
         filters={[
-          { id: 'cat', label: 'Category', value: cat, onChange: setCat, options: catOptions },
-          { id: 'type', label: 'Type', value: type, onChange: setType, options: typeOptions },
-          { id: 'fresh', label: 'Freshness', value: fresh, onChange: setFresh, options: freshOptions },
+          { id: 'cat',       label: 'Category',  value: cat,       onChange: setCat,       options: catOptions },
+          { id: 'placement', label: 'Profile',   value: placement, onChange: setPlacement, options: PLACEMENT_OPTIONS, type: 'chips' },
+          { id: 'type',      label: 'Type',      value: type,      onChange: setType,      options: typeOptions },
+          { id: 'fresh',     label: 'Freshness', value: fresh,     onChange: setFresh,     options: freshOptions },
         ]}
         sort={{
           value: sortBy,
