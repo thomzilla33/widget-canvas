@@ -541,7 +541,7 @@ export default function FilterToolbar({
   )
 
   return (
-    <div className={bare ? '' : 'border-b border-gray-100 dark:border-white/[0.06]'}>
+    <div>
       {/* ── Main bar ── */}
       <div className={`flex items-center gap-2 flex-wrap ${bare ? '' : 'px-6 py-3'}`}>
         {/* Search */}
