@@ -27,10 +27,13 @@ const STATUS_OPTIONS = [
   { value: 'Draft', label: 'Draft' },
   { value: 'Pending', label: 'Pending' },
 ]
-const KIND_OPTIONS = [
-  { value: 'All', label: 'All kinds' },
-  { value: 'Entity', label: 'Profile' },
-  { value: 'Global', label: 'Standalone' },
+const TYPE_OPTIONS = [
+  { value: 'All',      label: 'All types' },
+  { value: 'Contact',  label: 'Contact' },
+  { value: 'Company',  label: 'Company' },
+  { value: 'Employee', label: 'Employee' },
+  { value: 'Deal',     label: 'Deal' },
+  { value: 'Report',   label: 'Standalone' },
 ]
 
 // S76–S79 — dashboard list with search + status filter
@@ -85,7 +88,9 @@ export default function DashboardList() {
   const publishedCount = dashboards.filter((d) => d.status === 'published').length
   const filtered = dashboards.filter((d) => {
     const matchStatus = status === 'All' || d.status === status.toLowerCase()
-    const matchKind = kind === 'All' || dashboardKind(d) === kind.toLowerCase()
+    const matchKind = kind === 'All'
+      || (kind === 'Report' && d.placement?.surface !== 'profile')
+      || d.placement?.profileType === kind
     const matchOwner = owner === 'All' || d.owner === owner
     const matchSearch = !search || d.name.toLowerCase().includes(search.toLowerCase())
     return matchStatus && matchKind && matchOwner && matchSearch
@@ -164,7 +169,7 @@ export default function DashboardList() {
             },
           },
           { id: 'owner', label: 'Assign', type: 'avatars', value: owner, onChange: setOwner, options: ownerOptions },
-          { id: 'kind',  label: 'Kind',   type: 'checkboxes', value: kind, onChange: setKind, options: KIND_OPTIONS },
+          { id: 'kind',  label: 'Type',   type: 'chips', value: kind, onChange: setKind, options: TYPE_OPTIONS },
         ]}
         sort={{
           value: sortBy,
@@ -176,9 +181,39 @@ export default function DashboardList() {
       />
 
       <div className="px-6 py-4">
+        {/* Quick-filter type chips */}
+        <div className="mb-3 flex flex-wrap gap-1.5">
+          {TYPE_OPTIONS.map(({ value, label }) => {
+            const count = value === 'All'
+              ? dashboards.length
+              : dashboards.filter((d) =>
+                  value === 'Report'
+                    ? d.placement?.surface !== 'profile'
+                    : d.placement?.profileType === value
+                ).length
+            return (
+              <button
+                key={value}
+                type="button"
+                onClick={() => setKind(value)}
+                className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-medium transition-colors ${
+                  kind === value
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-white/8 dark:text-slate-400 dark:hover:bg-white/12'
+                }`}
+              >
+                {label}
+                <span className={`rounded-full px-1 text-[10px] font-semibold ${kind === value ? 'bg-white/20 text-white' : 'bg-gray-200 text-gray-500 dark:bg-white/10 dark:text-slate-400'}`}>
+                  {count}
+                </span>
+              </button>
+            )
+          })}
+        </div>
+
         {/* IA: Dashboards is the full catalog; Reports is the same Standalone dashboards
             grouped by collection. Cross-link when the user filters to Standalone. */}
-        {kind === 'Global' && (
+        {kind === 'Report' && (
           <button onClick={() => navigate('/reports')} className="mb-3 inline-flex items-center gap-1.5 text-xs font-medium text-aims-blue hover:underline">
             <FileBarChart size={13} aria-hidden="true" /> Standalone dashboards are also grouped by collection in Reports
             <ArrowRight size={12} aria-hidden="true" />
