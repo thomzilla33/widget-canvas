@@ -89,7 +89,7 @@ const PERSONAS = {
     status: 'Contract at risk · Aug 29 close', email: 'marcus.webb@initech.com', phone: '+1 (415) 555-0188', address: 'San Francisco, CA',
     primaryAction: 'Email',
     detailFields: [
-      { icon: Zap,       label: 'Next Best Action', value: 'Review deal risk signals · 1 pending' },
+      { icon: Zap,       label: 'Next Best Action', value: 'Review deal risk signals · 2 pending' },
       { icon: GitBranch, label: 'Active Workflow',  value: 'Sales Velocity · contract at risk' },
       { icon: Clock,     label: 'Last Interaction', value: 'Yesterday' },
       { icon: Bot,       label: 'Last Agent',       value: 'Deal Coach · 4h ago' },
@@ -144,10 +144,10 @@ const AGENTIC_CONTEXT = {
     workflow:      { name: 'Sales Velocity', status: 'contract at risk' },
     lastAgent:     { name: 'Deal Coach', ago: '4h ago' },
     nba:           { label: 'Review deal risk signals', confidence: null, primary: true, chipTarget: 'htl' },
-    htlPending:    1,
+    htlPending:    2,
     autoSavedCount: 2,
     memoryLayers: {
-      short: { label: 'Contract delayed 3d · 1 action pending' },
+      short: { label: 'Contract delayed 3d · 2 pending' },
       mid:   { label: 'Sales Velocity · contract at risk' },
       long:  { label: '$285K deal · Aug 29 close' },
     },
@@ -372,6 +372,145 @@ const CHIP_DETAIL = {
           priority: 'High',
           generatedBy: 'Deal Coach · 4h ago',
         },
+        {
+          id: 'h-deal-2',
+          title: 'Update expected close date — extend to Sep 5',
+          detail: "Given the 3-day delay in legal review, the Aug 29 close is at risk. Deal Coach recommends updating the CRM close date to Sep 5 to preserve pipeline accuracy and avoid a false Q3 commit.",
+          priority: 'Medium',
+          generatedBy: 'Deal Coach · 4h ago',
+        },
+      ],
+    },
+  },
+}
+
+const COMPANY_SCENARIOS = {
+  health: null, // use default AGENTIC_CONTEXT.Company
+  renewal: {
+    workflow:      { name: 'Renewal Expansion', status: 'opportunity detected' },
+    lastAgent:     { name: 'Revenue Intelligence', ago: '1d ago' },
+    nba:           { label: 'Review renewal proposal', confidence: null, primary: true, chipTarget: 'htl' },
+    htlPending:    1,
+    autoSavedCount: 2,
+    memoryLayers: {
+      short: { label: 'Renewal in 28d · expansion signal · 1 pending' },
+      mid:   { label: 'Renewal Expansion · active' },
+      long:  { label: '$2.1M ARR · 40% expansion potential' },
+    },
+  },
+  exec: {
+    workflow:      { name: 'Stakeholder Monitor', status: 'champion departed' },
+    lastAgent:     { name: 'Relationship Graph', ago: '4h ago' },
+    nba:           { label: 'Review stakeholder transition', confidence: null, primary: true, chipTarget: 'htl' },
+    htlPending:    1,
+    autoSavedCount: 2,
+    memoryLayers: {
+      short: { label: 'Champion departed 4h ago · 1 action pending' },
+      mid:   { label: 'Stakeholder Monitor · alert' },
+      long:  { label: 'Jane Doe → Robert Chen · VP Eng' },
+    },
+  },
+}
+
+const COMPANY_SCENARIO_CHIPS = {
+  health: null, // use default CHIP_DETAIL.Company
+  renewal: {
+    workflow: {
+      steps: [
+        { label: 'Renewal date identified',      status: 'done',    at: 'Jul 15' },
+        { label: 'Usage & health baseline',       status: 'done',    at: 'Aug 1'  },
+        { label: 'Expansion signal detected',     status: 'done',    at: 'Aug 19' },
+        { label: 'Renewal proposal drafted',      status: 'active',  at: null     },
+        { label: 'Proposal sent to champion',     status: 'pending', at: null     },
+      ],
+      nextTrigger: 'Proposal awaiting rep approval before sending to Jane Doe',
+      startedAt: 'Jul 15, 2026',
+      owner: 'Revenue Intelligence (agent)',
+    },
+    agent: {
+      sessionStart: 'Aug 19, 2:00 PM',
+      messageCount: 5,
+      summary: "Detected a 40% expansion opportunity for Acme Corporation's Q3 renewal. Current ARR $2.1M. Champion Jane Doe has been active this week. Agent drafted a custom proposal for an Enterprise+ tier upgrade at $2.94M ARR.",
+      recommendation: "Approve and send the renewal proposal before the 28-day deadline. Champion is actively engaged — window is open.",
+      lastExchange: [
+        { role: 'agent', text: "Expansion signal confirmed. Acme's usage is up 18% on the Enterprise modules they added in Q2. Renewal is 28 days out. I've drafted a proposal for an Enterprise+ tier at $2.94M ARR (+40%). Pending your approval." },
+      ],
+    },
+    nba: {
+      signals: [
+        { label: 'Renewal is 28 days away — proposal window is open',       weight: 'high' },
+        { label: 'Usage up 18% on Enterprise modules — strong expansion signal', weight: 'high' },
+        { label: 'Champion Jane Doe active this week — responsive',          weight: 'medium' },
+        { label: 'No competitive signals detected — safe to propose',        weight: 'medium' },
+        { label: 'Last renewal was on-time — low churn risk',               weight: 'low' },
+      ],
+      model: 'Revenue Intelligence v2.3',
+      generatedAt: 'Aug 19, 2:30 PM',
+      primaryCta: 'review-htl',
+    },
+    htl: {
+      autoSaved: [
+        { label: 'Renewal date synced', detail: 'Sep 17, 2026 · pulled from Salesforce contract record — informational only' },
+        { label: 'Expansion score calculated', detail: '40% upsell probability based on usage trend and module adoption — auto-logged to account snapshot' },
+      ],
+      items: [
+        {
+          id: 'h-acme-renewal-1',
+          title: 'Approve renewal proposal — Enterprise+ tier at $2.94M ARR',
+          detail: "Revenue Intelligence drafted a custom renewal proposal for Acme Corporation with an upgrade from Enterprise to Enterprise+. Proposed ARR is $2.94M (+40%). Approving sends the proposal to Jane Doe (VP Operations) for review.",
+          priority: 'High',
+          generatedBy: 'Revenue Intelligence · 1d ago',
+        },
+      ],
+    },
+  },
+  exec: {
+    workflow: {
+      steps: [
+        { label: 'Stakeholder monitoring active',  status: 'done',    at: 'Aug 1'  },
+        { label: 'Champion departure detected',     status: 'done',    at: 'Aug 20' },
+        { label: 'Successor identified',            status: 'done',    at: 'Aug 20' },
+        { label: 'Re-introduction drafted',         status: 'active',  at: null     },
+        { label: 'Outreach sent to Robert Chen',    status: 'pending', at: null     },
+      ],
+      nextTrigger: 'Outreach to Robert Chen pending rep approval',
+      startedAt: 'Aug 1, 2026',
+      owner: 'Relationship Graph (agent)',
+    },
+    agent: {
+      sessionStart: 'Aug 20, 9:00 AM',
+      messageCount: 4,
+      summary: "Jane Doe (VP Operations, primary champion) is no longer at Acme Corporation. LinkedIn update detected Aug 20. Relationship Graph identified Robert Chen (VP Engineering) as the likely successor. Re-introduction draft ready for approval.",
+      recommendation: "Move fast — the first 48 hours after a champion departure are critical for relationship continuity.",
+      lastExchange: [
+        { role: 'agent', text: "Jane Doe's LinkedIn shows she left Acme. Her internal email bounced this morning. Robert Chen (VP Engineering) appears to be the account's senior decision-maker. I've drafted a re-introduction email for your approval — the 48h window is open." },
+      ],
+    },
+    nba: {
+      signals: [
+        { label: 'Primary champion Jane Doe has left the company',       weight: 'high' },
+        { label: 'Robert Chen (VP Eng) identified as successor',         weight: 'high' },
+        { label: 'First 48h window — optimal moment for re-introduction', weight: 'high' },
+        { label: 'No active outreach to Robert Chen on record',          weight: 'medium' },
+        { label: 'Renewal is 45 days away — continuity is critical',     weight: 'medium' },
+      ],
+      model: 'Relationship Graph v1.4',
+      generatedAt: 'Aug 20, 9:15 AM',
+      primaryCta: 'review-htl',
+    },
+    htl: {
+      autoSaved: [
+        { label: 'Champion departure logged', detail: "Jane Doe marked as former champion in Acme's contact record — informational, no approval needed" },
+        { label: 'Robert Chen added to account', detail: 'Auto-added from LinkedIn org signal · synced to HubSpot Account Contact Map v1.0' },
+      ],
+      items: [
+        {
+          id: 'h-acme-exec-1',
+          title: 'Approve re-introduction outreach to Robert Chen',
+          detail: "Relationship Graph drafted a personalized re-introduction email from you to Robert Chen (VP Engineering, Acme Corp). The message references Acme's current projects and offers a brief sync. Approving sends it immediately — the 48h relationship window is open.",
+          priority: 'High',
+          generatedBy: 'Relationship Graph · 4h ago',
+        },
       ],
     },
   },
@@ -493,6 +632,7 @@ export default function EntityContextHeader({ placement, entity, viewerRole, onC
   const [panel, setPanel] = useState(null)
   const [menuOpen, setMenuOpen] = useState(false)
   const [activeChip, setActiveChip] = useState(null)
+  const [companyScenario, setCompanyScenario] = useState('health')
   const can = (action) => actionAllowedFor(action, viewerRole)
   const denyTip = (verb) => `Not available for ${viewerRole} -- this role cannot ${verb}`
 
@@ -508,7 +648,9 @@ export default function EntityContextHeader({ placement, entity, viewerRole, onC
     .filter((n) => n.unread)
     .sort((a, b) => (SEV_ORDER[a.severity] ?? 4) - (SEV_ORDER[b.severity] ?? 4))[0] || null
 
-  const ctx = AGENTIC_CONTEXT[profileType] || null
+  const rawCtx = AGENTIC_CONTEXT[profileType] || null
+  const ctx = (profileType === 'Company' && COMPANY_SCENARIOS[companyScenario]) ? COMPANY_SCENARIOS[companyScenario] : rawCtx
+  const activeDetail = (profileType === 'Company' && companyScenario !== 'health' && COMPANY_SCENARIO_CHIPS[companyScenario]) ? COMPANY_SCENARIO_CHIPS[companyScenario] : CHIP_DETAIL[profileType]
   const nbaActive = ctx?.nba?.primary
   const PrimaryIcon = nbaActive ? Zap : (PRIMARY_ICON[base.primaryAction] || Mail)
   const primaryLabel = nbaActive ? ctx.nba.label : base.primaryAction
@@ -571,6 +713,22 @@ export default function EntityContextHeader({ placement, entity, viewerRole, onC
                   )}
                 </>
               )}
+            </div>
+          )}
+          {profileType === 'Company' && (
+            <div className="mt-1 flex gap-1">
+              {[['health', 'Health drop'], ['renewal', 'Renewal'], ['exec', 'Exec shift']].map(([key, label]) => (
+                <button key={key} type="button"
+                  onClick={() => setCompanyScenario(key)}
+                  className={`rounded-full px-2 py-0.5 text-[10px] font-medium transition-colors ${
+                    companyScenario === key
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-white/5 text-slate-400 hover:bg-white/10 dark:text-slate-400'
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
             </div>
           )}
         </div>
@@ -669,7 +827,7 @@ export default function EntityContextHeader({ placement, entity, viewerRole, onC
                 <ZoneLabel label="Your intervention" color="amber" />
                 <HTLZoneCard
                   ctx={ctx}
-                  detail={CHIP_DETAIL[profileType]}
+                  detail={activeDetail}
                   onClick={() => setActiveChip('htl')}
                 />
               </div>
@@ -714,7 +872,7 @@ export default function EntityContextHeader({ placement, entity, viewerRole, onC
         <ChipSlideOut
           type={activeChip}
           ctx={ctx}
-          detail={CHIP_DETAIL[profileType]}
+          detail={activeDetail}
           name={name}
           onClose={() => setActiveChip(null)}
           onAction={(cta) => {
