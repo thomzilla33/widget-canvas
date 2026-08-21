@@ -1,8 +1,7 @@
-import { useState, useEffect, useRef, useLayoutEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useLoadMore } from '../hooks/useLoadMore.js'
 import { useParams, useNavigate } from 'react-router-dom'
-import gsap from 'gsap'
-import { Flip } from 'gsap/Flip'
+
 import {
   Sparkles,
   RefreshCw,
@@ -28,7 +27,7 @@ import { PageHeader, GovernedBadge, FreshnessBadge, EmptyState } from '../compon
 import { Button } from '@/components/ui/Button'
 import { PopoverPanel } from '../components/common/Popover.jsx'
 import FeedbackPanel from '../components/ucp/FeedbackPanel.jsx'
-import UcpConcierge from '../components/ucp/UcpConcierge.jsx'
+
 import DashboardZones from '../components/dashboard/DashboardZones.jsx'
 import EntityContextHeader, { profileSupportsHeader } from '../components/dashboard/EntityContextHeader.jsx'
 import { useWidgets } from '../state/WidgetsContext.jsx'
@@ -41,7 +40,7 @@ import { suggestTabs } from '../data/suggestions.js'
 import { ALL_AUDIENCES, AUDIENCE_OPTIONS, dashAudienceVisibleTo } from '../data/audiences.js'
 import { useActivity, ACTIVITY_TYPE_LABEL } from '../state/ActivityContext.jsx'
 
-gsap.registerPlugin(Flip)
+
 
 // Map an entity's type to the placement profile type used by dashboards.
 const PROFILE_OF = { Account: 'Company', Contact: 'Contact', Employee: 'Employee', Deal: 'Deal', Case: 'Case' }
@@ -97,23 +96,7 @@ export default function UCPView() {
   // tabs whose content that role can't see. Mandatory + empty tabs always show.
   const [viewAs, setViewAs] = useState(ALL_AUDIENCES)
 
-  // The internal chat (UCP Concierge) is docked open by DEFAULT on every UCP.
-  // Toggling it reflows the widget grid; GSAP Flip animates the tiles to their new
-  // positions (transforms only) so the reorganization is fluid — no jump.
-  const [chatOpen, setChatOpen] = useState(true)
   const contentRef = useRef(null)
-  const flipState = useRef(null)
-  const toggleChat = () => {
-    const reduce = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    const tiles = !reduce && contentRef.current ? contentRef.current.querySelectorAll('.flip-grid > *') : null
-    flipState.current = tiles && tiles.length ? Flip.getState(tiles) : null
-    setChatOpen((v) => !v)
-  }
-  useLayoutEffect(() => {
-    if (!flipState.current) return
-    Flip.from(flipState.current, { duration: 0.5, ease: 'power2.inOut', absolute: true, stagger: 0.015 })
-    flipState.current = null
-  }, [chatOpen])
   const previewing = viewAs !== ALL_AUDIENCES
   // A tab is visible to `role` if it's mandatory, has no dashboards (empty/configured),
   // or at least one of its dashboards is visible to that role.
@@ -265,7 +248,7 @@ export default function UCPView() {
       {hasEntityHeader ? (
         <div className="border-b border-gray-200 bg-white px-6 pt-4 dark:border-white/10 dark:bg-[var(--surface)] lg:px-8 2xl:px-12">
           <div className="mx-auto w-full max-w-[1800px]">
-            <EntityContextHeader entity={entity} viewerRole={viewAs} onChat={toggleChat} />
+            <EntityContextHeader entity={entity} viewerRole={viewAs} />
           </div>
         </div>
       ) : (
@@ -532,7 +515,7 @@ export default function UCPView() {
 
         {activeTab === 'Overview' && resetOpen && <ResetModal onCancel={() => setResetOpen(false)} onConfirm={resetLayout} />}
         </div>
-        <UcpConcierge entity={entity} open={chatOpen} onClose={toggleChat} />
+
       </div>
     </div>
   )

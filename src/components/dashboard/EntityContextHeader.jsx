@@ -14,8 +14,8 @@ import { actionAllowedFor } from '../../data/audiences.js'
 import { useActivity } from '../../state/ActivityContext.jsx'
 import { useNotifications } from '../../state/NotificationsContext.jsx'
 
-const HEADER_PROFILES = ['Company', 'Contact', 'Employee', 'Deal']
-const ENTITY_TO_PROFILE = { Account: 'Company', Contact: 'Contact', Employee: 'Employee', Deal: 'Deal', Case: 'Case' }
+const HEADER_PROFILES = ['Company', 'Contact', 'Employee', 'Deal', 'Location']
+const ENTITY_TO_PROFILE = { Account: 'Company', Contact: 'Contact', Employee: 'Employee', Deal: 'Deal', Case: 'Case', Location: 'Location' }
 
 export function entityHeaderApplies(placement) {
   return placement?.surface === 'profile' && HEADER_PROFILES.includes(placement.profileType)
@@ -47,19 +47,34 @@ const PERSONAS = {
   },
   Company: {
     kind: 'Account', icon: Building2, avatarBg: 'bg-aims-blue',
-    name: 'Acme Corporation', company: 'Enterprise · SaaS', owner: 'Priya Nair · AE',
-    status: 'Usage drop detected · QBR pending', email: 'billing@acme.com', phone: '+1 (415) 555-0110', address: '500 Market St, San Francisco, CA',
+    name: 'Meridian Health Network', company: '18 facilities · Healthcare', owner: 'Priya Nair · AE',
+    status: 'Network sync interrupted · 3 facilities affected', email: 'operations@meridianhealth.org', phone: '+1 (602) 555-0301', address: '4400 N Central Ave, Phoenix, AZ',
     primaryAction: 'Contact account',
     detailFields: [
-      { icon: Zap,       label: 'Next Best Action', value: 'Review QBR prep actions · 2 pending' },
-      { icon: GitBranch, label: 'Active Workflow',  value: 'QBR Prep · active' },
-      { icon: Bot,       label: 'Last Agent',       value: 'Account Health · 3h ago' },
-      { icon: User,      label: 'Pending review',      value: '2 actions awaiting review' },
-      // Record fields — multi-source example
-      { icon: Clock,     label: 'Last Contact',     value: '3 days ago',                    record: true, source: { system: 'Salesforce', model: 'CRM Activity Log v1.4',       syncedAgo: '15m ago' } },
-      { icon: UserRound, label: 'Primary Contact',  value: 'Jane Doe · VP Operations',      record: true, source: { system: 'HubSpot',    model: 'Account Contact Sync v1.0',   syncedAgo: '6h ago'  } },
-      { icon: Building2, label: 'Industry',         value: 'Enterprise SaaS',               record: true, source: { system: 'Salesforce', model: 'Account Profile Sync v2.3',   syncedAgo: '1h ago'  } },
-      { icon: DollarSign,label: 'ARR',              value: '$2.1M',                         record: true, source: { system: 'Salesforce', model: 'Revenue Intelligence v1.9',   syncedAgo: '30m ago' } },
+      { icon: Zap,       label: 'Recommended action', value: 'Review network alerts · 3 pending' },
+      { icon: GitBranch, label: 'Active workflow',    value: 'Network Monitor · degraded' },
+      { icon: Bot,       label: 'Last agent run',     value: 'Network Agent · 22m ago' },
+      { icon: User,      label: 'Pending review',    value: '3 actions awaiting review' },
+      { icon: Clock,     label: 'Last sync',         value: '22 min ago · partial',          record: true, source: { system: 'ORI Corporate', model: 'Kernel Sync Log v2.1',        syncedAgo: '22m ago' } },
+      { icon: Building2, label: 'Active facilities', value: '15 of 18 fully synced',          record: true, source: { system: 'ORI Corporate', model: 'Network Health v1.8',         syncedAgo: '22m ago' } },
+      { icon: Activity,  label: 'Network health',    value: 'Degraded · 3 offline',           record: true, source: { system: 'ORI Corporate', model: 'Kernel Coordinator v2.0',     syncedAgo: '22m ago' } },
+      { icon: DollarSign,label: 'ARR',               value: '$4.8M',                          record: true, source: { system: 'Salesforce',    model: 'Revenue Intelligence v1.9',  syncedAgo: '1h ago'  } },
+    ],
+  },
+  Location: {
+    kind: 'Location', icon: Building2, avatarBg: 'bg-teal-600',
+    name: 'Phoenix Medical Center', company: 'Meridian Health Network · Facility', owner: 'Carlos Reyes · CSM',
+    status: 'Network sync interrupted · Phoenix Medical Center', email: 'ops@phx.meridianhealth.org', phone: '+1 (602) 555-0412', address: '1245 E McDowell Rd, Phoenix, AZ',
+    primaryAction: 'Contact facility',
+    detailFields: [
+      { icon: Zap,       label: 'Recommended action', value: 'Review sync incident · 1 pending' },
+      { icon: GitBranch, label: 'Active workflow',   value: 'Incident Response · active' },
+      { icon: Bot,       label: 'Last agent run',    value: 'Sync Monitor · 8m ago' },
+      { icon: User,      label: 'Pending review',    value: '1 action awaiting review' },
+      { icon: Clock,     label: 'Last sync',         value: '8 min ago · failed',             record: true, source: { system: 'ORI Corporate', model: 'Kernel Sync Log v2.1',        syncedAgo: '8m ago'  } },
+      { icon: Activity,  label: 'Network status',     value: 'Phoenix Medical Center · interrupted',          record: true, source: { system: 'ORI Corporate', model: 'Kernel Health Monitor v1.4', syncedAgo: '8m ago'  } },
+      { icon: UserRound, label: 'Staff count',       value: '127 active',                     record: true, source: { system: 'Workday',       model: 'HR People Graph v3.2',        syncedAgo: '6h ago'  } },
+      { icon: Building2, label: 'Network',           value: 'Meridian Health Network',        record: true, source: { system: 'ORI Corporate', model: 'Network Registry v1.0',       syncedAgo: '1h ago'  } },
     ],
   },
   Employee: {
@@ -117,15 +132,27 @@ const AGENTIC_CONTEXT = {
     },
   },
   Company: {
-    workflow:      { name: 'QBR Prep', status: 'active' },
-    lastAgent:     { name: 'Account Health', ago: '3h ago' },
-    nba:           { label: 'Review QBR prep actions', confidence: null, primary: true, chipTarget: 'htl' },
-    htlPending:    2,
+    workflow:      { name: 'Network Monitor', status: 'degraded' },
+    lastAgent:     { name: 'Network Agent', ago: '22m ago' },
+    nba:           { label: 'Review network alerts', confidence: null, primary: true, chipTarget: 'htl' },
+    htlPending:    3,
     autoSavedCount: 2,
     memoryLayers: {
-      short: { label: 'Usage drop detected 3h ago · 2 pending' },
-      mid:   { label: 'QBR Prep · active' },
-      long:  { label: '$2.1M ARR · renewal in 45d' },
+      short: { label: 'Network sync interrupted 22m ago · 3 pending' },
+      mid:   { label: 'Network Monitor · degraded' },
+      long:  { label: '18 facilities · $4.8M ARR' },
+    },
+  },
+  Location: {
+    workflow:      { name: 'Incident Response', status: 'active' },
+    lastAgent:     { name: 'Sync Monitor', ago: '8m ago' },
+    nba:           { label: 'Review sync incident', confidence: null, primary: true, chipTarget: 'htl' },
+    htlPending:    1,
+    autoSavedCount: 1,
+    memoryLayers: {
+      short: { label: 'Network sync interrupted 8m ago · 1 pending' },
+      mid:   { label: 'Incident Response · active' },
+      long:  { label: 'Phoenix Medical Center · 127 staff · Meridian Network' },
     },
   },
   Employee: {
@@ -216,54 +243,109 @@ const CHIP_DETAIL = {
   Company: {
     workflow: {
       steps: [
-        { label: 'Pull account health metrics', status: 'done', at: 'Aug 10' },
-        { label: 'Draft QBR deck', status: 'done', at: 'Aug 14' },
-        { label: 'Schedule meeting with VP', status: 'active', at: null },
-        { label: 'Send summary & recording', status: 'pending', at: null },
+        { label: 'Network baseline established', status: 'done', at: 'Aug 1' },
+        { label: 'Facility sync monitoring active', status: 'done', at: 'Aug 10' },
+        { label: 'Degradation detected — 3 facilities', status: 'active', at: 'Aug 21' },
+        { label: 'Incident resolution & recheck', status: 'pending', at: null },
       ],
-      nextTrigger: 'Calendar invite draft ready — pending send approval',
-      startedAt: 'Aug 10, 2026',
-      owner: 'Account Health (agent)',
+      nextTrigger: 'Incident response actions awaiting corporate approval before dispatching to facilities',
+      startedAt: 'Aug 1, 2026',
+      owner: 'Network Agent (agent)',
     },
     agent: {
-      sessionStart: 'Aug 18, 6:00 AM',
-      messageCount: 8,
-      summary: "Ran a full account health scan on Acme Corporation. Detected a 12% usage drop in last 30 days and flagged moderate churn risk if no QBR is held before Q3 end.",
-      recommendation: "Schedule QBR before Aug 28 — champion's calendar is still open.",
+      sessionStart: 'Aug 21, 7:40 AM',
+      messageCount: 9,
+      summary: "Detected a network sync disruption affecting 3 of 18 facilities in the Meridian Health Network. PHX-01, SCC-02, and TEM-04 lost contact with the corporate network 22 minutes ago. Root cause traced to last night's maintenance window. A targeted connection restore is ready for approval.",
+      recommendation: "Approve the connection restore for the 3 affected facilities — the fix is isolated and non-destructive. ETA to full sync: 8 minutes post-approval.",
       lastExchange: [
-        { role: 'agent', text: "Moderate churn risk. Usage dropped 12% in 30 days. Renewal is Q3. Recommend scheduling a QBR immediately — champion is still engaged." },
+        { role: 'agent', text: "3 facilities are offline — PHX-01, SCC-02, TEM-04. Root cause: a configuration mismatch from last night's scheduled maintenance. I've prepared a targeted connection restore. Awaiting your approval before dispatching." },
       ],
     },
     nba: {
       signals: [
-        { label: 'Usage dropped 12% in last 30 days', weight: 'high' },
-        { label: 'Renewal is 45 days away', weight: 'high' },
-        { label: 'Champion Jane Doe active this week', weight: 'medium' },
-        { label: 'No QBR held in last 90 days', weight: 'medium' },
+        { label: '3 facilities lost network sync 22 minutes ago', weight: 'high' },
+        { label: 'Root cause isolated — last night\'s maintenance window', weight: 'high' },
+        { label: 'Remediation script ready — no data loss risk', weight: 'medium' },
+        { label: 'PHX-01 has 127 active staff — highest impact facility', weight: 'medium' },
+        { label: '15 of 18 facilities remain fully operational', weight: 'low' },
       ],
-      model: 'Account Health v1.8',
-      generatedAt: 'Aug 18, 6:30 AM',
+      model: 'Network Agent v2.0',
+      generatedAt: 'Aug 21, 8:02 AM',
       primaryCta: 'review-htl',
     },
     htl: {
       autoSaved: [
-        { label: 'Account health scan completed', detail: 'Aug 18, 6:00 AM · Full scan run by Account Health · results written to account snapshot — informational only' },
-        { label: 'Usage trend captured', detail: '12% drop in last 30 days — objective metric, auto-logged to account record from Salesforce' },
+        { label: 'Sync degradation logged', detail: 'Aug 21, 7:40 AM · 3 facilities lost contact · recorded in network incident log — informational only' },
+        { label: 'Root cause identified', detail: 'Configuration mismatch from last night\'s maintenance — auto-diagnosed by Network Agent, no approval needed for logging' },
       ],
       items: [
         {
-          id: 'h-acme-1',
-          title: 'Approve QBR calendar invite to Jane Doe',
-          detail: "Account Health drafted a QBR invite for Jane Doe (VP Operations, Acme Corp). The agent is waiting for your approval before sending.",
+          id: 'h-meridian-1',
+          title: 'Approve connection restore for 3 disconnected facilities',
+          detail: "Network Agent has prepared a targeted connection restore for PHX-01, SCC-02, and TEM-04. Approving dispatches the fix to each facility. ETA to full sync: ~8 minutes. No patient data is at risk.",
           priority: 'High',
-          generatedBy: 'Account Health · 3h ago',
+          generatedBy: 'Network Agent · 22m ago',
         },
         {
-          id: 'h-acme-2',
-          title: 'Approve executive outreach — CEO to Jane Doe',
-          detail: "Account Health flagged Acme Corp as moderate churn risk. It recommends an executive touch from your CEO. This action requires your review before the message is drafted.",
+          id: 'h-meridian-2',
+          title: 'Schedule post-incident review for maintenance window',
+          detail: "Network Agent recommends a post-incident review to update the maintenance runbook and prevent recurrence. Approving creates a calendar event for the ops team and flags the incident in the governance log.",
           priority: 'Medium',
-          generatedBy: 'Account Health · 3h ago',
+          generatedBy: 'Network Agent · 22m ago',
+        },
+        {
+          id: 'h-meridian-3',
+          title: 'Notify facility administrators of sync disruption',
+          detail: "PHX-01, SCC-02, and TEM-04 facility admins have not been notified of the disruption. Approving sends an automated status update to each facility's designated ops contact.",
+          priority: 'Medium',
+          generatedBy: 'Network Agent · 22m ago',
+        },
+      ],
+    },
+  },
+  Location: {
+    workflow: {
+      steps: [
+        { label: 'Facility connected to network', status: 'done', at: 'Mar 1' },
+        { label: 'Corporate sync established', status: 'done', at: 'Mar 1' },
+        { label: 'Sync failure detected', status: 'active', at: 'Aug 21' },
+        { label: 'Remediation & reconnect', status: 'pending', at: null },
+      ],
+      nextTrigger: 'Connection restore in progress — awaiting facility confirmation',
+      startedAt: 'Aug 21, 7:40 AM',
+      owner: 'Sync Monitor (agent)',
+    },
+    agent: {
+      sessionStart: 'Aug 21, 7:48 AM',
+      messageCount: 5,
+      summary: "Phoenix Medical Center lost contact with the Meridian corporate network 8 minutes ago. Sync Monitor identified a configuration mismatch from last night's maintenance as the root cause. 127 staff are active in local mode. No patient data affected. Awaiting the corporate connection restore.",
+      recommendation: "No action needed at facility level — the fix is being dispatched from the corporate network. Monitor for reconnection within the next 10 minutes.",
+      lastExchange: [
+        { role: 'agent', text: "Phoenix Medical Center has been operating in local mode since 7:40 AM. Configuration mismatch confirmed from last night's maintenance. The corporate network has the fix queued — pending their approval. All local workflows are running normally. I'll notify you when sync is restored." },
+      ],
+    },
+    nba: {
+      signals: [
+        { label: 'Corporate network sync lost 8 minutes ago', weight: 'high' },
+        { label: '127 staff operating in local mode', weight: 'high' },
+        { label: 'Certificate fix queued by corporate — pending approval', weight: 'medium' },
+        { label: 'No patient data affected — local workflows intact', weight: 'low' },
+      ],
+      model: 'Sync Monitor v1.4',
+      generatedAt: 'Aug 21, 7:48 AM',
+      primaryCta: 'review-htl',
+    },
+    htl: {
+      autoSaved: [
+        { label: 'Sync failure logged', detail: 'Aug 21, 7:40 AM · Lost contact with the corporate network · recorded in facility incident log — informational only' },
+      ],
+      items: [
+        {
+          id: 'h-phx-1',
+          title: 'Confirm local mode operations are stable',
+          detail: "Sync Monitor flagged that 4 workflows are running in local mode and have not yet been reviewed by a facility admin. Approving marks local operations as acknowledged and pauses escalation to the corporate ops team.",
+          priority: 'High',
+          generatedBy: 'Sync Monitor · 8m ago',
         },
       ],
     },
@@ -386,130 +468,137 @@ const CHIP_DETAIL = {
 
 const COMPANY_SCENARIOS = {
   health: null, // use default AGENTIC_CONTEXT.Company
-  renewal: {
-    workflow:      { name: 'Renewal Expansion', status: 'opportunity detected' },
-    lastAgent:     { name: 'Revenue Intelligence', ago: '1d ago' },
-    nba:           { label: 'Review renewal proposal', confidence: null, primary: true, chipTarget: 'htl' },
+  alert: {
+    workflow:      { name: 'Incident Response', status: 'active · PHX-01' },
+    lastAgent:     { name: 'Sync Monitor', ago: '8m ago' },
+    nba:           { label: 'Approve connection restore for Phoenix Medical Center', confidence: null, primary: true, chipTarget: 'htl' },
     htlPending:    1,
-    autoSavedCount: 2,
+    autoSavedCount: 1,
     memoryLayers: {
-      short: { label: 'Renewal in 28d · expansion signal · 1 pending' },
-      mid:   { label: 'Renewal Expansion · active' },
-      long:  { label: '$2.1M ARR · 40% expansion potential' },
+      short: { label: 'PHX-01 offline 8m ago · 1 action pending' },
+      mid:   { label: 'Incident Response · active' },
+      long:  { label: 'Phoenix Medical Center · 127 staff · sync interrupted' },
     },
   },
-  exec: {
-    workflow:      { name: 'Stakeholder Monitor', status: 'champion departed' },
-    lastAgent:     { name: 'Relationship Graph', ago: '4h ago' },
-    nba:           { label: 'Review stakeholder transition', confidence: null, primary: true, chipTarget: 'htl' },
-    htlPending:    1,
-    autoSavedCount: 2,
+  expansion: {
+    workflow:      { name: 'Location Onboarding', status: 'in progress · TEM-07' },
+    lastAgent:     { name: 'Network Provisioner', ago: '2h ago' },
+    nba:           { label: 'Approve TEM-07 network connection', confidence: null, primary: true, chipTarget: 'htl' },
+    htlPending:    2,
+    autoSavedCount: 3,
     memoryLayers: {
-      short: { label: 'Champion departed 4h ago · 1 action pending' },
-      mid:   { label: 'Stakeholder Monitor · alert' },
-      long:  { label: 'Jane Doe → Robert Chen · VP Eng' },
+      short: { label: 'TEM-07 onboarding in progress · 2 pending' },
+      mid:   { label: 'Location Onboarding · step 4 of 6' },
+      long:  { label: 'Tempe Outpatient Clinic · 62 staff · Q3 launch' },
     },
   },
 }
 
 const COMPANY_SCENARIO_CHIPS = {
   health: null, // use default CHIP_DETAIL.Company
-  renewal: {
+  alert: {
     workflow: {
       steps: [
-        { label: 'Renewal date identified',      status: 'done',    at: 'Jul 15' },
-        { label: 'Usage & health baseline',       status: 'done',    at: 'Aug 1'  },
-        { label: 'Expansion signal detected',     status: 'done',    at: 'Aug 19' },
-        { label: 'Renewal proposal drafted',      status: 'active',  at: null     },
-        { label: 'Proposal sent to champion',     status: 'pending', at: null     },
+        { label: 'Facility monitoring active',     status: 'done',    at: 'Aug 1'  },
+        { label: 'PHX-01 sync failure detected',   status: 'done',    at: 'Aug 21' },
+        { label: 'Root cause identified',          status: 'done',    at: 'Aug 21' },
+        { label: 'Certificate push dispatched',    status: 'active',  at: null     },
+        { label: 'Sync restored & verified',       status: 'pending', at: null     },
       ],
-      nextTrigger: 'Proposal awaiting rep approval before sending to Jane Doe',
-      startedAt: 'Jul 15, 2026',
-      owner: 'Revenue Intelligence (agent)',
+      nextTrigger: 'Connection restore awaiting corporate approval before dispatch to Phoenix Medical Center',
+      startedAt: 'Aug 21, 7:40 AM',
+      owner: 'Sync Monitor (agent)',
     },
     agent: {
-      sessionStart: 'Aug 19, 2:00 PM',
+      sessionStart: 'Aug 21, 7:48 AM',
       messageCount: 5,
-      summary: "Detected a 40% expansion opportunity for Acme Corporation's Q3 renewal. Current ARR $2.1M. Champion Jane Doe has been active this week. Agent drafted a custom proposal for an Enterprise+ tier upgrade at $2.94M ARR.",
-      recommendation: "Approve and send the renewal proposal before the 28-day deadline. Champion is actively engaged — window is open.",
+      summary: "Phoenix Medical Center (ori-phx-01) lost contact with the Meridian corporate kernel 8 minutes ago. Root cause: certificate mismatch from last night's maintenance window. 127 staff are operating on local mode. Certificate fix is ready — awaiting corporate approval.",
+      recommendation: "Approve the certificate push now — the fix is isolated and risk-free. All local workflows at PHX-01 are stable.",
       lastExchange: [
-        { role: 'agent', text: "Expansion signal confirmed. Acme's usage is up 18% on the Enterprise modules they added in Q2. Renewal is 28 days out. I've drafted a proposal for an Enterprise+ tier at $2.94M ARR (+40%). Pending your approval." },
+        { role: 'agent', text: "Phoenix Medical Center is in local mode. Configuration mismatch confirmed from last night's check. Fix is queued. Approving dispatches it directly to the facility — ETA to sync restore: ~6 minutes." },
       ],
     },
     nba: {
       signals: [
-        { label: 'Renewal is 28 days away — proposal window is open',       weight: 'high' },
-        { label: 'Usage up 18% on Enterprise modules — strong expansion signal', weight: 'high' },
-        { label: 'Champion Jane Doe active this week — responsive',          weight: 'medium' },
-        { label: 'No competitive signals detected — safe to propose',        weight: 'medium' },
-        { label: 'Last renewal was on-time — low churn risk',               weight: 'low' },
+        { label: 'Phoenix Medical Center lost network sync 8 minutes ago', weight: 'high' },
+        { label: '127 staff on local mode — highest impact facility',  weight: 'high' },
+        { label: 'Certificate fix ready — no data loss risk',          weight: 'medium' },
+        { label: '15 of 18 facilities remain fully synced',           weight: 'low' },
       ],
-      model: 'Revenue Intelligence v2.3',
-      generatedAt: 'Aug 19, 2:30 PM',
+      model: 'Sync Monitor v1.4',
+      generatedAt: 'Aug 21, 7:48 AM',
       primaryCta: 'review-htl',
     },
     htl: {
       autoSaved: [
-        { label: 'Renewal date synced', detail: 'Sep 17, 2026 · pulled from Salesforce contract record — informational only' },
-        { label: 'Expansion score calculated', detail: '40% upsell probability based on usage trend and module adoption — auto-logged to account snapshot' },
+        { label: 'Sync failure logged', detail: 'Aug 21, 7:40 AM · Phoenix Medical Center lost contact with the corporate network — recorded in network incident log, informational only' },
+        { label: 'Root cause identified', detail: 'Configuration mismatch — auto-diagnosed by Sync Monitor, no approval needed for logging' },
       ],
       items: [
         {
-          id: 'h-acme-renewal-1',
-          title: 'Approve renewal proposal — Enterprise+ tier at $2.94M ARR',
-          detail: "Revenue Intelligence drafted a custom renewal proposal for Acme Corporation with an upgrade from Enterprise to Enterprise+. Proposed ARR is $2.94M (+40%). Approving sends the proposal to Jane Doe (VP Operations) for review.",
+          id: 'h-meridian-alert-1',
+          title: 'Approve connection restore for Phoenix Medical Center',
+          detail: "Sync Monitor has a targeted configuration fix ready for Phoenix Medical Center. Approving dispatches the fix from the corporate network directly to the facility. ETA to sync restore: ~6 minutes. Local operations are stable — no urgency beyond restoring corporate visibility.",
           priority: 'High',
-          generatedBy: 'Revenue Intelligence · 1d ago',
+          generatedBy: 'Sync Monitor · 8m ago',
         },
       ],
     },
   },
-  exec: {
+  expansion: {
     workflow: {
       steps: [
-        { label: 'Stakeholder monitoring active',  status: 'done',    at: 'Aug 1'  },
-        { label: 'Champion departure detected',     status: 'done',    at: 'Aug 20' },
-        { label: 'Successor identified',            status: 'done',    at: 'Aug 20' },
-        { label: 'Re-introduction drafted',         status: 'active',  at: null     },
-        { label: 'Outreach sent to Robert Chen',    status: 'pending', at: null     },
+        { label: 'Facility added to network registry', status: 'done',    at: 'Aug 10' },
+        { label: 'Staff import from Workday',          status: 'done',    at: 'Aug 15' },
+        { label: 'Local network setup complete',       status: 'done',    at: 'Aug 18' },
+        { label: 'Corporate network connection',       status: 'active',  at: null     },
+        { label: 'Go-live verification',               status: 'pending', at: null     },
       ],
-      nextTrigger: 'Outreach to Robert Chen pending rep approval',
-      startedAt: 'Aug 1, 2026',
-      owner: 'Relationship Graph (agent)',
+      nextTrigger: 'Network connection for TEM-07 awaiting corporate admin approval',
+      startedAt: 'Aug 10, 2026',
+      owner: 'Network Provisioner (agent)',
     },
     agent: {
-      sessionStart: 'Aug 20, 9:00 AM',
-      messageCount: 4,
-      summary: "Jane Doe (VP Operations, primary champion) is no longer at Acme Corporation. LinkedIn update detected Aug 20. Relationship Graph identified Robert Chen (VP Engineering) as the likely successor. Re-introduction draft ready for approval.",
-      recommendation: "Move fast — the first 48 hours after a champion departure are critical for relationship continuity.",
+      sessionStart: 'Aug 21, 6:00 AM',
+      messageCount: 7,
+      summary: "Tempe Outpatient Clinic (TEM-07) is completing onboarding as the 19th facility in the Meridian Health Network. Three of six onboarding steps are complete. Local network setup is done and the facility is ready for corporate network connection. 62 staff have been imported from Workday. Target go-live is Q3 end.",
+      recommendation: "Approve the corporate network connection for TEM-07 — this is the final blocking step before go-live. All infrastructure checks passed.",
       lastExchange: [
-        { role: 'agent', text: "Jane Doe's LinkedIn shows she left Acme. Her internal email bounced this morning. Robert Chen (VP Engineering) appears to be the account's senior decision-maker. I've drafted a re-introduction email for your approval — the 48h window is open." },
+        { role: 'agent', text: "TEM-07 is at step 4 of 6. Local network setup is complete and all infrastructure checks passed. Pending your approval to connect it to the corporate network. After that, only go-live verification remains." },
       ],
     },
     nba: {
       signals: [
-        { label: 'Primary champion Jane Doe has left the company',       weight: 'high' },
-        { label: 'Robert Chen (VP Eng) identified as successor',         weight: 'high' },
-        { label: 'First 48h window — optimal moment for re-introduction', weight: 'high' },
-        { label: 'No active outreach to Robert Chen on record',          weight: 'medium' },
-        { label: 'Renewal is 45 days away — continuity is critical',     weight: 'medium' },
+        { label: 'TEM-07 ready for corporate network connection',      weight: 'high' },
+        { label: 'Q3 go-live target — registration is the blocker',   weight: 'high' },
+        { label: '62 staff imported from Workday — ready to activate', weight: 'medium' },
+        { label: 'All infrastructure checks passed — no blockers',    weight: 'medium' },
+        { label: 'This completes 19 of planned 22 network facilities', weight: 'low' },
       ],
-      model: 'Relationship Graph v1.4',
-      generatedAt: 'Aug 20, 9:15 AM',
+      model: 'Network Provisioner v1.1',
+      generatedAt: 'Aug 21, 6:30 AM',
       primaryCta: 'review-htl',
     },
     htl: {
       autoSaved: [
-        { label: 'Champion departure logged', detail: "Jane Doe marked as former champion in Acme's contact record — informational, no approval needed" },
-        { label: 'Robert Chen added to account', detail: 'Auto-added from LinkedIn org signal · synced to HubSpot Account Contact Map v1.0' },
+        { label: 'Facility added to network registry', detail: 'Aug 10, 2026 · Tempe Outpatient Clinic registered as TEM-07 in Meridian network — informational only' },
+        { label: 'Staff import completed', detail: '62 staff records imported from Workday HR People Graph v3.2 — auto-applied, no approval needed' },
+        { label: 'Local network setup complete', detail: 'TEM-07 local network setup complete Aug 18 · all infrastructure checks passed — informational only' },
       ],
       items: [
         {
-          id: 'h-acme-exec-1',
-          title: 'Approve re-introduction outreach to Robert Chen',
-          detail: "Relationship Graph drafted a personalized re-introduction email from you to Robert Chen (VP Engineering, Acme Corp). The message references Acme's current projects and offers a brief sync. Approving sends it immediately — the 48h relationship window is open.",
+          id: 'h-meridian-expansion-1',
+          title: 'Approve Tempe Outpatient Clinic network connection',
+          detail: "Network Provisioner has completed all pre-connection checks for Tempe Outpatient Clinic (TEM-07). Approving connects the facility to the corporate network, enabling full data sync and workflow coordination. This is the final blocking step before Q3 go-live.",
           priority: 'High',
-          generatedBy: 'Relationship Graph · 4h ago',
+          generatedBy: 'Network Provisioner · 2h ago',
+        },
+        {
+          id: 'h-meridian-expansion-2',
+          title: 'Schedule go-live verification call with TEM-07 facility admin',
+          detail: "Once kernel registration is complete, a go-live verification with the facility admin is required before activating staff access. Approving creates a calendar event and notifies the TEM-07 ops lead.",
+          priority: 'Medium',
+          generatedBy: 'Network Provisioner · 2h ago',
         },
       ],
     },
@@ -717,7 +806,7 @@ export default function EntityContextHeader({ placement, entity, viewerRole, onC
           )}
           {profileType === 'Company' && (
             <div className="mt-1 flex gap-1">
-              {[['health', 'Account health'], ['renewal', 'Renewal'], ['exec', 'Exec change']].map(([key, label]) => (
+              {[['health', 'Network health'], ['alert', 'Location alert'], ['expansion', 'New location']].map(([key, label]) => (
                 <button key={key} type="button"
                   onClick={() => setCompanyScenario(key)}
                   className={`rounded-full px-2 py-0.5 text-[10px] font-medium transition-colors ${
@@ -790,14 +879,6 @@ export default function EntityContextHeader({ placement, entity, viewerRole, onC
         </div>
       </div>
 
-      {/* Signal banner -- top-1 unread notification by severity */}
-      {signal && (
-        <SignalBanner
-          signal={signal}
-          onAction={() => markRead(signal.id)}
-          onViewAll={() => navigate('/notifications')}
-        />
-      )}
 
       {/* Details — zoned layout */}
       {open && (
@@ -808,7 +889,7 @@ export default function EntityContextHeader({ placement, entity, viewerRole, onC
               <div className="grid grid-cols-3 gap-2">
                 {ctx.nba && (
                   <AgenticCard icon={Zap} color="green"
-                    label="Suggested action"
+                    label="Recommended action"
                     value={ctx.nba.confidence != null ? `${ctx.nba.label} · ${ctx.nba.confidence}%` : ctx.nba.label}
                     onClick={() => setActiveChip('nba')} />
                 )}
