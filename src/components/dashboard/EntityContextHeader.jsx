@@ -36,7 +36,7 @@ const PERSONAS = {
       { icon: GitBranch,  label: 'Active Workflow',   value: 'Call Intelligence · processing' },
       { icon: Clock,      label: 'Last Interaction',  value: '3 min ago · Call · 28m' },
       { icon: Bot,        label: 'Last Agent',        value: 'Sentiment Analyzer · 3m ago' },
-      { icon: User,       label: 'HTL Pending',       value: '2 insights awaiting review' },
+      { icon: User,       label: 'Pending review',       value: '2 insights awaiting review' },
       // Record fields — Long-term memory (UCP)
       { icon: Clock,        label: 'Last Contact',       value: '3 min ago',                record: true, source: { system: 'Salesforce', model: 'CRM Activity Log v1.4',  syncedAgo: '3m ago'  } },
       { icon: Activity,     label: 'Sentiment',          value: 'At risk ↓',                record: true, source: { system: 'Salesforce', model: 'Sentiment Engine v2.1',  syncedAgo: '3m ago'  } },
@@ -54,7 +54,7 @@ const PERSONAS = {
       { icon: Zap,       label: 'Next Best Action', value: 'Review QBR prep actions · 2 pending' },
       { icon: GitBranch, label: 'Active Workflow',  value: 'QBR Prep · active' },
       { icon: Bot,       label: 'Last Agent',       value: 'Account Health · 3h ago' },
-      { icon: User,      label: 'HTL Pending',      value: '2 actions awaiting review' },
+      { icon: User,      label: 'Pending review',      value: '2 actions awaiting review' },
       // Record fields — multi-source example
       { icon: Clock,     label: 'Last Contact',     value: '3 days ago',                    record: true, source: { system: 'Salesforce', model: 'CRM Activity Log v1.4',       syncedAgo: '15m ago' } },
       { icon: UserRound, label: 'Primary Contact',  value: 'Jane Doe · VP Operations',      record: true, source: { system: 'HubSpot',    model: 'Account Contact Sync v1.0',   syncedAgo: '6h ago'  } },
@@ -74,7 +74,7 @@ const PERSONAS = {
       { icon: GitBranch,  label: 'Active Workflow',   value: 'Performance Monitor · flagging' },
       { icon: Clock,      label: 'Last Interaction',  value: '2h ago · Agent flag' },
       { icon: Bot,        label: 'Last Agent',        value: 'Pipeline Analyzer · 2h ago' },
-      { icon: User,       label: 'HTL Pending',       value: '2 actions awaiting review' },
+      { icon: User,       label: 'Pending review',       value: '2 actions awaiting review' },
       // Record fields — Workday + Salesforce sources
       { icon: UserRound,    label: 'Manager',          value: 'Olivia Chen',              record: true, source: { system: 'Workday',    model: 'HR People Graph v3.2',     syncedAgo: '12h ago' } },
       { icon: Clock,        label: 'Tenure',           value: '18 months',                record: true, source: { system: 'Workday',    model: 'HR Contract Records v1.1',  syncedAgo: '1d ago'  } },
@@ -93,7 +93,7 @@ const PERSONAS = {
       { icon: GitBranch, label: 'Active Workflow',  value: 'Sales Velocity · contract at risk' },
       { icon: Clock,     label: 'Last Interaction', value: 'Yesterday' },
       { icon: Bot,       label: 'Last Agent',       value: 'Deal Coach · 4h ago' },
-      { icon: User,      label: 'HTL Pending',      value: '1 action awaiting review' },
+      { icon: User,      label: 'Pending review',      value: '1 action awaiting review' },
       // Record fields — Salesforce + HubSpot sources
       { icon: Calendar,  label: 'Expected Close',   value: 'Aug 29, 2026',                  record: true, source: { system: 'Salesforce', model: 'Deal Pipeline Sync v1.8',  syncedAgo: '2h ago'  } },
       { icon: DollarSign,label: 'Deal Value',       value: '$285,000',                      record: true, source: { system: 'Salesforce', model: 'Deal Revenue Sync v2.0',   syncedAgo: '2h ago'  } },
@@ -717,7 +717,7 @@ export default function EntityContextHeader({ placement, entity, viewerRole, onC
           )}
           {profileType === 'Company' && (
             <div className="mt-1 flex gap-1">
-              {[['health', 'Health drop'], ['renewal', 'Renewal'], ['exec', 'Exec shift']].map(([key, label]) => (
+              {[['health', 'Account health'], ['renewal', 'Renewal'], ['exec', 'Exec change']].map(([key, label]) => (
                 <button key={key} type="button"
                   onClick={() => setCompanyScenario(key)}
                   className={`rounded-full px-2 py-0.5 text-[10px] font-medium transition-colors ${
@@ -804,27 +804,27 @@ export default function EntityContextHeader({ placement, entity, viewerRole, onC
         ctx ? (
           <div className="space-y-3 border-t border-gray-100 p-4 dark:border-white/10">
             <div className="space-y-2">
-              <ZoneLabel label="Agentic system" color="blue" />
+              <ZoneLabel label="AI activity" color="blue" />
               <div className="grid grid-cols-3 gap-2">
                 {ctx.nba && (
                   <AgenticCard icon={Zap} color="green"
-                    label="Next Best Action"
+                    label="Suggested action"
                     value={ctx.nba.confidence != null ? `${ctx.nba.label} · ${ctx.nba.confidence}%` : ctx.nba.label}
                     onClick={() => setActiveChip('nba')} />
                 )}
                 <AgenticCard icon={GitBranch} color="blue"
-                  label="Active Workflow"
+                  label="Active workflow"
                   value={`${ctx.workflow.name} · ${ctx.workflow.status}`}
                   onClick={() => setActiveChip('workflow')} />
                 <AgenticCard icon={Bot} color="purple"
-                  label="Last Agent"
+                  label="Last agent run"
                   value={`${ctx.lastAgent.name} · ${ctx.lastAgent.ago}`}
                   onClick={() => setActiveChip('agent')} />
               </div>
             </div>
             {ctx.htlPending > 0 && (
               <div className="space-y-2">
-                <ZoneLabel label="Your intervention" color="amber" />
+                <ZoneLabel label="Your review" color="amber" />
                 <HTLZoneCard
                   ctx={ctx}
                   detail={activeDetail}
@@ -1403,7 +1403,7 @@ function HTLZoneCard({ ctx, detail, onClick }) {
         <User size={14} className="shrink-0 text-amber-500" aria-hidden="true" />
         <div className="min-w-0 flex-1">
           <div className="text-[10px] font-semibold uppercase tracking-widest text-amber-600 dark:text-amber-400">
-            {ctx.htlPending} action{ctx.htlPending > 1 ? 's' : ''} awaiting review
+            {ctx.htlPending} action{ctx.htlPending > 1 ? 's' : ''} pending your review
           </div>
           {firstItem && (
             <div className="mt-0.5 truncate text-xs font-medium text-amber-800 dark:text-amber-200">
