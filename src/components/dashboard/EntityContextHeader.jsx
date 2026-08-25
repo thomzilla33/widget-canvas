@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import { useFocusTrap } from '../../hooks/useFocusTrap.js'
 import { Button } from '@/components/ui/Button'
+import UEPIdentityCard from '../ucp/UEPIdentityCard.jsx'
 import { Tag } from '@/components/ui/Tag'
 import { PopoverPanel } from '../common/Popover.jsx'
 import { actionAllowedFor } from '../../data/audiences.js'
@@ -749,135 +750,7 @@ export default function EntityContextHeader({ placement, entity, viewerRole, onC
 
   return (
     <div className="card mb-3 p-0">
-      {/* Identity row */}
-      <div className="flex flex-wrap items-center gap-3 px-4 pt-4 pb-3">
-        <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-full text-sm font-bold text-white ${base.avatarBg}`}>
-          {initialsOf(name)}
-        </span>
-
-        <div className="flex min-w-0 flex-1 flex-col gap-1">
-          <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-            <span className="text-base font-bold text-gray-900 dark:text-slate-100">{name}</span>
-            {isSample && (
-              <span className="group relative inline-flex items-center">
-                <span className="h-1.5 w-1.5 cursor-default rounded-full bg-amber-400" aria-label="Sample data" />
-                <span className="pointer-events-none absolute bottom-full left-1/2 z-50 mb-2 -translate-x-1/2 whitespace-nowrap rounded-md border border-gray-200 bg-white px-2.5 py-1.5 text-[11px] text-gray-600 opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100 dark:border-white/10 dark:bg-gray-900 dark:text-slate-300">
-                  Sample data — this is how it looks with real records
-                </span>
-              </span>
-            )}
-          </div>
-          {ctx && (
-            <div className="flex flex-wrap gap-1.5">
-              {ctx.memoryLayers ? (
-                // Memory layer chips — UCP Contact profile (Short / Mid / Long-term)
-                <>
-                  <ContextChip icon={Clock} color="amber"
-                    label={ctx.memoryLayers.short.label}
-                    onClick={() => setActiveChip('htl')} />
-                  <ContextChip icon={GitBranch} color="blue"
-                    label={ctx.memoryLayers.mid.label}
-                    onClick={() => setActiveChip('workflow')} />
-                  <ContextChip icon={Database} color="gray"
-                    label={ctx.memoryLayers.long.label} />
-                </>
-              ) : (
-                // Standard agentic chips — Company, Employee, Deal
-                <>
-                  <ContextChip icon={GitBranch} color="blue"
-                    label={`${ctx.workflow.name} · ${ctx.workflow.status}`}
-                    onClick={() => setActiveChip('workflow')} />
-                  <ContextChip icon={Bot} color="purple"
-                    label={`${ctx.lastAgent.name} · ${ctx.lastAgent.ago}`}
-                    onClick={() => setActiveChip('agent')} />
-                  {ctx.nba && (
-                    <ContextChip icon={Zap} color="green"
-                      label={`NBA: ${ctx.nba.label}${ctx.nba.confidence != null ? ` · ${ctx.nba.confidence}%` : ''}`}
-                      onClick={() => setActiveChip('nba')} />
-                  )}
-                  {ctx.htlPending > 0 && (
-                    <ContextChip icon={User} color="amber"
-                      label={`HTL pending · ${ctx.htlPending}`}
-                      onClick={() => setActiveChip('htl')} />
-                  )}
-                </>
-              )}
-            </div>
-          )}
-          {profileType === 'Company' && (
-            <div className="mt-1 flex gap-1">
-              {[['health', 'Network health'], ['alert', 'Location alert'], ['expansion', 'New location']].map(([key, label]) => (
-                <button key={key} type="button"
-                  onClick={() => setCompanyScenario(key)}
-                  className={`rounded-full px-2 py-0.5 text-[10px] font-medium transition-colors ${
-                    companyScenario === key
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-white/5 text-slate-400 hover:bg-white/10 dark:text-slate-400'
-                  }`}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-
-        <div className="ml-auto flex shrink-0 items-center gap-1.5">
-          <span
-            className="hidden items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] font-medium text-gray-400 sm:inline-flex dark:text-slate-400"
-            title="Locked -- part of the template, always shown"
-          >
-            <Lock size={11} aria-hidden="true" /> Locked
-          </span>
-          <button
-            type="button"
-            onClick={onChat || (() => setPanel('chat'))}
-            title={`AI assistant for this ${lower}`}
-            aria-label={`AI assistant for this ${lower}`}
-            className="grid h-8 w-8 place-items-center rounded-lg text-white shadow-sm"
-            style={{ background: 'linear-gradient(135deg,#06B6D4,#2563EB)' }}
-          >
-            <Sparkles size={15} aria-hidden="true" />
-          </button>
-          <button
-            type="button"
-            onClick={() => primaryChipTarget ? setActiveChip(primaryChipTarget) : setPanel(primaryPanel)}
-            disabled={!can(primaryCanKey)}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-aims-blue px-2.5 py-1.5 text-xs font-semibold text-white hover:bg-aims-blue/90 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-aims-blue"
-            title={can(primaryCanKey) ? primaryLabel : denyTip('send messages')}
-            aria-label={primaryLabel}
-          >
-            <PrimaryIcon size={14} aria-hidden="true" />
-            <span className="hidden md:inline">{primaryLabel}</span>
-          </button>
-          {primaryPanel !== 'sms' && (
-            <IconBtn
-              label={can('sms') ? `Text this ${lower}` : denyTip('send texts')}
-              onClick={() => setPanel('sms')}
-              disabled={!can('sms')}
-            >
-              <MessageSquare size={15} />
-            </IconBtn>
-          )}
-          <div className="relative">
-            <IconBtn label="More" onClick={() => setMenuOpen((m) => !m)} expanded={menuOpen}>
-              <MoreHorizontal size={15} />
-            </IconBtn>
-            {menuOpen && (
-              <MoreMenu
-                info={info}
-                entityId={entity?.id}
-                canContact={can('contact')}
-                navigate={navigate}
-                onClose={() => setMenuOpen(false)}
-              />
-            )}
-          </div>
-          <IconBtn label={open ? 'Hide details' : 'Show details'} onClick={() => setOpen((o) => !o)} expanded={open}>
-            {open ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-          </IconBtn>
-        </div>
-      </div>
+      <UEPIdentityCard persona={base} primaryAction={base.primaryAction} onPrimaryAction={() => {}} />
 
 
       {/* Details — zoned layout */}
