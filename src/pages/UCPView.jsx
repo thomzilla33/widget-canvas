@@ -25,8 +25,8 @@ import {
 } from 'lucide-react'
 import { PageHeader, GovernedBadge, FreshnessBadge, EmptyState } from '../components/common/index.jsx'
 import { Button } from '@/components/ui/Button'
-import { PopoverPanel } from '../components/common/Popover.jsx'
 import FeedbackPanel from '../components/ucp/FeedbackPanel.jsx'
+import EntityTypePicker from '../components/ucp/EntityTypePicker.jsx'
 
 import DashboardZones from '../components/dashboard/DashboardZones.jsx'
 import EntityContextHeader, { profileSupportsHeader } from '../components/dashboard/EntityContextHeader.jsx'
@@ -36,8 +36,8 @@ import { useDashboards } from '../state/DashboardsContext.jsx'
 import { useProfileConfig } from '../state/ProfileConfigContext.jsx'
 import { useRole } from '../state/RoleContext.jsx'
 import { entities, MANDATORY_TABS, UEP_OVERVIEW_CONTEXT } from '../data/mock.js'
-import { suggestTabs } from '../data/suggestions.js'
 import { ALL_AUDIENCES, AUDIENCE_OPTIONS, dashAudienceVisibleTo } from '../data/audiences.js'
+import { SECONDARY_ENTITY_OPTIONS } from '../data/uepConfig.js'
 import { useActivity, ACTIVITY_TYPE_LABEL } from '../state/ActivityContext.jsx'
 
 
@@ -73,6 +73,7 @@ export default function UCPView() {
 
   // Dashboards placed on this profile (by type / specific entity) become tabs.
   const profileType = PROFILE_OF[entity?.type] || 'Company'
+  const secondaryOptions = SECONDARY_ENTITY_OPTIONS[entity?.type] || []
   const profileDashboards = dashboards.filter(
     (d) => d.placement?.surface === 'profile' && d.placement.profileType === profileType && (d.placement.scope === 'all' || d.placement.entityId === entityId),
   )
@@ -85,7 +86,6 @@ export default function UCPView() {
   const tabs = [...new Set([...configuredTabs, ...placementTabs])]
 
   const [activeTab, setActiveTab] = useState('Overview')
-  const [newTab, setNewTab] = useState('')
   const [renaming, setRenaming] = useState(null) // tab name being renamed
   const [renameValue, setRenameValue] = useState('')
   const [dragTab, setDragTab] = useState(null) // tab name being dragged
@@ -108,7 +108,6 @@ export default function UCPView() {
   }
   const shownTabs = tabs.filter((t) => tabVisibleTo(t, viewAs))
   const hiddenTabCount = tabs.length - shownTabs.length
-  const tabSuggestions = isAdmin && !previewing ? suggestTabs(profileType, tabs) : [] // computed once for the "+" menu
   // Switching role: if the active tab is now hidden, fall back to Overview.
   function changeViewAs(role) {
     setViewAs(role)
@@ -122,15 +121,6 @@ export default function UCPView() {
   function persistFrom(nextTabs) {
     const placementOnly = new Set(placementTabs.filter((t) => !configuredTabs.includes(t)))
     persistTabs(profileType, nextTabs.filter((t) => !placementOnly.has(t)))
-  }
-
-  function addTab() {
-    const name = newTab.trim()
-    if (name && !tabs.some((t) => t.toLowerCase() === name.toLowerCase())) {
-      persistFrom([...tabs, name])
-    }
-    setNewTab('')
-    setTabMenuOpen(false)
   }
 
   function removeTab(name) {
@@ -181,7 +171,6 @@ export default function UCPView() {
     // Tabs are durable per profile type now (context-backed) — don't reset them on
     // entity change. Only clear any transient add/rename/drag UI.
     setTabMenuOpen(false)
-    setNewTab('')
     setRenaming(null)
     setRenameValue('')
     setDragTab(null)
@@ -336,37 +325,15 @@ export default function UCPView() {
                 <Plus size={16} aria-hidden="true" />
               </button>
               {tabMenuOpen && (
-                <PopoverPanel onClose={() => setTabMenuOpen(false)} align="left" role="dialog" aria-label="Add a tab" className="top-full w-64 p-1.5">
-                  <input
-                    autoFocus
-                    value={newTab}
-                    onChange={(e) => setNewTab(e.target.value)}
-                    onKeyDown={(e) => { if (e.key === 'Enter') addTab(); if (e.key === 'Escape') { e.stopPropagation(); setNewTab(''); setTabMenuOpen(false) } }}
-                    placeholder="New tab name… (Enter to add)"
-                    aria-label="New tab name"
-                    className="input h-8 w-full text-sm"
-                  />
-                  {tabSuggestions.length > 0 && (
-                    <>
-                      <div className="px-1 pb-1 pt-2 text-[10px] font-bold uppercase tracking-wide text-gray-400 dark:text-slate-400">
-                        <Sparkles size={10} className="mr-1 inline text-aims-blue" aria-hidden="true" />Suggested for {profileType}
-                      </div>
-                      {tabSuggestions.map((s) => (
-                        <button
-                          key={s.tab}
-                          onClick={() => { persistFrom([...tabs, s.tab]); setTabMenuOpen(false) }}
-                          className="flex w-full items-start gap-2 rounded-md px-2 py-1.5 text-left hover:bg-gray-50 dark:hover:bg-white/5"
-                        >
-                          <Plus size={13} className="mt-0.5 shrink-0 text-aims-blue" aria-hidden="true" />
-                          <span className="min-w-0">
-                            <span className="block text-sm font-medium text-gray-900 dark:text-slate-100">{s.tab}</span>
-                            <span className="block text-[11px] text-gray-500 dark:text-slate-400">{s.why}</span>
-                          </span>
-                        </button>
-                      ))}
-                    </>
-                  )}
-                </PopoverPanel>
+                <EntityTypePicker
+                  secondaryOptions={secondaryOptions}
+                  existingTabs={tabs}
+                  onAdd={(label) => {
+                    if (!tabs.includes(label)) persistFrom([...tabs, label])
+                    setTabMenuOpen(false)
+                  }}
+                  onClose={() => setTabMenuOpen(false)}
+                />
               )}
             </div>
           )}
