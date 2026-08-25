@@ -829,3 +829,24 @@ export const UEP_OVERVIEW_CONTEXT = {
   ],
 }
 
+// Secondary entity stubs — keyed by entity type.
+// These are child entities shown inside secondary entity tabs on a parent UEP.
+export const SECONDARY_ENTITIES = {
+  Location: [
+    { id: 'loc-01', name: 'Phoenix Medical Center',     status: 'Network sync interrupted',      statusVariant: 'error',   meta: 'Phoenix, AZ · 127 staff',   entityId: 'loc-phoenix' },
+    { id: 'loc-02', name: 'Tempe Outpatient Clinic',    status: 'Network connection pending',    statusVariant: 'warn',    meta: 'Tempe, AZ · 62 staff',      entityId: 'loc-tempe' },
+    { id: 'loc-03', name: 'Scottsdale North Clinic',    status: 'Fully synced',                  statusVariant: 'success', meta: 'Scottsdale, AZ · 94 staff', entityId: 'loc-scottsdale' },
+    { id: 'loc-04', name: 'Mesa Rehabilitation Center', status: 'Fully synced',                  statusVariant: 'success', meta: 'Mesa, AZ · 211 staff',       entityId: 'loc-mesa' },
+    { id: 'loc-05', name: 'Chandler Specialty Clinic',  status: 'Fully synced',                  statusVariant: 'success', meta: 'Chandler, AZ · 45 staff',    entityId: 'loc-chandler' },
+  ],
+  Contact: [
+    { id: 'cnt-01', name: 'Sarah Mitchell', status: 'Active',             statusVariant: 'success', meta: 'VP of Operations · Chicago, IL', entityId: 'contact-sarah' },
+    { id: 'cnt-02', name: 'Carlos Reyes',   status: 'Active',             statusVariant: 'success', meta: 'CSM · Phoenix, AZ',              entityId: 'contact-carlos' },
+    { id: 'cnt-03', name: 'Diana Pérez',    status: 'Pending onboarding', statusVariant: 'warn',    meta: 'Operations Manager · Tempe, AZ', entityId: 'contact-diana' },
+  ],
+  Deal: [
+    { id: 'deal-01', name: 'Contract Renewal Q3',  status: 'Active negotiation', statusVariant: 'info',    meta: '$1.24M ARR · Closes Sep 30', entityId: 'deal-renewal' },
+    { id: 'deal-02', name: 'Platform Expansion',    status: 'Discovery',          statusVariant: 'neutral', meta: '$480K · Early stage',        entityId: 'deal-expansion' },
+  ],
+}
+
