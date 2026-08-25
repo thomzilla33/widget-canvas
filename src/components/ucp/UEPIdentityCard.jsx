@@ -2,19 +2,23 @@ import { Building2, UserRound, UserCheck, Briefcase, MapPin, User } from 'lucide
 import { Button } from '@/components/ui/Button'
 
 const TYPE_ICON = {
-  Company:  Building2,
-  Contact:  UserRound,
-  Employee: UserCheck,
-  Deal:     Briefcase,
-  Location: MapPin,
+  Company:        Building2,
+  Account:        Building2,    // PERSONAS.Company uses kind: 'Account'
+  Contact:        UserRound,
+  Employee:       UserCheck,
+  Deal:           Briefcase,
+  'Client (deal)': Briefcase,  // PERSONAS.Deal uses kind: 'Client (deal)'
+  Location:       MapPin,
 }
 
 const TYPE_COLOR = {
-  Company:  'bg-aims-blue',
-  Contact:  'bg-emerald-500',
-  Employee: 'bg-purple-500',
-  Deal:     'bg-amber-500',
-  Location: 'bg-teal-600',
+  Company:        'bg-aims-blue',
+  Account:        'bg-aims-blue',
+  Contact:        'bg-emerald-500',
+  Employee:       'bg-purple-500',
+  Deal:           'bg-amber-500',
+  'Client (deal)': 'bg-amber-500',
+  Location:       'bg-teal-600',
 }
 
 /**
