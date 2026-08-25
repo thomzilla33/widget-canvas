@@ -26,7 +26,7 @@ import {
 import { PageHeader, GovernedBadge, FreshnessBadge, EmptyState } from '../components/common/index.jsx'
 import { Button } from '@/components/ui/Button'
 import FeedbackPanel from '../components/ucp/FeedbackPanel.jsx'
-import EntityTypePicker from '../components/ucp/EntityTypePicker.jsx'
+import EntityTypeMarketplace from '../components/ucp/EntityTypeMarketplace.jsx'
 
 import DashboardZones from '../components/dashboard/DashboardZones.jsx'
 import EntityContextHeader, { profileSupportsHeader } from '../components/dashboard/EntityContextHeader.jsx'
@@ -327,7 +327,7 @@ export default function UCPView() {
                 <Plus size={16} aria-hidden="true" />
               </button>
               {tabMenuOpen && (
-                <EntityTypePicker
+                <EntityTypeMarketplace
                   secondaryOptions={secondaryOptions}
                   existingTabs={tabs}
                   onAdd={(label) => {
