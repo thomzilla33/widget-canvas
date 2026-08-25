@@ -801,3 +801,31 @@ export const SCHEMA_DRIFT = {
   },
 }
 
+// UEP entity context — shown as Overview cards when no dashboard is placed.
+export const UEP_OVERVIEW_CONTEXT = {
+  Company: [
+    { id: 'nba',      label: 'Recommended action',  value: 'Review network alerts · 3 pending',  accent: 'var(--alert)' },
+    { id: 'workflow', label: 'Active workflow',       value: 'Network Monitor · degraded',         accent: 'var(--info)' },
+    { id: 'agent',    label: 'Last agent run',        value: 'Network Agent · 22m ago',            accent: 'var(--info)' },
+    { id: 'pending',  label: 'Pending review',        value: '3 actions awaiting human decision',  accent: 'var(--warn)' },
+  ],
+  Contact: [
+    { id: 'nba',      label: 'Recommended action',  value: 'Review call insights · 2 pending',   accent: 'var(--alert)' },
+    { id: 'workflow', label: 'Active workflow',       value: 'Call Intelligence · processing',     accent: 'var(--info)' },
+    { id: 'agent',    label: 'Last agent run',        value: 'Sentiment Analyzer · 3m ago',        accent: 'var(--info)' },
+    { id: 'pending',  label: 'Pending review',        value: '2 insights awaiting review',         accent: 'var(--warn)' },
+  ],
+  Employee: [
+    { id: 'nba',      label: 'Recommended action',  value: 'Complete onboarding checklist',       accent: 'var(--alert)' },
+    { id: 'workflow', label: 'Active workflow',       value: 'Onboarding · step 3 of 6',           accent: 'var(--info)' },
+    { id: 'agent',    label: 'Last agent run',        value: 'HR Coordinator · 1h ago',            accent: 'var(--info)' },
+    { id: 'pending',  label: 'Pending review',        value: '1 form awaiting manager approval',   accent: 'var(--warn)' },
+  ],
+  Location: [
+    { id: 'nba',      label: 'Recommended action',  value: 'Approve connection restore',          accent: 'var(--alert)' },
+    { id: 'workflow', label: 'Active workflow',       value: 'Incident Response · active',         accent: 'var(--info)' },
+    { id: 'agent',    label: 'Last agent run',        value: 'Sync Monitor · 8m ago',              accent: 'var(--info)' },
+    { id: 'pending',  label: 'Pending review',        value: '1 action awaiting approval',         accent: 'var(--warn)' },
+  ],
+}
+

@@ -35,7 +35,7 @@ import { useFeedback } from '../state/FeedbackContext.jsx'
 import { useDashboards } from '../state/DashboardsContext.jsx'
 import { useProfileConfig } from '../state/ProfileConfigContext.jsx'
 import { useRole } from '../state/RoleContext.jsx'
-import { entities, MANDATORY_TABS } from '../data/mock.js'
+import { entities, MANDATORY_TABS, UEP_OVERVIEW_CONTEXT } from '../data/mock.js'
 import { suggestTabs } from '../data/suggestions.js'
 import { ALL_AUDIENCES, AUDIENCE_OPTIONS, dashAudienceVisibleTo } from '../data/audiences.js'
 import { useActivity, ACTIVITY_TYPE_LABEL } from '../state/ActivityContext.jsx'
@@ -448,6 +448,39 @@ export default function UCPView() {
           </div>
 
           <AiSummary entityName={entity?.name || 'This account'} />
+
+          {/* UEP context summary — shows NBA, workflow, agent, pending when no dashboard placed */}
+          {tabDashboards.length === 0 && (() => {
+            const cards = UEP_OVERVIEW_CONTEXT[profileType] || []
+            if (cards.length === 0) return null
+            return (
+              <div
+                className="grid gap-3 mb-6 mt-5"
+                style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))' }}
+              >
+                {cards.map((card) => (
+                  <div
+                    key={card.id}
+                    className="rounded-xl p-4"
+                    style={{ background: 'var(--surface)', border: '1px solid var(--line)' }}
+                  >
+                    <div className="flex items-center gap-2 mb-2">
+                      <span
+                        className="w-2 h-2 rounded-full flex-shrink-0"
+                        style={{ background: card.accent }}
+                      />
+                      <span className="text-xs font-medium" style={{ color: 'var(--t3)' }}>
+                        {card.label}
+                      </span>
+                    </div>
+                    <p className="text-sm font-medium leading-snug" style={{ color: 'var(--t1)' }}>
+                      {card.value}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )
+          })()}
 
           {visible.length === 0 ? (
             <div className="mt-5">
