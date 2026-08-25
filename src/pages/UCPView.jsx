@@ -37,7 +37,8 @@ import { useProfileConfig } from '../state/ProfileConfigContext.jsx'
 import { useRole } from '../state/RoleContext.jsx'
 import { entities, MANDATORY_TABS, UEP_OVERVIEW_CONTEXT } from '../data/mock.js'
 import { ALL_AUDIENCES, AUDIENCE_OPTIONS, dashAudienceVisibleTo } from '../data/audiences.js'
-import { SECONDARY_ENTITY_OPTIONS } from '../data/uepConfig.js'
+import { SECONDARY_ENTITY_OPTIONS, ENTITY_TYPE_BY_LABEL } from '../data/uepConfig.js'
+import SecondaryEntityTab from '../components/ucp/SecondaryEntityTab.jsx'
 import { useActivity, ACTIVITY_TYPE_LABEL } from '../state/ActivityContext.jsx'
 
 
@@ -91,6 +92,7 @@ export default function UCPView() {
   const [dragTab, setDragTab] = useState(null) // tab name being dragged
   const [tabMenuOpen, setTabMenuOpen] = useState(false) // unified "+" menu: new tab + suggestions (U3)
   const tabDashboards = profileDashboards.filter((d) => (d.placement.tab || 'Overview') === activeTab)
+  const isSecondaryEntityTab = Boolean(ENTITY_TYPE_BY_LABEL[activeTab])
 
   // U1.5 — tab-level audience visibility: preview the profile as a role and hide
   // tabs whose content that role can't see. Mandatory + empty tabs always show.
@@ -366,7 +368,9 @@ export default function UCPView() {
 
       <div className="flex min-h-0 flex-1 overflow-hidden">
         <div ref={contentRef} className="relative flex-1 overflow-auto">
-        {activeTab !== 'Overview' ? (
+        {isSecondaryEntityTab ? (
+          <SecondaryEntityTab tabLabel={activeTab} />
+        ) : activeTab !== 'Overview' ? (
           <div className="mx-auto w-full max-w-[1800px] space-y-6 px-6 py-5 lg:px-8 2xl:px-12">
             {/* U2.3 — logged communications (Email/SMS/notes) for this entity */}
             {activeTab === 'Activity' && <ActivityFeed entries={getActivity(entityId)} />}
