@@ -23,7 +23,7 @@ import {
 import DatasetStep from '../components/playground/DatasetStep.jsx'
 import WidgetPreview from '../components/playground/WidgetPreview.jsx'
 import DataSourceMarketplace from '../components/datasources/DataSourceMarketplace.jsx'
-import { COMPATIBLE_SKELETONS, ENTITY_SOURCES } from '../data/datasets.js'
+import { COMPATIBLE_SKELETONS, ENTITY_SOURCES, PRESET_DATASETS } from '../data/datasets.js'
 
 const FRESHNESS_STATUS = { realtime: 'live', '15m': 'fresh', '1h': 'fresh', '24h': 'aging' }
 const PREVIEW_WIDTH = { sm: 'max-w-[240px]', md: 'max-w-md', lg: 'max-w-full' }
@@ -110,12 +110,25 @@ export default function WidgetBuilder() {
   // When using the new DatasetStep flow, derive synthetic source+metric for preview.
   // Use the ENTITY_SOURCES label (e.g. "Contacts") instead of the raw id ("contacts_hubspot")
   // so the preview header shows a readable name and entityKindFor resolves correctly.
-  const dsEntry = datasetConfig?.sourceId ? ENTITY_SOURCES.find((s) => s.id === datasetConfig.sourceId) : null
+  const dsEntry = datasetConfig?.sourceId
+    ? (ENTITY_SOURCES.find((s) => s.id === datasetConfig.sourceId) || PRESET_DATASETS.find((d) => d.id === datasetConfig.sourceId))
+    : null
+  const isPreset = dsEntry && 'name' in dsEntry && !('label' in dsEntry)
   const previewSource = source || (datasetConfig?.sourceId
-    ? { id: datasetConfig.sourceId, name: dsEntry ? `${dsEntry.label} · ${dsEntry.integration}` : datasetConfig.sourceId, governed: false, hasPII: false }
+    ? {
+        id: datasetConfig.sourceId,
+        name: isPreset ? dsEntry.name : (dsEntry ? `${dsEntry.label} · ${dsEntry.integration}` : datasetConfig.sourceId),
+        governed: false,
+        hasPII: false,
+      }
     : null)
   const previewMetric = metric || (datasetConfig?.sourceId
-    ? { id: 'dataset', name: dsEntry?.label || datasetConfig.calculations?.[0]?.column || datasetConfig.sourceId || 'Value' }
+    ? {
+        id: 'dataset',
+        name: isPreset
+          ? ((dsEntry.calculations?.[0]?.column || '').toUpperCase() || dsEntry.name)
+          : (dsEntry?.label || datasetConfig.calculations?.[0]?.column || datasetConfig.sourceId || 'Value'),
+      }
     : null)
 
   function resetAll() {
@@ -288,6 +301,29 @@ export default function WidgetBuilder() {
     }
   }
 
+  function handleAddToDashboard() {
+    const patch = {
+      name: name.trim(),
+      subtitle: subtitle.trim() || undefined,
+      skeleton: TYPE_LABEL[typeId] || typeId,
+      freshness: FRESHNESS_STATUS[freshness] || 'fresh',
+      source: datasetConfig?.sourceId || '',
+      dataset: datasetConfig,
+      format: format.style === 'auto' ? undefined : format,
+      goal: goal.value != null ? goal : undefined,
+      accentColor: accentColor || undefined,
+      styleVariant: styleVariant || undefined,
+      displayOptions: Object.keys(displayOptions).length ? displayOptions : undefined,
+    }
+    const wid = `w-${name.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now().toString(36)}`
+    addWidget({ id: wid, governed: false, health: 'unused', usedIn: 0, ...patch })
+    if (fromDashboard) {
+      navigate(`/dashboard/${fromDashboard}/canvas`, { state: { autoAdd: wid }, replace: true })
+    } else {
+      navigate('/dashboards', { state: { pendingPlace: { id: wid, name: name.trim() } }, replace: true })
+    }
+  }
+
   if (saved) return <SavedConfirmation name={name} widgetId={saved} navigate={navigate} onReset={resetAll} />
 
   const dimension = dimensionById(dimensionId)
@@ -304,24 +340,14 @@ export default function WidgetBuilder() {
         actions={
           <>
             <Button variant="secondary" onClick={handleCancel}>Cancel</Button>
-            {tab === 'data' && !dataComplete && (
-              <Button variant="secondary" disabled title="Complete the dataset configuration first">
+            {!isEditMode && (
+              <Button
+                variant="secondary"
+                disabled={!canSave}
+                title={!canSave ? saveHint : 'Save and add to a dashboard'}
+                onClick={handleAddToDashboard}
+              >
                 Widget <ArrowRight size={14} />
-              </Button>
-            )}
-            {tab === 'data' && dataComplete && (
-              <Button variant="secondary" onClick={() => setTab('widget')}>
-                Widget <ArrowRight size={14} />
-              </Button>
-            )}
-            {tab === 'widget' && !widgetComplete && (
-              <Button variant="secondary" disabled title="Name your widget first">
-                Appearance <ArrowRight size={14} />
-              </Button>
-            )}
-            {tab === 'widget' && widgetComplete && (
-              <Button variant="secondary" onClick={() => setTab('appearance')}>
-                Appearance <ArrowRight size={14} />
               </Button>
             )}
             <Button variant="primary" disabled={!canSave} onClick={handleSave}>
@@ -548,9 +574,6 @@ export default function WidgetBuilder() {
                 </div>
               )}
 
-              {!canSave && (
-                <p className="mt-3 text-center text-[11px] text-gray-500 dark:text-slate-400">{saveHint}</p>
-              )}
             </div>
           </div>
         </div>
@@ -633,8 +656,8 @@ function SavedConfirmation({ name, widgetId, navigate, onReset }) {
           <div className="grid h-16 w-16 place-items-center rounded-2xl border border-green-200 bg-green-50 shadow-sm dark:border-green-500/25 dark:bg-green-500/10">
             <Check size={32} className="text-aims-governed" />
           </div>
-          <h2 className="mt-4 text-xl font-bold text-gray-900 dark:text-slate-100">Widget saved</h2>
-          <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">Your widget is now in the library.</p>
+          <h2 className="mt-4 text-xl font-bold text-gray-900 dark:text-slate-100">Widget added to library</h2>
+          <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">Ready to use in any dashboard.</p>
         </div>
 
         {/* Widget name pill */}
@@ -645,16 +668,9 @@ function SavedConfirmation({ name, widgetId, navigate, onReset }) {
 
         {/* Actions */}
         <div className="flex flex-col gap-2">
-          <Button
-            variant="primary"
-            className="w-full"
-            onClick={() => navigate('/dashboards', { state: { pendingPlace: { id: widgetId, name: displayName } } })}
-          >
-            Add to a dashboard
-          </Button>
           <div className="flex gap-2">
             <Button variant="secondary" className="flex-1" onClick={onReset}>New widget</Button>
-            <Button variant="secondary" className="flex-1" onClick={() => navigate('/widgets')}>Back to library</Button>
+            <Button variant="secondary" className="flex-1" onClick={() => navigate('/widgets')}>Save and close</Button>
           </div>
         </div>
       </div>
